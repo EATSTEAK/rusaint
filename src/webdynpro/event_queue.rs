@@ -1,6 +1,6 @@
 use std::{collections::{HashMap, LinkedList}, ops::{Deref, DerefMut}};
 use derive_builder::Builder;
-use crate::webdynpro::model::UcfParameters;
+use self::ucf_parameters::UcfParameters;
 
 pub const EVENT_SPECTATOR: &str = "~E001";
 pub const EVENT_DATA_START: &str = "~E002";
@@ -52,3 +52,5 @@ impl<'a> WDEventQueue<'a> {
         self.pop_front()
     }
 }
+
+mod ucf_parameters;

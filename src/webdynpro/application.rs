@@ -1,25 +1,19 @@
-use crate::webdynpro::{event_queue::WDEventQueue, model::SapSsrClient};
+use crate::webdynpro::event_queue::WDEventQueue;
+use self::client::WDClient;
 
-type WDBody<'a> = &'a str;
 
 struct WDApplication<'a> {
     base_url: &'a str,
     id: &'a str,
-    ssr_client: SapSsrClient<'a>,
-    body: WDBody<'a>,
+    client: WDClient<'a>,
     event_queue: WDEventQueue<'a>
 }
 
 trait Application<'a> {
-    
-    fn init_anonymous() {
-        
-    }
+    fn new() -> Self;
 
-    fn init_sso() {
-        
-    }
+    fn with_client(client: WDClient) -> Self;
 }
 
 
-
+pub mod client;

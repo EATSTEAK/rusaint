@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::webdynpro::{event_queue::{WDEvent, WDEventBuilder}, model::UcfParametersBuilder, model::{UcfResponseData, UcfAction}};
+use crate::webdynpro::event_queue::{WDEvent, WDEventBuilder};
 
 use super::Component;
 
