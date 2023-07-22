@@ -4,7 +4,7 @@ use self::client::WDClient;
 
 struct WDApplication<'a> {
     base_url: &'a str,
-    id: &'a str,
+    name: &'a str,
     client: WDClient<'a>,
     event_queue: WDEventQueue<'a>
 }
