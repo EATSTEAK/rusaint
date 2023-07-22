@@ -18,8 +18,8 @@ pub struct WDEvent<'a> {
 }
 
 impl<'a> WDEvent<'a> {
-    fn serialize() {
-        // TODO: Implement Serialization
+    fn serialize() -> String {
+        todo!("Implement Serialization");
     }
 }
 
@@ -40,15 +40,15 @@ impl<'a> DerefMut for WDEventQueue<'a> {
 }
 
 impl<'a> WDEventQueue<'a> {
-    fn serialize_and_clear(&mut self) {
-        // TODO: Implement Serialization
+    pub fn serialize_and_clear(&mut self) -> String {
+        todo!("Implement Serialization");
     }
 
-    fn add(&mut self, evt: WDEvent<'a>) {
+    pub fn add(&mut self, evt: WDEvent<'a>) {
         &self.push_back(evt);
     }
 
-    fn remove(&mut self) -> Option<WDEvent<'a>> {
+    pub fn remove(&mut self) -> Option<WDEvent<'a>> {
         self.pop_front()
     }
 }
