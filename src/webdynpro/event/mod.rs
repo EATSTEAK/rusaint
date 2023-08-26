@@ -100,8 +100,32 @@ pub struct WDEvent<'a> {
 }
 
 impl<'a> WDEvent<'a> {
-    fn serialize() -> String {
-        todo!("Implement Serialization");
+    fn serialize(&self) -> String {
+        let mut owned = format!("{}_{}", &self.control, &self.event).to_owned();
+        owned.push_str(EVENT_DATA_START);
+        let mut params = self.parameters.iter().peekable();
+        while let Some((key, val)) = params.next() {
+            owned.push_str(key);
+            owned.push_str(EVENT_DATA_COLON);
+            owned.push_str(val);
+            if params.peek().is_some() {
+                owned.push_str(EVENT_DATA_COMMA);
+            }
+        }
+        owned.push_str(EVENT_DATA_END);
+        owned.push_str(&self.ucf_parameters.serialize());
+        owned.push_str(EVENT_DATA_START);
+        let mut custom_params = self.custom_parameters.iter().peekable();
+        while let Some((key, val)) = custom_params.next() {
+            owned.push_str(key);
+            owned.push_str(EVENT_DATA_COLON);
+            owned.push_str(val);
+            if params.peek().is_some() {
+                owned.push_str(EVENT_DATA_COMMA);
+            }
+        }
+        owned.push_str(EVENT_DATA_END);
+        owned
     }
 }
 
