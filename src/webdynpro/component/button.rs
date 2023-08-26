@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::webdynpro::event_queue::{WDEvent, WDEventBuilder};
+use crate::webdynpro::event::{WDEvent, WDEventBuilder};
 
 use super::Component;
 

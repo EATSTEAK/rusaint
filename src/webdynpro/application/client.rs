@@ -1,7 +1,7 @@
 use std::sync::Arc;
 use reqwest::{header::*, RequestBuilder, cookie::Jar};
 use thiserror::Error;
-use crate::webdynpro::event_queue::WDEventQueue;
+use crate::webdynpro::event::event_queue::WDEventQueue;
 use self::body::WDBody;
 
 const USER_AGENT: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36";

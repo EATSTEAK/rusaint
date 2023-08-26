@@ -1,4 +1,4 @@
-use crate::webdynpro::event_queue::WDEventQueue;
+use crate::webdynpro::event::event_queue::WDEventQueue;
 use self::client::WDClient;
 
 
