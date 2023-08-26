@@ -1,6 +1,7 @@
-use std::{collections::HashMap, borrow::Cow};
-use derive_builder::Builder;
 use self::ucf_parameters::UcfParameters;
+use derive_builder::Builder;
+use thiserror::Error;
+use std::{borrow::Cow, collections::HashMap, num::ParseIntError, string::FromUtf16Error};
 
 pub const EVENT_SPECTATOR: &str = "~E001";
 pub const EVENT_DATA_START: &str = "~E002";
@@ -9,45 +10,83 @@ pub const EVENT_DATA_COLON: &str = "~E004";
 pub const EVENT_DATA_COMMA: &str = "~E005";
 
 
-pub fn escape_str<'a>(text: &'a str) -> Cow<'a, str> {
+#[derive(Error, Debug)]
+pub enum EventStrUnescapeError {
+    #[error("Failed read hex string")]
+    Int(#[from] ParseIntError),
+    #[error("hex string is not valid")]
+    Parse(#[from] FromUtf16Error),
+    #[error("No form found in desired application")]
+    NoForm
+}
 
+pub fn escape_str<'a>(text: &'a str) -> String {
+    let chars = text.chars();
+
+    let mut owned: Vec<u8> = vec![];
+
+    for char in chars {
+        let special = match char {
+            '0'..='9' | 'a'..='z' | 'A'..='Z' | '-' | '.' | '_' => false,
+            _ => true,
+        };
+
+        if special {
+            owned.extend(
+                format!("~{:04x}", char as u16)
+                    .to_ascii_uppercase()
+                    .as_bytes(),
+            );
+        } else {
+            owned.push(char as u8);
+        }
+    }
+
+    unsafe { String::from_utf8_unchecked(owned) }
+}
+
+fn decode_hex(s: &str) -> Result<Vec<u16>, ParseIntError> {
+    (0..s.len())
+        .step_by(4)
+        .map(|i| u16::from_str_radix(&s[i..i + 4], 16))
+        .collect()
+}
+
+pub fn unescape_str<'a>(text: &'a str) -> Result<Cow<'a, str>, EventStrUnescapeError> {
     let bytes = text.as_bytes();
 
     let mut owned = None;
+    let mut special: Option<Vec<u8>> = None;
 
     for pos in 0..bytes.len() {
-        let special = match bytes[pos] {
-            b'0'..=b'9' | b'a'..=b'z' | b'A'..=b'Z' | b'-' | b'.' | b'_' => None,
-            _ => Some(bytes[pos])
+        match bytes[pos] {
+            b'~' => { special = Some(vec![]); },
+            b'A'..=b'F' | b'0'..=b'9' => {
+                if special.is_some() {
+                    special.as_mut().unwrap().push(bytes[pos]);
+                }
+            }
+            _ => { special = None },
         };
 
-        if let Some(s) = special {
-            if owned.is_none() {
-                owned = Some(bytes[0..pos].to_owned());
+        if let Some(ref v) = special {
+            if v.len() == 4 {
+                if owned.is_none() {
+                    owned = Some(bytes[0..(pos - 4)].to_owned());
+                }
+                let s: String = unsafe { String::from_utf8_unchecked(v.to_vec()) };
+                let result = String::from_utf16(&decode_hex(&s)?)?;
+                owned.as_mut().unwrap().extend_from_slice(result.as_bytes());
+                special = None;
             }
-            owned.as_mut().unwrap().extend_from_slice(format!("~{:02x}", s).as_bytes());
         } else if let Some(owned) = owned.as_mut() {
             owned.push(bytes[pos]);
         }
     }
-
     if let Some(owned) = owned {
-        unsafe { Cow::Owned(String::from_utf8_unchecked(owned)) }
+        unsafe { Ok(Cow::Owned(String::from_utf8_unchecked(owned))) }
     } else {
-        unsafe { Cow::Borrowed(std::str::from_utf8_unchecked(bytes))}
-    }
-}
-
-pub fn unescape<'a>(text: &'a str) -> Cow<'a, str> {
-
-    let bytes = text.as_bytes();
-    
-    let mut owned = None;
-
-    if let Some(owned) = owned {
-        unsafe { Cow::Owned(String::from_utf8_unchecked(owned)) }
-    } else {
-        unsafe { Cow::Borrowed(std::str::from_utf8_unchecked(bytes))}
+        unsafe { Ok(Cow::Borrowed(std::str::from_utf8_unchecked(bytes))) }
     }
 }
 
@@ -57,7 +96,7 @@ pub struct WDEvent<'a> {
     control: &'a str,
     parameters: HashMap<String, String>,
     ucf_parameters: UcfParameters,
-    custom_parameters: HashMap<String, String>
+    custom_parameters: HashMap<String, String>,
 }
 
 impl<'a> WDEvent<'a> {
@@ -66,8 +105,8 @@ impl<'a> WDEvent<'a> {
     }
 }
 
-mod ucf_parameters;
 pub(crate) mod event_queue;
+mod ucf_parameters;
 
 #[cfg(test)]
 mod test;
