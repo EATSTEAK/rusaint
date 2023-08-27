@@ -20,6 +20,7 @@ pub enum WDClientError {
 pub struct WDClient {
     client: reqwest::Client,
     pub ssr_client: SapSsrClient,
+    pub event_queue: WDEventQueue,
     raw_body: String,
 }
 
@@ -68,6 +69,7 @@ impl WDClient {
             client,
             raw_body,
             ssr_client,
+            event_queue: WDEventQueue::new(),
         };
         Ok(wd_client)
     }
@@ -78,13 +80,26 @@ impl WDClient {
         let wd_client = WDClient {
             client,
             ssr_client,
+            event_queue: WDEventQueue::new(),
             raw_body,
         };
         Ok(wd_client)
     }
 
-    pub async fn event_request(&self) {
+    pub async fn send_event(&mut self, base_url: &str) -> Result<(), WDClientError> {
+        let res = self.event_request(base_url).await?;
+        self.mutate_body(res)
+    }
 
+    async fn event_request(&mut self, base_url: &str) -> Result<String, WDClientError> {
+        let res = self.client.wd_xhr(base_url, &self.ssr_client, &mut self.event_queue).send().await?.text().await?;
+        println!("{}", res);
+        Ok("".to_owned())
+    }
+
+    fn mutate_body(&mut self, response: String) -> Result<(), WDClientError> {
+        println!("{}", response);
+        Ok(())
     }
 
     pub fn body(&self) -> Result<WDBody, WDClientError> {
