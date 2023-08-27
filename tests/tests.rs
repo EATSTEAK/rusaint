@@ -1,3 +1,3 @@
 #[cfg(test)]
-mod client;
+mod application;
 mod webdynpro;
