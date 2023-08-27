@@ -3,3 +3,4 @@ pub fn add(left: usize, right: usize) -> usize {
 }
 
 pub mod webdynpro;
+pub mod definitions;
