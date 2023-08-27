@@ -1,5 +1,5 @@
 use std::{collections::LinkedList, ops::{Deref, DerefMut}};
-use super::WDEvent;
+use super::{WDEvent, EVENT_SPECTATOR};
 
 
 pub struct WDEventQueue<'a>(LinkedList<WDEvent<'a>>);
@@ -19,8 +19,20 @@ impl<'a> DerefMut for WDEventQueue<'a> {
 }
 
 impl<'a> WDEventQueue<'a> {
+
+    pub fn new() -> WDEventQueue<'a> {
+        WDEventQueue(LinkedList::new())
+    }
+
     pub fn serialize_and_clear(&mut self) -> String {
-        todo!("Implement Serialization");
+        let mut owned = "".to_owned();
+        let events = &self.0;
+        for (idx, event) in events.iter().enumerate() {
+            owned.push_str(&event.serialize());
+            if idx < events.len()-1 { owned.push_str(EVENT_SPECTATOR); }
+        }
+        let _ = &self.clear();
+        owned
     }
 
     pub fn add(&mut self, evt: WDEvent<'a>) {

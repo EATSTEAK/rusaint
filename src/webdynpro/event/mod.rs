@@ -1,5 +1,6 @@
 use self::ucf_parameters::UcfParameters;
 use derive_builder::Builder;
+use indexmap::IndexMap;
 use thiserror::Error;
 use std::{borrow::Cow, collections::HashMap, num::ParseIntError, string::FromUtf16Error};
 
@@ -94,13 +95,16 @@ pub fn unescape_str<'a>(text: &'a str) -> Result<Cow<'a, str>, EventStrUnescapeE
 pub struct WDEvent<'a> {
     event: &'a str,
     control: &'a str,
-    parameters: HashMap<String, String>,
+    #[builder(default)]
+    parameters: IndexMap<String, String>,
+    #[builder(default)]
     ucf_parameters: UcfParameters,
-    custom_parameters: HashMap<String, String>,
+    #[builder(default)]
+    custom_parameters: IndexMap<String, String>,
 }
 
-impl<'a> WDEvent<'a> {
-    fn serialize(&self) -> String {
+impl<'a> ToString for WDEvent<'a> {
+    fn to_string(&self) -> String {
         let mut owned = format!("{}_{}", &self.control, &self.event).to_owned();
         owned.push_str(EVENT_DATA_START);
         let mut params = self.parameters.iter().peekable();
@@ -129,8 +133,14 @@ impl<'a> WDEvent<'a> {
     }
 }
 
-pub(crate) mod event_queue;
-mod ucf_parameters;
+impl<'a> WDEvent<'a> {
+    pub fn serialize(&self) -> String {
+        self.to_string()
+    }
+}
+
+pub mod event_queue;
+pub mod ucf_parameters;
 
 #[cfg(test)]
 mod test;
