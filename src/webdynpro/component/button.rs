@@ -1,8 +1,6 @@
-use std::collections::HashMap;
-
 use indexmap::IndexMap;
 
-use crate::webdynpro::event::{WDEvent, WDEventBuilder};
+use crate::webdynpro::event::{WDEvent, WDEventBuilder, ucf_parameters::{UcfParametersBuilder, UcfResponseData, UcfAction}};
 
 use super::Component;
 
@@ -13,13 +11,26 @@ pub struct Button<'a> {
 impl<'a> Component<'a> for Button<'a> {}
 
 impl<'a> Button<'a> {
-    fn press_event(&self) -> WDEvent {
+    
+    pub fn new(id: &'a str) -> Self {
+        Self {
+            id
+        }
+    }
+
+    pub fn press(&self) -> WDEvent {
         let mut parameters: IndexMap<String, String> = IndexMap::new();
-        parameters.insert("id".to_string(), self.id.clone().to_string());
+        let ucf_params = UcfParametersBuilder::default()
+            .response(Some(UcfResponseData::Delta))
+            .action(Some(UcfAction::Submit))
+            .build()
+            .unwrap();
+        parameters.insert("Id".to_string(), self.id.clone().to_string());
         WDEventBuilder::default()
-            .event("Press")
-            .control("Button")
+            .event("Press".to_owned())
+            .control("Button".to_owned())
             .parameters(parameters)
+            .ucf_parameters(ucf_params)
             .build()
             .unwrap()
     }

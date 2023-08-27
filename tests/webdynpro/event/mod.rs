@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use indexmap::IndexMap;
 use rusaint::webdynpro::event::{WDEventBuilder, ucf_parameters::{UcfParametersBuilder, UcfResponseData, UcfAction}, event_queue::WDEventQueue, unescape_str};
 
@@ -13,8 +11,8 @@ fn event_serialize() {
             .build()
             .unwrap();
     let event = WDEventBuilder::default()
-            .control("Button")
-            .event("Press")
+            .control("Button".to_owned())
+            .event("Press".to_owned())
             .parameters(parameters)
             .ucf_parameters(ucf_params)
             .build()
@@ -32,8 +30,8 @@ fn event_queue_serialize() {
             .build()
             .unwrap();
     let event = WDEventBuilder::default()
-            .control("Button")
-            .event("Press")
+            .control("Button".to_owned())
+            .event("Press".to_owned())
             .parameters(parameters)
             .ucf_parameters(ucf_params)
             .build()
@@ -50,8 +48,8 @@ fn event_queue_serialize() {
         .build()
         .unwrap();
     let event_two = WDEventBuilder::default()
-            .control("Form")
-            .event("Request")
+            .control("Form".to_owned())
+            .event("Request".to_owned())
             .parameters(parameters_two)
             .ucf_parameters(ucf_params_two)
             .build()

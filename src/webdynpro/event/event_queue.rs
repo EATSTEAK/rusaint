@@ -2,25 +2,25 @@ use std::{collections::LinkedList, ops::{Deref, DerefMut}};
 use super::{WDEvent, EVENT_SPECTATOR};
 
 
-pub struct WDEventQueue<'a>(LinkedList<WDEvent<'a>>);
+pub struct WDEventQueue(LinkedList<WDEvent>);
 
-impl<'a> Deref for WDEventQueue<'a> {
-    type Target = LinkedList<WDEvent<'a>>;
+impl Deref for WDEventQueue {
+    type Target = LinkedList<WDEvent>;
 
     fn deref(&self) -> &Self::Target {
         &self.0
     }
 }
 
-impl<'a> DerefMut for WDEventQueue<'a> {
+impl DerefMut for WDEventQueue {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.0
     }
 }
 
-impl<'a> WDEventQueue<'a> {
+impl WDEventQueue {
 
-    pub fn new() -> WDEventQueue<'a> {
+    pub fn new() -> WDEventQueue {
         WDEventQueue(LinkedList::new())
     }
 
@@ -35,11 +35,11 @@ impl<'a> WDEventQueue<'a> {
         owned
     }
 
-    pub fn add(&mut self, evt: WDEvent<'a>) {
+    pub fn add(&mut self, evt: WDEvent) {
         &self.push_back(evt);
     }
 
-    pub fn remove(&mut self) -> Option<WDEvent<'a>> {
+    pub fn remove(&mut self) -> Option<WDEvent> {
         self.pop_front()
     }
 }

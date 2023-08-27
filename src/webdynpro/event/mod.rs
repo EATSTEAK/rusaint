@@ -2,7 +2,7 @@ use self::ucf_parameters::UcfParameters;
 use derive_builder::Builder;
 use indexmap::IndexMap;
 use thiserror::Error;
-use std::{borrow::Cow, collections::HashMap, num::ParseIntError, string::FromUtf16Error};
+use std::{borrow::Cow, num::ParseIntError, string::FromUtf16Error};
 
 pub const EVENT_SPECTATOR: &str = "~E001";
 pub const EVENT_DATA_START: &str = "~E002";
@@ -92,9 +92,9 @@ pub fn unescape_str<'a>(text: &'a str) -> Result<Cow<'a, str>, EventStrUnescapeE
 }
 
 #[derive(Builder)]
-pub struct WDEvent<'a> {
-    event: &'a str,
-    control: &'a str,
+pub struct WDEvent {
+    event: String,
+    control: String,
     #[builder(default)]
     parameters: IndexMap<String, String>,
     #[builder(default)]
@@ -103,7 +103,7 @@ pub struct WDEvent<'a> {
     custom_parameters: IndexMap<String, String>,
 }
 
-impl<'a> ToString for WDEvent<'a> {
+impl ToString for WDEvent {
     fn to_string(&self) -> String {
         let mut owned = format!("{}_{}", &self.control, &self.event).to_owned();
         owned.push_str(EVENT_DATA_START);
@@ -133,7 +133,7 @@ impl<'a> ToString for WDEvent<'a> {
     }
 }
 
-impl<'a> WDEvent<'a> {
+impl WDEvent {
     pub fn serialize(&self) -> String {
         self.to_string()
     }
