@@ -1,4 +1,7 @@
-mod button;
+pub mod button;
+pub mod client_inspector;
+pub mod loading_placeholder;
+pub mod form;
 
 trait Component<'a> {}
 
