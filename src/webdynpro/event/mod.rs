@@ -107,7 +107,7 @@ impl<'a> WDEvent<'a> {
         while let Some((key, val)) = params.next() {
             owned.push_str(key);
             owned.push_str(EVENT_DATA_COLON);
-            owned.push_str(val);
+            owned.push_str(escape_str(val).as_str());
             if params.peek().is_some() {
                 owned.push_str(EVENT_DATA_COMMA);
             }
@@ -119,7 +119,7 @@ impl<'a> WDEvent<'a> {
         while let Some((key, val)) = custom_params.next() {
             owned.push_str(key);
             owned.push_str(EVENT_DATA_COLON);
-            owned.push_str(val);
+            owned.push_str(escape_str(val).as_str());
             if params.peek().is_some() {
                 owned.push_str(EVENT_DATA_COMMA);
             }
