@@ -62,7 +62,7 @@ impl<'a> WDBody<'a> {
             data.insert(id, value);
         });
         Some(SapSsrClient {
-            action: data.get("action")?.to_owned(),
+            action: html_escape::decode_html_entities(data.get("action")?).to_string(),
             charset: data.get("sap-charset")?.to_owned(),
             wd_secure_id: data.get("sap-wd-secure-id")?.to_owned(),
             app_name: data.get("fesrAppName")?.to_owned(),
