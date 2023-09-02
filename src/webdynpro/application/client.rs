@@ -1,6 +1,7 @@
 use std::sync::Arc;
 use reqwest::{header::*, RequestBuilder, cookie::Jar};
 use thiserror::Error;
+use url::Url;
 use crate::webdynpro::event::event_queue::WDEventQueue;
 use self::body::WDBody;
 
@@ -13,6 +14,10 @@ pub enum WDClientError {
     Request(#[from] reqwest::Error),
     #[error("Failed to parse HTML body")]
     Parse(#[from] tl::ParseError),
+    #[error("Failed to parse base url")]
+    BaseUrlParse(#[from] url::ParseError),
+    #[error("Given base url is not valid")]
+    InvalidBaseUrl,
     #[error("No form found in desired application")]
     NoForm
 }
@@ -46,7 +51,12 @@ fn wd_xhr_header() -> HeaderMap {
     let mut headers = HeaderMap::new();
     headers.insert(ACCEPT, "*/*".parse().unwrap());
     headers.insert(ACCEPT_ENCODING, "gzip, deflate, br".parse().unwrap());
+    headers.insert(ACCEPT_LANGUAGE, "ko,en;q=0.9,en-US;q=0.8".parse().unwrap());
     headers.insert(CONNECTION, "keep-alive".parse().unwrap());
+    headers.insert("Sec-Fetch-Dest", "empty".parse().unwrap());
+    headers.insert("Sec-Fetch-Mode", "empty".parse().unwrap());
+    headers.insert("Sec-Fetch-Site", "empty".parse().unwrap());
+    headers.insert("Sec-GPC", "empty".parse().unwrap());
     headers.insert("X-Requested-With", "XMLHttpRequest".parse().unwrap());
     headers.insert("X-XHR-Logon", "Accept".parse().unwrap());
     headers
@@ -55,7 +65,7 @@ fn wd_xhr_header() -> HeaderMap {
 
 impl WDClient {
 
-    pub async fn new(base_url: &str, app_name: &str) -> Result<WDClient, WDClientError> {
+    pub async fn new(base_url: &Url, app_name: &str) -> Result<WDClient, WDClientError> {
         let jar: Arc<Jar> = Arc::new(Jar::default());
         let client = reqwest::Client::builder()
             .cookie_provider(jar)
@@ -74,7 +84,7 @@ impl WDClient {
         Ok(wd_client)
     }
 
-    pub async fn with_client(client: reqwest::Client, base_url: &str, app_name: &str) -> Result<WDClient, WDClientError> {
+    pub async fn with_client(client: reqwest::Client, base_url: &Url, app_name: &str) -> Result<WDClient, WDClientError> {
         let raw_body = client.wd_navigate(base_url, app_name).send().await?.text().await?;
         let ssr_client = WDBody::new(&raw_body)?.parse_sap_ssr_client().ok_or(WDClientError::NoForm)?;
         let wd_client = WDClient {
@@ -86,19 +96,19 @@ impl WDClient {
         Ok(wd_client)
     }
 
-    pub async fn send_event(&mut self, base_url: &str) -> Result<(), WDClientError> {
+    pub async fn send_event(&mut self, base_url: &Url) -> Result<(), WDClientError> {
         let res = self.event_request(base_url).await?;
         self.mutate_body(res)
     }
 
-    async fn event_request(&mut self, base_url: &str) -> Result<String, WDClientError> {
-        let res = self.client.wd_xhr(base_url, &self.ssr_client, &mut self.event_queue).send().await?.text().await?;
-        println!("{}", res);
-        Ok("".to_owned())
+    async fn event_request(&mut self, base_url: &Url) -> Result<String, WDClientError> {
+        let res = self.client.wd_xhr(base_url, &self.ssr_client, &mut self.event_queue)?.send().await?;
+        println!("res: {:?}", res);
+        Ok(res.text().await?)
     }
 
     fn mutate_body(&mut self, response: String) -> Result<(), WDClientError> {
-        println!("{}", response);
+        println!("text: {:?}", response);
         Ok(())
     }
 
@@ -108,15 +118,15 @@ impl WDClient {
 }
 
 trait WDRequests {
-    fn wd_navigate(&self, base_url: &str, app_name: &str) -> RequestBuilder;
+    fn wd_navigate(&self, base_url: &Url, app_name: &str) -> RequestBuilder;
 
-    fn wd_xhr(&self, base_url: &str, ssr_client: &SapSsrClient, event_queue: &mut WDEventQueue) -> RequestBuilder;
+    fn wd_xhr(&self, base_url: &Url, ssr_client: &SapSsrClient, event_queue: &mut WDEventQueue) -> Result<RequestBuilder, WDClientError>;
 }
 
 impl WDRequests for reqwest::Client {
-    fn wd_navigate(&self, base_url: &str, app_name: &str) -> RequestBuilder {
+    fn wd_navigate(&self, base_url: &Url, app_name: &str) -> RequestBuilder {
         let mut url = "".to_owned();
-        url.push_str(base_url);
+        url.push_str(base_url.as_str());
         if !url.ends_with('/') { url.push_str("/"); }
         url.push_str(app_name);
         url.push_str("?sap-wd-stableids=X");
@@ -125,11 +135,21 @@ impl WDRequests for reqwest::Client {
             .headers(default_header())
     }
 
-    fn wd_xhr(&self, base_url: &str, ssr_client: &SapSsrClient, event_queue: &mut WDEventQueue) -> RequestBuilder {
+    fn wd_xhr(&self, base_url: &Url, ssr_client: &SapSsrClient, event_queue: &mut WDEventQueue) -> Result<RequestBuilder, WDClientError> {
         let mut url = "".to_owned();
-        url.push_str(base_url);
-        if !url.ends_with('/') { url.push_str("/"); }
+        url.push_str(base_url.scheme());
+        url.push_str("://");
+        if let Some(host_str) = base_url.host_str() {
+            url.push_str(host_str);
+        } else {
+            return Err(WDClientError::InvalidBaseUrl);
+        }
+        if let Some(port) = base_url.port() {
+            url.push_str(":");
+            url.push_str(port.to_string().as_str());
+        }
         url.push_str(ssr_client.action.as_str());
+        println!("{}", url);
         let serialized = event_queue.serialize_and_clear();
         let params = [
             ("sap-charset", ssr_client.charset.as_str()), 
@@ -138,9 +158,10 @@ impl WDRequests for reqwest::Client {
             ("fesrUseBeacon", (if ssr_client.use_beacon { "true" } else { "false" })),
             ("SAPEVENTQUEUE", &serialized),
             ];
-        self.post(url)
+        println!("{:?}", params);
+        Ok(self.post(url)
             .headers(wd_xhr_header())
-            .form(&params)
+            .form(&params))
     }
 }
 
