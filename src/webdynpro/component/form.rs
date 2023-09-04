@@ -31,8 +31,8 @@ impl<'a> Form<'a> {
         parameters.insert("DomChanged".to_string(), dom_changed.to_string());
         parameters.insert("IsDirty".to_string(), is_dirty.to_string());
         WDEventBuilder::default()
-            .event("Press".to_owned())
-            .control("Button".to_owned())
+            .control("Form".to_owned())
+            .event("Request".to_owned())
             .parameters(parameters)
             .ucf_parameters(ucf_params)
             .build()

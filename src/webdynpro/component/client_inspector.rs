@@ -1,6 +1,6 @@
 use indexmap::IndexMap;
 
-use crate::webdynpro::event::{WDEvent, WDEventBuilder, ucf_parameters::{UcfParametersBuilder, UcfResponseData, UcfAction, UcfCardinality}};
+use crate::webdynpro::event::{WDEvent, WDEventBuilder, ucf_parameters::{UcfParametersBuilder, UcfResponseData, UcfCardinality}};
 
 use super::Component;
 
@@ -27,8 +27,8 @@ impl<'a> ClientInspector<'a> {
         parameters.insert("Id".to_string(), self.id.clone().to_string());
         parameters.insert("Data".to_string(), data.to_string());
         WDEventBuilder::default()
-            .event("Press".to_owned())
-            .control("Button".to_owned())
+            .control("ClientInspector".to_owned())
+            .event("Notify".to_owned())
             .parameters(parameters)
             .ucf_parameters(ucf_params)
             .build()

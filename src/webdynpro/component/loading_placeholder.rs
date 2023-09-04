@@ -27,8 +27,8 @@ impl<'a> LoadingPlaceholder<'a> {
             .unwrap();
         parameters.insert("Id".to_string(), self.id.clone().to_string());
         WDEventBuilder::default()
-            .event("Press".to_owned())
-            .control("Button".to_owned())
+            .control("LoadingPlaceHolder".to_owned())
+            .event("Load".to_owned())
             .parameters(parameters)
             .ucf_parameters(ucf_params)
             .build()
