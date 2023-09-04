@@ -36,7 +36,7 @@ impl BasicWDApplication {
         Ok(())
     }
 
-    pub fn body(&self) -> Result<WDBody, WDClientError> {
+    pub fn body(&mut self) -> Result<WDBody, WDClientError> {
         Ok(self.client.body()?)
     }
 }
