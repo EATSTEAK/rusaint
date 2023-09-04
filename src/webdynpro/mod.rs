@@ -1,3 +1,3 @@
 pub mod application;
-pub mod component;
+pub mod element;
 pub mod event;

@@ -2,13 +2,13 @@ use indexmap::IndexMap;
 
 use crate::webdynpro::event::{WDEvent, WDEventBuilder, ucf_parameters::{UcfParametersBuilder, UcfResponseData, UcfAction}};
 
-use super::Component;
+use super::Element;
 
 pub struct ComboBox<'a> {
     id: &'a str
 }
 
-impl<'a> Component<'a> for ComboBox<'a> {}
+impl<'a> Element<'a> for ComboBox<'a> {}
 
 impl<'a> ComboBox<'a> {
     

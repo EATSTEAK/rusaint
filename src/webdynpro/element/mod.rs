@@ -8,9 +8,9 @@ pub mod form;
 pub mod loading_placeholder;
 pub mod tab_strip;
 
-trait Component<'a> {}
+trait Element<'a> {}
 
-trait Parseable<'a>: Component<'a> {
+trait Parseable<'a>: Element<'a> {
     type Parser;
 
     fn parser(&'a self, body: &'a WDBody) -> Self::Parser;

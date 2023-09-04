@@ -1,34 +1,34 @@
 use indexmap::IndexMap;
 
-use crate::webdynpro::event::{WDEvent, WDEventBuilder, ucf_parameters::{UcfParametersBuilder, UcfResponseData, UcfCardinality}};
+use crate::webdynpro::{event::{WDEvent, WDEventBuilder, ucf_parameters::{UcfParametersBuilder, UcfResponseData, UcfAction}}, application::client::body::WDBody};
 
-use super::Component;
+use super::{Element, Parseable};
 
-pub struct ClientInspector<'a> {
+pub struct Button<'a> {
     id: &'a str
 }
 
-impl<'a> Component<'a> for ClientInspector<'a> {}
+impl<'a> Element<'a> for Button<'a> {}
 
-impl<'a> ClientInspector<'a> {
+impl<'a> Button<'a> {
+    
     pub const fn new(id: &'a str) -> Self {
         Self {
             id
         }
     }
 
-    pub fn notify(&self, data: &str) -> WDEvent {
+    pub fn press(&self) -> WDEvent {
         let mut parameters: IndexMap<String, String> = IndexMap::new();
         let ucf_params = UcfParametersBuilder::default()
             .response(Some(UcfResponseData::Delta))
-            .cardinality(Some(UcfCardinality::Single))
+            .action(Some(UcfAction::Submit))
             .build()
             .unwrap();
         parameters.insert("Id".to_string(), self.id.clone().to_string());
-        parameters.insert("Data".to_string(), data.to_string());
         WDEventBuilder::default()
-            .control("ClientInspector".to_owned())
-            .event("Notify".to_owned())
+            .control("Button".to_owned())
+            .event("Press".to_owned())
             .parameters(parameters)
             .ucf_parameters(ucf_params)
             .build()

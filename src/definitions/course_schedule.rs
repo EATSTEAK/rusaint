@@ -1,6 +1,6 @@
 use std::ops::{Deref, DerefMut};
 
-use crate::webdynpro::{application::client::WDClientError, component::{button::Button, combo_box::ComboBox, custom::Custom, tab_strip::TabStrip}};
+use crate::webdynpro::{application::client::WDClientError, element::{button::Button, combo_box::ComboBox, custom::Custom, tab_strip::TabStrip}};
 
 use super::BasicUSaintApplication;
 

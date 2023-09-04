@@ -2,13 +2,13 @@ use indexmap::IndexMap;
 
 use crate::webdynpro::event::{WDEvent, WDEventBuilder, ucf_parameters::{UcfParametersBuilder, UcfResponseData}};
 
-use super::Component;
+use super::Element;
 
 pub struct Form<'a> {
     id: &'a str
 }
 
-impl<'a> Component<'a> for Form<'a> {}
+impl<'a> Element<'a> for Form<'a> {}
 
 impl<'a> Form<'a> {
     

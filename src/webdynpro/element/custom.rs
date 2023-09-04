@@ -5,7 +5,7 @@ use crate::webdynpro::event::{
     WDEvent, WDEventBuilder,
 };
 
-use super::Component;
+use super::Element;
 
 pub struct CustomClientInfo {
     pub window_opener_exists: bool,
@@ -41,7 +41,7 @@ pub struct Custom<'a> {
     id: &'a str,
 }
 
-impl<'a> Component<'a> for Custom<'a> {}
+impl<'a> Element<'a> for Custom<'a> {}
 
 impl<'a> Custom<'a> {
     pub const fn new(id: &'a str) -> Self {
