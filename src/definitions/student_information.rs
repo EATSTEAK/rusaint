@@ -4,7 +4,7 @@ use crate::webdynpro::application::client::WDClientError;
 
 use super::BasicUSaintApplication;
 
-struct StudentInformation(BasicUSaintApplication);
+pub struct StudentInformation(BasicUSaintApplication);
 
 impl Deref for StudentInformation {
     type Target = BasicUSaintApplication;

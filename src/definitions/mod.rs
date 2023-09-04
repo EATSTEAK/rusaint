@@ -44,4 +44,5 @@ impl BasicUSaintApplication {
     }
 }
 
+pub mod course_schedule;
 pub mod student_information;
