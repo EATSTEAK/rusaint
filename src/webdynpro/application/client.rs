@@ -16,10 +16,10 @@ pub enum WDClientError {
     Parse(#[from] WDBodyError),
     #[error("Failed to parse base url")]
     BaseUrlParse(#[from] url::ParseError),
-    #[error("Given base url is not valid")]
-    InvalidBaseUrl,
     #[error("Server's update response is invalid")]
     InvalidUpdate(#[from] WDBodyUpdateError),
+    #[error("Given base url is not valid")]
+    InvalidBaseUrl,
     #[error("No form found in desired application")]
     NoForm
 }
@@ -113,8 +113,7 @@ impl WDClient {
     fn mutate_body(&mut self, response: String) -> Result<(), WDClientError> {
         let body = &mut self.body;
         let update = WDBodyUpdate::new(&response)?;
-        body.apply(update);
-        Ok(())
+        Ok(body.apply(update)?)
     }
 }
 

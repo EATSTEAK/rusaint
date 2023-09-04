@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 
+use lol_html::{element, RewriteStrSettings, rewrite_str, html_content::ContentType};
+use roxmltree::Node;
 use scraper::{Html, Selector};
 use thiserror::Error;
 
@@ -10,7 +12,9 @@ pub enum WDBodyUpdateError {
     #[error("Failed to parse update document")]
     Parse(#[from] roxmltree::Error),
     #[error("Given update document is invalid")]
-    Invalid
+    Invalid,
+    #[error("Failed to rewrite body document")]
+    Rewrite(#[from] lol_html::errors::RewritingError)
 }
 
 #[derive(Error, Debug)]
@@ -47,11 +51,26 @@ impl WDBodyUpdate {
             let windowid = update.attribute("windowid").ok_or(WDBodyUpdateError::Invalid)?;
             let content = update.first_child().ok_or(WDBodyUpdateError::Invalid)?;
             if content.tag_name().name() != "content-update" { return Err(WDBodyUpdateError::Invalid) }
-            println!("{:?}", content.text());
             update_type = Some(WDBodyUpdateType::Full(windowid.to_owned(), content.text().ok_or(WDBodyUpdateError::Invalid)?.to_owned()));
         } else if update.tag_name().name() == "delta-update" {
-            todo!("implement delta update");
+            let windowid = update.attribute("windowid").ok_or(WDBodyUpdateError::Invalid)?;
+            let childrens = update.children().collect::<Vec<Node>>();
+            let mut update_map: HashMap<WDBodyUpdateControlId, String> = HashMap::with_capacity(childrens.len());
+            for children in childrens {
+                let tag_name = children.tag_name().name();
+                match tag_name {
+                    "control-update" => {
+                        let control_id = children.attribute("id").ok_or(WDBodyUpdateError::Invalid)?;
+                        update_map.insert(control_id.to_owned(), children.text().ok_or(WDBodyUpdateError::Invalid)?.to_owned());
+                    }
+                    &_ => {
+                        eprintln!("Unknown body update {} is found, ignore.", tag_name);
+                    }
+                };
+            }
+            update_type = Some(WDBodyUpdateType::Delta(windowid.to_owned(), update_map));
         } else { return Err(WDBodyUpdateError::Invalid) }
+        // TODO: Apply additional updates to WDBodyUpdate struct.
         Ok(
             WDBodyUpdate {
                 update: update_type,
@@ -106,11 +125,38 @@ impl WDBody {
         })
     }
 
-    pub fn apply(&mut self, updates: WDBodyUpdate) {
+    pub fn apply(&mut self, updates: WDBodyUpdate) -> Result<(), WDBodyUpdateError> {
         if let Some(update) = updates.update {
-            if let WDBodyUpdateType::Full(windowid, content) = update {
-                todo!("mutate body");
-            }
+            let output: String = match update {
+                WDBodyUpdateType::Full(windowid, content) => {
+                    let element_content_handlers = vec![
+                    element!(format!(r#"[id="{}"]"#, windowid), |el| {
+                        el.replace(&content, ContentType::Html);
+                        Ok(())
+                    })
+                ];
+                rewrite_str(&self.raw_body,
+                    RewriteStrSettings {
+                        element_content_handlers,
+                        ..RewriteStrSettings::default()
+                    })?
+                },
+                WDBodyUpdateType::Delta(windowid, controls) => {
+                    let element_content_handlers = controls.iter().map(|(control_id, content)| {
+                        element!(format!(r#"[id="{}"] [id="{}"]"#, windowid, control_id), move |el| {
+                            el.replace(&content, ContentType::Html);
+                            Ok(())
+                        })
+                    }).collect();
+                    rewrite_str(&self.raw_body,
+                        RewriteStrSettings {
+                            element_content_handlers,
+                            ..RewriteStrSettings::default()
+                        })?
+                }
+            };
+            self.raw_body = output;
         }
+        Ok(())
     }
 }
