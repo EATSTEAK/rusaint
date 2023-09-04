@@ -2,7 +2,7 @@ use std::ops::{Deref, DerefMut};
 
 use crate::webdynpro::application::client::WDClientError;
 
-use super::{BasicUSaintApplication, SSU_WEBDYNPRO_BASE_URL};
+use super::BasicUSaintApplication;
 
 struct StudentInformation(BasicUSaintApplication);
 

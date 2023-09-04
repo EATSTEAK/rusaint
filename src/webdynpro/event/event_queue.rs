@@ -36,7 +36,7 @@ impl WDEventQueue {
     }
 
     pub fn add(&mut self, evt: WDEvent) {
-        &self.push_back(evt);
+        self.push_back(evt)
     }
 
     pub fn remove(&mut self) -> Option<WDEvent> {

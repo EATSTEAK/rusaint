@@ -1,6 +1,6 @@
 use indexmap::IndexMap;
 
-use crate::webdynpro::event::{WDEvent, WDEventBuilder, ucf_parameters::{UcfParametersBuilder, UcfResponseData, UcfAction, UcfCardinality}};
+use crate::webdynpro::event::{WDEvent, WDEventBuilder, ucf_parameters::{UcfParametersBuilder, UcfResponseData}};
 
 use super::Component;
 
