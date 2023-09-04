@@ -27,6 +27,15 @@ impl BasicWDApplication {
         })
     }
 
+    pub fn client_url(&self) -> String {
+        let mut url = "".to_owned();
+        url.push_str(&self.base_url.as_str());
+        if !url.ends_with('/') { url.push_str("/"); }
+        url.push_str(&self.name);
+        url.push_str("?sap-wd-stableids=X#");
+        url
+    }
+
     pub fn event_queue(&mut self) -> &mut WDEventQueue {
         &mut self.client.event_queue
     }
