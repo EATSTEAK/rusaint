@@ -11,9 +11,11 @@ const USER_AGENT: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/
 #[derive(Error, Debug)]
 pub enum WDClientError {
     #[error("Failed to request from web")]
-    Request(#[from] reqwest::Error),
+    RequestError(#[from] reqwest::Error),
     #[error("Failed to parse HTML body")]
     Parse(#[from] WDBodyError),
+    #[error("Request is made, but failed")]
+    RequestFailed(reqwest::Response),
     #[error("Failed to parse base url")]
     BaseUrlParse(#[from] url::ParseError),
     #[error("Server's update response is invalid")]
@@ -107,6 +109,9 @@ impl WDClient {
 
     async fn event_request(&mut self, base_url: &Url) -> Result<String, WDClientError> {
         let res = self.client.wd_xhr(base_url, &self.ssr_client, &mut self.event_queue)?.send().await?;
+        if !res.status().is_success() {
+            return Err(WDClientError::RequestFailed(res))
+        }
         Ok(res.text().await?)
     }
 
