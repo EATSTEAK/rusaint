@@ -32,12 +32,11 @@ impl BasicWDApplication {
     }
 
     pub async fn send_event(&mut self) -> Result<(), WDClientError> {
-        self.client.send_event(&self.base_url).await?;
-        Ok(())
+        self.client.send_event(&self.base_url).await
     }
 
-    pub fn body(&mut self) -> Result<WDBody, WDClientError> {
-        Ok(self.client.body()?)
+    pub fn body(&mut self) -> &WDBody {
+        &self.client.body
     }
 }
 
