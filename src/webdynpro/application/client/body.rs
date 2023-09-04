@@ -72,7 +72,9 @@ impl WDBodyUpdate {
                 .first_child()
                 .ok_or(WDBodyUpdateError::NoContent("full-update".to_string()))?;
             if content.tag_name().name() != "content-update" {
-                return Err(WDBodyUpdateError::UnknownElement(content.tag_name().name().to_owned()));
+                return Err(WDBodyUpdateError::UnknownElement(
+                    content.tag_name().name().to_owned(),
+                ));
             }
             update_type = Some(WDBodyUpdateType::Full(
                 windowid.to_owned(),
@@ -82,12 +84,13 @@ impl WDBodyUpdate {
                     .to_owned(),
             ));
         } else if update.tag_name().name() == "delta-update" {
-            let windowid = update
-                .attribute("windowid")
-                .ok_or(WDBodyUpdateError::CannotFindAttribute {
-                    node: "delta-update".to_string(),
-                    attribute: "windowid".to_string(),
-                })?;
+            let windowid =
+                update
+                    .attribute("windowid")
+                    .ok_or(WDBodyUpdateError::CannotFindAttribute {
+                        node: "delta-update".to_string(),
+                        attribute: "windowid".to_string(),
+                    })?;
             let childrens = update.children().collect::<Vec<Node>>();
             let mut update_map: HashMap<WDBodyUpdateControlId, String> =
                 HashMap::with_capacity(childrens.len());
@@ -95,12 +98,15 @@ impl WDBodyUpdate {
                 let tag_name = children.tag_name().name();
                 match tag_name {
                     "control-update" => {
-                        let control_id =
-                            children.attribute("id").ok_or(WDBodyUpdateError::CannotFindAttribute {
+                        let control_id = children.attribute("id").ok_or(
+                            WDBodyUpdateError::CannotFindAttribute {
                                 node: "control-update".to_string(),
                                 attribute: "id".to_string(),
-                            })?;
-                        let content = children.first_child().ok_or(WDBodyUpdateError::NoContent("control-update".to_string()))?;
+                            },
+                        )?;
+                        let content = children
+                            .first_child()
+                            .ok_or(WDBodyUpdateError::NoContent("control-update".to_string()))?;
                         update_map.insert(
                             control_id.to_owned(),
                             content
@@ -116,7 +122,9 @@ impl WDBodyUpdate {
             }
             update_type = Some(WDBodyUpdateType::Delta(windowid.to_owned(), update_map));
         } else {
-            return Err(WDBodyUpdateError::UnknownElement(update.tag_name().name().to_owned()));
+            return Err(WDBodyUpdateError::UnknownElement(
+                update.tag_name().name().to_owned(),
+            ));
         }
         // TODO: Apply additional updates to WDBodyUpdate struct.
         Ok(WDBodyUpdate {
@@ -219,8 +227,12 @@ impl WDBody {
                     )?
                 }
                 WDBodyUpdateType::Delta(windowid, controls) => {
-                    let element_content_handlers = controls.iter().map(|(control_id, content)| {
-                            element!(format!(r#"[id="{}"] [id="{}"]"#, windowid, control_id), move |el| {
+                    let element_content_handlers = controls
+                        .iter()
+                        .map(|(control_id, content)| {
+                            element!(
+                                format!(r#"[id="{}_root_"] [id="{}"]"#, windowid, control_id),
+                                move |el| {
                                     el.replace(&content, ContentType::Html);
                                     Ok(())
                                 }
