@@ -14,3 +14,4 @@ tokio = { version = "1.29.1", features = ["full"] }
 indexmap = "2.0.0"
 html-escape = "0.2.13"
 url = "2.4.1"
+roxmltree = "0.18.0"
