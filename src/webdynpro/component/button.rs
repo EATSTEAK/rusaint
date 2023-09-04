@@ -12,7 +12,7 @@ impl<'a> Component<'a> for Button<'a> {}
 
 impl<'a> Button<'a> {
     
-    pub fn new(id: &'a str) -> Self {
+    pub const fn new(id: &'a str) -> Self {
         Self {
             id
         }
@@ -27,8 +27,8 @@ impl<'a> Button<'a> {
             .unwrap();
         parameters.insert("Id".to_string(), self.id.clone().to_string());
         WDEventBuilder::default()
-            .event("Press".to_owned())
             .control("Button".to_owned())
+            .event("Press".to_owned())
             .parameters(parameters)
             .ucf_parameters(ucf_params)
             .build()
