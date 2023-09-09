@@ -1,18 +1,28 @@
 use derive_builder::Builder;
+use serde::Deserialize;
 
 use super::{EVENT_DATA_START, EVENT_DATA_COLON, EVENT_DATA_COMMA, EVENT_DATA_END};
 
-#[derive(Builder, Default, Clone)]
+#[derive(Builder, Default, Clone, Deserialize)]
 #[builder(default)]
 pub struct UcfParameters {
+    #[serde(rename = "ClientAction")]
     action: Option<UcfAction>,
+    #[serde(rename = "EnqueueCardinality")]
     cardinality: Option<UcfCardinality>,
+    #[serde(rename = "TransportMethod")]
     transport: Option<UcfTransportMethod>,
+    #[serde(rename = "ResponseData")]
     response: Option<UcfResponseData>,
+    #[serde(rename = "ActionUrl")]
     action_url: Option<String>,
+    #[serde(rename = "PrepareScript")]
     prepare_script: Option<String>,
+    #[serde(rename = "Delay")]
     delay: Option<UcfDelay>,
+    #[serde(rename = "SyncExecution")]
     sync_execution: Option<bool>,
+    #[serde(rename = "ClientListener")]
     client_listener: Option<String>
 }
 
@@ -86,8 +96,12 @@ impl UcfParameters {
         self.to_string()
     }
 }
-
-#[derive(Clone)]
+/**
+ * UCFAction
+ * This enum means should event is fired with form request
+ */
+#[derive(Clone, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub enum UcfAction {
     Submit,
     SubmitAsync,
@@ -106,7 +120,8 @@ impl ToString for UcfAction {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub enum UcfCardinality {
     Multiple,
     Single,
@@ -123,7 +138,8 @@ impl ToString for UcfCardinality {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub enum UcfResponseData {
     Full,
     Delta,
@@ -140,7 +156,8 @@ impl ToString for UcfResponseData {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub enum UcfTransportMethod {
     Full,
     Partial
@@ -155,7 +172,8 @@ impl ToString for UcfTransportMethod {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub enum UcfDelay {
     Full,
     None

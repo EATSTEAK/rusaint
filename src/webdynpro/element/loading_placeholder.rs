@@ -8,7 +8,9 @@ pub struct LoadingPlaceholder<'a> {
     id: &'a str
 }
 
-impl<'a> Element<'a> for LoadingPlaceholder<'a> {}
+impl<'a> Element<'a> for LoadingPlaceholder<'a> {
+    const CONTROL_ID: &'static str = "LP";
+}
 
 impl<'a> LoadingPlaceholder<'a> {
 

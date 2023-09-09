@@ -8,7 +8,9 @@ pub struct ClientInspector<'a> {
     id: &'a str
 }
 
-impl<'a> Element<'a> for ClientInspector<'a> {}
+impl<'a> Element<'a> for ClientInspector<'a> {
+    const CONTROL_ID: &'static str = "CI";
+}
 
 impl<'a> ClientInspector<'a> {
     pub const fn new(id: &'a str) -> Self {

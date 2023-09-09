@@ -8,7 +8,9 @@ pub struct Form<'a> {
     id: &'a str
 }
 
-impl<'a> Element<'a> for Form<'a> {}
+impl<'a> Element<'a> for Form<'a> {
+    const CONTROL_ID: &'static str = "FOR";
+}
 
 impl<'a> Form<'a> {
     

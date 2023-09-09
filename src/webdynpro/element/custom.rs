@@ -1,7 +1,7 @@
 use indexmap::IndexMap;
 
 use crate::webdynpro::event::{
-    ucf_parameters::{UcfAction, UcfCardinality, UcfParametersBuilder, UcfResponseData},
+    ucf_parameters::{UcfAction, UcfParametersBuilder, UcfResponseData},
     WDEvent, WDEventBuilder,
 };
 
@@ -41,7 +41,10 @@ pub struct Custom<'a> {
     id: &'a str,
 }
 
-impl<'a> Element<'a> for Custom<'a> {}
+impl<'a> Element<'a> for Custom<'a> {
+    // Note: This element is not rendered to client itself. This control id is a dummy.
+    const CONTROL_ID: &'static str = "CUSTOM";
+}
 
 impl<'a> Custom<'a> {
     pub const fn new(id: &'a str) -> Self {
