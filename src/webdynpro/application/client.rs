@@ -1,36 +1,16 @@
 use std::sync::Arc;
 use reqwest::{header::*, RequestBuilder, cookie::Jar};
-use thiserror::Error;
 use url::Url;
-use crate::webdynpro::event::event_queue::WDEventQueue;
-use self::body::{WDBody, WDBodyUpdate, WDBodyUpdateError, WDBodyError};
+use crate::webdynpro::{event::{event_queue::EventQueue, Event}, error::ClientError};
+use self::body::{Body, BodyUpdate};
 
 const USER_AGENT: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36";
 
-
-#[derive(Error, Debug)]
-pub enum WDClientError {
-    #[error("Failed to request from web")]
-    RequestError(#[from] reqwest::Error),
-    #[error("Failed to parse HTML body")]
-    Parse(#[from] WDBodyError),
-    #[error("Request is made, but failed")]
-    RequestFailed(reqwest::Response),
-    #[error("Failed to parse base url")]
-    BaseUrlParse(#[from] url::ParseError),
-    #[error("Server's update response is invalid")]
-    InvalidUpdate(#[from] WDBodyUpdateError),
-    #[error("Given base url is not valid")]
-    InvalidBaseUrl,
-    #[error("No form found in desired application")]
-    NoForm
-}
-
-pub struct WDClient {
+pub struct Client {
     client: reqwest::Client,
     pub ssr_client: SapSsrClient,
-    pub event_queue: WDEventQueue,
-    pub(super) body: WDBody,
+    event_queue: EventQueue,
+    pub(super) body: Body,
 }
 
 pub struct SapSsrClient {
@@ -67,9 +47,9 @@ fn wd_xhr_header() -> HeaderMap {
 }
 
 
-impl WDClient {
+impl Client {
 
-    pub async fn new(base_url: &Url, app_name: &str) -> Result<WDClient, WDClientError> {
+    pub async fn new(base_url: &Url, app_name: &str) -> Result<Client, ClientError> {
         let jar: Arc<Jar> = Arc::new(Jar::default());
         let client = reqwest::Client::builder()
             .cookie_provider(jar)
@@ -78,57 +58,61 @@ impl WDClient {
             .build()
             .unwrap();
         let raw_body = client.wd_navigate(base_url, app_name).send().await?.text().await?;
-        let body = WDBody::new(raw_body);
+        let body = Body::new(raw_body);
         let ssr_client = body.parse_sap_ssr_client()?;
-        let wd_client = WDClient {
+        let wd_client = Client {
             client,
             body,
             ssr_client,
-            event_queue: WDEventQueue::new(),
+            event_queue: EventQueue::new(),
         };
         Ok(wd_client)
     }
 
-    pub async fn with_client(client: reqwest::Client, base_url: &Url, app_name: &str) -> Result<WDClient, WDClientError> {
+    pub async fn with_client(client: reqwest::Client, base_url: &Url, app_name: &str) -> Result<Client, ClientError> {
         let raw_body = client.wd_navigate(base_url, app_name).send().await?.text().await?;
-        let body = WDBody::new(raw_body);
+        let body = Body::new(raw_body);
         let ssr_client = body.parse_sap_ssr_client()?;
-        let wd_client = WDClient {
+        let wd_client = Client {
             client,
             ssr_client,
-            event_queue: WDEventQueue::new(),
+            event_queue: EventQueue::new(),
             body,
         };
         Ok(wd_client)
     }
 
-    pub async fn send_event(&mut self, base_url: &Url) -> Result<(), WDClientError> {
+    pub fn add_event(&mut self, event: Event) {
+        self.event_queue.add(event)
+    }
+
+    pub async fn send_event(&mut self, base_url: &Url) -> Result<(), ClientError> {
         let res = self.event_request(base_url).await?;
         self.mutate_body(res)
     }
 
-    async fn event_request(&mut self, base_url: &Url) -> Result<String, WDClientError> {
+    async fn event_request(&mut self, base_url: &Url) -> Result<String, ClientError> {
         let res = self.client.wd_xhr(base_url, &self.ssr_client, &mut self.event_queue)?.send().await?;
         if !res.status().is_success() {
-            return Err(WDClientError::RequestFailed(res))
+            return Err(ClientError::RequestFailed(res))
         }
         Ok(res.text().await?)
     }
 
-    fn mutate_body(&mut self, response: String) -> Result<(), WDClientError> {
+    fn mutate_body(&mut self, response: String) -> Result<(), ClientError> {
         let body = &mut self.body;
-        let update = WDBodyUpdate::new(&response)?;
+        let update = BodyUpdate::new(&response)?;
         Ok(body.apply(update)?)
     }
 }
 
-trait WDRequests {
+trait Requests {
     fn wd_navigate(&self, base_url: &Url, app_name: &str) -> RequestBuilder;
 
-    fn wd_xhr(&self, base_url: &Url, ssr_client: &SapSsrClient, event_queue: &mut WDEventQueue) -> Result<RequestBuilder, WDClientError>;
+    fn wd_xhr(&self, base_url: &Url, ssr_client: &SapSsrClient, event_queue: &mut EventQueue) -> Result<RequestBuilder, ClientError>;
 }
 
-impl WDRequests for reqwest::Client {
+impl Requests for reqwest::Client {
     fn wd_navigate(&self, base_url: &Url, app_name: &str) -> RequestBuilder {
         let mut url = "".to_owned();
         url.push_str(base_url.as_str());
@@ -139,14 +123,14 @@ impl WDRequests for reqwest::Client {
             .headers(default_header())
     }
 
-    fn wd_xhr(&self, base_url: &Url, ssr_client: &SapSsrClient, event_queue: &mut WDEventQueue) -> Result<RequestBuilder, WDClientError> {
+    fn wd_xhr(&self, base_url: &Url, ssr_client: &SapSsrClient, event_queue: &mut EventQueue) -> Result<RequestBuilder, ClientError> {
         let mut url = "".to_owned();
         url.push_str(base_url.scheme());
         url.push_str("://");
         if let Some(host_str) = base_url.host_str() {
             url.push_str(host_str);
         } else {
-            return Err(WDClientError::InvalidBaseUrl);
+            return Err(ClientError::InvalidBaseUrl);
         }
         if let Some(port) = base_url.port() {
             url.push_str(":");
