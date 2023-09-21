@@ -1,25 +1,15 @@
 use self::ucf_parameters::UcfParameters;
 use derive_builder::Builder;
 use indexmap::IndexMap;
-use thiserror::Error;
-use std::{borrow::Cow, num::ParseIntError, string::FromUtf16Error};
+use std::{borrow::Cow, num::ParseIntError};
+
+use super::error::EventStrUnescapeError;
 
 pub const EVENT_SPECTATOR: &str = "~E001";
 pub const EVENT_DATA_START: &str = "~E002";
 pub const EVENT_DATA_END: &str = "~E003";
 pub const EVENT_DATA_COLON: &str = "~E004";
 pub const EVENT_DATA_COMMA: &str = "~E005";
-
-
-#[derive(Error, Debug)]
-pub enum EventStrUnescapeError {
-    #[error("Failed read hex string")]
-    Int(#[from] ParseIntError),
-    #[error("hex string is not valid")]
-    Parse(#[from] FromUtf16Error),
-    #[error("No form found in desired application")]
-    NoForm
-}
 
 pub fn escape_str<'a>(text: &'a str) -> String {
     let chars = text.chars();
@@ -92,7 +82,7 @@ pub fn unescape_str<'a>(text: &'a str) -> Result<Cow<'a, str>, EventStrUnescapeE
 }
 
 #[derive(Builder)]
-pub struct WDEvent {
+pub struct Event {
     event: String,
     control: String,
     #[builder(default)]
@@ -103,7 +93,7 @@ pub struct WDEvent {
     custom_parameters: IndexMap<String, String>,
 }
 
-impl ToString for WDEvent {
+impl ToString for Event {
     fn to_string(&self) -> String {
         let mut owned = format!("{}_{}", &self.control, &self.event).to_owned();
         owned.push_str(EVENT_DATA_START);
@@ -133,9 +123,17 @@ impl ToString for WDEvent {
     }
 }
 
-impl WDEvent {
+impl Event {
     pub fn serialize(&self) -> String {
         self.to_string()
+    }
+
+    pub fn is_enqueable(&self) -> bool {
+        self.ucf_parameters.is_enqueable()
+    }
+
+    pub fn is_submitable(&self) -> bool {
+        self.ucf_parameters.is_submitable()
     }
 }
 
