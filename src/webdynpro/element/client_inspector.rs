@@ -1,6 +1,5 @@
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
-use serde_json5::Error;
 
 use crate::webdynpro::{
     application::client::body::Body,
