@@ -93,10 +93,10 @@ impl<'a> TabStrip<'a> {
         let lsdata = serde_json::from_value::<TabStripLSData>(lsdata_obj).or(Err(ElementError::InvalidLSData))?;
         let lsevents = Self::lsevents_elem(selector, body.document())?;
         let items_selector = Selector::parse(format!(r#"[id="{}"] [ct="{}"]"#, &elem_def.id, TabStripItem::CONTROL_ID).as_str()).or(Err(BodyError::InvalidSelector))?;
-        let tab_items: TabItems<'_> = body.document().select(&items_selector)
+        let tab_items: TabItems<'a> = body.document().select(&items_selector)
             .filter_map(|eref| {
                 let id = eref.value().id()?;
-                Some(ElementDef::<TabStripItem<'_>>::new(id))
+                Some(ElementDef::<TabStripItem<'a>>::new(id))
             }).collect();
         Ok(Self::new(elem_def.id, Some(lsdata), Some(lsevents), Some(tab_items)))
     }
