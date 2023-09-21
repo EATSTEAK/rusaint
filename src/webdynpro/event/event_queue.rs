@@ -1,27 +1,27 @@
 use std::{collections::LinkedList, ops::{Deref, DerefMut}};
-use super::{WDEvent, EVENT_SPECTATOR};
+use super::{Event, EVENT_SPECTATOR};
 
 
-pub struct WDEventQueue(LinkedList<WDEvent>);
+pub struct EventQueue(LinkedList<Event>);
 
-impl Deref for WDEventQueue {
-    type Target = LinkedList<WDEvent>;
+impl Deref for EventQueue {
+    type Target = LinkedList<Event>;
 
     fn deref(&self) -> &Self::Target {
         &self.0
     }
 }
 
-impl DerefMut for WDEventQueue {
+impl DerefMut for EventQueue {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.0
     }
 }
 
-impl WDEventQueue {
+impl EventQueue {
 
-    pub fn new() -> WDEventQueue {
-        WDEventQueue(LinkedList::new())
+    pub fn new() -> EventQueue {
+        EventQueue(LinkedList::new())
     }
 
     pub fn serialize_and_clear(&mut self) -> String {
@@ -35,11 +35,11 @@ impl WDEventQueue {
         owned
     }
 
-    pub fn add(&mut self, evt: WDEvent) {
+    pub fn add(&mut self, evt: Event) {
         self.push_back(evt)
     }
 
-    pub fn remove(&mut self) -> Option<WDEvent> {
+    pub fn remove(&mut self) -> Option<Event> {
         self.pop_front()
     }
 }
