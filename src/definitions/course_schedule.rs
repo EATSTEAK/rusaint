@@ -1,7 +1,5 @@
 use std::ops::{Deref, DerefMut};
 
-use scraper::Selector;
-
 use crate::webdynpro::{
     element::{button::Button, combo_box::ComboBox, tab_strip::TabStrip, ElementDef},
     error::ClientError,
