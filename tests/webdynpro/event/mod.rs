@@ -1,5 +1,5 @@
 use indexmap::IndexMap;
-use rusaint::webdynpro::event::{WDEventBuilder, ucf_parameters::{UcfParametersBuilder, UcfResponseData, UcfAction}, event_queue::WDEventQueue, unescape_str};
+use rusaint::webdynpro::event::{EventBuilder, ucf_parameters::{UcfParametersBuilder, UcfResponseData, UcfAction}, event_queue::EventQueue, unescape_str};
 
 #[test]
 fn event_serialize() {
@@ -10,7 +10,7 @@ fn event_serialize() {
             .action(Some(UcfAction::Submit))
             .build()
             .unwrap();
-    let event = WDEventBuilder::default()
+    let event = EventBuilder::default()
             .control("Button".to_owned())
             .event("Press".to_owned())
             .parameters(parameters)
@@ -29,7 +29,7 @@ fn event_queue_serialize() {
             .action(Some(UcfAction::Submit))
             .build()
             .unwrap();
-    let event = WDEventBuilder::default()
+    let event = EventBuilder::default()
             .control("Button".to_owned())
             .event("Press".to_owned())
             .parameters(parameters)
@@ -47,14 +47,14 @@ fn event_queue_serialize() {
         .response(Some(UcfResponseData::Delta))
         .build()
         .unwrap();
-    let event_two = WDEventBuilder::default()
+    let event_two = EventBuilder::default()
             .control("Form".to_owned())
             .event("Request".to_owned())
             .parameters(parameters_two)
             .ucf_parameters(ucf_params_two)
             .build()
             .unwrap();
-    let mut queue = WDEventQueue::new();
+    let mut queue = EventQueue::new();
     queue.add(event);
     queue.add(event_two);
     assert_eq!(queue.serialize_and_clear(), "Button_Press~E002Id~E004WD0213~E003~E002ClientAction~E004submit~E005ResponseData~E004delta~E003~E002~E003~E001Form_Request~E002Id~E004sap.client.SsrClient.form~E005Async~E004false~E005FocusInfo~E004~0040~007B~0022sFocussedId~0022~003A~0022WD0213~0022~007D~E005Hash~E004~E005DomChanged~E004false~E005IsDirty~E004false~E003~E002ResponseData~E004delta~E003~E002~E003");

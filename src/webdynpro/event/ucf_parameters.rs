@@ -95,6 +95,29 @@ impl UcfParameters {
     pub fn serialize(&self) -> String {
         self.to_string()
     }
+
+    pub fn is_enqueable(&self) -> bool {
+        if let Some(action) = &self.action {
+            match action {
+                UcfAction::Enqueue => true,
+                _ => false
+            }
+        } else {
+            false
+        }
+    }
+
+    pub fn is_submitable(&self) -> bool {
+        if let Some(action) = &self.action {
+            match action {
+                UcfAction::Submit => true,
+                UcfAction::SubmitAsync => true,
+                _ => false
+            }
+        } else {
+            false
+        }
+    }
 }
 /**
  * UCFAction

@@ -2,7 +2,7 @@ use indexmap::IndexMap;
 
 use crate::webdynpro::event::{
     ucf_parameters::{UcfAction, UcfParametersBuilder, UcfResponseData},
-    WDEvent, WDEventBuilder,
+    Event, EventBuilder,
 };
 
 use super::Element;
@@ -41,9 +41,21 @@ pub struct Custom<'a> {
     id: &'a str,
 }
 
-impl<'a> Element<'a> for Custom<'a> {
+impl<'a> Element for Custom<'a> {
     // Note: This element is not rendered to client itself. This control id is a dummy.
     const CONTROL_ID: &'static str = "CUSTOM";
+
+    const ELEMENT_NAME: &'static str = "Custom";
+
+    type ElementLSData = ();
+
+    fn lsdata(&self) -> Option<&Self::ElementLSData> {
+        None
+    }
+
+    fn lsevents(&self) -> Option<&super::EventParameterMap> {
+        None
+    }
 }
 
 impl<'a> Custom<'a> {
@@ -51,7 +63,7 @@ impl<'a> Custom<'a> {
         Self { id }
     }
 
-    pub fn client_infos(&self, infos: CustomClientInfo) -> WDEvent {
+    pub fn client_infos(&self, infos: CustomClientInfo) -> Event {
         let mut parameters: IndexMap<String, String> = IndexMap::new();
         let ucf_params = UcfParametersBuilder::default()
             .action(Some(UcfAction::Enqueue))
@@ -72,7 +84,7 @@ impl<'a> Custom<'a> {
             "ParentAccessible".to_string(),
             infos.parent_accessible.to_string(),
         );
-        WDEventBuilder::default()
+        EventBuilder::default()
             .control("Custom".to_owned())
             .event("ClientInfos".to_owned())
             .parameters(parameters)
