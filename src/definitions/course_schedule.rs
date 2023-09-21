@@ -1,4 +1,4 @@
-use std::{ops::{Deref, DerefMut}, borrow::BorrowMut};
+use std::ops::{Deref, DerefMut};
 
 use scraper::Selector;
 

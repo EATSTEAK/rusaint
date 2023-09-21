@@ -1,5 +1,5 @@
 use indexmap::IndexMap;
-use rusaint::webdynpro::event::{EventBuilder, ucf_parameters::{UcfParametersBuilder, UcfResponseData, UcfAction}, event_queue::EventQueue, unescape_str};
+use rusaint::webdynpro::event::{EventBuilder, ucf_parameters::{UcfParametersBuilder, UcfResponseData, UcfAction}, event_queue::EventQueue};
 
 #[test]
 fn event_serialize() {
