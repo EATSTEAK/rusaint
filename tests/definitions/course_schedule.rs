@@ -1,4 +1,4 @@
-use rusaint::definitions::course_schedule::{CourseSchedule, PeriodType};
+use rusaint::definitions::course_schedule::CourseSchedule;
 use scraper::Selector;
 
 
@@ -13,4 +13,5 @@ async fn course_schedule_load() {
     for table in selection {
         println!("{}", table.html());
     }
+    assert!(false)
 }
