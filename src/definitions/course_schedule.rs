@@ -84,11 +84,6 @@ impl CourseSchedule {
 
     pub async fn load_edu(&mut self) -> Result<(), ClientError> {
         self.select_edu().await?;
-        let html = self.body().document();
-        let selector = Selector::parse(r#"[ct="B"]"#).unwrap();
-        let elements: Vec<Option<&str>> = html.select(&selector).map(|elref| {
-            elref.value().id()
-        }).collect();
         self.search_edu().await?;
         Ok(())
     }
