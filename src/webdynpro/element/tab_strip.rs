@@ -1,14 +1,19 @@
 use indexmap::IndexMap;
 use serde::Deserialize;
+use scraper::Selector;
 
 use crate::webdynpro::{event::Event, application::client::body::Body, error::{BodyError, ElementError}};
 
 use super::{Element, EventParameterMap, ElementDef};
+use self::item::TabStripItem;
+
+type TabItems<'a> = Vec<ElementDef<'a, TabStripItem<'a>>>;
 
 pub struct TabStrip<'a> {
     id: &'a str,
     lsdata: Option<TabStripLSData>,
-    lsevents: Option<EventParameterMap>
+    lsevents: Option<EventParameterMap>,
+    tab_items: Option<TabItems<'a>>
 }
 
 #[derive(Deserialize, Debug, Default)]
@@ -73,11 +78,12 @@ impl<'a> ElementDef<'a, TabStrip<'a>> {
 
 impl<'a> TabStrip<'a> {
     
-    pub const fn new(id: &'a str, lsdata: Option<TabStripLSData>, lsevents: Option<EventParameterMap>) -> Self {
+    pub const fn new(id: &'a str, lsdata: Option<TabStripLSData>, lsevents: Option<EventParameterMap>, tab_items: Option<TabItems<'a>>) -> Self {
         Self {
             id,
             lsdata,
-            lsevents
+            lsevents,
+            tab_items
         }
     }
 
@@ -86,7 +92,13 @@ impl<'a> TabStrip<'a> {
         let lsdata_obj = Self::lsdata_elem(selector, body.document())?;
         let lsdata = serde_json::from_value::<TabStripLSData>(lsdata_obj).or(Err(ElementError::InvalidLSData))?;
         let lsevents = Self::lsevents_elem(selector, body.document())?;
-        Ok(Self::new(elem_def.id, Some(lsdata), Some(lsevents)))
+        let items_selector = Selector::parse(format!(r#"[id="{}"] [ct="{}"]"#, &elem_def.id, TabStripItem::CONTROL_ID).as_str()).or(Err(BodyError::InvalidSelector))?;
+        let tab_items: TabItems<'_> = body.document().select(&items_selector)
+            .filter_map(|eref| {
+                let id = eref.value().id()?;
+                Some(ElementDef::<TabStripItem<'_>>::new(id))
+            }).collect();
+        Ok(Self::new(elem_def.id, Some(lsdata), Some(lsevents), Some(tab_items)))
     }
 
     pub fn tab_select(&self, item_id: &str, item_index: u32, first_visible_item_index: u32) -> Result<Event, ElementError> {
