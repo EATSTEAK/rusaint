@@ -5,6 +5,7 @@ use crate::webdynpro::{event::Event, application::client::body::Body, error::{Bo
 
 use super::{Element, EventParameterMap, ElementDef};
 
+#[allow(unused)]
 pub struct Form<'a> {
     id: &'a str,
     lsdata: Option<FormLSData>,
@@ -35,6 +36,7 @@ impl<'a> ElementDef<'a, Form<'a>> {
 }
 
 #[derive(Debug, Default)]
+#[allow(unused)]
 pub struct FormData {
     name: Option<String>,
     method: Option<String>,
@@ -47,6 +49,7 @@ pub struct FormData {
 }
 
 #[derive(Deserialize, Debug, Default)]
+#[allow(unused)]
 pub struct FormLSData {
     #[serde(rename = "0")]
     has_event_queue: Option<bool>,

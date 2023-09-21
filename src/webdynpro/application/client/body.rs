@@ -19,6 +19,7 @@ pub enum BodyUpdateType {
 }
 
 #[derive(Debug)]
+#[allow(unused)]
 pub struct BodyUpdate {
     update: Option<BodyUpdateType>,
     initialize_ids: Option<String>,
@@ -205,7 +206,7 @@ impl Body {
     pub fn apply(&mut self, updates: BodyUpdate) -> Result<(), BodyUpdateError> {
         if let Some(update) = updates.update {
             let output: String = match update {
-                BodyUpdateType::Full(windowid, contentid, content) => {
+                BodyUpdateType::Full(_, contentid, content) => {
                     let element_content_handlers =
                         vec![element!(format!(r#"[id="{}"]"#, contentid), |el| {
                             println!("performing full update: {:?}", el.get_attribute("id"));

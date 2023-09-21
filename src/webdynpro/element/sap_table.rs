@@ -12,6 +12,7 @@ pub struct SapTable<'a> {
 }
 
 #[derive(Deserialize, Debug, Default)]
+#[allow(unused)]
 pub struct SapTableLSData {
     #[serde(rename = "0")]
     title_text: Option<String>,

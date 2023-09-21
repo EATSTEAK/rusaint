@@ -12,6 +12,7 @@ pub struct ComboBox<'a> {
 }
 
 #[derive(Deserialize, Debug, Default)]
+#[allow(unused)]
 pub struct ComboBoxLSData {
     #[serde(rename = "0")]
     behavior: Option<String>,

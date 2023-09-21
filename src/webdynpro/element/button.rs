@@ -20,6 +20,7 @@ pub struct Button<'a> {
 }
 
 #[derive(Deserialize, Default)]
+#[allow(unused)]
 pub struct ButtonLSData {
     #[serde(rename = "0")]
     text: Option<String>,

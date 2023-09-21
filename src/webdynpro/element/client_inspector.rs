@@ -16,6 +16,7 @@ pub struct ClientInspector<'a> {
 }
 #[derive(Serialize, Deserialize, Debug, Default)]
 #[serde(rename_all(serialize = "PascalCase"))]
+#[allow(unused)]
 pub struct ClientInspectorLSData {
     #[serde(rename(deserialize = "0"), skip_serializing)]
     notification_trigger: Option<String>,

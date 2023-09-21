@@ -34,6 +34,7 @@ impl<'a> ElementDef<'a, LoadingPlaceholder<'a>> {
 }
 
 #[derive(Deserialize, Debug, Default)]
+#[allow(unused)]
 pub struct LoadingPlaceholderLSData {
     #[serde(rename = "0")]
     id: Option<String>,

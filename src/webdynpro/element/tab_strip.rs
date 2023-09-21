@@ -12,6 +12,7 @@ pub struct TabStrip<'a> {
 }
 
 #[derive(Deserialize, Debug, Default)]
+#[allow(unused)]
 pub struct TabStripLSData {
     #[serde(rename = "0")]
     current_index: Option<i32>,
@@ -111,6 +112,7 @@ mod item {
     }
 
     #[derive(Deserialize, Debug, Default)]
+    #[allow(unused)]
     pub struct TabStripItemLSData {
         #[serde(rename = "0")]
         id: Option<String>,

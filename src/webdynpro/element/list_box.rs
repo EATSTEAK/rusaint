@@ -12,6 +12,7 @@ struct ListBoxMultiple(ListBox);
 struct ListBoxSingle(ListBox);
 
 #[derive(Deserialize, Debug, Default)]
+#[allow(unused)]
 struct ListBoxLSData {
     #[serde(rename = "0")]
     visible_items: Option<i32>,
@@ -53,6 +54,7 @@ mod item {
     }
 
     #[derive(Deserialize, Debug, Default)]
+    #[allow(unused)]
     struct ListBoxItemLSData {
         #[serde(rename = "0")]
         icon_src: Option<String>,
@@ -66,6 +68,7 @@ mod item {
         custom_data: Option<String>,
     }
 
+    #[allow(unused)]
     struct ListBoxItemData {
         index: Option<String>,
         key: Option<String>,
@@ -82,6 +85,7 @@ mod item {
     }
 
     #[derive(Deserialize, Debug, Default)]
+    #[allow(unused)]
     struct ListBoxActionItemLSData {
         #[serde(rename = "0")]
         custom_data: Option<String>,
