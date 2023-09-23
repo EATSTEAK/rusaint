@@ -84,9 +84,13 @@ impl CourseSchedule {
         self.send_events(vec![button_edu.press()?]).await
     }
 
-    pub async fn read_edu_raw(&mut self) -> Result<SapTable> {
+    pub async fn load_edu(&mut self) -> Result<()> {
         self.select_edu().await?;
         self.search_edu().await?;
+        Ok(())
+    }
+
+    pub fn read_edu_raw(&self) -> Result<SapTable> {
         let body = self.body();
         let main_table = Self::MAIN_TABLE.from_body(body)?;
         Ok(main_table)

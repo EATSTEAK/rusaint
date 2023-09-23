@@ -1,5 +1,4 @@
 use rusaint::definitions::course_schedule::CourseSchedule;
-use scraper::Selector;
 
 #[tokio::test]
 async fn initial_load() {
@@ -10,12 +9,9 @@ async fn initial_load() {
 #[tokio::test]
 async fn edu_data() {
     let mut app = CourseSchedule::new().await.unwrap();
-    let table = app.read_edu_raw().await;
-    if let Ok(table) = table {
-        println!("{:?}", table.table());
-    } else {
-        eprintln!("{:?}", table.unwrap_err());
-    }
-
+    app.load_placeholder().await.unwrap();
+    app.load_edu().await.unwrap();
+    let table = app.read_edu_raw().unwrap();
+    println!("{:?}", table.table());
     assert!(false);
 }
