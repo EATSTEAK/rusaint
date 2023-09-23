@@ -4,7 +4,7 @@ use scraper::Selector;
 use serde::Deserialize;
 
 use crate::webdynpro::{
-    element::{Element, Elements, SubElement, SubElementDef},
+    element::{dyn_elem, Element, Elements, SubElement, SubElementDef},
     error::{BodyError, ElementError},
 };
 
@@ -13,6 +13,7 @@ use super::{SapTableCell, SapTableCells};
 pub struct SapTableHeaderCell {
     id: Cow<'static, str>,
     lsdata: Option<SapTableHeaderCellLSData>,
+    contents: Vec<Elements>,
 }
 
 #[derive(Deserialize, Debug, Default)]
@@ -73,13 +74,34 @@ impl SubElement for SapTableHeaderCell {
         let lsdata_obj = Self::lsdata_elem(element)?;
         let lsdata = serde_json::from_value::<Self::SubElementLSData>(lsdata_obj)
             .or(Err(ElementError::InvalidLSData))?;
-        Ok(Self::new(elem_def.id.to_owned(), Some(lsdata)))
+        let content_selector =
+            Selector::parse(format!(r#"[id="{}-CONTENT"] > [ct]"#, &elem_def.id).as_str())
+                .or(Err(BodyError::InvalidSelector))?;
+        let contents: Vec<Elements> = element
+            .select(&content_selector)
+            .filter_map(|node| dyn_elem(node).ok())
+            .collect();
+        Ok(Self::new(elem_def.id.to_owned(), Some(lsdata), contents))
+    }
+}
+
+impl SapTableCell for SapTableHeaderCell {
+    fn content(&self) -> &Vec<Elements> {
+        &self.contents
     }
 }
 
 impl SapTableHeaderCell {
-    pub const fn new(id: Cow<'static, str>, lsdata: Option<SapTableHeaderCellLSData>) -> Self {
-        Self { id, lsdata }
+    pub const fn new(
+        id: Cow<'static, str>,
+        lsdata: Option<SapTableHeaderCellLSData>,
+        contents: Vec<Elements>,
+    ) -> Self {
+        Self {
+            id,
+            lsdata,
+            contents,
+        }
     }
 
     pub fn wrap(self) -> SapTableCells {

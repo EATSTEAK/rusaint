@@ -15,7 +15,7 @@ pub enum SapTableCells {
 }
 
 pub trait SapTableCell {
-    fn content(&self) -> Elements;
+    fn content(&self) -> &Vec<Elements>;
 }
 
 pub mod header_cell;

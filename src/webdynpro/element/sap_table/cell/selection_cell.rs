@@ -1,9 +1,10 @@
 use std::borrow::Cow;
 
+use scraper::Selector;
 use serde::Deserialize;
 
 use crate::webdynpro::{
-    element::{Element, SubElement, SubElementDef},
+    element::{dyn_elem, Element, Elements, SubElement, SubElementDef},
     error::{BodyError, ElementError},
 };
 
@@ -12,6 +13,7 @@ use super::{SapTableCell, SapTableCells};
 pub struct SapTableSelectionCell {
     id: Cow<'static, str>,
     lsdata: Option<SapTableSelectionCellLSData>,
+    contents: Vec<Elements>,
 }
 
 #[derive(Deserialize, Debug, Default)]
@@ -35,6 +37,12 @@ pub struct SapTableSelectionCellLSData {
     custom_data: Option<String>,
 }
 
+impl SapTableCell for SapTableSelectionCell {
+    fn content(&self) -> &Vec<Elements> {
+        &self.contents
+    }
+}
+
 impl SubElement for SapTableSelectionCell {
     const SUBCONTROL_ID: &'static str = "SC";
     const ELEMENT_NAME: &'static str = "SapTableSelectionCell";
@@ -52,13 +60,26 @@ impl SubElement for SapTableSelectionCell {
         let lsdata_obj = Self::lsdata_elem(element)?;
         let lsdata = serde_json::from_value::<Self::SubElementLSData>(lsdata_obj)
             .or(Err(ElementError::InvalidLSData))?;
-        Ok(Self::new(elem_def.id.to_owned(), Some(lsdata)))
+        let content_selector = Selector::parse(":root > div > div > [ct]").unwrap();
+        let contents: Vec<Elements> = element
+            .select(&content_selector)
+            .filter_map(|node| dyn_elem(node).ok())
+            .collect();
+        Ok(Self::new(elem_def.id.to_owned(), Some(lsdata), contents))
     }
 }
 
 impl SapTableSelectionCell {
-    pub const fn new(id: Cow<'static, str>, lsdata: Option<SapTableSelectionCellLSData>) -> Self {
-        Self { id, lsdata }
+    pub const fn new(
+        id: Cow<'static, str>,
+        lsdata: Option<SapTableSelectionCellLSData>,
+        contents: Vec<Elements>,
+    ) -> Self {
+        Self {
+            id,
+            lsdata,
+            contents,
+        }
     }
 
     pub fn wrap(self) -> SapTableCells {
