@@ -66,7 +66,7 @@ impl SubElement for SapTableHierarchicalCell {
         let lsdata_obj = Self::lsdata_elem(element)?;
         let lsdata = serde_json::from_value::<Self::SubElementLSData>(lsdata_obj)
             .or(Err(ElementError::InvalidLSData))?;
-        let content_selector = Selector::parse(":root > [ct]").unwrap();
+        let content_selector = Selector::parse(":root [ct]").unwrap();
         let contents: Vec<Elements> = element
             .select(&content_selector)
             .filter_map(|node| dyn_elem(node).ok())
