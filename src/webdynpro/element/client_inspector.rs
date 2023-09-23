@@ -1,16 +1,17 @@
+use std::borrow::Cow;
+
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 
 use crate::webdynpro::{
-    application::client::body::Body,
     error::{BodyError, ElementError},
     event::Event,
 };
 
 use super::{Element, ElementDef, EventParameterMap};
 
-pub struct ClientInspector<'a> {
-    id: &'a str,
+pub struct ClientInspector {
+    id: Cow<'static, str>,
     lsdata: Option<ClientInspectorLSData>,
     lsevents: Option<EventParameterMap>,
 }
@@ -110,7 +111,7 @@ pub struct ClientInspectorLSData {
     parent_accessible: Option<String>,
 }
 
-impl<'a> Element for ClientInspector<'a> {
+impl Element for ClientInspector {
     const CONTROL_ID: &'static str = "CI";
 
     const ELEMENT_NAME: &'static str = "ClientInspector";
@@ -124,17 +125,26 @@ impl<'a> Element for ClientInspector<'a> {
     fn lsevents(&self) -> Option<&EventParameterMap> {
         self.lsevents.as_ref()
     }
-}
 
-impl<'a> ElementDef<'a, ClientInspector<'a>> {
-    pub fn elem(&self, body: &'_ Body) -> Result<ClientInspector<'a>, BodyError> {
-        ClientInspector::from_body(self, body)
+    fn from_elem(
+        elem_def: ElementDef<Self>,
+        element: scraper::ElementRef,
+    ) -> Result<Self, BodyError> {
+        let lsdata_obj = Self::lsdata_elem(element)?;
+        let lsdata = serde_json::from_value::<Self::ElementLSData>(lsdata_obj)
+            .or(Err(ElementError::InvalidLSData))?;
+        let lsevents = Self::lsevents_elem(element)?;
+        Ok(Self::new(
+            elem_def.id.to_owned(),
+            Some(lsdata),
+            Some(lsevents),
+        ))
     }
 }
 
-impl<'a> ClientInspector<'a> {
+impl ClientInspector {
     pub const fn new(
-        id: &'a str,
+        id: Cow<'static, str>,
         lsdata: Option<ClientInspectorLSData>,
         lsevents: Option<EventParameterMap>,
     ) -> Self {
@@ -143,14 +153,6 @@ impl<'a> ClientInspector<'a> {
             lsdata,
             lsevents,
         }
-    }
-
-    pub fn from_body(elem_def: &ElementDef<'a, Self>, body: &'_ Body) -> Result<Self, BodyError> {
-        let selector = &elem_def.selector().or(Err(BodyError::InvalidSelector))?;
-        let lsdata_obj = Self::lsdata_elem(selector, body.document())?;
-        let lsdata = serde_json::from_value::<ClientInspectorLSData>(lsdata_obj).or(Err(ElementError::InvalidLSData))?;
-        let lsevents = Self::lsevents_elem(selector, body.document())?;
-        Ok(Self::new(elem_def.id, Some(lsdata), Some(lsevents)))
     }
 
     pub fn notify(&self, data: &str) -> Result<Event, ElementError> {

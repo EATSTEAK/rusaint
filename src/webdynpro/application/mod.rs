@@ -1,19 +1,21 @@
-
 use url::Url;
 
-use self::client::{Client, body::Body};
+use self::client::{body::Body, Client};
 
-use super::{error::ClientError, event::Event, element::{ElementDef, form::Form}};
-
+use super::{
+    element::{form::Form, ElementDef},
+    error::ClientError,
+    event::Event,
+};
 
 pub struct BasicApplication {
     base_url: Url,
     name: String,
-    client: Client
+    client: Client,
 }
 
 impl BasicApplication {
-    pub const SSR_FORM: ElementDef<'_, Form<'_>> = ElementDef::new("sap.client.SsrClient.form");
+    pub const SSR_FORM: ElementDef<Form> = ElementDef::new("sap.client.SsrClient.form");
 
     pub async fn new(base_url_str: &str, name: &str) -> Result<Self, ClientError> {
         let base_url = Url::parse(base_url_str)?;
@@ -32,7 +34,9 @@ impl BasicApplication {
     pub fn client_url(&self) -> String {
         let mut url = "".to_owned();
         url.push_str(&self.base_url.as_str());
-        if !url.ends_with('/') { url.push_str("/"); }
+        if !url.ends_with('/') {
+            url.push_str("/");
+        }
         url.push_str(&self.name);
         url.push_str("?sap-wd-stableids=X#");
         url
@@ -40,11 +44,14 @@ impl BasicApplication {
 
     pub async fn send_events(&mut self, events: Vec<Event>) -> Result<(), ClientError> {
         let client = &mut self.client;
-        let form = Self::SSR_FORM.elem(&client.body)?;
+        let form = Self::SSR_FORM.from_body(&client.body)?;
         for event in events.into_iter() {
-            if !event.is_enqueable() && event.is_submitable() { 
+            if !event.is_enqueable() && event.is_submitable() {
                 client.add_event(event);
-                client.add_event(form.request(false, "", "", false, false).or(Err(ClientError::NoForm))?);
+                client.add_event(
+                    form.request(false, "", "", false, false)
+                        .or(Err(ClientError::NoForm))?,
+                );
                 client.send_event(&self.base_url).await?;
             } else {
                 client.add_event(event);

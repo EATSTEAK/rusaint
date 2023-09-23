@@ -1,7 +1,9 @@
 use std::ops::{Deref, DerefMut};
 
 use crate::webdynpro::{
-    element::{button::Button, combo_box::ComboBox, tab_strip::TabStrip, ElementDef},
+    element::{
+        button::Button, combo_box::ComboBox, sap_table::SapTable, tab_strip::TabStrip, ElementDef,
+    },
     error::ClientError,
 };
 
@@ -24,16 +26,18 @@ impl<'a> DerefMut for CourseSchedule {
 
 impl CourseSchedule {
     const APP_NAME: &str = "ZCMW2100";
-    const PERIOD_YEAR: ElementDef<'_, ComboBox<'_>> =
+    const PERIOD_YEAR: ElementDef<ComboBox> =
         ElementDef::new("ZCMW_PERIOD_RE.ID_A61C4ED604A2BFC2A8F6C6038DE6AF18:VIW_MAIN.PERYR");
-    const PERIOD_ID: ElementDef<'_, ComboBox<'_>> =
+    const PERIOD_ID: ElementDef<ComboBox> =
         ElementDef::new("ZCMW_PERIOD_RE.ID_A61C4ED604A2BFC2A8F6C6038DE6AF18:VIW_MAIN.PERID");
-    const TABLE_ROWS: ElementDef<'_, ComboBox<'_>> =
-        ElementDef::new("ZCMW2100.ID_0001:VIW_MODULES.ROWS");
-    const TABSTRIP: ElementDef<'_, TabStrip<'_>> =
+    const TABLE_ROWS: ElementDef<ComboBox> = ElementDef::new("ZCMW2100.ID_0001:VIW_MODULES.ROWS");
+    const TABSTRIP: ElementDef<TabStrip> =
         ElementDef::new("ZCMW2100.ID_0001:VIW_MAIN.MODULE_TABSTRIP");
-    const BUTTON_EDU: ElementDef<'_, Button<'_>> =
-        ElementDef::new("ZCMW2100.ID_0001:VIW_MAIN.BUTTON_EDU");
+    const BUTTON_EDU: ElementDef<Button> = ElementDef::new("ZCMW2100.ID_0001:VIW_MAIN.BUTTON_EDU");
+    const MAIN_TABLE: ElementDef<SapTable> = ElementDef::new(
+        "SALV_WD_TABLE.ID_DE0D9128A4327646C94670E2A892C99C:VIEW_TABLE.SALV_WD_UIE_TABLE",
+    );
+
     pub async fn new() -> Result<CourseSchedule, ClientError> {
         Ok(CourseSchedule(
             BasicUSaintApplication::new(Self::APP_NAME).await?,
@@ -46,8 +50,8 @@ impl CourseSchedule {
         period: PeriodType,
     ) -> Result<(), ClientError> {
         let body = self.body();
-        let period_year = Self::PERIOD_YEAR.elem(body)?;
-        let period_id = Self::PERIOD_ID.elem(body)?;
+        let period_year = Self::PERIOD_YEAR.from_body(body)?;
+        let period_id = Self::PERIOD_ID.from_body(body)?;
         self.send_events(vec![
             period_year.select(year.to_string().as_str(), false)?,
             period_id.select(period.to_string().as_str(), false)?,
@@ -57,15 +61,14 @@ impl CourseSchedule {
 
     pub async fn select_rows(&mut self, row: u32) -> Result<(), ClientError> {
         let body = self.body();
-        let table_rows = Self::TABLE_ROWS.elem(body)?;
+        let table_rows = Self::TABLE_ROWS.from_body(body)?;
         self.send_events(vec![table_rows.select(row.to_string().as_str(), false)?])
             .await
     }
 
     pub async fn select_edu(&mut self) -> Result<(), ClientError> {
         let body = self.body();
-        let tab_strip = Self::TABSTRIP.elem(body)?;
-        println!("Parsed TabStrip");
+        let tab_strip = Self::TABSTRIP.from_body(body)?;
         self.send_events(vec![tab_strip.tab_select(
             "ZCMW2100.ID_0001:VIW_MAIN.TAB_EDU",
             4,
@@ -76,7 +79,7 @@ impl CourseSchedule {
 
     async fn search_edu(&mut self) -> Result<(), ClientError> {
         let body = self.body();
-        let button_edu = Self::BUTTON_EDU.elem(body)?;
+        let button_edu = Self::BUTTON_EDU.from_body(body)?;
         self.send_events(vec![button_edu.press()?]).await
     }
 

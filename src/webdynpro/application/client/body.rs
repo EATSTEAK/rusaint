@@ -4,7 +4,7 @@ use lol_html::{element, html_content::ContentType, rewrite_str, RewriteStrSettin
 use roxmltree::Node;
 use scraper::{Html, Selector};
 
-use crate::webdynpro::error::{BodyUpdateError, BodyError};
+use crate::webdynpro::error::{BodyError, BodyUpdateError};
 
 use super::SapSsrClient;
 
@@ -57,7 +57,7 @@ impl BodyUpdate {
                     .attribute("id")
                     .ok_or(BodyUpdateError::CannotFindAttribute {
                         node: "content-update".to_string(),
-                        attribute: "id".to_string()
+                        attribute: "id".to_string(),
                     })?;
             if content.tag_name().name() != "content-update" {
                 return Err(BodyUpdateError::UnknownElement(
@@ -128,15 +128,15 @@ impl BodyUpdate {
 
 pub struct Body {
     raw_body: String,
-    document: Html
+    document: Html,
 }
 
 impl Body {
     pub fn new(body: String) -> Body {
         let document = Html::parse_document(&body);
-        Body { 
+        Body {
             raw_body: body,
-            document
+            document,
         }
     }
 
@@ -209,7 +209,6 @@ impl Body {
                 BodyUpdateType::Full(_, contentid, content) => {
                     let element_content_handlers =
                         vec![element!(format!(r#"[id="{}"]"#, contentid), |el| {
-                            println!("performing full update: {:?}", el.get_attribute("id"));
                             el.set_inner_content(&content, ContentType::Html);
                             Ok(())
                         })];

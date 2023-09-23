@@ -1,11 +1,16 @@
+use std::borrow::Cow;
+
 use indexmap::IndexMap;
 
-use crate::webdynpro::event::{
-    ucf_parameters::{UcfAction, UcfParametersBuilder, UcfResponseData},
-    Event, EventBuilder,
+use crate::webdynpro::{
+    error::BodyError,
+    event::{
+        ucf_parameters::{UcfAction, UcfParametersBuilder, UcfResponseData},
+        Event, EventBuilder,
+    },
 };
 
-use super::Element;
+use super::{Element, ElementDef};
 
 pub struct CustomClientInfo {
     pub window_opener_exists: bool,
@@ -19,12 +24,28 @@ pub struct CustomClientInfo {
 
 impl Default for CustomClientInfo {
     fn default() -> Self {
-        Self { window_opener_exists: true, client_url: Default::default(), client_width: 1920, client_height: 1000, document_domain: Default::default(), is_top_window: true, parent_accessible: true }
+        Self {
+            window_opener_exists: true,
+            client_url: Default::default(),
+            client_width: 1920,
+            client_height: 1000,
+            document_domain: Default::default(),
+            is_top_window: true,
+            parent_accessible: true,
+        }
     }
 }
 
 impl CustomClientInfo {
-    pub fn new(window_opener_exists: bool, client_url: &str, client_width: u32, client_height: u32, document_domain: &str, is_top_window: bool, parent_accessible: bool) -> CustomClientInfo {
+    pub fn new(
+        window_opener_exists: bool,
+        client_url: &str,
+        client_width: u32,
+        client_height: u32,
+        document_domain: &str,
+        is_top_window: bool,
+        parent_accessible: bool,
+    ) -> CustomClientInfo {
         CustomClientInfo {
             window_opener_exists,
             client_url: client_url.to_owned(),
@@ -32,16 +53,16 @@ impl CustomClientInfo {
             client_height,
             document_domain: document_domain.to_string(),
             is_top_window,
-            parent_accessible
+            parent_accessible,
         }
     }
 }
 
-pub struct Custom<'a> {
-    id: &'a str,
+pub struct Custom {
+    id: Cow<'static, str>,
 }
 
-impl<'a> Element for Custom<'a> {
+impl Element for Custom {
     // Note: This element is not rendered to client itself. This control id is a dummy.
     const CONTROL_ID: &'static str = "CUSTOM";
 
@@ -56,10 +77,17 @@ impl<'a> Element for Custom<'a> {
     fn lsevents(&self) -> Option<&super::EventParameterMap> {
         None
     }
+
+    fn from_elem(
+        elem_def: ElementDef<Self>,
+        _element: scraper::ElementRef,
+    ) -> Result<Self, BodyError> {
+        Ok(Self::new(elem_def.id.to_owned()))
+    }
 }
 
-impl<'a> Custom<'a> {
-    pub const fn new(id: &'a str) -> Self {
+impl Custom {
+    pub const fn new(id: Cow<'static, str>) -> Self {
         Self { id }
     }
 

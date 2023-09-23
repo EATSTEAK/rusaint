@@ -1,17 +1,22 @@
+use std::borrow::Cow;
+
 use indexmap::IndexMap;
 use serde::Deserialize;
 
-use crate::webdynpro::{event::Event, application::client::body::Body, error::{BodyError, ElementError}};
+use crate::webdynpro::{
+    error::{BodyError, ElementError},
+    event::Event,
+};
 
-use super::{Element, EventParameterMap, ElementDef};
+use super::{Element, ElementDef, EventParameterMap};
 
-pub struct LoadingPlaceholder<'a> {
-    id: &'a str,
+pub struct LoadingPlaceholder {
+    id: Cow<'static, str>,
     lsdata: Option<LoadingPlaceholderLSData>,
-    lsevents: Option<EventParameterMap>
+    lsevents: Option<EventParameterMap>,
 }
 
-impl<'a> Element for LoadingPlaceholder<'a> {
+impl Element for LoadingPlaceholder {
     const CONTROL_ID: &'static str = "LP";
 
     const ELEMENT_NAME: &'static str = "LoadingPlaceHolder";
@@ -25,11 +30,20 @@ impl<'a> Element for LoadingPlaceholder<'a> {
     fn lsevents(&self) -> Option<&EventParameterMap> {
         self.lsevents.as_ref()
     }
-}
 
-impl<'a> ElementDef<'a, LoadingPlaceholder<'a>> {
-    pub fn elem(&self, body: &'_ Body) -> Result<LoadingPlaceholder<'a>, BodyError> {
-        LoadingPlaceholder::from_body(self, body)
+    fn from_elem(
+        elem_def: ElementDef<Self>,
+        element: scraper::ElementRef,
+    ) -> Result<Self, BodyError> {
+        let lsdata_obj = Self::lsdata_elem(element)?;
+        let lsdata = serde_json::from_value::<Self::ElementLSData>(lsdata_obj)
+            .or(Err(ElementError::InvalidLSData))?;
+        let lsevents = Self::lsevents_elem(element)?;
+        Ok(Self::new(
+            elem_def.id.to_owned(),
+            Some(lsdata),
+            Some(lsevents),
+        ))
     }
 }
 
@@ -42,22 +56,17 @@ pub struct LoadingPlaceholderLSData {
     custom_data: Option<String>,
 }
 
-impl<'a> LoadingPlaceholder<'a> {
-
-    pub const fn new(id: &'a str, lsdata: Option<LoadingPlaceholderLSData>, lsevents: Option<EventParameterMap>) -> Self {
+impl LoadingPlaceholder {
+    pub const fn new(
+        id: Cow<'static, str>,
+        lsdata: Option<LoadingPlaceholderLSData>,
+        lsevents: Option<EventParameterMap>,
+    ) -> Self {
         Self {
             id,
             lsdata,
-            lsevents
+            lsevents,
         }
-    }
-
-    pub fn from_body(elem_def: &ElementDef<'a, Self>, body: &'_ Body) -> Result<Self, BodyError> {
-        let selector = &elem_def.selector().or(Err(BodyError::InvalidSelector))?;
-        let lsdata_obj = Self::lsdata_elem(selector, body.document())?;
-        let lsdata = serde_json::from_value::<LoadingPlaceholderLSData>(lsdata_obj).or(Err(ElementError::InvalidLSData))?;
-        let lsevents = Self::lsevents_elem(selector, body.document())?;
-        Ok(Self::new(elem_def.id, Some(lsdata), Some(lsevents)))
     }
 
     pub fn load(&self) -> Result<Event, ElementError> {

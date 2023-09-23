@@ -1,14 +1,19 @@
+use std::borrow::Cow;
+
 use indexmap::IndexMap;
 use serde::Deserialize;
 
-use crate::webdynpro::{event::Event, application::client::body::Body, error::{BodyError, ElementError}};
+use crate::webdynpro::{
+    error::{BodyError, ElementError},
+    event::Event,
+};
 
-use super::{Element, EventParameterMap, ElementDef};
+use super::{Element, ElementDef, EventParameterMap};
 
-pub struct ComboBox<'a> {
-    id: &'a str,
+pub struct ComboBox {
+    id: Cow<'static, str>,
     lsdata: Option<ComboBoxLSData>,
-    lsevents: Option<EventParameterMap>
+    lsevents: Option<EventParameterMap>,
 }
 
 #[derive(Deserialize, Debug, Default)]
@@ -73,10 +78,10 @@ pub struct ComboBoxLSData {
     #[serde(rename = "28")]
     tab_behaviour: Option<String>,
     #[serde(rename = "29")]
-    described_by: Option<String>
+    described_by: Option<String>,
 }
 
-impl<'a> Element for ComboBox<'a> {
+impl Element for ComboBox {
     const CONTROL_ID: &'static str = "CB";
 
     const ELEMENT_NAME: &'static str = "ComboBox";
@@ -90,30 +95,34 @@ impl<'a> Element for ComboBox<'a> {
     fn lsevents(&self) -> Option<&EventParameterMap> {
         self.lsevents.as_ref()
     }
-}
 
-impl<'a> ElementDef<'a, ComboBox<'a>> {
-    pub fn elem(&self, body: &'_ Body) -> Result<ComboBox<'a>, BodyError> {
-        ComboBox::from_body(self, body)
+    fn from_elem(
+        elem_def: ElementDef<Self>,
+        element: scraper::ElementRef,
+    ) -> Result<Self, BodyError> {
+        let lsdata_obj = Self::lsdata_elem(element)?;
+        let lsdata = serde_json::from_value::<Self::ElementLSData>(lsdata_obj)
+            .or(Err(ElementError::InvalidLSData))?;
+        let lsevents = Self::lsevents_elem(element)?;
+        Ok(Self::new(
+            elem_def.id.to_owned(),
+            Some(lsdata),
+            Some(lsevents),
+        ))
     }
 }
 
-impl<'a> ComboBox<'a> {
-    
-    pub const fn new(id: &'a str, lsdata: Option<ComboBoxLSData>, lsevents: Option<EventParameterMap>) -> Self {
+impl ComboBox {
+    pub const fn new(
+        id: Cow<'static, str>,
+        lsdata: Option<ComboBoxLSData>,
+        lsevents: Option<EventParameterMap>,
+    ) -> Self {
         Self {
             id,
             lsdata,
-            lsevents
+            lsevents,
         }
-    }
-
-    pub fn from_body(elem_def: &ElementDef<'a, Self>, body: &'_ Body) -> Result<Self, BodyError> {
-        let selector = &elem_def.selector().or(Err(BodyError::InvalidSelector))?;
-        let lsdata_obj = Self::lsdata_elem(selector, body.document())?;
-        let lsdata = serde_json::from_value::<ComboBoxLSData>(lsdata_obj).or(Err(ElementError::InvalidLSData))?;
-        let lsevents = Self::lsevents_elem(selector, body.document())?;
-        Ok(Self::new(elem_def.id, Some(lsdata), Some(lsevents)))
     }
 
     pub fn select(&self, key: &str, by_enter: bool) -> Result<Event, ElementError> {

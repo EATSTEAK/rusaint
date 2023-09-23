@@ -1,19 +1,24 @@
+use std::borrow::Cow;
+
 use indexmap::IndexMap;
-use serde::Deserialize;
 use scraper::Selector;
+use serde::Deserialize;
 
-use crate::webdynpro::{event::Event, application::client::body::Body, error::{BodyError, ElementError}};
+use crate::webdynpro::{
+    error::{BodyError, ElementError},
+    event::Event,
+};
 
-use super::{Element, EventParameterMap, ElementDef};
 use self::item::TabStripItem;
+use super::{Element, ElementDef, EventParameterMap};
 
-type TabItems<'a> = Vec<ElementDef<'a, TabStripItem<'a>>>;
+type TabItems = Vec<ElementDef<TabStripItem>>;
 
-pub struct TabStrip<'a> {
-    id: &'a str,
+pub struct TabStrip {
+    id: Cow<'static, str>,
     lsdata: Option<TabStripLSData>,
     lsevents: Option<EventParameterMap>,
-    tab_items: Option<TabItems<'a>>
+    tab_items: Option<TabItems>,
 }
 
 #[derive(Deserialize, Debug, Default)]
@@ -50,10 +55,10 @@ pub struct TabStripLSData {
     #[serde(rename = "14")]
     tab_items_design: Option<String>,
     #[serde(rename = "15")]
-    heading_level: Option<i32>
+    heading_level: Option<i32>,
 }
 
-impl<'a> Element for TabStrip<'a> {
+impl Element for TabStrip {
     // Note: This element renders as "TS_ie6" if >= IE6
     const CONTROL_ID: &'static str = "TS_standards";
 
@@ -68,59 +73,82 @@ impl<'a> Element for TabStrip<'a> {
     fn lsevents(&self) -> Option<&EventParameterMap> {
         self.lsevents.as_ref()
     }
-}
 
-impl<'a> ElementDef<'a, TabStrip<'a>> {
-    pub fn elem(&self, body: &'_ Body) -> Result<TabStrip<'a>, BodyError> {
-        TabStrip::from_body(self, body)
+    fn from_elem(
+        elem_def: ElementDef<Self>,
+        element: scraper::ElementRef,
+    ) -> Result<Self, BodyError> {
+        let lsdata_obj = Self::lsdata_elem(element)?;
+        let lsdata = serde_json::from_value::<Self::ElementLSData>(lsdata_obj)
+            .or(Err(ElementError::InvalidLSData))?;
+        let lsevents = Self::lsevents_elem(element)?;
+        let items_selector =
+            Selector::parse(format!(r#"[ct="{}"]"#, TabStripItem::CONTROL_ID).as_str())
+                .or(Err(BodyError::InvalidSelector))?;
+        let tab_items: TabItems = element
+            .select(&items_selector)
+            .filter_map(|eref| {
+                let id = eref.value().id()?;
+                Some(ElementDef::<TabStripItem>::new_dynamic(id.to_owned()))
+            })
+            .collect();
+        Ok(Self::new(
+            elem_def.id.to_owned(),
+            Some(lsdata),
+            Some(lsevents),
+            Some(tab_items),
+        ))
     }
 }
 
-impl<'a> TabStrip<'a> {
-    
-    pub const fn new(id: &'a str, lsdata: Option<TabStripLSData>, lsevents: Option<EventParameterMap>, tab_items: Option<TabItems<'a>>) -> Self {
+impl TabStrip {
+    pub const fn new(
+        id: Cow<'static, str>,
+        lsdata: Option<TabStripLSData>,
+        lsevents: Option<EventParameterMap>,
+        tab_items: Option<TabItems>,
+    ) -> Self {
         Self {
             id,
             lsdata,
             lsevents,
-            tab_items
+            tab_items,
         }
     }
 
-    pub fn from_body(elem_def: &ElementDef<'a, Self>, body: &'_ Body) -> Result<Self, BodyError> {
-        let selector = &elem_def.selector().or(Err(BodyError::InvalidSelector))?;
-        let lsdata_obj = Self::lsdata_elem(selector, body.document())?;
-        let lsdata = serde_json::from_value::<TabStripLSData>(lsdata_obj).or(Err(ElementError::InvalidLSData))?;
-        let lsevents = Self::lsevents_elem(selector, body.document())?;
-        let items_selector = Selector::parse(format!(r#"[id="{}"] [ct="{}"]"#, &elem_def.id, TabStripItem::CONTROL_ID).as_str()).or(Err(BodyError::InvalidSelector))?;
-        let tab_items: TabItems<'a> = body.document().select(&items_selector)
-            .filter_map(|eref| {
-                let id = eref.value().id()?;
-                Some(ElementDef::<TabStripItem<'a>>::new(id))
-            }).collect();
-        Ok(Self::new(elem_def.id, Some(lsdata), Some(lsevents), Some(tab_items)))
-    }
-
-    pub fn tab_select(&self, item_id: &str, item_index: u32, first_visible_item_index: u32) -> Result<Event, ElementError> {
+    pub fn tab_select(
+        &self,
+        item_id: &str,
+        item_index: u32,
+        first_visible_item_index: u32,
+    ) -> Result<Event, ElementError> {
         let mut parameters: IndexMap<String, String> = IndexMap::new();
         parameters.insert("Id".to_string(), self.id.clone().to_string());
         parameters.insert("ItemId".to_string(), item_id.to_string());
         parameters.insert("ItemIndex".to_string(), item_index.to_string());
-        parameters.insert("FirstVisibleItemIndex".to_string(), first_visible_item_index.to_string());
+        parameters.insert(
+            "FirstVisibleItemIndex".to_string(),
+            first_visible_item_index.to_string(),
+        );
         self.fire_event("TabSelect", parameters)
     }
 }
 
 mod item {
 
+    use std::borrow::Cow;
+
     use serde::Deserialize;
 
-    use crate::webdynpro::{element::{Element, EventParameterMap, ElementDef}, application::client::body::Body, error::{BodyError, ElementError}};
+    use crate::webdynpro::{
+        application::client::body::Body,
+        element::{Element, ElementDef, EventParameterMap},
+        error::{BodyError, ElementError},
+    };
 
-    
-    pub struct TabStripItem<'a> {
-        id: &'a str,
-        lsdata: Option<TabStripItemLSData>
+    pub struct TabStripItem {
+        id: Cow<'static, str>,
+        lsdata: Option<TabStripItemLSData>,
     }
 
     #[derive(Deserialize, Debug, Default)]
@@ -168,7 +196,7 @@ mod item {
         visibility: Option<String>,
     }
 
-    impl<'a> Element for TabStripItem<'a> {
+    impl Element for TabStripItem {
         // Note: This element renders as "TSITM_ie6" if >= IE6
         const CONTROL_ID: &'static str = "TSITM_standards";
 
@@ -184,28 +212,21 @@ mod item {
         fn lsevents(&self) -> Option<&EventParameterMap> {
             None
         }
-    }
 
-    impl<'a> ElementDef<'a, TabStripItem<'a>> {
-        pub fn elem(&self, body: &'_ Body) -> Result<TabStripItem<'a>, BodyError> {
-            TabStripItem::from_body(self, body)
+        fn from_elem(
+            elem_def: ElementDef<Self>,
+            element: scraper::ElementRef,
+        ) -> Result<Self, BodyError> {
+            let lsdata_obj = Self::lsdata_elem(element)?;
+            let lsdata = serde_json::from_value::<Self::ElementLSData>(lsdata_obj)
+                .or(Err(ElementError::InvalidLSData))?;
+            Ok(Self::new(elem_def.id.to_owned(), Some(lsdata)))
         }
     }
-    
-    impl<'a> TabStripItem<'a> {
-        
-        pub const fn new(id: &'a str, lsdata: Option<TabStripItemLSData>) -> Self {
-            Self {
-                id,
-                lsdata
-            }
-        }
 
-        pub fn from_body(elem_def: &ElementDef<'a, Self>, body: &'_ Body) -> Result<Self, BodyError> {
-            let selector = &elem_def.selector().or(Err(BodyError::InvalidSelector))?;
-            let lsdata_obj = Self::lsdata_elem(selector, body.document())?;
-            let lsdata = serde_json::from_value::<TabStripItemLSData>(lsdata_obj).or(Err(ElementError::InvalidLSData))?;
-            Ok(Self::new(elem_def.id, Some(lsdata)))
+    impl TabStripItem {
+        pub const fn new(id: Cow<'static, str>, lsdata: Option<TabStripItemLSData>) -> Self {
+            Self { id, lsdata }
         }
     }
 }

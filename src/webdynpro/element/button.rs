@@ -1,20 +1,17 @@
-use std::collections::HashMap;
+use std::{borrow::Cow, collections::HashMap};
 
 use indexmap::IndexMap;
 use serde::Deserialize;
 
 use crate::webdynpro::{
-    application::client::body::Body,
-    event::{
-        ucf_parameters::UcfParameters,
-        Event,
-    }, error::{BodyError, ElementError},
+    error::{BodyError, ElementError},
+    event::{ucf_parameters::UcfParameters, Event},
 };
 
 use super::{Element, ElementDef, EventParameterMap};
 
-pub struct Button<'a> {
-    id: &'a str,
+pub struct Button {
+    id: Cow<'static, str>,
     lsdata: Option<ButtonLSData>,
     lsevents: Option<HashMap<String, (UcfParameters, IndexMap<String, String>)>>,
 }
@@ -89,7 +86,7 @@ pub struct ButtonLSData {
     content_visibility: Option<String>,
 }
 
-impl<'a> Element for Button<'a> {
+impl<'a> Element for Button {
     const CONTROL_ID: &'static str = "B";
 
     const ELEMENT_NAME: &'static str = "Button";
@@ -103,18 +100,26 @@ impl<'a> Element for Button<'a> {
     fn lsevents(&self) -> Option<&EventParameterMap> {
         self.lsevents.as_ref()
     }
-}
 
-impl<'a> ElementDef<'a, Button<'a>> {
-    pub fn elem(&self, body: &'_ Body) -> Result<Button<'a>, BodyError> {
-        Button::from_body(self, body)
+    fn from_elem(
+        elem_def: ElementDef<Self>,
+        element: scraper::ElementRef,
+    ) -> Result<Self, BodyError> {
+        let lsdata_obj = Self::lsdata_elem(element)?;
+        let lsdata = serde_json::from_value::<Self::ElementLSData>(lsdata_obj)
+            .or(Err(ElementError::InvalidLSData))?;
+        let lsevents = Self::lsevents_elem(element)?;
+        Ok(Self::new(
+            elem_def.id.to_owned(),
+            Some(lsdata),
+            Some(lsevents),
+        ))
     }
 }
 
-impl<'a> Button<'a> {
-
+impl<'a> Button {
     pub fn new(
-        id: &'a str,
+        id: Cow<'static, str>,
         lsdata: Option<ButtonLSData>,
         lsevents: Option<EventParameterMap>,
     ) -> Self {
@@ -123,14 +128,6 @@ impl<'a> Button<'a> {
             lsdata,
             lsevents,
         }
-    }
-
-    pub fn from_body(elem_def: &ElementDef<'a, Self>, body: &'_ Body) -> Result<Self, BodyError> {
-        let selector = &elem_def.selector().or(Err(BodyError::InvalidSelector))?;
-        let lsdata_obj = Self::lsdata_elem(selector, body.document())?;
-        let lsdata = serde_json::from_value::<ButtonLSData>(lsdata_obj).or(Err(ElementError::InvalidLSData))?;
-        let lsevents = Self::lsevents_elem(selector, body.document())?;
-        Ok(Self::new(elem_def.id, Some(lsdata), Some(lsevents)))
     }
 
     pub fn press(&self) -> Result<Event, ElementError> {
