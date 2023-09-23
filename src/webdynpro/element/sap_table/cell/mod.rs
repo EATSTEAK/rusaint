@@ -6,6 +6,7 @@ use self::{
     selection_cell::SapTableSelectionCell,
 };
 
+#[derive(Debug)]
 pub enum SapTableCells {
     Normal(SapTableNormalCell),
     Header(SapTableHeaderCell),

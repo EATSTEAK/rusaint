@@ -2,9 +2,13 @@ use std::ops::{Deref, DerefMut};
 
 use crate::webdynpro::{
     element::{
-        button::Button, combo_box::ComboBox, sap_table::SapTable, tab_strip::TabStrip, ElementDef,
+        button::Button,
+        combo_box::ComboBox,
+        sap_table::{SapTable, SapTableBody},
+        tab_strip::TabStrip,
+        ElementDef,
     },
-    error::ClientError,
+    error::{ClientError, ElementError},
 };
 
 use super::BasicUSaintApplication;
@@ -83,10 +87,12 @@ impl CourseSchedule {
         self.send_events(vec![button_edu.press()?]).await
     }
 
-    pub async fn load_edu(&mut self) -> Result<(), ClientError> {
+    pub async fn read_edu_raw(&mut self) -> Result<SapTable, ClientError> {
         self.select_edu().await?;
         self.search_edu().await?;
-        Ok(())
+        let body = self.body();
+        let main_table = Self::MAIN_TABLE.from_body(body)?;
+        Ok(main_table)
     }
 }
 

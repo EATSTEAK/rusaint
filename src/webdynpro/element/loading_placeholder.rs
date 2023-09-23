@@ -10,6 +10,7 @@ use crate::webdynpro::{
 
 use super::{Element, ElementDef, EventParameterMap};
 
+#[derive(Debug)]
 pub struct LoadingPlaceholder {
     id: Cow<'static, str>,
     lsdata: Option<LoadingPlaceholderLSData>,

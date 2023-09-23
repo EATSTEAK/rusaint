@@ -6,7 +6,7 @@ use scraper::Selector;
 use serde_json::{Map, Value};
 
 
-use self::{button::Button, client_inspector::ClientInspector, combo_box::ComboBox, custom::Custom, form::Form, loading_placeholder::LoadingPlaceholder, tab_strip::{TabStrip, item::TabStripItem}, sap_table::SapTable};
+use self::{button::Button, client_inspector::ClientInspector, combo_box::ComboBox, custom::Custom, form::Form, loading_placeholder::LoadingPlaceholder, tab_strip::{TabStrip, item::TabStripItem}, sap_table::SapTable, unknown::Unknown};
 
 use super::{event::{ucf_parameters::UcfParameters, Event, EventBuilder}, error::{ElementError, BodyError}, application::client::body::Body};
 
@@ -18,10 +18,12 @@ pub mod form;
 pub mod loading_placeholder;
 pub mod tab_strip;
 pub mod sap_table;
-mod list_box;
+pub mod list_box;
+pub mod unknown;
 
 pub type EventParameterMap = HashMap<String, (UcfParameters, IndexMap<String, String>)>;
 
+#[derive(Debug)]
 pub enum Elements {
     Button(ElementDef<Button>),
     ClientInspector(ElementDef<ClientInspector>),
@@ -31,7 +33,8 @@ pub enum Elements {
     LoadingPlaceholder(ElementDef<LoadingPlaceholder>),
     TabStrip(ElementDef<TabStrip>),
     TabStripItem(ElementDef<TabStripItem>),
-    SapTable(ElementDef<SapTable>)
+    SapTable(ElementDef<SapTable>),
+    Unknown(ElementDef<Unknown>),
 }
 
 #[derive(Debug)]
@@ -97,7 +100,7 @@ macro_rules! match_elem {
     ($id: expr, $element: expr, $( $type: ty ),+ $(,)?) => {
         match $element.value().attr("ct") {
             $( Some(<$type>::CONTROL_ID) => Ok($crate::webdynpro::element::ElementDef::<$type>::new_dynamic($id).wrap()), )*
-            _ => Err($crate::webdynpro::error::BodyError::InvalidElement($crate::webdynpro::error::ElementError::NoSuchElement))
+            _ => Ok($crate::webdynpro::element::ElementDef::<$crate::webdynpro::element::unknown::Unknown>::new_dynamic($id).wrap())
         }
     };
 }

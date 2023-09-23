@@ -10,6 +10,7 @@ use crate::webdynpro::{
 
 use super::{Element, ElementDef, EventParameterMap};
 
+#[derive(Debug)]
 #[allow(unused)]
 pub struct Form {
     id: Cow<'static, str>,

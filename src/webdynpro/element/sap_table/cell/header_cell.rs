@@ -10,6 +10,7 @@ use crate::webdynpro::{
 
 use super::{SapTableCell, SapTableCells};
 
+#[derive(Debug)]
 pub struct SapTableHeaderCell {
     id: Cow<'static, str>,
     lsdata: Option<SapTableHeaderCellLSData>,

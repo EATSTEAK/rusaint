@@ -58,6 +58,7 @@ impl CustomClientInfo {
     }
 }
 
+#[derive(Debug)]
 pub struct Custom {
     id: Cow<'static, str>,
 }

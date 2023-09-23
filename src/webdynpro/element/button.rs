@@ -10,13 +10,14 @@ use crate::webdynpro::{
 
 use super::{Element, ElementDef, EventParameterMap};
 
+#[derive(Debug)]
 pub struct Button {
     id: Cow<'static, str>,
     lsdata: Option<ButtonLSData>,
     lsevents: Option<HashMap<String, (UcfParameters, IndexMap<String, String>)>>,
 }
 
-#[derive(Deserialize, Default)]
+#[derive(Debug, Deserialize, Default)]
 #[allow(unused)]
 pub struct ButtonLSData {
     #[serde(rename = "0")]

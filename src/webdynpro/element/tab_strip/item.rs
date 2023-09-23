@@ -7,6 +7,7 @@ use crate::webdynpro::{
     error::{BodyError, ElementError},
 };
 
+#[derive(Debug)]
 pub struct TabStripItem {
     id: Cow<'static, str>,
     lsdata: Option<TabStripItemLSData>,

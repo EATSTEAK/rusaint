@@ -16,8 +16,9 @@ use self::cell::{
 
 use super::{Element, ElementDef, EventParameterMap, SubElementDef};
 
-type SapTableBody = Vec<Vec<SapTableCells>>;
+pub type SapTableBody = Vec<Vec<SapTableCells>>;
 
+#[derive(Debug)]
 pub struct SapTable {
     id: Cow<'static, str>,
     lsdata: Option<SapTableLSData>,
@@ -92,11 +93,16 @@ impl SapTable {
         }
     }
 
+    pub fn table(&self) -> Option<&SapTableBody> {
+        self.table.as_ref()
+    }
+
     fn parse_table(
         def: ElementDef<SapTable>,
         element: scraper::ElementRef,
     ) -> Result<SapTableBody, BodyError> {
         let elem_value = element.value();
+        dbg!("reading tbody");
         let tbody_selector = Selector::parse(
             format!(
                 r#"[id="{}-contentTBody"]"#,
@@ -109,6 +115,7 @@ impl SapTable {
             .select(&tbody_selector)
             .next()
             .ok_or(ElementError::InvalidId)?;
+        dbg!("tbody readed");
         Ok(tbody
             .children()
             .filter_map(|node| scraper::ElementRef::wrap(node))

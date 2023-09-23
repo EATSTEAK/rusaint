@@ -1,9 +1,9 @@
 use derive_builder::Builder;
 use serde::Deserialize;
 
-use super::{EVENT_DATA_START, EVENT_DATA_COLON, EVENT_DATA_COMMA, EVENT_DATA_END};
+use super::{EVENT_DATA_COLON, EVENT_DATA_COMMA, EVENT_DATA_END, EVENT_DATA_START};
 
-#[derive(Builder, Default, Clone, Deserialize)]
+#[derive(Builder, Clone, Default, Debug, Deserialize)]
 #[builder(default)]
 pub struct UcfParameters {
     #[serde(rename = "ClientAction")]
@@ -23,7 +23,7 @@ pub struct UcfParameters {
     #[serde(rename = "SyncExecution")]
     sync_execution: Option<bool>,
     #[serde(rename = "ClientListener")]
-    client_listener: Option<String>
+    client_listener: Option<String>,
 }
 
 impl ToString for UcfParameters {
@@ -84,7 +84,9 @@ impl ToString for UcfParameters {
             owned.push_str(client_listener);
             owned.push_str(EVENT_DATA_COMMA);
         }
-        if owned.ends_with(EVENT_DATA_COMMA) { owned.truncate(owned.len() - 5) };
+        if owned.ends_with(EVENT_DATA_COMMA) {
+            owned.truncate(owned.len() - 5)
+        };
         owned.push_str(EVENT_DATA_END);
         owned
     }
@@ -100,7 +102,7 @@ impl UcfParameters {
         if let Some(action) = &self.action {
             match action {
                 UcfAction::Enqueue => true,
-                _ => false
+                _ => false,
             }
         } else {
             false
@@ -112,7 +114,7 @@ impl UcfParameters {
             match action {
                 UcfAction::Submit => true,
                 UcfAction::SubmitAsync => true,
-                _ => false
+                _ => false,
             }
         } else {
             false
@@ -123,13 +125,13 @@ impl UcfParameters {
  * UCFAction
  * This enum means should event is fired with form request
  */
-#[derive(Clone, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum UcfAction {
     Submit,
     SubmitAsync,
     Enqueue,
-    None
+    None,
 }
 
 impl ToString for UcfAction {
@@ -138,17 +140,18 @@ impl ToString for UcfAction {
             Self::Submit => "submit",
             Self::SubmitAsync => "submit_async",
             Self::Enqueue => "enqueue",
-            _ => "none"
-        }.to_owned()
+            _ => "none",
+        }
+        .to_owned()
     }
 }
 
-#[derive(Clone, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum UcfCardinality {
     Multiple,
     Single,
-    None
+    None,
 }
 
 impl ToString for UcfCardinality {
@@ -156,17 +159,18 @@ impl ToString for UcfCardinality {
         match &self {
             Self::Multiple => "multiple",
             Self::Single => "single",
-            _ => "none"
-        }.to_owned()
+            _ => "none",
+        }
+        .to_owned()
     }
 }
 
-#[derive(Clone, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum UcfResponseData {
     Full,
     Delta,
-    Inherit
+    Inherit,
 }
 
 impl ToString for UcfResponseData {
@@ -174,39 +178,42 @@ impl ToString for UcfResponseData {
         match &self {
             Self::Full => "full",
             Self::Delta => "delta",
-            Self::Inherit => "inherit"
-        }.to_owned()
+            Self::Inherit => "inherit",
+        }
+        .to_owned()
     }
 }
 
-#[derive(Clone, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum UcfTransportMethod {
     Full,
-    Partial
+    Partial,
 }
 
 impl ToString for UcfTransportMethod {
     fn to_string(&self) -> String {
         match &self {
             Self::Full => "full",
-            Self::Partial => "partial"
-        }.to_owned()
+            Self::Partial => "partial",
+        }
+        .to_owned()
     }
 }
 
-#[derive(Clone, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum UcfDelay {
     Full,
-    None
+    None,
 }
 
 impl ToString for UcfDelay {
     fn to_string(&self) -> String {
         match &self {
             Self::Full => "full",
-            _ => "none"
-        }.to_owned()
+            _ => "none",
+        }
+        .to_owned()
     }
 }

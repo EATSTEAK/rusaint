@@ -14,6 +14,7 @@ use super::{Element, ElementDef, EventParameterMap};
 
 type TabItems = Vec<ElementDef<TabStripItem>>;
 
+#[derive(Debug)]
 pub struct TabStrip {
     id: Cow<'static, str>,
     lsdata: Option<TabStripLSData>,
