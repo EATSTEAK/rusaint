@@ -140,6 +140,10 @@ impl Element for ClientInspector {
             Some(lsevents),
         ))
     }
+
+    fn wrap(self) -> super::Elements {
+        super::Elements::ClientInspector(self)
+    }
 }
 
 impl ClientInspector {

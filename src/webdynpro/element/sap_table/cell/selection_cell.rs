@@ -7,7 +7,7 @@ use crate::webdynpro::{
     error::{BodyError, ElementError},
 };
 
-use super::SapTableCell;
+use super::{SapTableCell, SapTableCells};
 
 pub struct SapTableSelectionCell {
     id: Cow<'static, str>,
@@ -61,7 +61,7 @@ impl SapTableSelectionCell {
         Self { id, lsdata }
     }
 
-    pub fn wrap(self) -> SapTableCell {
-        SapTableCell::Selection(self)
+    pub fn wrap(self) -> SapTableCells {
+        SapTableCells::Selection(self)
     }
 }

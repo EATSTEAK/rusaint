@@ -7,7 +7,7 @@ use crate::webdynpro::{
     error::{BodyError, ElementError},
 };
 
-use super::SapTableCell;
+use super::{SapTableCell, SapTableCells};
 
 pub struct SapTableHierarchicalCell {
     id: Cow<'static, str>,
@@ -68,7 +68,7 @@ impl SapTableHierarchicalCell {
         Self { id, lsdata }
     }
 
-    pub fn wrap(self) -> SapTableCell {
-        SapTableCell::Hierarchical(self)
+    pub fn wrap(self) -> SapTableCells {
+        SapTableCells::Hierarchical(self)
     }
 }

@@ -1,13 +1,14 @@
 use std::borrow::Cow;
 
+use scraper::Selector;
 use serde::Deserialize;
 
 use crate::webdynpro::{
-    element::{Element, SubElement, SubElementDef},
+    element::{Element, Elements, SubElement, SubElementDef},
     error::{BodyError, ElementError},
 };
 
-use super::SapTableCell;
+use super::{SapTableCell, SapTableCells};
 
 pub struct SapTableHeaderCell {
     id: Cow<'static, str>,
@@ -81,7 +82,7 @@ impl SapTableHeaderCell {
         Self { id, lsdata }
     }
 
-    pub fn wrap(self) -> SapTableCell {
-        SapTableCell::Header(self)
+    pub fn wrap(self) -> SapTableCells {
+        SapTableCells::Header(self)
     }
 }

@@ -51,6 +51,10 @@ impl Element for Form {
             Some(data),
         ))
     }
+
+    fn wrap(self) -> super::Elements {
+        super::Elements::Form(self)
+    }
 }
 
 #[derive(Debug, Default)]

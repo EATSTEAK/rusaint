@@ -45,6 +45,10 @@ impl Element for LoadingPlaceholder {
             Some(lsevents),
         ))
     }
+
+    fn wrap(self) -> super::Elements {
+        super::Elements::LoadingPlaceholder(self)
+    }
 }
 
 #[derive(Deserialize, Debug, Default)]

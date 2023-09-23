@@ -5,6 +5,9 @@ use regex::Regex;
 use scraper::Selector;
 use serde_json::{Map, Value};
 
+
+use self::{button::Button, client_inspector::ClientInspector, combo_box::ComboBox, custom::Custom, form::Form, loading_placeholder::LoadingPlaceholder, tab_strip::{TabStrip, item::TabStripItem}, sap_table::SapTable};
+
 use super::{event::{ucf_parameters::UcfParameters, Event, EventBuilder}, error::{ElementError, BodyError}, application::client::body::Body};
 
 pub mod button;
@@ -18,6 +21,18 @@ pub mod sap_table;
 mod list_box;
 
 pub type EventParameterMap = HashMap<String, (UcfParameters, IndexMap<String, String>)>;
+
+pub enum Elements {
+    Button(Button),
+    ClientInspector(ClientInspector),
+    ComboBox(ComboBox),
+    Custom(Custom),
+    Form(Form),
+    LoadingPlaceholder(LoadingPlaceholder),
+    TabStrip(TabStrip),
+    TabStripItem(TabStripItem),
+    SapTable(SapTable)
+}
 
 #[derive(Debug)]
 pub struct ElementDef<T>
@@ -78,6 +93,30 @@ fn normalize_lsjson(lsjson: &str) -> String {
     ret
 }
 
+macro_rules! match_elem {
+    ($id: expr, $element: expr, $( $type: ty ),+ $(,)?) => {
+        match $element.value().attr("ct") {
+            $( Some(<$type>::CONTROL_ID) => Ok($crate::webdynpro::element::ElementDef::<$type>::new_dynamic($id).from_elem($element)?.wrap()), )*
+            _ => Err($crate::webdynpro::error::BodyError::InvalidElement($crate::webdynpro::error::ElementError::NoSuchElement))
+        }
+    };
+}
+
+fn dyn_elem(element: scraper::ElementRef) -> Result<Elements, BodyError> {
+        let value = element.value();
+        let id = value.id().ok_or(ElementError::InvalidId)?.to_owned();
+        match_elem!(id, element, 
+            Button,
+            ClientInspector,
+            ComboBox,
+            Form,
+            LoadingPlaceholder,
+            TabStrip, 
+            TabStripItem,
+            SapTable
+        )
+}
+
 pub trait Element: Sized {
     const CONTROL_ID: &'static str;
     const ELEMENT_NAME: &'static str;
@@ -94,6 +133,8 @@ pub trait Element: Sized {
     }
 
     fn from_elem(elem_def: ElementDef<Self>, element: scraper::ElementRef) -> Result<Self, BodyError>;
+
+    fn wrap(self) -> Elements;
 
     fn lsdata_elem(element: scraper::ElementRef) -> Result<Value, ElementError> {
         let raw_data = element.value().attr("lsdata").ok_or(ElementError::InvalidLSData)?;

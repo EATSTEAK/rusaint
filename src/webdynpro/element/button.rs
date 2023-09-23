@@ -115,6 +115,10 @@ impl<'a> Element for Button {
             Some(lsevents),
         ))
     }
+
+    fn wrap(self) -> super::Elements {
+        super::Elements::Button(self)
+    }
 }
 
 impl<'a> Button {

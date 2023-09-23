@@ -7,7 +7,7 @@ use crate::webdynpro::{
     error::{BodyError, ElementError},
 };
 
-use super::SapTableCell;
+use super::{SapTableCell, SapTableCells};
 
 pub struct SapTableMatrixCell {
     id: Cow<'static, str>,
@@ -53,7 +53,7 @@ impl SapTableMatrixCell {
         Self { id, lsdata }
     }
 
-    pub fn wrap(self) -> SapTableCell {
-        SapTableCell::Matrix(self)
+    pub fn wrap(self) -> SapTableCells {
+        SapTableCells::Matrix(self)
     }
 }

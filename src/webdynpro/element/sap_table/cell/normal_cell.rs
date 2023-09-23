@@ -7,7 +7,7 @@ use crate::webdynpro::{
     error::{BodyError, ElementError},
 };
 
-use super::SapTableCell;
+use super::{SapTableCell, SapTableCells};
 
 pub struct SapTableNormalCell {
     id: Cow<'static, str>,
@@ -61,7 +61,7 @@ impl SapTableNormalCell {
         Self { id, lsdata }
     }
 
-    pub fn wrap(self) -> SapTableCell {
-        SapTableCell::Normal(self)
+    pub fn wrap(self) -> SapTableCells {
+        SapTableCells::Normal(self)
     }
 }

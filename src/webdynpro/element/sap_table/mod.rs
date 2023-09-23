@@ -11,12 +11,12 @@ use crate::webdynpro::{
 use self::cell::{
     header_cell::SapTableHeaderCell, hierarchical_cell::SapTableHierarchicalCell,
     matrix_cell::SapTableMatrixCell, normal_cell::SapTableNormalCell,
-    selection_cell::SapTableSelectionCell, SapTableCell,
+    selection_cell::SapTableSelectionCell, SapTableCells,
 };
 
 use super::{Element, ElementDef, EventParameterMap, SubElementDef};
 
-type SapTableBody = Vec<Vec<SapTableCell>>;
+type SapTableBody = Vec<Vec<SapTableCells>>;
 
 pub struct SapTable {
     id: Cow<'static, str>,
@@ -69,6 +69,10 @@ impl Element for SapTable {
             Some(table),
         ))
     }
+
+    fn wrap(self) -> super::Elements {
+        super::Elements::SapTable(self)
+    }
 }
 
 impl SapTable {
@@ -106,11 +110,11 @@ impl SapTable {
         Ok(tbody
             .children()
             .filter_map(|node| scraper::ElementRef::wrap(node))
-            .map(|row_ref| -> Vec<SapTableCell> {
+            .map(|row_ref| -> Vec<SapTableCells> {
                 let subct_selector = Selector::parse("[subct]").unwrap();
                 let subcts = row_ref.select(&subct_selector);
                 subcts
-                    .filter_map(|subct_ref| -> Option<SapTableCell> {
+                    .filter_map(|subct_ref| -> Option<SapTableCells> {
                         let subct_value = subct_ref.value();
                         match subct_value.attr("subct") {
                             Some(SapTableNormalCell::SUBCONTROL_ID) => Some(
@@ -161,7 +165,7 @@ impl SapTable {
                             _ => None,
                         }
                     })
-                    .collect::<Vec<SapTableCell>>()
+                    .collect::<Vec<SapTableCells>>()
             })
             .collect())
     }

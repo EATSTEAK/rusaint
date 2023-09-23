@@ -110,6 +110,10 @@ impl Element for ComboBox {
             Some(lsevents),
         ))
     }
+
+    fn wrap(self) -> super::Elements {
+        super::Elements::ComboBox(self)
+    }
 }
 
 impl ComboBox {
