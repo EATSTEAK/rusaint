@@ -1,15 +1,8 @@
 use anyhow::Result;
 use std::ops::{Deref, DerefMut};
 
-use crate::webdynpro::{
-    element::{
-        button::Button,
-        combo_box::ComboBox,
-        sap_table::{SapTable, SapTableBody},
-        tab_strip::TabStrip,
-        ElementDef,
-    },
-    error::{ClientError, ElementError},
+use crate::webdynpro::element::{
+    button::Button, combo_box::ComboBox, sap_table::SapTable, tab_strip::TabStrip, ElementDef,
 };
 
 use super::BasicUSaintApplication;

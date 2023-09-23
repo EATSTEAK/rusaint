@@ -6,7 +6,7 @@ use serde::Deserialize;
 
 use crate::webdynpro::{
     element::{dyn_elem, Element, Elements, SubElement, SubElementDef},
-    error::{BodyError, ElementError},
+    error::ElementError,
 };
 
 use super::{SapTableCell, SapTableCells};

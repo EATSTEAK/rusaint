@@ -4,10 +4,7 @@ use std::borrow::Cow;
 use indexmap::IndexMap;
 use serde::Deserialize;
 
-use crate::webdynpro::{
-    error::{BodyError, ElementError},
-    event::Event,
-};
+use crate::webdynpro::{error::ElementError, event::Event};
 
 use super::{Element, ElementDef, EventParameterMap};
 

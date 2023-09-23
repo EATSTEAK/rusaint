@@ -3,8 +3,6 @@ use std::borrow::Cow;
 
 use serde_json::Value;
 
-use crate::webdynpro::error::BodyError;
-
 use super::{Element, ElementDef, EventParameterMap};
 
 // Type for unimplemented elements

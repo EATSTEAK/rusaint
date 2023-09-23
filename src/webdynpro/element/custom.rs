@@ -3,12 +3,9 @@ use std::borrow::Cow;
 
 use indexmap::IndexMap;
 
-use crate::webdynpro::{
-    error::BodyError,
-    event::{
-        ucf_parameters::{UcfAction, UcfParametersBuilder, UcfResponseData},
-        Event, EventBuilder,
-    },
+use crate::webdynpro::event::{
+    ucf_parameters::{UcfAction, UcfParametersBuilder, UcfResponseData},
+    Event, EventBuilder,
 };
 
 use super::{Element, ElementDef};

@@ -9,7 +9,6 @@ use crate::webdynpro::{
         loading_placeholder::LoadingPlaceholder,
         ElementDef,
     },
-    error::ClientError,
 };
 
 const SSU_WEBDYNPRO_BASE_URL: &str = "https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/";

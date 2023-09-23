@@ -1,8 +1,6 @@
 use anyhow::Result;
 use std::ops::{Deref, DerefMut};
 
-use crate::webdynpro::error::ClientError;
-
 use super::BasicUSaintApplication;
 
 pub struct StudentInformation(BasicUSaintApplication);

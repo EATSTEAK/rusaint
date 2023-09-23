@@ -5,7 +5,7 @@ use serde::Deserialize;
 
 use crate::webdynpro::{
     element::{Element, ElementDef, EventParameterMap},
-    error::{BodyError, ElementError},
+    error::ElementError,
 };
 
 #[derive(Debug)]

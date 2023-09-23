@@ -3,8 +3,6 @@ use derive_builder::Builder;
 use indexmap::IndexMap;
 use std::{borrow::Cow, num::ParseIntError};
 
-use super::error::EventStrUnescapeError;
-
 pub const EVENT_SPECTATOR: &str = "~E001";
 pub const EVENT_DATA_START: &str = "~E002";
 pub const EVENT_DATA_END: &str = "~E003";

@@ -5,7 +5,7 @@ use indexmap::IndexMap;
 use serde::Deserialize;
 
 use crate::webdynpro::{
-    error::{BodyError, ElementError},
+    error::ElementError,
     event::{ucf_parameters::UcfParameters, Event},
 };
 
