@@ -73,8 +73,7 @@ where T: Element
     }
 
     pub fn selector(&self) -> Result<Selector> {
-        Selector::parse(format!(r#"[id="{}"]"#, self.id).as_str())
-        .or(Err(ElementError::InvalidId)?)
+        Ok(std::result::Result::or(Selector::parse(format!(r#"[id="{}"]"#, &self.id).as_str()), Err(BodyError::InvalidSelector))?)
     }
 
     pub fn from_body(self, body: &'_ Body) -> Result<T> {
