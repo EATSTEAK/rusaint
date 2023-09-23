@@ -86,6 +86,12 @@ pub struct ButtonLSData {
     content_visibility: Option<String>,
 }
 
+impl ElementDef<Button> {
+    pub fn wrap(self) -> super::Elements {
+        super::Elements::Button(self)
+    }
+}
+
 impl<'a> Element for Button {
     const CONTROL_ID: &'static str = "B";
 
@@ -114,10 +120,6 @@ impl<'a> Element for Button {
             Some(lsdata),
             Some(lsevents),
         ))
-    }
-
-    fn wrap(self) -> super::Elements {
-        super::Elements::Button(self)
     }
 }
 

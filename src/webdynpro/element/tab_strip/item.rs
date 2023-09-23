@@ -57,6 +57,12 @@ pub struct TabStripItemLSData {
     visibility: Option<String>,
 }
 
+impl ElementDef<TabStripItem> {
+    pub fn wrap(self) -> super::super::Elements {
+        super::super::Elements::TabStripItem(self)
+    }
+}
+
 impl Element for TabStripItem {
     // Note: This element renders as "TSITM_ie6" if >= IE6
     const CONTROL_ID: &'static str = "TSITM_standards";
@@ -82,10 +88,6 @@ impl Element for TabStripItem {
         let lsdata = serde_json::from_value::<Self::ElementLSData>(lsdata_obj)
             .or(Err(ElementError::InvalidLSData))?;
         Ok(Self::new(elem_def.id.to_owned(), Some(lsdata)))
-    }
-
-    fn wrap(self) -> super::super::Elements {
-        super::super::Elements::TabStripItem(self)
     }
 }
 

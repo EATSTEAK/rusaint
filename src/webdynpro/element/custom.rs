@@ -84,10 +84,6 @@ impl Element for Custom {
     ) -> Result<Self, BodyError> {
         Ok(Self::new(elem_def.id.to_owned()))
     }
-
-    fn wrap(self) -> super::Elements {
-        super::Elements::Custom(self)
-    }
 }
 
 impl Custom {

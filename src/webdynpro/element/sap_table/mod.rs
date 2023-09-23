@@ -38,6 +38,12 @@ pub struct SapTableLSData {
     col_count: Option<u32>,
 }
 
+impl ElementDef<SapTable> {
+    pub fn wrap(self) -> super::Elements {
+        super::Elements::SapTable(self)
+    }
+}
+
 impl Element for SapTable {
     const CONTROL_ID: &'static str = "ST";
 
@@ -68,10 +74,6 @@ impl Element for SapTable {
             Some(lsevents),
             Some(table),
         ))
-    }
-
-    fn wrap(self) -> super::Elements {
-        super::Elements::SapTable(self)
     }
 }
 

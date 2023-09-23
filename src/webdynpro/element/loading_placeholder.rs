@@ -16,6 +16,12 @@ pub struct LoadingPlaceholder {
     lsevents: Option<EventParameterMap>,
 }
 
+impl ElementDef<LoadingPlaceholder> {
+    pub fn wrap(self) -> super::Elements {
+        super::Elements::LoadingPlaceholder(self)
+    }
+}
+
 impl Element for LoadingPlaceholder {
     const CONTROL_ID: &'static str = "LP";
 
@@ -44,10 +50,6 @@ impl Element for LoadingPlaceholder {
             Some(lsdata),
             Some(lsevents),
         ))
-    }
-
-    fn wrap(self) -> super::Elements {
-        super::Elements::LoadingPlaceholder(self)
     }
 }
 

@@ -23,15 +23,15 @@ mod list_box;
 pub type EventParameterMap = HashMap<String, (UcfParameters, IndexMap<String, String>)>;
 
 pub enum Elements {
-    Button(Button),
-    ClientInspector(ClientInspector),
-    ComboBox(ComboBox),
-    Custom(Custom),
-    Form(Form),
-    LoadingPlaceholder(LoadingPlaceholder),
-    TabStrip(TabStrip),
-    TabStripItem(TabStripItem),
-    SapTable(SapTable)
+    Button(ElementDef<Button>),
+    ClientInspector(ElementDef<ClientInspector>),
+    ComboBox(ElementDef<ComboBox>),
+    Custom(ElementDef<Custom>),
+    Form(ElementDef<Form>),
+    LoadingPlaceholder(ElementDef<LoadingPlaceholder>),
+    TabStrip(ElementDef<TabStrip>),
+    TabStripItem(ElementDef<TabStripItem>),
+    SapTable(ElementDef<SapTable>)
 }
 
 #[derive(Debug)]
@@ -96,7 +96,7 @@ fn normalize_lsjson(lsjson: &str) -> String {
 macro_rules! match_elem {
     ($id: expr, $element: expr, $( $type: ty ),+ $(,)?) => {
         match $element.value().attr("ct") {
-            $( Some(<$type>::CONTROL_ID) => Ok($crate::webdynpro::element::ElementDef::<$type>::new_dynamic($id).from_elem($element)?.wrap()), )*
+            $( Some(<$type>::CONTROL_ID) => Ok($crate::webdynpro::element::ElementDef::<$type>::new_dynamic($id).wrap()), )*
             _ => Err($crate::webdynpro::error::BodyError::InvalidElement($crate::webdynpro::error::ElementError::NoSuchElement))
         }
     };
@@ -133,8 +133,6 @@ pub trait Element: Sized {
     }
 
     fn from_elem(elem_def: ElementDef<Self>, element: scraper::ElementRef) -> Result<Self, BodyError>;
-
-    fn wrap(self) -> Elements;
 
     fn lsdata_elem(element: scraper::ElementRef) -> Result<Value, ElementError> {
         let raw_data = element.value().attr("lsdata").ok_or(ElementError::InvalidLSData)?;

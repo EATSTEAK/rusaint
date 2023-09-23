@@ -81,6 +81,12 @@ pub struct ComboBoxLSData {
     described_by: Option<String>,
 }
 
+impl ElementDef<ComboBox> {
+    pub fn wrap(self) -> super::Elements {
+        super::Elements::ComboBox(self)
+    }
+}
+
 impl Element for ComboBox {
     const CONTROL_ID: &'static str = "CB";
 
@@ -109,10 +115,6 @@ impl Element for ComboBox {
             Some(lsdata),
             Some(lsevents),
         ))
-    }
-
-    fn wrap(self) -> super::Elements {
-        super::Elements::ComboBox(self)
     }
 }
 

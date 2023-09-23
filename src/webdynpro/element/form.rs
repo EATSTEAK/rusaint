@@ -18,6 +18,12 @@ pub struct Form {
     data: Option<FormData>,
 }
 
+impl ElementDef<Form> {
+    pub fn wrap(self) -> super::Elements {
+        super::Elements::Form(self)
+    }
+}
+
 impl Element for Form {
     const CONTROL_ID: &'static str = "FOR";
 
@@ -50,10 +56,6 @@ impl Element for Form {
             Some(lsevents),
             Some(data),
         ))
-    }
-
-    fn wrap(self) -> super::Elements {
-        super::Elements::Form(self)
     }
 }
 

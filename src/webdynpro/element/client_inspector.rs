@@ -111,6 +111,12 @@ pub struct ClientInspectorLSData {
     parent_accessible: Option<String>,
 }
 
+impl ElementDef<ClientInspector> {
+    pub fn wrap(self) -> super::Elements {
+        super::Elements::ClientInspector(self)
+    }
+}
+
 impl Element for ClientInspector {
     const CONTROL_ID: &'static str = "CI";
 
@@ -139,10 +145,6 @@ impl Element for ClientInspector {
             Some(lsdata),
             Some(lsevents),
         ))
-    }
-
-    fn wrap(self) -> super::Elements {
-        super::Elements::ClientInspector(self)
     }
 }
 

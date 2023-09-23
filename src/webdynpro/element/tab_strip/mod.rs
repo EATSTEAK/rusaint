@@ -58,6 +58,12 @@ pub struct TabStripLSData {
     heading_level: Option<i32>,
 }
 
+impl ElementDef<TabStrip> {
+    pub fn wrap(self) -> super::Elements {
+        super::Elements::TabStrip(self)
+    }
+}
+
 impl Element for TabStrip {
     // Note: This element renders as "TS_ie6" if >= IE6
     const CONTROL_ID: &'static str = "TS_standards";
@@ -98,10 +104,6 @@ impl Element for TabStrip {
             Some(lsevents),
             Some(tab_items),
         ))
-    }
-
-    fn wrap(self) -> super::Elements {
-        super::Elements::TabStrip(self)
     }
 }
 
