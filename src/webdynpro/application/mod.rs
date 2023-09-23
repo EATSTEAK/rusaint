@@ -1,6 +1,6 @@
-use url::Url;
-
 use self::client::{body::Body, Client};
+use anyhow::Result;
+use url::Url;
 
 use super::{
     element::{form::Form, ElementDef},
@@ -17,13 +17,13 @@ pub struct BasicApplication {
 impl BasicApplication {
     pub const SSR_FORM: ElementDef<Form> = ElementDef::new("sap.client.SsrClient.form");
 
-    pub async fn new(base_url_str: &str, name: &str) -> Result<Self, ClientError> {
+    pub async fn new(base_url_str: &str, name: &str) -> Result<Self> {
         let base_url = Url::parse(base_url_str)?;
         let client = Client::new(&base_url, name).await?;
         Ok(Self::with_client(base_url, name, client)?)
     }
 
-    pub fn with_client(base_url: Url, name: &str, client: Client) -> Result<Self, ClientError> {
+    pub fn with_client(base_url: Url, name: &str, client: Client) -> Result<Self> {
         Ok(BasicApplication {
             base_url,
             name: name.to_owned(),
@@ -42,7 +42,7 @@ impl BasicApplication {
         url
     }
 
-    pub async fn send_events(&mut self, events: Vec<Event>) -> Result<(), ClientError> {
+    pub async fn send_events(&mut self, events: Vec<Event>) -> Result<()> {
         let client = &mut self.client;
         let form = Self::SSR_FORM.from_body(&client.body)?;
         for event in events.into_iter() {

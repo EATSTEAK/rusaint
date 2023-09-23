@@ -1,3 +1,4 @@
+use anyhow::Result;
 use std::borrow::Cow;
 
 use scraper::Selector;
@@ -57,7 +58,7 @@ impl SubElement for SapTableSelectionCell {
     fn from_elem<Parent: Element>(
         elem_def: SubElementDef<Parent, Self>,
         element: scraper::ElementRef,
-    ) -> Result<Self, BodyError> {
+    ) -> Result<Self> {
         let lsdata_obj = Self::lsdata_elem(element)?;
         let lsdata = serde_json::from_value::<Self::SubElementLSData>(lsdata_obj)
             .or(Err(ElementError::InvalidLSData))?;

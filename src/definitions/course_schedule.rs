@@ -1,3 +1,4 @@
+use anyhow::Result;
 use std::ops::{Deref, DerefMut};
 
 use crate::webdynpro::{
@@ -42,17 +43,13 @@ impl CourseSchedule {
         "SALV_WD_TABLE.ID_DE0D9128A4327646C94670E2A892C99C:VIEW_TABLE.SALV_WD_UIE_TABLE",
     );
 
-    pub async fn new() -> Result<CourseSchedule, ClientError> {
+    pub async fn new() -> Result<CourseSchedule> {
         Ok(CourseSchedule(
             BasicUSaintApplication::new(Self::APP_NAME).await?,
         ))
     }
 
-    pub async fn select_period(
-        &mut self,
-        year: u32,
-        period: PeriodType,
-    ) -> Result<(), ClientError> {
+    pub async fn select_period(&mut self, year: u32, period: PeriodType) -> Result<()> {
         let body = self.body();
         let period_year = Self::PERIOD_YEAR.from_body(body)?;
         let period_id = Self::PERIOD_ID.from_body(body)?;
@@ -63,14 +60,14 @@ impl CourseSchedule {
         .await
     }
 
-    pub async fn select_rows(&mut self, row: u32) -> Result<(), ClientError> {
+    pub async fn select_rows(&mut self, row: u32) -> Result<()> {
         let body = self.body();
         let table_rows = Self::TABLE_ROWS.from_body(body)?;
         self.send_events(vec![table_rows.select(row.to_string().as_str(), false)?])
             .await
     }
 
-    pub async fn select_edu(&mut self) -> Result<(), ClientError> {
+    pub async fn select_edu(&mut self) -> Result<()> {
         let body = self.body();
         let tab_strip = Self::TABSTRIP.from_body(body)?;
         self.send_events(vec![tab_strip.tab_select(
@@ -81,13 +78,13 @@ impl CourseSchedule {
         .await
     }
 
-    async fn search_edu(&mut self) -> Result<(), ClientError> {
+    async fn search_edu(&mut self) -> Result<()> {
         let body = self.body();
         let button_edu = Self::BUTTON_EDU.from_body(body)?;
         self.send_events(vec![button_edu.press()?]).await
     }
 
-    pub async fn read_edu_raw(&mut self) -> Result<SapTable, ClientError> {
+    pub async fn read_edu_raw(&mut self) -> Result<SapTable> {
         self.select_edu().await?;
         self.search_edu().await?;
         let body = self.body();

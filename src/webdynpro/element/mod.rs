@@ -1,4 +1,5 @@
 use std::{marker, collections::HashMap, borrow::Cow};
+use anyhow::Result;
 
 use indexmap::IndexMap;
 use regex::Regex;
@@ -71,16 +72,16 @@ where T: Element
         }
     }
 
-    pub fn selector(&self) -> Result<Selector, ElementError> {
+    pub fn selector(&self) -> Result<Selector> {
         Selector::parse(format!(r#"[id="{}"]"#, self.id).as_str())
-        .or(Err(ElementError::InvalidId))
+        .or(Err(ElementError::InvalidId)?)
     }
 
-    pub fn from_body(self, body: &'_ Body) -> Result<T, BodyError> {
+    pub fn from_body(self, body: &'_ Body) -> Result<T> {
         T::from_body(self, body)
     }
 
-    pub fn from_elem(self, element: scraper::ElementRef) -> Result<T, BodyError> {
+    pub fn from_elem(self, element: scraper::ElementRef) -> Result<T> {
         T::from_elem(self, element)
     }
 }
@@ -105,7 +106,7 @@ macro_rules! match_elem {
     };
 }
 
-fn dyn_elem(element: scraper::ElementRef) -> Result<Elements, BodyError> {
+fn dyn_elem(element: scraper::ElementRef) -> Result<Elements> {
         let value = element.value();
         let id = value.id().ok_or(ElementError::InvalidId)?.to_owned();
         match_elem!(id, element, 
@@ -125,7 +126,7 @@ pub trait Element: Sized {
     const ELEMENT_NAME: &'static str;
     type ElementLSData;
 
-    fn from_body(elem_def: ElementDef<Self>, body: &'_ Body) -> Result<Self, BodyError> {
+    fn from_body(elem_def: ElementDef<Self>, body: &'_ Body) -> Result<Self> {
         let selector = &elem_def.selector().or(Err(BodyError::InvalidSelector))?;
         let element = body
             .document()
@@ -135,15 +136,15 @@ pub trait Element: Sized {
         Self::from_elem(elem_def, element)
     }
 
-    fn from_elem(elem_def: ElementDef<Self>, element: scraper::ElementRef) -> Result<Self, BodyError>;
+    fn from_elem(elem_def: ElementDef<Self>, element: scraper::ElementRef) -> Result<Self>;
 
-    fn lsdata_elem(element: scraper::ElementRef) -> Result<Value, ElementError> {
+    fn lsdata_elem(element: scraper::ElementRef) -> Result<Value> {
         let raw_data = element.value().attr("lsdata").ok_or(ElementError::InvalidLSData)?;
         let normalized = normalize_lsjson(raw_data);
         return Ok(serde_json::from_str(&normalized)?);
     }
 
-    fn lsevents_elem(element: scraper::ElementRef) -> Result<EventParameterMap, BodyError> {
+    fn lsevents_elem(element: scraper::ElementRef) -> Result<EventParameterMap> {
         let raw_data = element.value().attr("lsevents").ok_or(BodyError::Invalid)?;
         let normalized = normalize_lsjson(raw_data);
         let json: Map<String, Value> = serde_json::from_str::<Map<String, Value>>(&normalized).or(Err(BodyError::Invalid))?.to_owned();
@@ -182,7 +183,7 @@ pub trait Element: Sized {
         .unwrap()
     }
 
-    fn fire_event(&self, event: &str, parameters: IndexMap<String, String>) -> Result<Event, ElementError> {
+    fn fire_event(&self, event: &str, parameters: IndexMap<String, String>) -> Result<Event> {
         let (ucf_params, custom_params) = self.event_parameter(event)?;
         Ok(unsafe { Self::fire_event_unchecked(event, parameters, ucf_params.to_owned(), custom_params.to_owned()) })
     }
@@ -225,15 +226,15 @@ where Parent: Element, T: SubElement
         }
     }
 
-    pub fn selector(&self) -> Result<Selector, ElementError> {
+    pub fn selector(&self) -> Result<Selector> {
         Selector::parse(format!(r#"[id="{}"] [id="{}"]"#, self.parent.id, self.id).as_str())
-        .or(Err(ElementError::InvalidId))
+        .or(Err(ElementError::InvalidId)?)
     }
-    pub fn from_body(self, body: &'_ Body) -> Result<T, BodyError> {
+    pub fn from_body(self, body: &'_ Body) -> Result<T> {
         T::from_body(self, body)
     }
 
-    pub fn from_elem(self, element: scraper::ElementRef) -> Result<T, BodyError> {
+    pub fn from_elem(self, element: scraper::ElementRef) -> Result<T> {
         T::from_elem(self, element)
     }
 }
@@ -243,7 +244,7 @@ pub trait SubElement: Sized {
     const ELEMENT_NAME: &'static str;
     type SubElementLSData;
 
-    fn lsdata_elem(element: scraper::ElementRef) -> Result<Value, ElementError> {
+    fn lsdata_elem(element: scraper::ElementRef) -> Result<Value> {
         let raw_data = element.value().attr("lsdata").ok_or(ElementError::InvalidLSData)?;
         let normalized = normalize_lsjson(raw_data);
         return Ok(serde_json::from_str(&normalized)?);
@@ -254,7 +255,7 @@ pub trait SubElement: Sized {
     fn from_body<Parent: Element>(
         elem_def: SubElementDef<Parent, Self>,
         body: &'_ Body,
-    ) -> Result<Self, BodyError> {
+    ) -> Result<Self> {
         let selector = &elem_def.selector().or(Err(BodyError::InvalidSelector))?;
         let element = body
             .document()
@@ -267,5 +268,5 @@ pub trait SubElement: Sized {
     fn from_elem<Parent: Element>(
         elem_def: SubElementDef<Parent, Self>,
         element: scraper::ElementRef
-    ) -> Result<Self, BodyError>;
+    ) -> Result<Self>;
 }

@@ -1,3 +1,4 @@
+use anyhow::Result;
 use std::ops::{Deref, DerefMut};
 
 use crate::webdynpro::{
@@ -36,13 +37,13 @@ impl BasicUSaintApplication {
     pub const LOADING_PLACEHOLDER: ElementDef<LoadingPlaceholder> =
         ElementDef::new("_loadingPlaceholder_");
 
-    pub async fn new(app_name: &str) -> Result<BasicUSaintApplication, ClientError> {
+    pub async fn new(app_name: &str) -> Result<BasicUSaintApplication> {
         Ok(BasicUSaintApplication(
             BasicApplication::new(SSU_WEBDYNPRO_BASE_URL, app_name).await?,
         ))
     }
 
-    pub async fn load_placeholder(&mut self) -> Result<(), ClientError> {
+    pub async fn load_placeholder(&mut self) -> Result<()> {
         let body = self.body();
         let wd01 = Self::CLIENT_INSPECTOR_WD01.from_body(body)?;
         let wd02 = Self::CLIENT_INSPECTOR_WD02.from_body(body)?;

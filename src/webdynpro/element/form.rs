@@ -1,3 +1,4 @@
+use anyhow::Result;
 use std::borrow::Cow;
 
 use indexmap::IndexMap;
@@ -40,10 +41,7 @@ impl Element for Form {
         self.lsevents.as_ref()
     }
 
-    fn from_elem(
-        elem_def: ElementDef<Self>,
-        element: scraper::ElementRef,
-    ) -> Result<Self, BodyError> {
+    fn from_elem(elem_def: ElementDef<Self>, element: scraper::ElementRef) -> Result<Self> {
         let lsdata_obj = Self::lsdata_elem(element)?;
         let lsdata = serde_json::from_value::<Self::ElementLSData>(lsdata_obj)
             .or(Err(ElementError::InvalidLSData))?;
@@ -106,7 +104,7 @@ impl Form {
         hash: &str,
         dom_changed: bool,
         is_dirty: bool,
-    ) -> Result<Event, ElementError> {
+    ) -> Result<Event> {
         let mut parameters: IndexMap<String, String> = IndexMap::new();
         parameters.insert("Id".to_string(), self.id.clone().to_string());
         parameters.insert("Async".to_string(), is_async.to_string());

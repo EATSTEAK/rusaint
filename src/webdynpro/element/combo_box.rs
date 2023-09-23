@@ -1,3 +1,4 @@
+use anyhow::Result;
 use std::borrow::Cow;
 
 use indexmap::IndexMap;
@@ -103,10 +104,7 @@ impl Element for ComboBox {
         self.lsevents.as_ref()
     }
 
-    fn from_elem(
-        elem_def: ElementDef<Self>,
-        element: scraper::ElementRef,
-    ) -> Result<Self, BodyError> {
+    fn from_elem(elem_def: ElementDef<Self>, element: scraper::ElementRef) -> Result<Self> {
         let lsdata_obj = Self::lsdata_elem(element)?;
         let lsdata = serde_json::from_value::<Self::ElementLSData>(lsdata_obj)
             .or(Err(ElementError::InvalidLSData))?;
@@ -132,7 +130,7 @@ impl ComboBox {
         }
     }
 
-    pub fn select(&self, key: &str, by_enter: bool) -> Result<Event, ElementError> {
+    pub fn select(&self, key: &str, by_enter: bool) -> Result<Event> {
         let mut parameters: IndexMap<String, String> = IndexMap::new();
         parameters.insert("Id".to_string(), self.id.clone().to_string());
         parameters.insert("Key".to_string(), key.to_string());

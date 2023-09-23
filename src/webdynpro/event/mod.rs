@@ -43,7 +43,7 @@ fn decode_hex(s: &str) -> Result<Vec<u16>, ParseIntError> {
         .collect()
 }
 
-pub fn unescape_str<'a>(text: &'a str) -> Result<Cow<'a, str>, EventStrUnescapeError> {
+pub fn unescape_str<'a>(text: &'a str) -> anyhow::Result<Cow<'a, str>> {
     let bytes = text.as_bytes();
 
     let mut owned = None;
@@ -51,13 +51,15 @@ pub fn unescape_str<'a>(text: &'a str) -> Result<Cow<'a, str>, EventStrUnescapeE
 
     for pos in 0..bytes.len() {
         match bytes[pos] {
-            b'~' => { special = Some(vec![]); },
+            b'~' => {
+                special = Some(vec![]);
+            }
             b'A'..=b'F' | b'0'..=b'9' => {
                 if special.is_some() {
                     special.as_mut().unwrap().push(bytes[pos]);
                 }
             }
-            _ => { special = None },
+            _ => special = None,
         };
 
         if let Some(ref v) = special {

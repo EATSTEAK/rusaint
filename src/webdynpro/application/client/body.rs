@@ -1,3 +1,4 @@
+use anyhow::Result;
 use std::collections::HashMap;
 
 use lol_html::{element, html_content::ContentType, rewrite_str, RewriteStrSettings};
@@ -29,7 +30,7 @@ pub struct BodyUpdate {
 }
 
 impl BodyUpdate {
-    pub fn new(response: &str) -> Result<BodyUpdate, BodyUpdateError> {
+    pub fn new(response: &str) -> Result<BodyUpdate> {
         let response_xml = roxmltree::Document::parse(response)?;
         let updates = response_xml
             .root()
@@ -62,7 +63,7 @@ impl BodyUpdate {
             if content.tag_name().name() != "content-update" {
                 return Err(BodyUpdateError::UnknownElement(
                     content.tag_name().name().to_owned(),
-                ));
+                ))?;
             }
             update_type = Some(BodyUpdateType::Full(
                 windowid.to_owned(),
@@ -113,7 +114,7 @@ impl BodyUpdate {
         } else {
             return Err(BodyUpdateError::UnknownElement(
                 update.tag_name().name().to_owned(),
-            ));
+            ))?;
         }
         // TODO: Apply additional updates to BodyUpdate struct.
         Ok(BodyUpdate {
@@ -148,7 +149,7 @@ impl Body {
         &self.document
     }
 
-    pub fn parse_sap_ssr_client(&self) -> Result<SapSsrClient, BodyError> {
+    pub fn parse_sap_ssr_client(&self) -> Result<SapSsrClient> {
         let document = &self.document;
         let selector = Selector::parse(r#"#sap\.client\.SsrClient\.form"#).unwrap();
         let client_form = document
@@ -203,7 +204,7 @@ impl Body {
         })
     }
 
-    pub fn apply(&mut self, updates: BodyUpdate) -> Result<(), BodyUpdateError> {
+    pub fn apply(&mut self, updates: BodyUpdate) -> Result<()> {
         if let Some(update) = updates.update {
             let output: String = match update {
                 BodyUpdateType::Full(_, contentid, content) => {

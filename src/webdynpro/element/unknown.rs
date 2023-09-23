@@ -1,3 +1,4 @@
+use anyhow::Result;
 use std::borrow::Cow;
 
 use serde_json::Value;
@@ -27,10 +28,7 @@ impl Element for Unknown {
 
     type ElementLSData = Value;
 
-    fn from_elem(
-        elem_def: ElementDef<Self>,
-        element: scraper::ElementRef,
-    ) -> Result<Self, BodyError> {
+    fn from_elem(elem_def: ElementDef<Self>, element: scraper::ElementRef) -> Result<Self> {
         let lsdata_obj = Self::lsdata_elem(element).ok();
         let lsevents = Self::lsevents_elem(element).ok();
         Ok(Self::new(elem_def.id.to_owned(), lsdata_obj, lsevents))

@@ -1,3 +1,4 @@
+use anyhow::Result;
 use std::borrow::Cow;
 
 use indexmap::IndexMap;
@@ -79,10 +80,7 @@ impl Element for Custom {
         None
     }
 
-    fn from_elem(
-        elem_def: ElementDef<Self>,
-        _element: scraper::ElementRef,
-    ) -> Result<Self, BodyError> {
+    fn from_elem(elem_def: ElementDef<Self>, _element: scraper::ElementRef) -> Result<Self> {
         Ok(Self::new(elem_def.id.to_owned()))
     }
 }

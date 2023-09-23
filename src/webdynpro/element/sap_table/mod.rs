@@ -1,3 +1,4 @@
+use anyhow::Result;
 use std::borrow::Cow;
 
 use scraper::Selector;
@@ -60,10 +61,7 @@ impl Element for SapTable {
         self.lsevents.as_ref()
     }
 
-    fn from_elem(
-        elem_def: ElementDef<Self>,
-        element: scraper::ElementRef,
-    ) -> Result<Self, BodyError> {
+    fn from_elem(elem_def: ElementDef<Self>, element: scraper::ElementRef) -> Result<Self> {
         let lsdata_obj = Self::lsdata_elem(element)?;
         let lsdata = serde_json::from_value::<Self::ElementLSData>(lsdata_obj)
             .or(Err(ElementError::InvalidLSData))?;
@@ -100,7 +98,7 @@ impl SapTable {
     fn parse_table(
         def: ElementDef<SapTable>,
         element: scraper::ElementRef,
-    ) -> Result<SapTableBody, BodyError> {
+    ) -> Result<SapTableBody> {
         let elem_value = element.value();
         dbg!("reading tbody");
         let tbody_selector = Selector::parse(

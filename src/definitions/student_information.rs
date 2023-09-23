@@ -1,3 +1,4 @@
+use anyhow::Result;
 use std::ops::{Deref, DerefMut};
 
 use crate::webdynpro::error::ClientError;
@@ -22,7 +23,9 @@ impl<'a> DerefMut for StudentInformation {
 impl StudentInformation {
     const APP_NAME: &str = "ZCMW1001n";
 
-    pub async fn new() -> Result<StudentInformation, ClientError> {
-        Ok(StudentInformation(BasicUSaintApplication::new(Self::APP_NAME).await?))
+    pub async fn new() -> Result<StudentInformation> {
+        Ok(StudentInformation(
+            BasicUSaintApplication::new(Self::APP_NAME).await?,
+        ))
     }
 }

@@ -1,3 +1,4 @@
+use anyhow::Result;
 use std::borrow::Cow;
 
 use serde::Deserialize;
@@ -81,10 +82,7 @@ impl Element for TabStripItem {
         None
     }
 
-    fn from_elem(
-        elem_def: ElementDef<Self>,
-        element: scraper::ElementRef,
-    ) -> Result<Self, BodyError> {
+    fn from_elem(elem_def: ElementDef<Self>, element: scraper::ElementRef) -> Result<Self> {
         let lsdata_obj = Self::lsdata_elem(element)?;
         let lsdata = serde_json::from_value::<Self::ElementLSData>(lsdata_obj)
             .or(Err(ElementError::InvalidLSData))?;
