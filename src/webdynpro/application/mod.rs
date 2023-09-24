@@ -3,7 +3,7 @@ use anyhow::Result;
 use url::Url;
 
 use super::{
-    element::{element_ref, form::Form, ElementDef},
+    element::{element_ref, form::Form},
     error::ClientError,
     event::Event,
 };
@@ -52,14 +52,14 @@ impl<'a> BasicApplication {
         for event in events.into_iter() {
             if !event.is_enqueable() && event.is_submitable() {
                 {
-                    &self.client.add_event(event);
-                    &self.client.add_event(form_req.to_owned());
+                    self.client.add_event(event);
+                    self.client.add_event(form_req.to_owned());
                 }
                 {
                     self.client.send_event(&self.base_url).await?;
                 }
             } else {
-                &self.client.add_event(event);
+                self.client.add_event(event);
             }
         }
         Ok(())

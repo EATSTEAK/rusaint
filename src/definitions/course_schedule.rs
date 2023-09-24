@@ -3,7 +3,6 @@ use std::ops::{Deref, DerefMut};
 
 use crate::webdynpro::element::{
     button::Button, combo_box::ComboBox, element_ref, sap_table::SapTable, tab_strip::TabStrip,
-    ElementDef,
 };
 
 use super::BasicUSaintApplication;
