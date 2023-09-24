@@ -42,7 +42,9 @@ async fn edu_data() {
                             Some(Elements::Button(elem)) => {
                                 print!("Button {{ {:?} }}, ", elem.lsdata());
                             }
-                            _ => {}
+                            _ => {
+                                print!("{:?}, ", content);
+                            }
                         };
                     }
                     SapTableCells::Normal(cell) => {
@@ -63,7 +65,9 @@ async fn edu_data() {
                             Some(Elements::Button(elem)) => {
                                 print!("Button {{ {:?} }}, ", elem.lsdata());
                             }
-                            _ => {}
+                            _ => {
+                                print!("{:?}, ", content);
+                            }
                         };
                     }
                     _ => {
