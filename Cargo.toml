@@ -24,6 +24,7 @@ serde_json = "1"
 regex = "1.9.5"
 anyhow = "1.0.75"
 rusaint-macro = { version = "=0.1.0", path = "macro" }
+getset = "0.1.2"
 
 [workspace]
 members = ["macro"]

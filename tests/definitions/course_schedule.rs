@@ -30,11 +30,17 @@ async fn edu_data() {
                             None => {
                                 print!("None, ")
                             }
+                            Some(Elements::Caption(elem)) => {
+                                print!("Caption {{ {:?} }}, ", elem.text());
+                            }
                             Some(Elements::TextView(elem)) => {
-                                print!("TextView {{ {:?} }},", elem.lsdata());
+                                print!("TextView {{ {:?} }}, ", elem.text());
                             }
                             Some(Elements::Unknown(elem)) => {
                                 print!("Unknown {{ {:?} }}, ", elem.lsdata());
+                            }
+                            Some(Elements::Button(elem)) => {
+                                print!("Button {{ {:?} }}, ", elem.lsdata());
                             }
                             _ => {}
                         };
@@ -45,11 +51,17 @@ async fn edu_data() {
                             None => {
                                 print!("None, ")
                             }
+                            Some(Elements::Caption(elem)) => {
+                                print!("Caption {{ {:?} }},", elem.text());
+                            }
                             Some(Elements::TextView(elem)) => {
-                                print!("TextView {{ {:?} }}", elem.lsdata());
+                                print!("TextView {{ {:?} }},", elem.text());
                             }
                             Some(Elements::Unknown(elem)) => {
                                 print!("Unknown {{ {:?} }}, ", elem.lsdata());
+                            }
+                            Some(Elements::Button(elem)) => {
+                                print!("Button {{ {:?} }}, ", elem.lsdata());
                             }
                             _ => {}
                         };

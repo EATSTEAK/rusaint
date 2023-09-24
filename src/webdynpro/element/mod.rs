@@ -9,11 +9,12 @@ use serde_json::{Map, Value};
 
 use crate::webdynpro::element::text_view::TextView;
 
-use self::{button::Button, client_inspector::ClientInspector, combo_box::ComboBox, custom::Custom, form::Form, loading_placeholder::LoadingPlaceholder, tab_strip::{TabStrip, item::TabStripItem}, sap_table::SapTable, unknown::Unknown};
+use self::{button::Button, client_inspector::ClientInspector, combo_box::ComboBox, custom::Custom, form::Form, loading_placeholder::LoadingPlaceholder, tab_strip::{TabStrip, item::TabStripItem}, sap_table::SapTable, unknown::Unknown, caption::Caption};
 
 use super::{event::{ucf_parameters::UcfParameters, Event, EventBuilder}, error::{ElementError, BodyError}, application::client::body::Body};
 
 pub mod button;
+pub mod caption;
 pub mod client_inspector;
 pub mod combo_box;
 pub mod custom;
@@ -40,6 +41,7 @@ pub enum Elements<'a> {
     SapTable(SapTable<'a>),
     TextView(TextView<'a>),
     Unknown(Unknown<'a>),
+    Caption(Caption<'a>),
 }
 
 #[derive(Debug)]
@@ -126,6 +128,7 @@ fn dyn_elem(element: scraper::ElementRef) -> Result<Elements> {
         let id = value.id().ok_or(ElementError::InvalidId)?.to_owned();
         match_elem!(id, element, 
             Button,
+            Caption,
             ClientInspector,
             ComboBox,
             Form,

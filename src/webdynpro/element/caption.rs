@@ -1,4 +1,5 @@
 use anyhow::Result;
+use getset::Getters;
 use std::{borrow::Cow, cell::OnceCell};
 
 use serde::Deserialize;
@@ -6,44 +7,57 @@ use serde::Deserialize;
 use super::{Element, ElementDef, EventParameterMap};
 
 #[derive(Debug)]
-pub struct TextView<'a> {
+pub struct Caption<'a> {
     id: Cow<'static, str>,
     element_ref: scraper::ElementRef<'a>,
-    lsdata: OnceCell<Option<TextViewLSData>>,
+    lsdata: OnceCell<Option<CaptionLSData>>,
     lsevents: OnceCell<Option<EventParameterMap>>,
     text: OnceCell<String>,
 }
 
-#[derive(Debug, Deserialize, Default)]
 #[allow(unused)]
-pub struct TextViewLSData {
+#[derive(Getters, Debug, Deserialize, Default)]
+#[get = "pub"]
+pub struct CaptionLSData {
     #[serde(rename = "0")]
     tooltip: Option<String>,
     #[serde(rename = "1")]
-    required: Option<bool>,
+    text: Option<String>,
     #[serde(rename = "2")]
-    enabled: Option<bool>,
+    image_src: Option<String>,
     #[serde(rename = "3")]
-    design: Option<String>,
+    image_first: Option<bool>,
     #[serde(rename = "4")]
-    layout: Option<String>,
+    image_width: Option<String>,
     #[serde(rename = "5")]
-    semantic_color: Option<String>,
+    image_height: Option<String>,
     #[serde(rename = "6")]
-    semantic_bg_color: Option<String>,
-    #[serde(rename = "7")]
     is_nested: Option<bool>,
-    #[serde(rename = "8")]
+    #[serde(rename = "7")]
     visibility: Option<String>,
+    #[serde(rename = "8")]
+    is_drag_handle: Option<bool>,
     #[serde(rename = "9")]
-    text_overflow: Option<bool>,
+    hover_image_src: Option<String>,
+    #[serde(rename = "10")]
+    drag_source_info: Option<String>,
+    #[serde(rename = "11")]
+    editable: Option<bool>,
+    #[serde(rename = "12")]
+    semantic_color: Option<String>,
+    #[serde(rename = "13")]
+    design: Option<String>,
+    #[serde(rename = "14")]
+    custom_data: Option<String>,
+    #[serde(rename = "15")]
+    labelled_by: Option<String>,
 }
-impl<'a> Element<'a> for TextView<'a> {
-    const CONTROL_ID: &'static str = "TV";
+impl<'a> Element<'a> for Caption<'a> {
+    const CONTROL_ID: &'static str = "CP";
 
-    const ELEMENT_NAME: &'static str = "TextView";
+    const ELEMENT_NAME: &'static str = "Caption";
 
-    type ElementLSData = TextViewLSData;
+    type ElementLSData = CaptionLSData;
 
     fn lsdata(&self) -> Option<&Self::ElementLSData> {
         self.lsdata
@@ -73,7 +87,7 @@ impl<'a> Element<'a> for TextView<'a> {
     }
 }
 
-impl<'a> TextView<'a> {
+impl<'a> Caption<'a> {
     pub fn new(id: Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {
         Self {
             id,
@@ -84,13 +98,17 @@ impl<'a> TextView<'a> {
         }
     }
 
-    pub fn text(&self) -> String {
-        self.text
-            .get_or_init(|| self.element_ref().text().collect::<String>())
-            .to_owned()
+    pub fn text(&self) -> &str {
+        self.text.get_or_init(|| {
+            if let Some(lsdata) = self.lsdata() {
+                lsdata.text().as_ref().unwrap_or(&"".to_string()).to_owned()
+            } else {
+                "".to_string()
+            }
+        })
     }
 
     pub fn wrap(self) -> super::Elements<'a> {
-        super::Elements::TextView(self)
+        super::Elements::Caption(self)
     }
 }
