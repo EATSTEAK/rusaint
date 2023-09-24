@@ -33,7 +33,7 @@ impl<'a> BasicUSaintApplication {
     element_ref! {
         CLIENT_INSPECTOR_WD01:ClientInspector<'a> = "WD01",
         CLIENT_INSPECTOR_WD02:ClientInspector<'a> = "WD02",
-        LOADING_PLACEHOLDER: LoadingPlaceholder<'a> = "_loadingPlaceholder"
+        LOADING_PLACEHOLDER: LoadingPlaceholder<'a> = "_loadingPlaceholder_"
     }
 
     pub const CUSTOM: Custom = Custom::new(std::borrow::Cow::Borrowed("WD01"));
