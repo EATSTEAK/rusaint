@@ -1,16 +1,26 @@
 use anyhow::Result;
-use std::ops::{Deref, DerefMut};
+use reqwest::cookie::Jar;
+use std::{
+    ops::{Deref, DerefMut},
+    sync::Arc,
+};
+use url::Url;
 
 use crate::webdynpro::{
-    application::BasicApplication,
+    application::{
+        client::{default_header, Client, USER_AGENT},
+        BasicApplication,
+    },
     element::{
         client_inspector::ClientInspector,
         custom::{Custom, CustomClientInfo},
         element_ref,
         loading_placeholder::LoadingPlaceholder,
     },
+    error::ClientError,
 };
 
+const SSU_USAINT_SSO_URL: &str = "https://saint.ssu.ac.kr/webSSO/sso.jsp";
 const SSU_WEBDYNPRO_BASE_URL: &str = "https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/";
 const INITIAL_CLIENT_DATA_WD01: &str = "ClientWidth:1920px;ClientHeight:1000px;ScreenWidth:1920px;ScreenHeight:1080px;ScreenOrientation:landscape;ThemedTableRowHeight:33px;ThemedFormLayoutRowHeight:32px;ThemedSvgLibUrls:{\"SAPGUI-icons\":\"https://ecc.ssu.ac.kr:8443/sap/public/bc/ur/nw5/themes/~cache-20210223121230/Base/baseLib/sap_fiori_3/svg/libs/SAPGUI-icons.svg\",\"SAPWeb-icons\":\"https://ecc.ssu.ac.kr:8443/sap/public/bc/ur/nw5/themes/~cache-20210223121230/Base/baseLib/sap_fiori_3/svg/libs/SAPWeb-icons.svg\"};ThemeTags:Fiori_3,Touch;ThemeID:sap_fiori_3;SapThemeID:sap_fiori_3;DeviceType:DESKTOP";
 const INITIAL_CLIENT_DATA_WD02: &str = "ThemedTableRowHeight:25px";
@@ -42,6 +52,35 @@ impl<'a> BasicUSaintApplication {
         Ok(BasicUSaintApplication(
             BasicApplication::new(SSU_WEBDYNPRO_BASE_URL, app_name).await?,
         ))
+    }
+
+    async fn client_with_session(sso_token: &str) -> Result<reqwest::Client> {
+        let jar: Arc<Jar> = Arc::new(Jar::default());
+        let client = reqwest::Client::builder()
+            .cookie_provider(jar)
+            .cookie_store(true)
+            .user_agent(USER_AGENT)
+            .build()
+            .unwrap();
+        let res = client
+            .get(format!("{}?sToken={}", SSU_USAINT_SSO_URL, sso_token))
+            .headers(default_header())
+            .send()
+            .await?;
+        if res.cookies().any(|cookie| cookie.name() == "MYSAPSSO2") {
+            Ok(client)
+        } else {
+            Err(ClientError::RequestFailed(res))?
+        }
+    }
+
+    pub async fn with_auth(app_name: &str, token: &str) -> Result<BasicUSaintApplication> {
+        let base_url = Url::parse(SSU_WEBDYNPRO_BASE_URL)?;
+        let r_client = Self::client_with_session(token).await?;
+        let client = Client::with_client(r_client, &base_url, app_name).await?;
+        Ok(BasicUSaintApplication(BasicApplication::with_client(
+            base_url, app_name, client,
+        )?))
     }
 
     pub async fn load_placeholder(&mut self) -> Result<()> {

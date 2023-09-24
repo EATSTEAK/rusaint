@@ -8,7 +8,7 @@ use reqwest::{cookie::Jar, header::*, RequestBuilder};
 use std::sync::Arc;
 use url::Url;
 
-const USER_AGENT: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36";
+pub const USER_AGENT: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36";
 
 pub struct Client {
     client: reqwest::Client,
@@ -25,7 +25,7 @@ pub struct SapSsrClient {
     use_beacon: bool,
 }
 
-fn default_header() -> HeaderMap {
+pub fn default_header() -> HeaderMap {
     let mut headers = HeaderMap::new();
     headers.insert(
         ACCEPT,
@@ -40,7 +40,7 @@ fn default_header() -> HeaderMap {
     headers
 }
 
-fn wd_xhr_header() -> HeaderMap {
+pub fn wd_xhr_header() -> HeaderMap {
     let mut headers = HeaderMap::new();
     headers.insert(ACCEPT, "*/*".parse().unwrap());
     headers.insert(ACCEPT_ENCODING, "gzip, deflate, br".parse().unwrap());
@@ -64,21 +64,7 @@ impl Client {
             .user_agent(USER_AGENT)
             .build()
             .unwrap();
-        let raw_body = client
-            .wd_navigate(base_url, app_name)
-            .send()
-            .await?
-            .text()
-            .await?;
-        let body = Body::new(raw_body);
-        let ssr_client = body.parse_sap_ssr_client()?;
-        let wd_client = Client {
-            client,
-            body,
-            ssr_client,
-            event_queue: EventQueue::new(),
-        };
-        Ok(wd_client)
+        Self::with_client(client, base_url, app_name).await
     }
 
     pub async fn with_client(
