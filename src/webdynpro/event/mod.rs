@@ -81,7 +81,7 @@ pub fn unescape_str<'a>(text: &'a str) -> anyhow::Result<Cow<'a, str>> {
     }
 }
 
-#[derive(Builder)]
+#[derive(Builder, Clone)]
 pub struct Event {
     event: String,
     control: String,

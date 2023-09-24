@@ -9,8 +9,9 @@ use crate::webdynpro::{
 };
 
 #[derive(Debug)]
-pub struct TabStripItem {
+pub struct TabStripItem<'a> {
     id: Cow<'static, str>,
+    element_ref: scraper::ElementRef<'a>,
     lsdata: Option<TabStripItemLSData>,
 }
 
@@ -59,13 +60,7 @@ pub struct TabStripItemLSData {
     visibility: Option<String>,
 }
 
-impl ElementDef<TabStripItem> {
-    pub fn wrap(self) -> super::super::Elements {
-        super::super::Elements::TabStripItem(self)
-    }
-}
-
-impl Element for TabStripItem {
+impl<'a> Element<'a> for TabStripItem<'a> {
     // Note: This element renders as "TSITM_ie6" if >= IE6
     const CONTROL_ID: &'static str = "TSITM_standards";
 
@@ -82,16 +77,28 @@ impl Element for TabStripItem {
         None
     }
 
-    fn from_elem(elem_def: ElementDef<Self>, element: scraper::ElementRef) -> Result<Self> {
+    fn from_elem(elem_def: ElementDef<'a, Self>, element: scraper::ElementRef<'a>) -> Result<Self> {
         let lsdata_obj = Self::lsdata_elem(element)?;
         let lsdata = serde_json::from_value::<Self::ElementLSData>(lsdata_obj)
             .or(Err(ElementError::InvalidLSData))?;
-        Ok(Self::new(elem_def.id.to_owned(), Some(lsdata)))
+        Ok(Self::new(elem_def.id.to_owned(), element, Some(lsdata)))
     }
 }
 
-impl TabStripItem {
-    pub const fn new(id: Cow<'static, str>, lsdata: Option<TabStripItemLSData>) -> Self {
-        Self { id, lsdata }
+impl<'a> TabStripItem<'a> {
+    pub const fn new(
+        id: Cow<'static, str>,
+        element_ref: scraper::ElementRef<'a>,
+        lsdata: Option<TabStripItemLSData>,
+    ) -> Self {
+        Self {
+            id,
+            element_ref,
+            lsdata,
+        }
+    }
+
+    pub fn wrap(self) -> super::super::Elements<'a> {
+        super::super::Elements::TabStripItem(self)
     }
 }

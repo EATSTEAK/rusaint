@@ -6,8 +6,8 @@ use crate::webdynpro::{
     element::{
         client_inspector::ClientInspector,
         custom::{Custom, CustomClientInfo},
+        element_ref,
         loading_placeholder::LoadingPlaceholder,
-        ElementDef,
     },
 };
 
@@ -29,12 +29,14 @@ impl<'a> DerefMut for BasicUSaintApplication {
     }
 }
 
-impl BasicUSaintApplication {
-    pub const CLIENT_INSPECTOR_WD01: ElementDef<ClientInspector> = ElementDef::new("WD01");
+impl<'a> BasicUSaintApplication {
+    element_ref! {
+        CLIENT_INSPECTOR_WD01:ClientInspector<'a> = "WD01",
+        CLIENT_INSPECTOR_WD02:ClientInspector<'a> = "WD02",
+        LOADING_PLACEHOLDER: LoadingPlaceholder<'a> = "_loadingPlaceholder"
+    }
+
     pub const CUSTOM: Custom = Custom::new(std::borrow::Cow::Borrowed("WD01"));
-    pub const CLIENT_INSPECTOR_WD02: ElementDef<ClientInspector> = ElementDef::new("WD02");
-    pub const LOADING_PLACEHOLDER: ElementDef<LoadingPlaceholder> =
-        ElementDef::new("_loadingPlaceholder_");
 
     pub async fn new(app_name: &str) -> Result<BasicUSaintApplication> {
         Ok(BasicUSaintApplication(
@@ -43,22 +45,24 @@ impl BasicUSaintApplication {
     }
 
     pub async fn load_placeholder(&mut self) -> Result<()> {
-        let body = self.body();
-        let wd01 = Self::CLIENT_INSPECTOR_WD01.from_body(body)?;
-        let wd02 = Self::CLIENT_INSPECTOR_WD02.from_body(body)?;
-        let load_ph = Self::LOADING_PLACEHOLDER.from_body(body)?;
-        let client_infos = Self::CUSTOM.client_infos(CustomClientInfo {
-            client_url: self.client_url(),
-            document_domain: "ssu.ac.kr".to_owned(),
-            ..CustomClientInfo::default()
-        });
-        self.send_events(vec![
-            wd01.notify(INITIAL_CLIENT_DATA_WD01)?,
-            wd02.notify(INITIAL_CLIENT_DATA_WD02)?,
-            load_ph.load()?,
-            client_infos,
-        ])
-        .await
+        let events = {
+            let body = self.body();
+            let wd01 = Self::CLIENT_INSPECTOR_WD01.from_body(body)?;
+            let wd02 = Self::CLIENT_INSPECTOR_WD02.from_body(body)?;
+            let load_ph = Self::LOADING_PLACEHOLDER.from_body(body)?;
+            let client_infos = Self::CUSTOM.client_infos(CustomClientInfo {
+                client_url: self.client_url(),
+                document_domain: "ssu.ac.kr".to_owned(),
+                ..CustomClientInfo::default()
+            });
+            vec![
+                wd01.notify(INITIAL_CLIENT_DATA_WD01)?,
+                wd02.notify(INITIAL_CLIENT_DATA_WD02)?,
+                load_ph.load()?,
+                client_infos,
+            ]
+        };
+        self.send_events(events).await
     }
 }
 

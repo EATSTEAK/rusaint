@@ -12,10 +12,11 @@ use crate::webdynpro::{
 use super::{SapTableCell, SapTableCells};
 
 #[derive(Debug)]
-pub struct SapTableHeaderCell {
+pub struct SapTableHeaderCell<'a> {
     id: Cow<'static, str>,
+    element_ref: scraper::ElementRef<'a>,
     lsdata: Option<SapTableHeaderCellLSData>,
-    contents: Vec<Elements>,
+    contents: Vec<Elements<'a>>,
 }
 
 #[derive(Deserialize, Debug, Default)]
@@ -59,7 +60,7 @@ pub struct SapTableHeaderCellLSData {
     custom_data: Option<String>,
 }
 
-impl SubElement for SapTableHeaderCell {
+impl<'a> SubElement<'a> for SapTableHeaderCell<'a> {
     const SUBCONTROL_ID: &'static str = "HC";
     const ELEMENT_NAME: &'static str = "SapTableHeaderCell";
 
@@ -69,9 +70,9 @@ impl SubElement for SapTableHeaderCell {
         self.lsdata.as_ref()
     }
 
-    fn from_elem<Parent: Element>(
-        elem_def: SubElementDef<Parent, Self>,
-        element: scraper::ElementRef,
+    fn from_elem<Parent: Element<'a>>(
+        elem_def: SubElementDef<'a, Parent, Self>,
+        element: scraper::ElementRef<'a>,
     ) -> Result<Self> {
         let lsdata_obj = Self::lsdata_elem(element)?;
         let lsdata = serde_json::from_value::<Self::SubElementLSData>(lsdata_obj)
@@ -83,30 +84,37 @@ impl SubElement for SapTableHeaderCell {
             .select(&content_selector)
             .filter_map(|node| dyn_elem(node).ok())
             .collect();
-        Ok(Self::new(elem_def.id.to_owned(), Some(lsdata), contents))
+        Ok(Self::new(
+            elem_def.id.to_owned(),
+            element,
+            Some(lsdata),
+            contents,
+        ))
     }
 }
 
-impl SapTableCell for SapTableHeaderCell {
-    fn content(&self) -> &Vec<Elements> {
+impl<'a> SapTableCell for SapTableHeaderCell<'a> {
+    fn content(&self) -> &Vec<Elements<'a>> {
         &self.contents
     }
 }
 
-impl SapTableHeaderCell {
+impl<'a> SapTableHeaderCell<'a> {
     pub const fn new(
         id: Cow<'static, str>,
+        element_ref: scraper::ElementRef<'a>,
         lsdata: Option<SapTableHeaderCellLSData>,
-        contents: Vec<Elements>,
+        contents: Vec<Elements<'a>>,
     ) -> Self {
         Self {
             id,
+            element_ref,
             lsdata,
             contents,
         }
     }
 
-    pub fn wrap(self) -> SapTableCells {
+    pub fn wrap(self) -> SapTableCells<'a> {
         SapTableCells::Header(self)
     }
 }

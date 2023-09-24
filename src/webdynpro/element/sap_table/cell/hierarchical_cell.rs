@@ -12,10 +12,11 @@ use crate::webdynpro::{
 use super::{SapTableCell, SapTableCells};
 
 #[derive(Debug)]
-pub struct SapTableHierarchicalCell {
+pub struct SapTableHierarchicalCell<'a> {
     id: Cow<'static, str>,
+    element_ref: scraper::ElementRef<'a>,
     lsdata: Option<SapTableHierarchicalCellLSData>,
-    contents: Vec<Elements>,
+    contents: Vec<Elements<'a>>,
 }
 
 #[derive(Deserialize, Debug, Default)]
@@ -43,13 +44,13 @@ pub struct SapTableHierarchicalCellLSData {
     custom_data: Option<String>,
 }
 
-impl SapTableCell for SapTableHierarchicalCell {
+impl<'a> SapTableCell for SapTableHierarchicalCell<'a> {
     fn content(&self) -> &Vec<Elements> {
         &self.contents
     }
 }
 
-impl SubElement for SapTableHierarchicalCell {
+impl<'a> SubElement<'a> for SapTableHierarchicalCell<'a> {
     const SUBCONTROL_ID: &'static str = "HIC";
     const ELEMENT_NAME: &'static str = "SapTableHierarchicalCell";
 
@@ -59,9 +60,9 @@ impl SubElement for SapTableHierarchicalCell {
         self.lsdata.as_ref()
     }
 
-    fn from_elem<Parent: Element>(
-        elem_def: SubElementDef<Parent, Self>,
-        element: scraper::ElementRef,
+    fn from_elem<Parent: Element<'a>>(
+        elem_def: SubElementDef<'a, Parent, Self>,
+        element: scraper::ElementRef<'a>,
     ) -> Result<Self> {
         let lsdata_obj = Self::lsdata_elem(element)?;
         let lsdata = serde_json::from_value::<Self::SubElementLSData>(lsdata_obj)
@@ -71,24 +72,31 @@ impl SubElement for SapTableHierarchicalCell {
             .select(&content_selector)
             .filter_map(|node| dyn_elem(node).ok())
             .collect();
-        Ok(Self::new(elem_def.id.to_owned(), Some(lsdata), contents))
+        Ok(Self::new(
+            elem_def.id.to_owned(),
+            element,
+            Some(lsdata),
+            contents,
+        ))
     }
 }
 
-impl SapTableHierarchicalCell {
+impl<'a> SapTableHierarchicalCell<'a> {
     pub const fn new(
         id: Cow<'static, str>,
+        element_ref: scraper::ElementRef<'a>,
         lsdata: Option<SapTableHierarchicalCellLSData>,
-        contents: Vec<Elements>,
+        contents: Vec<Elements<'a>>,
     ) -> Self {
         Self {
             id,
+            element_ref,
             lsdata,
             contents,
         }
     }
 
-    pub fn wrap(self) -> SapTableCells {
+    pub fn wrap(self) -> SapTableCells<'a> {
         SapTableCells::Hierarchical(self)
     }
 }

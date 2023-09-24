@@ -10,20 +10,15 @@ use super::{Element, ElementDef, EventParameterMap};
 
 #[derive(Debug)]
 #[allow(unused)]
-pub struct Form {
+pub struct Form<'a> {
     id: Cow<'static, str>,
+    element_ref: scraper::ElementRef<'a>,
     lsdata: Option<FormLSData>,
     lsevents: Option<EventParameterMap>,
     data: Option<FormData>,
 }
 
-impl ElementDef<Form> {
-    pub fn wrap(self) -> super::Elements {
-        super::Elements::Form(self)
-    }
-}
-
-impl Element for Form {
+impl<'a> Element<'a> for Form<'a> {
     const CONTROL_ID: &'static str = "FOR";
 
     const ELEMENT_NAME: &'static str = "Form";
@@ -38,7 +33,7 @@ impl Element for Form {
         self.lsevents.as_ref()
     }
 
-    fn from_elem(elem_def: ElementDef<Self>, element: scraper::ElementRef) -> Result<Self> {
+    fn from_elem(elem_def: ElementDef<'a, Self>, element: scraper::ElementRef<'a>) -> Result<Self> {
         let lsdata_obj = Self::lsdata_elem(element)?;
         let lsdata = serde_json::from_value::<Self::ElementLSData>(lsdata_obj)
             .or(Err(ElementError::InvalidLSData))?;
@@ -48,6 +43,7 @@ impl Element for Form {
         };
         Ok(Self::new(
             elem_def.id.to_owned(),
+            element,
             Some(lsdata),
             Some(lsevents),
             Some(data),
@@ -79,19 +75,25 @@ pub struct FormLSData {
     custom_data: Option<String>,
 }
 
-impl Form {
+impl<'a> Form<'a> {
     pub fn new(
         id: Cow<'static, str>,
+        element_ref: scraper::ElementRef<'a>,
         lsdata: Option<FormLSData>,
         lsevents: Option<EventParameterMap>,
         data: Option<FormData>,
     ) -> Self {
         Self {
             id,
+            element_ref,
             lsdata,
             lsevents,
             data,
         }
+    }
+
+    pub fn wrap(self) -> super::Elements<'a> {
+        super::Elements::Form(self)
     }
 
     pub fn request(
@@ -109,6 +111,6 @@ impl Form {
         parameters.insert("Hash".to_string(), hash.to_string());
         parameters.insert("DomChanged".to_string(), dom_changed.to_string());
         parameters.insert("IsDirty".to_string(), is_dirty.to_string());
-        self.fire_event("Request", parameters)
+        self.fire_event("Request".to_string(), parameters)
     }
 }

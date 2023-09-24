@@ -12,10 +12,11 @@ use crate::webdynpro::{
 use super::{SapTableCell, SapTableCells};
 
 #[derive(Debug)]
-pub struct SapTableMatrixCell {
+pub struct SapTableMatrixCell<'a> {
     id: Cow<'static, str>,
+    element_ref: scraper::ElementRef<'a>,
     lsdata: Option<SapTableMatrixCellLSData>,
-    contents: Vec<Elements>,
+    contents: Vec<Elements<'a>>,
 }
 
 #[derive(Deserialize, Debug, Default)]
@@ -31,13 +32,13 @@ pub struct SapTableMatrixCellLSData {
     custom_data: Option<String>,
 }
 
-impl SapTableCell for SapTableMatrixCell {
+impl<'a> SapTableCell for SapTableMatrixCell<'a> {
     fn content(&self) -> &Vec<Elements> {
         &self.contents
     }
 }
 
-impl SubElement for SapTableMatrixCell {
+impl<'a> SubElement<'a> for SapTableMatrixCell<'a> {
     const SUBCONTROL_ID: &'static str = "MC";
     const ELEMENT_NAME: &'static str = "SapTableMatrixCell";
 
@@ -47,9 +48,9 @@ impl SubElement for SapTableMatrixCell {
         self.lsdata.as_ref()
     }
 
-    fn from_elem<Parent: Element>(
-        elem_def: SubElementDef<Parent, Self>,
-        element: scraper::ElementRef,
+    fn from_elem<Parent: Element<'a>>(
+        elem_def: SubElementDef<'a, Parent, Self>,
+        element: scraper::ElementRef<'a>,
     ) -> Result<Self> {
         let lsdata_obj = Self::lsdata_elem(element)?;
         let lsdata = serde_json::from_value::<Self::SubElementLSData>(lsdata_obj)
@@ -59,24 +60,31 @@ impl SubElement for SapTableMatrixCell {
             .select(&content_selector)
             .filter_map(|node| dyn_elem(node).ok())
             .collect();
-        Ok(Self::new(elem_def.id.to_owned(), Some(lsdata), contents))
+        Ok(Self::new(
+            elem_def.id.to_owned(),
+            element,
+            Some(lsdata),
+            contents,
+        ))
     }
 }
 
-impl SapTableMatrixCell {
+impl<'a> SapTableMatrixCell<'a> {
     pub const fn new(
         id: Cow<'static, str>,
+        element_ref: scraper::ElementRef<'a>,
         lsdata: Option<SapTableMatrixCellLSData>,
-        contents: Vec<Elements>,
+        contents: Vec<Elements<'a>>,
     ) -> Self {
         Self {
             id,
+            element_ref,
             lsdata,
             contents,
         }
     }
 
-    pub fn wrap(self) -> SapTableCells {
+    pub fn wrap(self) -> SapTableCells<'a> {
         SapTableCells::Matrix(self)
     }
 }

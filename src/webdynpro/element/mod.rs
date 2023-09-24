@@ -25,27 +25,27 @@ pub mod unknown;
 pub type EventParameterMap = HashMap<String, (UcfParameters, IndexMap<String, String>)>;
 
 #[derive(Debug)]
-pub enum Elements {
-    Button(ElementDef<Button>),
-    ClientInspector(ElementDef<ClientInspector>),
-    ComboBox(ElementDef<ComboBox>),
-    Custom(ElementDef<Custom>),
-    Form(ElementDef<Form>),
-    LoadingPlaceholder(ElementDef<LoadingPlaceholder>),
-    TabStrip(ElementDef<TabStrip>),
-    TabStripItem(ElementDef<TabStripItem>),
-    SapTable(ElementDef<SapTable>),
-    Unknown(ElementDef<Unknown>),
+pub enum Elements<'a> {
+    Button(Button<'a>),
+    ClientInspector(ClientInspector<'a>),
+    ComboBox(ComboBox<'a>),
+    Custom(Custom),
+    Form(Form<'a>),
+    LoadingPlaceholder(LoadingPlaceholder<'a>),
+    TabStrip(TabStrip<'a>),
+    TabStripItem(TabStripItem<'a>),
+    SapTable(SapTable<'a>),
+    Unknown(Unknown<'a>),
 }
 
 #[derive(Debug)]
-pub struct ElementDef<T>
-    where T: Element {
+pub struct ElementDef<'a, T>
+    where T: Element<'a> {
     id: Cow<'static, str>,
-    _marker: marker::PhantomData<T>,
+    _marker: marker::PhantomData<&'a T>,
 }
 
-impl<T: Element> Clone for ElementDef<T> {
+impl<'a, T: Element<'a>> Clone for ElementDef<'a, T> {
     fn clone(&self) -> Self {
         Self { id: self.id.clone(), _marker: self._marker.clone() }
     }
@@ -55,35 +55,47 @@ impl<T: Element> Clone for ElementDef<T> {
     }
 }
 
-impl<T> ElementDef<T>
-where T: Element
+impl<'a, T> ElementDef<'a, T>
+where T: Element<'a>
 {
 
-    pub const fn new(id: &'static str) -> ElementDef<T> {
+    pub const fn new(id: &'static str) -> ElementDef<'a, T> {
         ElementDef {
             id: Cow::Borrowed(id),
             _marker: std::marker::PhantomData
         }
     }
 
-    pub fn new_dynamic(id: String) -> ElementDef<T> {
+    pub fn new_dynamic(id: String) -> ElementDef<'a, T> {
         ElementDef {
             id: id.into(), _marker: std::marker::PhantomData
         }
+    }
+
+    pub fn id(&self) -> &str {
+        &self.id
     }
 
     pub fn selector(&self) -> Result<Selector> {
         Ok(std::result::Result::or(Selector::parse(format!(r#"[id="{}"]"#, &self.id).as_str()), Err(BodyError::InvalidSelector))?)
     }
 
-    pub fn from_body(self, body: &'_ Body) -> Result<T> {
+    pub fn from_body(self, body: &'a Body) -> Result<T> {
         T::from_body(self, body)
     }
 
-    pub fn from_elem(self, element: scraper::ElementRef) -> Result<T> {
+    pub fn from_elem(self, element: scraper::ElementRef<'a>) -> Result<T> {
         T::from_elem(self, element)
     }
 }
+
+macro_rules! element_ref {
+    ($($name:ident : $eltype:tt<$lt:lifetime> = $id:literal),+ $(,)?) => {
+        $(const $name: $crate::webdynpro::element::ElementDef<$lt, $eltype<$lt>> = $crate::webdynpro::element::ElementDef::new($id);)*
+    }
+}
+
+pub(crate) use element_ref;
 
 // TODO: Do multiple replacements without owning
 fn normalize_lsjson(lsjson: &str) -> String {
@@ -99,8 +111,8 @@ fn normalize_lsjson(lsjson: &str) -> String {
 macro_rules! match_elem {
     ($id: expr, $element: expr, $( $type: ty ),+ $(,)?) => {
         match $element.value().attr("ct") {
-            $( Some(<$type>::CONTROL_ID) => Ok($crate::webdynpro::element::ElementDef::<$type>::new_dynamic($id).wrap()), )*
-            _ => Ok($crate::webdynpro::element::ElementDef::<$crate::webdynpro::element::unknown::Unknown>::new_dynamic($id).wrap())
+            $( Some(<$type>::CONTROL_ID) => Ok($crate::webdynpro::element::ElementDef::<$type>::new_dynamic($id).from_elem($element)?.wrap()), )*
+            _ => Ok($crate::webdynpro::element::ElementDef::<$crate::webdynpro::element::unknown::Unknown>::new_dynamic($id).from_elem($element)?.wrap())
         }
     };
 }
@@ -120,12 +132,12 @@ fn dyn_elem(element: scraper::ElementRef) -> Result<Elements> {
         )
 }
 
-pub trait Element: Sized {
+pub trait Element<'a>: Sized {
     const CONTROL_ID: &'static str;
     const ELEMENT_NAME: &'static str;
     type ElementLSData;
 
-    fn from_body(elem_def: ElementDef<Self>, body: &'_ Body) -> Result<Self> {
+    fn from_body(elem_def: ElementDef<'a, Self>, body: &'a Body) -> Result<Self> {
         let selector = &elem_def.selector().or(Err(BodyError::InvalidSelector))?;
         let element = body
             .document()
@@ -135,7 +147,7 @@ pub trait Element: Sized {
         Self::from_elem(elem_def, element)
     }
 
-    fn from_elem(elem_def: ElementDef<Self>, element: scraper::ElementRef) -> Result<Self>;
+    fn from_elem(elem_def: ElementDef<'a, Self>, element: scraper::ElementRef<'a>) -> Result<Self>;
 
     fn lsdata_elem(element: scraper::ElementRef) -> Result<Value> {
         let raw_data = element.value().attr("lsdata").ok_or(ElementError::InvalidLSData)?;
@@ -171,10 +183,10 @@ pub trait Element: Sized {
         }
     }
 
-    unsafe fn fire_event_unchecked(event: &str, parameters: IndexMap<String, String>, ucf_params: UcfParameters, custom_params: IndexMap<String, String>) -> Event {
+    unsafe fn fire_event_unchecked(event: String, parameters: IndexMap<String, String>, ucf_params: UcfParameters, custom_params: IndexMap<String, String>) -> Event {
         EventBuilder::default()
         .control(Self::ELEMENT_NAME.to_owned())
-        .event(event.to_owned())
+        .event(event)
         .parameters(parameters)
         .ucf_parameters(ucf_params)
         .custom_parameters(custom_params)
@@ -182,22 +194,22 @@ pub trait Element: Sized {
         .unwrap()
     }
 
-    fn fire_event(&self, event: &str, parameters: IndexMap<String, String>) -> Result<Event> {
-        let (ucf_params, custom_params) = self.event_parameter(event)?;
+    fn fire_event(&self, event: String, parameters: IndexMap<String, String>) -> Result<Event> {
+        let (ucf_params, custom_params) = self.event_parameter(&event)?;
         Ok(unsafe { Self::fire_event_unchecked(event, parameters, ucf_params.to_owned(), custom_params.to_owned()) })
     }
 }
 
 
 #[derive(Debug)]
-pub struct SubElementDef<Parent, T>
-    where Parent: Element, T: SubElement {
+pub struct SubElementDef<'a, Parent, T>
+    where Parent: Element<'a>, T: SubElement<'a> {
         id: Cow<'static, str>,
-        parent: ElementDef<Parent>,
-        _marker: std::marker::PhantomData<T>
+        parent: ElementDef<'a, Parent>,
+        _marker: std::marker::PhantomData<&'a T>
 }
 
-impl<Parent: Element, T: SubElement> Clone for SubElementDef<Parent, T> {
+impl<'a, Parent: Element<'a>, T: SubElement<'a>> Clone for SubElementDef<'a, Parent, T> {
     fn clone(&self) -> Self {
         Self { id: self.id.clone(), parent: self.parent.clone(), _marker: self._marker.clone() }
     }
@@ -207,11 +219,11 @@ impl<Parent: Element, T: SubElement> Clone for SubElementDef<Parent, T> {
     }
 }
 
-impl<Parent, T> SubElementDef<Parent, T>
-where Parent: Element, T: SubElement
+impl<'a, Parent, T> SubElementDef<'a, Parent, T>
+where Parent: Element<'a>, T: SubElement<'a>
 {
 
-    pub const fn new(parent: ElementDef<Parent>, id: &'static str) -> SubElementDef<Parent, T> {
+    pub const fn new(parent: ElementDef<'a, Parent>, id: &'static str) -> SubElementDef<'a, Parent, T> {
         SubElementDef {
             id: Cow::Borrowed(id),
             parent,
@@ -219,7 +231,7 @@ where Parent: Element, T: SubElement
         }
     }
 
-    pub fn new_dynamic(parent: ElementDef<Parent>, id: String) -> SubElementDef<Parent, T> {
+    pub fn new_dynamic(parent: ElementDef<'a, Parent>, id: String) -> SubElementDef<'a, Parent, T> {
         SubElementDef {
             id: id.into(), parent, _marker: std::marker::PhantomData
         }
@@ -229,16 +241,16 @@ where Parent: Element, T: SubElement
         Selector::parse(format!(r#"[id="{}"] [id="{}"]"#, self.parent.id, self.id).as_str())
         .or(Err(ElementError::InvalidId)?)
     }
-    pub fn from_body(self, body: &'_ Body) -> Result<T> {
+    pub fn from_body(self, body: &'a Body) -> Result<T> {
         T::from_body(self, body)
     }
 
-    pub fn from_elem(self, element: scraper::ElementRef) -> Result<T> {
+    pub fn from_elem(self, element: scraper::ElementRef<'a>) -> Result<T> {
         T::from_elem(self, element)
     }
 }
 
-pub trait SubElement: Sized {
+pub trait SubElement<'a>: Sized {
     const SUBCONTROL_ID: &'static str;
     const ELEMENT_NAME: &'static str;
     type SubElementLSData;
@@ -251,9 +263,9 @@ pub trait SubElement: Sized {
 
     fn lsdata(&self) -> Option<&Self::SubElementLSData>;
 
-    fn from_body<Parent: Element>(
-        elem_def: SubElementDef<Parent, Self>,
-        body: &'_ Body,
+    fn from_body<Parent: Element<'a>>(
+        elem_def: SubElementDef<'a, Parent, Self>,
+        body: &'a Body,
     ) -> Result<Self> {
         let selector = &elem_def.selector().or(Err(BodyError::InvalidSelector))?;
         let element = body
@@ -264,8 +276,8 @@ pub trait SubElement: Sized {
         Self::from_elem(elem_def, element)
     }
 
-    fn from_elem<Parent: Element>(
-        elem_def: SubElementDef<Parent, Self>,
-        element: scraper::ElementRef
+    fn from_elem<Parent: Element<'a>>(
+        elem_def: SubElementDef<'a, Parent, Self>,
+        element: scraper::ElementRef<'a>
     ) -> Result<Self>;
 }

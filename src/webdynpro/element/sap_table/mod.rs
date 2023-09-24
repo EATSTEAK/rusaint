@@ -17,14 +17,15 @@ use self::cell::{
 
 use super::{Element, ElementDef, EventParameterMap, SubElementDef};
 
-pub type SapTableBody = Vec<Vec<SapTableCells>>;
+pub type SapTableBody<'a> = Vec<Vec<SapTableCells<'a>>>;
 
 #[derive(Debug)]
-pub struct SapTable {
+pub struct SapTable<'a> {
     id: Cow<'static, str>,
+    element_ref: scraper::ElementRef<'a>,
     lsdata: Option<SapTableLSData>,
     lsevents: Option<EventParameterMap>,
-    table: Option<SapTableBody>,
+    table: Option<SapTableBody<'a>>,
 }
 
 #[derive(Deserialize, Debug, Default)]
@@ -40,13 +41,7 @@ pub struct SapTableLSData {
     col_count: Option<u32>,
 }
 
-impl ElementDef<SapTable> {
-    pub fn wrap(self) -> super::Elements {
-        super::Elements::SapTable(self)
-    }
-}
-
-impl Element for SapTable {
+impl<'a> Element<'a> for SapTable<'a> {
     const CONTROL_ID: &'static str = "ST";
 
     const ELEMENT_NAME: &'static str = "SapTable";
@@ -61,7 +56,7 @@ impl Element for SapTable {
         self.lsevents.as_ref()
     }
 
-    fn from_elem(elem_def: ElementDef<Self>, element: scraper::ElementRef) -> Result<Self> {
+    fn from_elem(elem_def: ElementDef<'a, Self>, element: scraper::ElementRef<'a>) -> Result<Self> {
         let lsdata_obj = Self::lsdata_elem(element)?;
         let lsdata = serde_json::from_value::<Self::ElementLSData>(lsdata_obj)
             .or(Err(ElementError::InvalidLSData))?;
@@ -69,6 +64,7 @@ impl Element for SapTable {
         let table = Self::parse_table(elem_def.clone(), element)?;
         Ok(Self::new(
             elem_def.id.to_owned(),
+            element,
             Some(lsdata),
             Some(lsevents),
             Some(table),
@@ -76,19 +72,25 @@ impl Element for SapTable {
     }
 }
 
-impl SapTable {
+impl<'a> SapTable<'a> {
     pub const fn new(
         id: Cow<'static, str>,
+        element_ref: scraper::ElementRef<'a>,
         lsdata: Option<SapTableLSData>,
         lsevents: Option<EventParameterMap>,
-        table: Option<SapTableBody>,
+        table: Option<SapTableBody<'a>>,
     ) -> Self {
         Self {
             id,
+            element_ref,
             lsdata,
             lsevents,
             table,
         }
+    }
+
+    pub fn wrap(self) -> super::Elements<'a> {
+        super::Elements::SapTable(self)
     }
 
     pub fn table(&self) -> Option<&SapTableBody> {
@@ -96,9 +98,9 @@ impl SapTable {
     }
 
     fn parse_table(
-        def: ElementDef<SapTable>,
-        element: scraper::ElementRef,
-    ) -> Result<SapTableBody> {
+        def: ElementDef<'a, SapTable<'a>>,
+        element: scraper::ElementRef<'a>,
+    ) -> Result<SapTableBody<'a>> {
         let elem_value = element.value();
         dbg!("reading tbody");
         let tbody_selector = Selector::parse(

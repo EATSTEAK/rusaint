@@ -12,8 +12,9 @@ use crate::webdynpro::{
 use super::{Element, ElementDef, EventParameterMap};
 
 #[derive(Debug)]
-pub struct Button {
+pub struct Button<'a> {
     id: Cow<'static, str>,
+    element_ref: scraper::ElementRef<'a>,
     lsdata: Option<ButtonLSData>,
     lsevents: Option<HashMap<String, (UcfParameters, IndexMap<String, String>)>>,
 }
@@ -88,13 +89,7 @@ pub struct ButtonLSData {
     content_visibility: Option<String>,
 }
 
-impl ElementDef<Button> {
-    pub fn wrap(self) -> super::Elements {
-        super::Elements::Button(self)
-    }
-}
-
-impl<'a> Element for Button {
+impl<'a> Element<'a> for Button<'a> {
     const CONTROL_ID: &'static str = "B";
 
     const ELEMENT_NAME: &'static str = "Button";
@@ -109,35 +104,42 @@ impl<'a> Element for Button {
         self.lsevents.as_ref()
     }
 
-    fn from_elem(elem_def: ElementDef<Self>, element: scraper::ElementRef) -> Result<Self> {
+    fn from_elem(elem_def: ElementDef<'a, Self>, element: scraper::ElementRef<'a>) -> Result<Self> {
         let lsdata_obj = Self::lsdata_elem(element)?;
         let lsdata = serde_json::from_value::<Self::ElementLSData>(lsdata_obj)
             .or(Err(ElementError::InvalidLSData))?;
         let lsevents = Self::lsevents_elem(element)?;
         Ok(Self::new(
             elem_def.id.to_owned(),
+            element,
             Some(lsdata),
             Some(lsevents),
         ))
     }
 }
 
-impl<'a> Button {
+impl<'a> Button<'a> {
     pub fn new(
         id: Cow<'static, str>,
+        element_ref: scraper::ElementRef<'a>,
         lsdata: Option<ButtonLSData>,
         lsevents: Option<EventParameterMap>,
     ) -> Self {
         Self {
             id,
+            element_ref,
             lsdata,
             lsevents,
         }
     }
 
+    pub fn wrap(self) -> super::Elements<'a> {
+        super::Elements::Button(self)
+    }
+
     pub fn press(&self) -> Result<Event> {
         let mut parameters: IndexMap<String, String> = IndexMap::new();
         parameters.insert("Id".to_string(), self.id.clone().to_string());
-        self.fire_event("Press", parameters)
+        self.fire_event("Press".to_string(), parameters)
     }
 }

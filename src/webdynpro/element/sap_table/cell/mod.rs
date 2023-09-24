@@ -7,12 +7,12 @@ use self::{
 };
 
 #[derive(Debug)]
-pub enum SapTableCells {
-    Normal(SapTableNormalCell),
-    Header(SapTableHeaderCell),
-    Hierarchical(SapTableHierarchicalCell),
-    Matrix(SapTableMatrixCell),
-    Selection(SapTableSelectionCell),
+pub enum SapTableCells<'a> {
+    Normal(SapTableNormalCell<'a>),
+    Header(SapTableHeaderCell<'a>),
+    Hierarchical(SapTableHierarchicalCell<'a>),
+    Matrix(SapTableMatrixCell<'a>),
+    Selection(SapTableSelectionCell<'a>),
 }
 
 pub trait SapTableCell {

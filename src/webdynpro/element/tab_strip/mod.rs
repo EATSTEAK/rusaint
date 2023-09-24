@@ -13,14 +13,15 @@ use crate::webdynpro::{
 use self::item::TabStripItem;
 use super::{Element, ElementDef, EventParameterMap};
 
-type TabItems = Vec<ElementDef<TabStripItem>>;
+type TabItems<'a> = Vec<ElementDef<'a, TabStripItem<'a>>>;
 
 #[derive(Debug)]
-pub struct TabStrip {
+pub struct TabStrip<'a> {
     id: Cow<'static, str>,
+    element_ref: scraper::ElementRef<'a>,
     lsdata: Option<TabStripLSData>,
     lsevents: Option<EventParameterMap>,
-    tab_items: Option<TabItems>,
+    tab_items: Option<TabItems<'a>>,
 }
 
 #[derive(Deserialize, Debug, Default)]
@@ -60,13 +61,7 @@ pub struct TabStripLSData {
     heading_level: Option<i32>,
 }
 
-impl ElementDef<TabStrip> {
-    pub fn wrap(self) -> super::Elements {
-        super::Elements::TabStrip(self)
-    }
-}
-
-impl Element for TabStrip {
+impl<'a> Element<'a> for TabStrip<'a> {
     // Note: This element renders as "TS_ie6" if >= IE6
     const CONTROL_ID: &'static str = "TS_standards";
 
@@ -82,7 +77,7 @@ impl Element for TabStrip {
         self.lsevents.as_ref()
     }
 
-    fn from_elem(elem_def: ElementDef<Self>, element: scraper::ElementRef) -> Result<Self> {
+    fn from_elem(elem_def: ElementDef<'a, Self>, element: scraper::ElementRef<'a>) -> Result<Self> {
         let lsdata_obj = Self::lsdata_elem(element)?;
         let lsdata = serde_json::from_value::<Self::ElementLSData>(lsdata_obj)
             .or(Err(ElementError::InvalidLSData))?;
@@ -99,6 +94,7 @@ impl Element for TabStrip {
             .collect();
         Ok(Self::new(
             elem_def.id.to_owned(),
+            element,
             Some(lsdata),
             Some(lsevents),
             Some(tab_items),
@@ -106,19 +102,25 @@ impl Element for TabStrip {
     }
 }
 
-impl TabStrip {
+impl<'a> TabStrip<'a> {
     pub const fn new(
         id: Cow<'static, str>,
+        element_ref: scraper::ElementRef<'a>,
         lsdata: Option<TabStripLSData>,
         lsevents: Option<EventParameterMap>,
-        tab_items: Option<TabItems>,
+        tab_items: Option<TabItems<'a>>,
     ) -> Self {
         Self {
             id,
+            element_ref,
             lsdata,
             lsevents,
             tab_items,
         }
+    }
+
+    pub fn wrap(self) -> super::Elements<'a> {
+        super::Elements::TabStrip(self)
     }
 
     pub fn tab_select(
@@ -135,7 +137,7 @@ impl TabStrip {
             "FirstVisibleItemIndex".to_string(),
             first_visible_item_index.to_string(),
         );
-        self.fire_event("TabSelect", parameters)
+        self.fire_event("TabSelect".to_string(), parameters)
     }
 }
 

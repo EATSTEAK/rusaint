@@ -12,10 +12,11 @@ use crate::webdynpro::{
 use super::{SapTableCell, SapTableCells};
 
 #[derive(Debug)]
-pub struct SapTableSelectionCell {
+pub struct SapTableSelectionCell<'a> {
     id: Cow<'static, str>,
+    element_ref: scraper::ElementRef<'a>,
     lsdata: Option<SapTableSelectionCellLSData>,
-    contents: Vec<Elements>,
+    contents: Vec<Elements<'a>>,
 }
 
 #[derive(Deserialize, Debug, Default)]
@@ -39,13 +40,13 @@ pub struct SapTableSelectionCellLSData {
     custom_data: Option<String>,
 }
 
-impl SapTableCell for SapTableSelectionCell {
-    fn content(&self) -> &Vec<Elements> {
+impl<'a> SapTableCell for SapTableSelectionCell<'a> {
+    fn content(&self) -> &Vec<Elements<'a>> {
         &self.contents
     }
 }
 
-impl SubElement for SapTableSelectionCell {
+impl<'a> SubElement<'a> for SapTableSelectionCell<'a> {
     const SUBCONTROL_ID: &'static str = "SC";
     const ELEMENT_NAME: &'static str = "SapTableSelectionCell";
 
@@ -55,9 +56,9 @@ impl SubElement for SapTableSelectionCell {
         self.lsdata.as_ref()
     }
 
-    fn from_elem<Parent: Element>(
-        elem_def: SubElementDef<Parent, Self>,
-        element: scraper::ElementRef,
+    fn from_elem<Parent: Element<'a>>(
+        elem_def: SubElementDef<'a, Parent, Self>,
+        element: scraper::ElementRef<'a>,
     ) -> Result<Self> {
         let lsdata_obj = Self::lsdata_elem(element)?;
         let lsdata = serde_json::from_value::<Self::SubElementLSData>(lsdata_obj)
@@ -67,24 +68,31 @@ impl SubElement for SapTableSelectionCell {
             .select(&content_selector)
             .filter_map(|node| dyn_elem(node).ok())
             .collect();
-        Ok(Self::new(elem_def.id.to_owned(), Some(lsdata), contents))
+        Ok(Self::new(
+            elem_def.id.to_owned(),
+            element,
+            Some(lsdata),
+            contents,
+        ))
     }
 }
 
-impl SapTableSelectionCell {
+impl<'a> SapTableSelectionCell<'a> {
     pub const fn new(
         id: Cow<'static, str>,
+        element_ref: scraper::ElementRef<'a>,
         lsdata: Option<SapTableSelectionCellLSData>,
-        contents: Vec<Elements>,
+        contents: Vec<Elements<'a>>,
     ) -> Self {
         Self {
             id,
+            element_ref,
             lsdata,
             contents,
         }
     }
 
-    pub fn wrap(self) -> SapTableCells {
+    pub fn wrap(self) -> SapTableCells<'a> {
         SapTableCells::Selection(self)
     }
 }

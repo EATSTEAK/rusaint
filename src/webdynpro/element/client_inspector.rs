@@ -9,8 +9,9 @@ use crate::webdynpro::{error::ElementError, event::Event};
 use super::{Element, ElementDef, EventParameterMap};
 
 #[derive(Debug)]
-pub struct ClientInspector {
+pub struct ClientInspector<'a> {
     id: Cow<'static, str>,
+    element_ref: scraper::ElementRef<'a>,
     lsdata: Option<ClientInspectorLSData>,
     lsevents: Option<EventParameterMap>,
 }
@@ -110,13 +111,7 @@ pub struct ClientInspectorLSData {
     parent_accessible: Option<String>,
 }
 
-impl ElementDef<ClientInspector> {
-    pub fn wrap(self) -> super::Elements {
-        super::Elements::ClientInspector(self)
-    }
-}
-
-impl Element for ClientInspector {
+impl<'a> Element<'a> for ClientInspector<'a> {
     const CONTROL_ID: &'static str = "CI";
 
     const ELEMENT_NAME: &'static str = "ClientInspector";
@@ -131,30 +126,37 @@ impl Element for ClientInspector {
         self.lsevents.as_ref()
     }
 
-    fn from_elem(elem_def: ElementDef<Self>, element: scraper::ElementRef) -> Result<Self> {
+    fn from_elem(elem_def: ElementDef<'a, Self>, element: scraper::ElementRef<'a>) -> Result<Self> {
         let lsdata_obj = Self::lsdata_elem(element)?;
         let lsdata = serde_json::from_value::<Self::ElementLSData>(lsdata_obj)
             .or(Err(ElementError::InvalidLSData))?;
         let lsevents = Self::lsevents_elem(element)?;
         Ok(Self::new(
             elem_def.id.to_owned(),
+            element,
             Some(lsdata),
             Some(lsevents),
         ))
     }
 }
 
-impl ClientInspector {
+impl<'a> ClientInspector<'a> {
     pub const fn new(
         id: Cow<'static, str>,
+        element_ref: scraper::ElementRef<'a>,
         lsdata: Option<ClientInspectorLSData>,
         lsevents: Option<EventParameterMap>,
     ) -> Self {
         Self {
             id,
+            element_ref,
             lsdata,
             lsevents,
         }
+    }
+
+    pub fn wrap(self) -> super::Elements<'a> {
+        super::Elements::ClientInspector(self)
     }
 
     pub fn notify(&self, data: &str) -> Result<Event> {
@@ -162,6 +164,6 @@ impl ClientInspector {
 
         parameters.insert("Id".to_string(), self.id.clone().to_string());
         parameters.insert("Data".to_string(), data.to_string());
-        self.fire_event("Notify", parameters)
+        self.fire_event("Notify".to_string(), parameters)
     }
 }
