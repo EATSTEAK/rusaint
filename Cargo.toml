@@ -28,3 +28,6 @@ getset = "0.1.2"
 
 [workspace]
 members = ["macro"]
+
+[dev-dependencies]
+dotenv = "0.15.0"
