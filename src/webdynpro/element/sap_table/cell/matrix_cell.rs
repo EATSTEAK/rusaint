@@ -1,13 +1,10 @@
 use anyhow::Result;
-use std::borrow::Cow;
+use std::{borrow::Cow, cell::OnceCell};
 
 use scraper::Selector;
 use serde::Deserialize;
 
-use crate::webdynpro::{
-    element::{dyn_elem, Element, Elements, SubElement, SubElementDef},
-    error::ElementError,
-};
+use crate::webdynpro::element::{dyn_elem, Element, Elements, SubElement, SubElementDef};
 
 use super::{SapTableCell, SapTableCells};
 
@@ -15,8 +12,8 @@ use super::{SapTableCell, SapTableCells};
 pub struct SapTableMatrixCell<'a> {
     id: Cow<'static, str>,
     element_ref: scraper::ElementRef<'a>,
-    lsdata: Option<SapTableMatrixCellLSData>,
-    contents: Vec<Elements<'a>>,
+    lsdata: OnceCell<Option<SapTableMatrixCellLSData>>,
+    contents: OnceCell<Option<Elements<'a>>>,
 }
 
 #[derive(Deserialize, Debug, Default)]
@@ -33,8 +30,19 @@ pub struct SapTableMatrixCellLSData {
 }
 
 impl<'a> SapTableCell<'a> for SapTableMatrixCell<'a> {
-    fn content(&self) -> &Vec<Elements<'a>> {
-        &self.contents
+    fn content(&self) -> Option<&Elements<'a>> {
+        self.contents
+            .get_or_init(|| {
+                let content_selector = Selector::parse(":root [ct]").unwrap();
+                dyn_elem(
+                    self.element_ref
+                        .select(&content_selector)
+                        .next()?
+                        .to_owned(),
+                )
+                .ok()
+            })
+            .as_ref()
     }
 }
 
@@ -45,42 +53,29 @@ impl<'a> SubElement<'a> for SapTableMatrixCell<'a> {
     type SubElementLSData = SapTableMatrixCellLSData;
 
     fn lsdata(&self) -> Option<&Self::SubElementLSData> {
-        self.lsdata.as_ref()
+        self.lsdata
+            .get_or_init(|| {
+                let lsdata_obj = Self::lsdata_elem(self.element_ref).ok()?;
+                serde_json::from_value::<Self::SubElementLSData>(lsdata_obj).ok()
+            })
+            .as_ref()
     }
 
     fn from_elem<Parent: Element<'a>>(
         elem_def: SubElementDef<'a, Parent, Self>,
         element: scraper::ElementRef<'a>,
     ) -> Result<Self> {
-        let lsdata_obj = Self::lsdata_elem(element)?;
-        let lsdata = serde_json::from_value::<Self::SubElementLSData>(lsdata_obj)
-            .or(Err(ElementError::InvalidLSData))?;
-        let content_selector = Selector::parse(":root [ct]").unwrap();
-        let contents: Vec<Elements> = element
-            .select(&content_selector)
-            .filter_map(|node| dyn_elem(node).ok())
-            .collect();
-        Ok(Self::new(
-            elem_def.id.to_owned(),
-            element,
-            Some(lsdata),
-            contents,
-        ))
+        Ok(Self::new(elem_def.id.to_owned(), element))
     }
 }
 
 impl<'a> SapTableMatrixCell<'a> {
-    pub const fn new(
-        id: Cow<'static, str>,
-        element_ref: scraper::ElementRef<'a>,
-        lsdata: Option<SapTableMatrixCellLSData>,
-        contents: Vec<Elements<'a>>,
-    ) -> Self {
+    pub const fn new(id: Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {
         Self {
             id,
             element_ref,
-            lsdata,
-            contents,
+            lsdata: OnceCell::new(),
+            contents: OnceCell::new(),
         }
     }
 

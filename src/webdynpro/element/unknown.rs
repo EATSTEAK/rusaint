@@ -1,5 +1,5 @@
 use anyhow::Result;
-use std::borrow::Cow;
+use std::{borrow::Cow, cell::OnceCell};
 
 use serde_json::Value;
 
@@ -10,8 +10,8 @@ use super::{Element, ElementDef, EventParameterMap};
 pub struct Unknown<'a> {
     id: Cow<'static, str>,
     element_ref: scraper::ElementRef<'a>,
-    lsdata: Option<Value>,
-    lsevents: Option<EventParameterMap>,
+    lsdata: OnceCell<Option<Value>>,
+    lsevents: OnceCell<Option<EventParameterMap>>,
 }
 
 impl<'a> Element<'a> for Unknown<'a> {
@@ -21,38 +21,33 @@ impl<'a> Element<'a> for Unknown<'a> {
 
     type ElementLSData = Value;
 
-    fn from_elem(elem_def: ElementDef<'a, Self>, element: scraper::ElementRef<'a>) -> Result<Self> {
-        let lsdata_obj = Self::lsdata_elem(element).ok();
-        let lsevents = Self::lsevents_elem(element).ok();
-        Ok(Self::new(
-            elem_def.id.to_owned(),
-            element,
-            lsdata_obj,
-            lsevents,
-        ))
-    }
-
     fn lsdata(&self) -> Option<&Self::ElementLSData> {
-        self.lsdata.as_ref()
+        self.lsdata
+            .get_or_init(|| {
+                let lsdata_obj = Self::lsdata_elem(self.element_ref).ok()?;
+                serde_json::from_value::<Self::ElementLSData>(lsdata_obj).ok()
+            })
+            .as_ref()
     }
 
-    fn lsevents(&self) -> Option<&super::EventParameterMap> {
-        self.lsevents.as_ref()
+    fn lsevents(&self) -> Option<&EventParameterMap> {
+        self.lsevents
+            .get_or_init(|| Self::lsevents_elem(self.element_ref).ok())
+            .as_ref()
+    }
+
+    fn from_elem(elem_def: ElementDef<'a, Self>, element: scraper::ElementRef<'a>) -> Result<Self> {
+        Ok(Self::new(elem_def.id.to_owned(), element))
     }
 }
 
 impl<'a> Unknown<'a> {
-    pub fn new(
-        id: Cow<'static, str>,
-        element_ref: scraper::ElementRef<'a>,
-        lsdata: Option<Value>,
-        lsevents: Option<EventParameterMap>,
-    ) -> Self {
+    pub fn new(id: Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {
         Self {
             id,
             element_ref,
-            lsdata,
-            lsevents,
+            lsdata: OnceCell::new(),
+            lsevents: OnceCell::new(),
         }
     }
 

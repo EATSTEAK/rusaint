@@ -1,13 +1,10 @@
 use anyhow::Result;
-use std::{borrow::Cow, collections::HashMap};
+use std::{borrow::Cow, cell::OnceCell};
 
 use indexmap::IndexMap;
 use serde::Deserialize;
 
-use crate::webdynpro::{
-    error::ElementError,
-    event::{ucf_parameters::UcfParameters, Event},
-};
+use crate::webdynpro::event::Event;
 
 use super::{Element, ElementDef, EventParameterMap};
 
@@ -15,8 +12,8 @@ use super::{Element, ElementDef, EventParameterMap};
 pub struct Button<'a> {
     id: Cow<'static, str>,
     element_ref: scraper::ElementRef<'a>,
-    lsdata: Option<ButtonLSData>,
-    lsevents: Option<HashMap<String, (UcfParameters, IndexMap<String, String>)>>,
+    lsdata: OnceCell<Option<ButtonLSData>>,
+    lsevents: OnceCell<Option<EventParameterMap>>,
 }
 
 #[derive(Debug, Deserialize, Default)]
@@ -96,40 +93,33 @@ impl<'a> Element<'a> for Button<'a> {
 
     type ElementLSData = ButtonLSData;
 
-    fn lsdata(&self) -> Option<&ButtonLSData> {
-        self.lsdata.as_ref()
+    fn lsdata(&self) -> Option<&Self::ElementLSData> {
+        self.lsdata
+            .get_or_init(|| {
+                let lsdata_obj = Self::lsdata_elem(self.element_ref).ok()?;
+                serde_json::from_value::<Self::ElementLSData>(lsdata_obj).ok()
+            })
+            .as_ref()
     }
 
     fn lsevents(&self) -> Option<&EventParameterMap> {
-        self.lsevents.as_ref()
+        self.lsevents
+            .get_or_init(|| Self::lsevents_elem(self.element_ref).ok())
+            .as_ref()
     }
 
     fn from_elem(elem_def: ElementDef<'a, Self>, element: scraper::ElementRef<'a>) -> Result<Self> {
-        let lsdata_obj = Self::lsdata_elem(element)?;
-        let lsdata = serde_json::from_value::<Self::ElementLSData>(lsdata_obj)
-            .or(Err(ElementError::InvalidLSData))?;
-        let lsevents = Self::lsevents_elem(element)?;
-        Ok(Self::new(
-            elem_def.id.to_owned(),
-            element,
-            Some(lsdata),
-            Some(lsevents),
-        ))
+        Ok(Self::new(elem_def.id.to_owned(), element))
     }
 }
 
 impl<'a> Button<'a> {
-    pub fn new(
-        id: Cow<'static, str>,
-        element_ref: scraper::ElementRef<'a>,
-        lsdata: Option<ButtonLSData>,
-        lsevents: Option<EventParameterMap>,
-    ) -> Self {
+    pub fn new(id: Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {
         Self {
             id,
             element_ref,
-            lsdata,
-            lsevents,
+            lsdata: OnceCell::new(),
+            lsevents: OnceCell::new(),
         }
     }
 

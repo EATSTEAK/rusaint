@@ -1,12 +1,12 @@
 use anyhow::Result;
-use std::borrow::Cow;
+use std::{borrow::Cow, cell::OnceCell};
 
 use scraper::Selector;
 use serde::Deserialize;
 
 use crate::webdynpro::{
     element::{dyn_elem, Element, Elements, SubElement, SubElementDef},
-    error::{BodyError, ElementError},
+    error::BodyError,
 };
 
 use super::{SapTableCell, SapTableCells};
@@ -15,8 +15,8 @@ use super::{SapTableCell, SapTableCells};
 pub struct SapTableHeaderCell<'a> {
     id: Cow<'static, str>,
     element_ref: scraper::ElementRef<'a>,
-    lsdata: Option<SapTableHeaderCellLSData>,
-    contents: Vec<Elements<'a>>,
+    lsdata: OnceCell<Option<SapTableHeaderCellLSData>>,
+    contents: OnceCell<Option<Elements<'a>>>,
 }
 
 #[derive(Deserialize, Debug, Default)]
@@ -67,50 +67,49 @@ impl<'a> SubElement<'a> for SapTableHeaderCell<'a> {
     type SubElementLSData = SapTableHeaderCellLSData;
 
     fn lsdata(&self) -> Option<&Self::SubElementLSData> {
-        self.lsdata.as_ref()
+        self.lsdata
+            .get_or_init(|| {
+                let lsdata_obj = Self::lsdata_elem(self.element_ref).ok()?;
+                serde_json::from_value::<Self::SubElementLSData>(lsdata_obj).ok()
+            })
+            .as_ref()
     }
 
     fn from_elem<Parent: Element<'a>>(
         elem_def: SubElementDef<'a, Parent, Self>,
         element: scraper::ElementRef<'a>,
     ) -> Result<Self> {
-        let lsdata_obj = Self::lsdata_elem(element)?;
-        let lsdata = serde_json::from_value::<Self::SubElementLSData>(lsdata_obj)
-            .or(Err(ElementError::InvalidLSData))?;
-        let content_selector =
-            Selector::parse(format!(r#"[id="{}-CONTENT"] > [ct]"#, &elem_def.id).as_str())
-                .or(Err(BodyError::InvalidSelector))?;
-        let contents: Vec<Elements> = element
-            .select(&content_selector)
-            .filter_map(|node| dyn_elem(node).ok())
-            .collect();
-        Ok(Self::new(
-            elem_def.id.to_owned(),
-            element,
-            Some(lsdata),
-            contents,
-        ))
+        Ok(Self::new(elem_def.id.to_owned(), element))
     }
 }
 
 impl<'a> SapTableCell<'a> for SapTableHeaderCell<'a> {
-    fn content(&self) -> &Vec<Elements<'a>> {
-        &self.contents
+    fn content(&self) -> Option<&Elements<'a>> {
+        self.contents
+            .get_or_init(|| {
+                let content_selector =
+                    Selector::parse(format!(r#"[id="{}-CONTENT"] [ct]"#, &self.id).as_str())
+                        .or(Err(BodyError::InvalidSelector))
+                        .ok()?;
+                dyn_elem(
+                    self.element_ref
+                        .select(&content_selector)
+                        .next()?
+                        .to_owned(),
+                )
+                .ok()
+            })
+            .as_ref()
     }
 }
 
 impl<'a> SapTableHeaderCell<'a> {
-    pub const fn new(
-        id: Cow<'static, str>,
-        element_ref: scraper::ElementRef<'a>,
-        lsdata: Option<SapTableHeaderCellLSData>,
-        contents: Vec<Elements<'a>>,
-    ) -> Self {
+    pub const fn new(id: Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {
         Self {
             id,
             element_ref,
-            lsdata,
-            contents,
+            lsdata: OnceCell::new(),
+            contents: OnceCell::new(),
         }
     }
 

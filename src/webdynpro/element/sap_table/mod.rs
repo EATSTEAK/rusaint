@@ -1,5 +1,5 @@
 use anyhow::Result;
-use std::borrow::Cow;
+use std::{borrow::Cow, cell::OnceCell};
 
 use scraper::Selector;
 use serde::Deserialize;
@@ -23,9 +23,9 @@ pub type SapTableBody<'a> = Vec<Vec<SapTableCells<'a>>>;
 pub struct SapTable<'a> {
     id: Cow<'static, str>,
     element_ref: scraper::ElementRef<'a>,
-    lsdata: Option<SapTableLSData>,
-    lsevents: Option<EventParameterMap>,
-    table: Option<SapTableBody<'a>>,
+    lsdata: OnceCell<Option<SapTableLSData>>,
+    lsevents: OnceCell<Option<EventParameterMap>>,
+    table: OnceCell<Option<SapTableBody<'a>>>,
 }
 
 #[derive(Deserialize, Debug, Default)]
@@ -49,43 +49,33 @@ impl<'a> Element<'a> for SapTable<'a> {
     type ElementLSData = SapTableLSData;
 
     fn lsdata(&self) -> Option<&Self::ElementLSData> {
-        self.lsdata.as_ref()
+        self.lsdata
+            .get_or_init(|| {
+                let lsdata_obj = Self::lsdata_elem(self.element_ref).ok()?;
+                serde_json::from_value::<Self::ElementLSData>(lsdata_obj).ok()
+            })
+            .as_ref()
     }
 
     fn lsevents(&self) -> Option<&EventParameterMap> {
-        self.lsevents.as_ref()
+        self.lsevents
+            .get_or_init(|| Self::lsevents_elem(self.element_ref).ok())
+            .as_ref()
     }
 
     fn from_elem(elem_def: ElementDef<'a, Self>, element: scraper::ElementRef<'a>) -> Result<Self> {
-        let lsdata_obj = Self::lsdata_elem(element)?;
-        let lsdata = serde_json::from_value::<Self::ElementLSData>(lsdata_obj)
-            .or(Err(ElementError::InvalidLSData))?;
-        let lsevents = Self::lsevents_elem(element)?;
-        let table = Self::parse_table(elem_def.clone(), element)?;
-        Ok(Self::new(
-            elem_def.id.to_owned(),
-            element,
-            Some(lsdata),
-            Some(lsevents),
-            Some(table),
-        ))
+        Ok(Self::new(elem_def.id.to_owned(), element))
     }
 }
 
 impl<'a> SapTable<'a> {
-    pub const fn new(
-        id: Cow<'static, str>,
-        element_ref: scraper::ElementRef<'a>,
-        lsdata: Option<SapTableLSData>,
-        lsevents: Option<EventParameterMap>,
-        table: Option<SapTableBody<'a>>,
-    ) -> Self {
+    pub const fn new(id: Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {
         Self {
             id,
             element_ref,
-            lsdata,
-            lsevents,
-            table,
+            lsdata: OnceCell::new(),
+            lsevents: OnceCell::new(),
+            table: OnceCell::new(),
         }
     }
 
@@ -93,16 +83,20 @@ impl<'a> SapTable<'a> {
         super::Elements::SapTable(self)
     }
 
-    pub fn table(&self) -> Option<&SapTableBody> {
-        self.table.as_ref()
+    pub fn table(&self) -> Option<&SapTableBody<'a>> {
+        self.table.get_or_init(|| self.parse_table().ok()).as_ref()
     }
 
-    fn parse_table(
-        def: ElementDef<'a, SapTable<'a>>,
-        element: scraper::ElementRef<'a>,
-    ) -> Result<SapTableBody<'a>> {
+    fn parse_table(&self) -> Result<SapTableBody<'a>> {
+        let def: ElementDef<'a, SapTable<'a>> = {
+            if let Cow::Borrowed(id) = self.id {
+                ElementDef::new(id)
+            } else {
+                ElementDef::new_dynamic((&self.id).to_string())
+            }
+        };
+        let element = self.element_ref;
         let elem_value = element.value();
-        dbg!("reading tbody");
         let tbody_selector = Selector::parse(
             format!(
                 r#"[id="{}-contentTBody"]"#,
@@ -115,15 +109,14 @@ impl<'a> SapTable<'a> {
             .select(&tbody_selector)
             .next()
             .ok_or(ElementError::InvalidId)?;
-        dbg!("tbody readed");
         Ok(tbody
             .children()
             .filter_map(|node| scraper::ElementRef::wrap(node))
-            .map(|row_ref| -> Vec<SapTableCells> {
+            .map(|row_ref| -> Vec<SapTableCells<'a>> {
                 let subct_selector = Selector::parse("[subct]").unwrap();
                 let subcts = row_ref.select(&subct_selector);
                 subcts
-                    .filter_map(|subct_ref| -> Option<SapTableCells> {
+                    .filter_map(|subct_ref| -> Option<SapTableCells<'a>> {
                         let subct_value = subct_ref.value();
                         match subct_value.attr("subct") {
                             Some(SapTableNormalCell::SUBCONTROL_ID) => Some(
@@ -174,7 +167,7 @@ impl<'a> SapTable<'a> {
                             _ => None,
                         }
                     })
-                    .collect::<Vec<SapTableCells>>()
+                    .collect::<Vec<SapTableCells<'a>>>()
             })
             .collect())
     }

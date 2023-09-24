@@ -15,8 +15,8 @@ use super::{Element, ElementDef, EventParameterMap};
 pub struct TextView<'a> {
     id: Cow<'static, str>,
     element_ref: scraper::ElementRef<'a>,
-    lsdata: Option<TextViewLSData>,
-    lsevents: Option<HashMap<String, (UcfParameters, IndexMap<String, String>)>>,
+    lsdata: OnceCell<Option<TextViewLSData>>,
+    lsevents: OnceCell<Option<EventParameterMap>>,
 }
 
 #[derive(Debug, Deserialize, Default)]
@@ -50,35 +50,33 @@ impl<'a> Element<'a> for TextView<'a> {
 
     type ElementLSData = TextViewLSData;
 
-    fn lsdata(&self) -> Option<&TextViewLSData> {
-        self.lsdata.as_ref()
+    fn lsdata(&self) -> Option<&Self::ElementLSData> {
+        self.lsdata
+            .get_or_init(|| {
+                let lsdata_obj = Self::lsdata_elem(self.element_ref).ok()?;
+                serde_json::from_value::<Self::ElementLSData>(lsdata_obj).ok()
+            })
+            .as_ref()
     }
 
     fn lsevents(&self) -> Option<&EventParameterMap> {
-        self.lsevents.as_ref()
+        self.lsevents
+            .get_or_init(|| Self::lsevents_elem(self.element_ref).ok())
+            .as_ref()
     }
 
     fn from_elem(elem_def: ElementDef<'a, Self>, element: scraper::ElementRef<'a>) -> Result<Self> {
-        let lsdata_obj = Self::lsdata_elem(element)?;
-        let lsdata = serde_json::from_value::<Self::ElementLSData>(lsdata_obj)
-            .or(Err(ElementError::InvalidLSData))?;
-        let lsevents = Self::lsevents_elem(element).ok();
-        Ok(Self::new(elem_def.id.to_owned(), Some(lsdata), lsevents))
+        Ok(Self::new(elem_def.id.to_owned(), element))
     }
 }
 
 impl<'a> TextView<'a> {
-    pub fn new(
-        id: Cow<'static, str>,
-        element_ref: scraper::ElementRef<'a>,
-        lsdata: Option<TextViewLSData>,
-        lsevents: Option<EventParameterMap>,
-    ) -> Self {
+    pub fn new(id: Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {
         Self {
             id,
             element_ref,
-            lsdata,
-            lsevents,
+            lsdata: OnceCell::new(),
+            lsevents: OnceCell::new(),
         }
     }
 

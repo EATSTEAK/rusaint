@@ -1,10 +1,10 @@
 use anyhow::Result;
-use std::borrow::Cow;
+use std::{borrow::Cow, cell::OnceCell};
 
 use indexmap::IndexMap;
 use serde::Deserialize;
 
-use crate::webdynpro::{error::ElementError, event::Event};
+use crate::webdynpro::event::Event;
 
 use super::{Element, ElementDef, EventParameterMap};
 
@@ -13,9 +13,9 @@ use super::{Element, ElementDef, EventParameterMap};
 pub struct Form<'a> {
     id: Cow<'static, str>,
     element_ref: scraper::ElementRef<'a>,
-    lsdata: Option<FormLSData>,
-    lsevents: Option<EventParameterMap>,
-    data: Option<FormData>,
+    lsdata: OnceCell<Option<FormLSData>>,
+    lsevents: OnceCell<Option<EventParameterMap>>,
+    data: OnceCell<Option<FormData>>,
 }
 
 impl<'a> Element<'a> for Form<'a> {
@@ -26,28 +26,22 @@ impl<'a> Element<'a> for Form<'a> {
     type ElementLSData = FormLSData;
 
     fn lsdata(&self) -> Option<&Self::ElementLSData> {
-        self.lsdata.as_ref()
+        self.lsdata
+            .get_or_init(|| {
+                let lsdata_obj = Self::lsdata_elem(self.element_ref).ok()?;
+                serde_json::from_value::<Self::ElementLSData>(lsdata_obj).ok()
+            })
+            .as_ref()
     }
 
     fn lsevents(&self) -> Option<&EventParameterMap> {
-        self.lsevents.as_ref()
+        self.lsevents
+            .get_or_init(|| Self::lsevents_elem(self.element_ref).ok())
+            .as_ref()
     }
 
     fn from_elem(elem_def: ElementDef<'a, Self>, element: scraper::ElementRef<'a>) -> Result<Self> {
-        let lsdata_obj = Self::lsdata_elem(element)?;
-        let lsdata = serde_json::from_value::<Self::ElementLSData>(lsdata_obj)
-            .or(Err(ElementError::InvalidLSData))?;
-        let lsevents = Self::lsevents_elem(element)?;
-        let data = FormData {
-            ..Default::default()
-        };
-        Ok(Self::new(
-            elem_def.id.to_owned(),
-            element,
-            Some(lsdata),
-            Some(lsevents),
-            Some(data),
-        ))
+        Ok(Self::new(elem_def.id.to_owned(), element))
     }
 }
 
@@ -76,19 +70,13 @@ pub struct FormLSData {
 }
 
 impl<'a> Form<'a> {
-    pub fn new(
-        id: Cow<'static, str>,
-        element_ref: scraper::ElementRef<'a>,
-        lsdata: Option<FormLSData>,
-        lsevents: Option<EventParameterMap>,
-        data: Option<FormData>,
-    ) -> Self {
+    pub fn new(id: Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {
         Self {
             id,
             element_ref,
-            lsdata,
-            lsevents,
-            data,
+            lsdata: OnceCell::new(),
+            lsevents: OnceCell::new(),
+            data: OnceCell::new(),
         }
     }
 

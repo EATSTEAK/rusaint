@@ -1,18 +1,15 @@
 use anyhow::Result;
-use std::borrow::Cow;
+use std::{borrow::Cow, cell::OnceCell};
 
 use serde::Deserialize;
 
-use crate::webdynpro::{
-    element::{Element, ElementDef, EventParameterMap},
-    error::ElementError,
-};
+use crate::webdynpro::element::{Element, ElementDef, EventParameterMap};
 
 #[derive(Debug)]
 pub struct TabStripItem<'a> {
     id: Cow<'static, str>,
     element_ref: scraper::ElementRef<'a>,
-    lsdata: Option<TabStripItemLSData>,
+    lsdata: OnceCell<Option<TabStripItemLSData>>,
 }
 
 #[derive(Deserialize, Debug, Default)]
@@ -70,7 +67,12 @@ impl<'a> Element<'a> for TabStripItem<'a> {
     type ElementLSData = TabStripItemLSData;
 
     fn lsdata(&self) -> Option<&Self::ElementLSData> {
-        self.lsdata.as_ref()
+        self.lsdata
+            .get_or_init(|| {
+                let lsdata_obj = Self::lsdata_elem(self.element_ref).ok()?;
+                serde_json::from_value::<Self::ElementLSData>(lsdata_obj).ok()
+            })
+            .as_ref()
     }
 
     fn lsevents(&self) -> Option<&EventParameterMap> {
@@ -78,23 +80,16 @@ impl<'a> Element<'a> for TabStripItem<'a> {
     }
 
     fn from_elem(elem_def: ElementDef<'a, Self>, element: scraper::ElementRef<'a>) -> Result<Self> {
-        let lsdata_obj = Self::lsdata_elem(element)?;
-        let lsdata = serde_json::from_value::<Self::ElementLSData>(lsdata_obj)
-            .or(Err(ElementError::InvalidLSData))?;
-        Ok(Self::new(elem_def.id.to_owned(), element, Some(lsdata)))
+        Ok(Self::new(elem_def.id.to_owned(), element))
     }
 }
 
 impl<'a> TabStripItem<'a> {
-    pub const fn new(
-        id: Cow<'static, str>,
-        element_ref: scraper::ElementRef<'a>,
-        lsdata: Option<TabStripItemLSData>,
-    ) -> Self {
+    pub const fn new(id: Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {
         Self {
             id,
             element_ref,
-            lsdata,
+            lsdata: OnceCell::new(),
         }
     }
 
