@@ -4,7 +4,7 @@ use std::{borrow::Cow, cell::OnceCell};
 use scraper::Selector;
 use serde::Deserialize;
 
-use crate::webdynpro::element::{dyn_elem, Element, Elements, SubElement, SubElementDef};
+use crate::webdynpro::element::{Element, Elements, SubElement, SubElementDef};
 
 use super::{SapTableCell, SapTableCells};
 
@@ -34,7 +34,7 @@ impl<'a> SapTableCell<'a> for SapTableMatrixCell<'a> {
         self.contents
             .get_or_init(|| {
                 let content_selector = Selector::parse(":root [ct]").unwrap();
-                dyn_elem(
+                Elements::dyn_elem(
                     self.element_ref
                         .select(&content_selector)
                         .next()?

@@ -9,11 +9,12 @@ use serde_json::{Map, Value};
 
 use crate::webdynpro::element::text_view::TextView;
 
-use self::{button::Button, client_inspector::ClientInspector, combo_box::ComboBox, custom::Custom, form::Form, loading_placeholder::LoadingPlaceholder, tab_strip::{TabStrip, item::TabStripItem}, sap_table::SapTable, unknown::Unknown, caption::Caption, link::Link};
+use self::{button::Button, client_inspector::ClientInspector, combo_box::ComboBox, custom::Custom, form::Form, loading_placeholder::LoadingPlaceholder, tab_strip::{TabStrip, item::TabStripItem}, sap_table::SapTable, unknown::Unknown, caption::Caption, link::Link, button_row::ButtonRow};
 
 use super::{event::{ucf_parameters::UcfParameters, Event, EventBuilder}, error::{ElementError, BodyError}, application::client::body::Body};
 
 pub mod button;
+pub mod button_row;
 pub mod caption;
 pub mod client_inspector;
 pub mod combo_box;
@@ -32,6 +33,7 @@ pub type EventParameterMap = HashMap<String, (UcfParameters, IndexMap<String, St
 #[derive(Debug)]
 pub enum Elements<'a> {
     Button(Button<'a>),
+    ButtonRow(ButtonRow<'a>),
     ClientInspector(ClientInspector<'a>),
     ComboBox(ComboBox<'a>),
     Custom(Custom),
@@ -44,6 +46,36 @@ pub enum Elements<'a> {
     TextView(TextView<'a>),
     Unknown(Unknown<'a>),
     Caption(Caption<'a>),
+}
+
+macro_rules! match_elem {
+    ($id: expr, $element: expr, $( $type: ty ),+ $(,)?) => {
+        match $element.value().attr("ct") {
+            $( Some(<$type>::CONTROL_ID) => Ok($crate::webdynpro::element::ElementDef::<$type>::new_dynamic($id).from_elem($element)?.wrap()), )*
+            _ => Ok($crate::webdynpro::element::ElementDef::<$crate::webdynpro::element::unknown::Unknown>::new_dynamic($id).from_elem($element)?.wrap())
+        }
+    };
+}
+
+impl<'a> Elements<'a> {
+    fn dyn_elem(element: scraper::ElementRef) -> Result<Elements> {
+        let value = element.value();
+        let id = value.id().ok_or(ElementError::InvalidId)?.to_owned();
+        match_elem!(id, element, 
+            Button,
+            ButtonRow,
+            Caption,
+            ClientInspector,
+            ComboBox,
+            Form,
+            Link,
+            LoadingPlaceholder,
+            TabStrip, 
+            TabStripItem,
+            TextView,
+            SapTable
+        )
+}
 }
 
 #[derive(Debug)]
@@ -115,33 +147,6 @@ fn normalize_lsjson(lsjson: &str) -> String {
     let double_quoted = quote_to_double.replace_all(&quoted, r#"$1"$2""#).into_owned();
     let ret = convert_escape_to_rust.replace_all(&double_quoted, r"\u00$1").into_owned();
     ret
-}
-
-macro_rules! match_elem {
-    ($id: expr, $element: expr, $( $type: ty ),+ $(,)?) => {
-        match $element.value().attr("ct") {
-            $( Some(<$type>::CONTROL_ID) => Ok($crate::webdynpro::element::ElementDef::<$type>::new_dynamic($id).from_elem($element)?.wrap()), )*
-            _ => Ok($crate::webdynpro::element::ElementDef::<$crate::webdynpro::element::unknown::Unknown>::new_dynamic($id).from_elem($element)?.wrap())
-        }
-    };
-}
-
-fn dyn_elem(element: scraper::ElementRef) -> Result<Elements> {
-        let value = element.value();
-        let id = value.id().ok_or(ElementError::InvalidId)?.to_owned();
-        match_elem!(id, element, 
-            Button,
-            Caption,
-            ClientInspector,
-            ComboBox,
-            Form,
-            Link,
-            LoadingPlaceholder,
-            TabStrip, 
-            TabStripItem,
-            TextView,
-            SapTable
-        )
 }
 
 pub trait Element<'a>: Sized {

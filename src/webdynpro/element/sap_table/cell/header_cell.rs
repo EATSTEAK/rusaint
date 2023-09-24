@@ -5,7 +5,7 @@ use scraper::Selector;
 use serde::Deserialize;
 
 use crate::webdynpro::{
-    element::{dyn_elem, Element, Elements, SubElement, SubElementDef},
+    element::{Element, Elements, SubElement, SubElementDef},
     error::BodyError,
 };
 
@@ -99,7 +99,7 @@ impl<'a> SapTableCell<'a> for SapTableHeaderCell<'a> {
                     Selector::parse(format!(r#"[id="{}-CONTENT"] [ct]"#, &self.id).as_str())
                         .or(Err(BodyError::InvalidSelector))
                         .ok()?;
-                dyn_elem(
+                Elements::dyn_elem(
                     self.element_ref
                         .select(&content_selector)
                         .next()?
