@@ -9,7 +9,7 @@ use serde_json::{Map, Value};
 
 use crate::webdynpro::element::text_view::TextView;
 
-use self::{button::Button, client_inspector::ClientInspector, combo_box::ComboBox, custom::Custom, form::Form, loading_placeholder::LoadingPlaceholder, tab_strip::{TabStrip, item::TabStripItem}, sap_table::SapTable, unknown::Unknown, caption::Caption};
+use self::{button::Button, client_inspector::ClientInspector, combo_box::ComboBox, custom::Custom, form::Form, loading_placeholder::LoadingPlaceholder, tab_strip::{TabStrip, item::TabStripItem}, sap_table::SapTable, unknown::Unknown, caption::Caption, link::Link};
 
 use super::{event::{ucf_parameters::UcfParameters, Event, EventBuilder}, error::{ElementError, BodyError}, application::client::body::Body};
 
@@ -19,6 +19,7 @@ pub mod client_inspector;
 pub mod combo_box;
 pub mod custom;
 pub mod form;
+pub mod link;
 pub mod loading_placeholder;
 pub mod tab_strip;
 pub mod sap_table;
@@ -35,6 +36,7 @@ pub enum Elements<'a> {
     ComboBox(ComboBox<'a>),
     Custom(Custom),
     Form(Form<'a>),
+    Link(Link<'a>),
     LoadingPlaceholder(LoadingPlaceholder<'a>),
     TabStrip(TabStrip<'a>),
     TabStripItem(TabStripItem<'a>),
@@ -95,13 +97,14 @@ where T: Element<'a>
     }
 }
 
+#[macro_export]
 macro_rules! element_ref {
     ($($name:ident : $eltype:tt<$lt:lifetime> = $id:literal),+ $(,)?) => {
         $(const $name: $crate::webdynpro::element::ElementDef<$lt, $eltype<$lt>> = $crate::webdynpro::element::ElementDef::new($id);)*
     }
 }
 
-pub(crate) use element_ref;
+pub use element_ref;
 
 // TODO: Do multiple replacements without owning
 fn normalize_lsjson(lsjson: &str) -> String {
@@ -132,6 +135,7 @@ fn dyn_elem(element: scraper::ElementRef) -> Result<Elements> {
             ClientInspector,
             ComboBox,
             Form,
+            Link,
             LoadingPlaceholder,
             TabStrip, 
             TabStripItem,
