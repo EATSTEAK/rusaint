@@ -75,6 +75,14 @@ impl<'a> SubElement<'a> for SapTableNormalCell<'a> {
     ) -> Result<Self> {
         Ok(Self::new(elem_def.id.to_owned(), element))
     }
+
+    fn id(&self) -> &str {
+        &self.id
+    }
+
+    fn element_ref(&self) -> &scraper::ElementRef<'a> {
+        &self.element_ref
+    }
 }
 
 impl<'a> SapTableNormalCell<'a> {

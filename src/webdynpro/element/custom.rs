@@ -61,7 +61,7 @@ pub struct Custom {
     id: Cow<'static, str>,
 }
 
-impl Element<'_> for Custom {
+impl<'a> Element<'a> for Custom {
     // Note: This element is not rendered to client itself. This control id is a dummy.
     const CONTROL_ID: &'static str = "CUSTOM";
 
@@ -79,6 +79,14 @@ impl Element<'_> for Custom {
 
     fn from_elem(elem_def: ElementDef<'_, Self>, _element: scraper::ElementRef) -> Result<Self> {
         Ok(Self::new(elem_def.id.to_owned()))
+    }
+
+    fn id(&self) -> &str {
+        &self.id
+    }
+
+    fn element_ref(&self) -> &scraper::ElementRef<'a> {
+        panic!("Element Custom is pseudo-element")
     }
 }
 

@@ -1,4 +1,10 @@
-use rusaint::definitions::course_schedule::CourseSchedule;
+use rusaint::{
+    definitions::course_schedule::CourseSchedule,
+    webdynpro::element::{
+        sap_table::cell::{SapTableCell, SapTableCells},
+        Element, Elements,
+    },
+};
 
 #[tokio::test]
 async fn initial_load() {
@@ -12,6 +18,49 @@ async fn edu_data() {
     app.load_placeholder().await.unwrap();
     app.load_edu().await.unwrap();
     let table = app.read_edu_raw().unwrap();
-    println!("{:?}", table.table());
+    if let Some(table) = table.table() {
+        for row in table {
+            print!("row: ");
+            for col in row {
+                match col {
+                    SapTableCells::Header(cell) => {
+                        let content = cell.content();
+                        print!("Header: ");
+                        match content {
+                            None => {
+                                print!("None, ")
+                            }
+                            Some(Elements::TextView(elem)) => {
+                                print!("TextView {{ {:?} }},", elem.lsdata());
+                            }
+                            Some(Elements::Unknown(elem)) => {
+                                print!("Unknown {{ {:?} }}, ", elem.lsdata());
+                            }
+                            _ => {}
+                        };
+                    }
+                    SapTableCells::Normal(cell) => {
+                        let content = cell.content();
+                        match content {
+                            None => {
+                                print!("None, ")
+                            }
+                            Some(Elements::TextView(elem)) => {
+                                print!("TextView {{ {:?} }}", elem.lsdata());
+                            }
+                            Some(Elements::Unknown(elem)) => {
+                                print!("Unknown {{ {:?} }}, ", elem.lsdata());
+                            }
+                            _ => {}
+                        };
+                    }
+                    _ => {
+                        print!("{:?}, ", col);
+                    }
+                }
+            }
+            println!("");
+        }
+    }
     assert!(false);
 }

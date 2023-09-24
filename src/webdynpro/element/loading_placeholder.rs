@@ -40,6 +40,14 @@ impl<'a> Element<'a> for LoadingPlaceholder<'a> {
     fn from_elem(elem_def: ElementDef<'a, Self>, element: scraper::ElementRef<'a>) -> Result<Self> {
         Ok(Self::new(elem_def.id.to_owned(), element))
     }
+
+    fn id(&self) -> &str {
+        &self.id
+    }
+
+    fn element_ref(&self) -> &scraper::ElementRef<'a> {
+        &self.element_ref
+    }
 }
 
 #[derive(Deserialize, Debug, Default)]

@@ -3,9 +3,11 @@ use anyhow::Result;
 
 use indexmap::IndexMap;
 use regex::Regex;
-use scraper::Selector;
+use scraper::{Selector, ElementRef};
 use serde_json::{Map, Value};
 
+
+use crate::webdynpro::element::text_view::TextView;
 
 use self::{button::Button, client_inspector::ClientInspector, combo_box::ComboBox, custom::Custom, form::Form, loading_placeholder::LoadingPlaceholder, tab_strip::{TabStrip, item::TabStripItem}, sap_table::SapTable, unknown::Unknown};
 
@@ -20,6 +22,7 @@ pub mod loading_placeholder;
 pub mod tab_strip;
 pub mod sap_table;
 pub mod list_box;
+pub mod text_view;
 pub mod unknown;
 
 pub type EventParameterMap = HashMap<String, (UcfParameters, IndexMap<String, String>)>;
@@ -35,6 +38,7 @@ pub enum Elements<'a> {
     TabStrip(TabStrip<'a>),
     TabStripItem(TabStripItem<'a>),
     SapTable(SapTable<'a>),
+    TextView(TextView<'a>),
     Unknown(Unknown<'a>),
 }
 
@@ -128,6 +132,7 @@ fn dyn_elem(element: scraper::ElementRef) -> Result<Elements> {
             LoadingPlaceholder,
             TabStrip, 
             TabStripItem,
+            TextView,
             SapTable
         )
 }
@@ -137,17 +142,16 @@ pub trait Element<'a>: Sized {
     const ELEMENT_NAME: &'static str;
     type ElementLSData;
 
-    fn from_body(elem_def: ElementDef<'a, Self>, body: &'a Body) -> Result<Self> {
-        let selector = &elem_def.selector().or(Err(BodyError::InvalidSelector))?;
-        let element = body
-            .document()
-            .select(selector)
-            .next()
-            .ok_or(ElementError::InvalidId)?;
-        Self::from_elem(elem_def, element)
+    unsafe fn fire_event_unchecked(event: String, parameters: IndexMap<String, String>, ucf_params: UcfParameters, custom_params: IndexMap<String, String>) -> Event {
+        EventBuilder::default()
+        .control(Self::ELEMENT_NAME.to_owned())
+        .event(event)
+        .parameters(parameters)
+        .ucf_parameters(ucf_params)
+        .custom_parameters(custom_params)
+        .build()
+        .unwrap()
     }
-
-    fn from_elem(elem_def: ElementDef<'a, Self>, element: scraper::ElementRef<'a>) -> Result<Self>;
 
     fn lsdata_elem(element: scraper::ElementRef) -> Result<Value> {
         let raw_data = element.value().attr("lsdata").ok_or(ElementError::InvalidLSData)?;
@@ -171,9 +175,17 @@ pub trait Element<'a>: Sized {
                 }).collect::<EventParameterMap>())
     }
 
-    fn lsdata(&self) -> Option<&Self::ElementLSData>;
+    fn from_body(elem_def: ElementDef<'a, Self>, body: &'a Body) -> Result<Self> {
+        let selector = &elem_def.selector().or(Err(BodyError::InvalidSelector))?;
+        let element = body
+            .document()
+            .select(selector)
+            .next()
+            .ok_or(ElementError::InvalidId)?;
+        Self::from_elem(elem_def, element)
+    }
 
-    fn lsevents(&self) -> Option<&EventParameterMap>;
+    fn from_elem(elem_def: ElementDef<'a, Self>, element: scraper::ElementRef<'a>) -> Result<Self>;
 
     fn event_parameter(&self, event: &str) -> Result<&(UcfParameters, IndexMap<String, String>), ElementError> {
         if let Some(lsevents) = self.lsevents() {
@@ -183,21 +195,22 @@ pub trait Element<'a>: Sized {
         }
     }
 
-    unsafe fn fire_event_unchecked(event: String, parameters: IndexMap<String, String>, ucf_params: UcfParameters, custom_params: IndexMap<String, String>) -> Event {
-        EventBuilder::default()
-        .control(Self::ELEMENT_NAME.to_owned())
-        .event(event)
-        .parameters(parameters)
-        .ucf_parameters(ucf_params)
-        .custom_parameters(custom_params)
-        .build()
-        .unwrap()
-    }
-
     fn fire_event(&self, event: String, parameters: IndexMap<String, String>) -> Result<Event> {
         let (ucf_params, custom_params) = self.event_parameter(&event)?;
         Ok(unsafe { Self::fire_event_unchecked(event, parameters, ucf_params.to_owned(), custom_params.to_owned()) })
     }
+
+    fn lsdata(&self) -> Option<&Self::ElementLSData>;
+
+    fn lsevents(&self) -> Option<&EventParameterMap>;
+
+    fn id(&self) -> &str;
+
+    fn element_ref(&self) -> &ElementRef<'a>;
+
+
+
+    
 }
 
 
@@ -261,8 +274,6 @@ pub trait SubElement<'a>: Sized {
         return Ok(serde_json::from_str(&normalized)?);
     }
 
-    fn lsdata(&self) -> Option<&Self::SubElementLSData>;
-
     fn from_body<Parent: Element<'a>>(
         elem_def: SubElementDef<'a, Parent, Self>,
         body: &'a Body,
@@ -280,4 +291,10 @@ pub trait SubElement<'a>: Sized {
         elem_def: SubElementDef<'a, Parent, Self>,
         element: scraper::ElementRef<'a>
     ) -> Result<Self>;
+
+    fn lsdata(&self) -> Option<&Self::SubElementLSData>;
+
+    fn id(&self) -> &str;
+
+    fn element_ref(&self) -> &ElementRef<'a>;
 }

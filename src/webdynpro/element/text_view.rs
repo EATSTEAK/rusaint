@@ -1,13 +1,7 @@
 use anyhow::Result;
-use std::{borrow::Cow, collections::HashMap};
+use std::{borrow::Cow, cell::OnceCell};
 
-use indexmap::IndexMap;
 use serde::Deserialize;
-
-use crate::webdynpro::{
-    error::ElementError,
-    event::{ucf_parameters::UcfParameters, Event},
-};
 
 use super::{Element, ElementDef, EventParameterMap};
 
@@ -68,6 +62,14 @@ impl<'a> Element<'a> for TextView<'a> {
     fn from_elem(elem_def: ElementDef<'a, Self>, element: scraper::ElementRef<'a>) -> Result<Self> {
         Ok(Self::new(elem_def.id.to_owned(), element))
     }
+
+    fn id(&self) -> &str {
+        &self.id
+    }
+
+    fn element_ref(&self) -> &scraper::ElementRef<'a> {
+        &self.element_ref
+    }
 }
 
 impl<'a> TextView<'a> {
@@ -80,7 +82,7 @@ impl<'a> TextView<'a> {
         }
     }
 
-    pub fn wrap(self) -> super::Elements {
+    pub fn wrap(self) -> super::Elements<'a> {
         super::Elements::TextView(self)
     }
 }
