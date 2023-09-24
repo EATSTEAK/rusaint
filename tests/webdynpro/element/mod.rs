@@ -21,9 +21,9 @@ impl<'a> DerefMut for EventTestSuite {
 impl<'a> EventTestSuite {
     const APP_NAME: &str = "WDR_TEST_EVENTS";
 
-    pub async fn new(token: &str) -> Result<EventTestSuite> {
+    pub async fn new(id: &str, token: &str) -> Result<EventTestSuite> {
         Ok(EventTestSuite(
-            BasicUSaintApplication::with_auth(Self::APP_NAME, token).await?,
+            BasicUSaintApplication::with_auth(Self::APP_NAME, id, token).await?,
         ))
     }
 }

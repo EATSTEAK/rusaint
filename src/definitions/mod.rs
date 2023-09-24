@@ -54,8 +54,12 @@ impl<'a> BasicUSaintApplication {
         ))
     }
 
-    async fn client_with_session(sso_token: &str) -> Result<reqwest::Client> {
+    async fn client_with_session(sso_idno: &str, sso_token: &str) -> Result<reqwest::Client> {
         let jar: Arc<Jar> = Arc::new(Jar::default());
+        jar.add_cookie_str(
+            format!("sToken={}; domain=.ssu.ac.kr; path=/; secure", sso_token).as_str(),
+            &Url::parse("https://smartid.ssu.ac.kr")?,
+        );
         let client = reqwest::Client::builder()
             .cookie_provider(jar)
             .cookie_store(true)
@@ -63,7 +67,10 @@ impl<'a> BasicUSaintApplication {
             .build()
             .unwrap();
         let res = client
-            .get(format!("{}?sToken={}", SSU_USAINT_SSO_URL, sso_token))
+            .get(format!(
+                "{}?sToken={}&sIdno={}",
+                SSU_USAINT_SSO_URL, sso_token, sso_idno
+            ))
             .headers(default_header())
             .send()
             .await?;
@@ -74,9 +81,13 @@ impl<'a> BasicUSaintApplication {
         }
     }
 
-    pub async fn with_auth(app_name: &str, token: &str) -> Result<BasicUSaintApplication> {
+    pub async fn with_auth(
+        app_name: &str,
+        id: &str,
+        token: &str,
+    ) -> Result<BasicUSaintApplication> {
         let base_url = Url::parse(SSU_WEBDYNPRO_BASE_URL)?;
-        let r_client = Self::client_with_session(token).await?;
+        let r_client = Self::client_with_session(id, token).await?;
         let client = Client::with_client(r_client, &base_url, app_name).await?;
         Ok(BasicUSaintApplication(BasicApplication::with_client(
             base_url, app_name, client,
