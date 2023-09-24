@@ -93,7 +93,7 @@ impl<'a> SubElement<'a> for SapTableHeaderCell<'a> {
     }
 }
 
-impl<'a> SapTableCell for SapTableHeaderCell<'a> {
+impl<'a> SapTableCell<'a> for SapTableHeaderCell<'a> {
     fn content(&self) -> &Vec<Elements<'a>> {
         &self.contents
     }

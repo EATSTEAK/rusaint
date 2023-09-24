@@ -40,7 +40,7 @@ pub struct SapTableSelectionCellLSData {
     custom_data: Option<String>,
 }
 
-impl<'a> SapTableCell for SapTableSelectionCell<'a> {
+impl<'a> SapTableCell<'a> for SapTableSelectionCell<'a> {
     fn content(&self) -> &Vec<Elements<'a>> {
         &self.contents
     }

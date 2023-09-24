@@ -15,8 +15,8 @@ pub enum SapTableCells<'a> {
     Selection(SapTableSelectionCell<'a>),
 }
 
-pub trait SapTableCell {
-    fn content(&self) -> &Vec<Elements>;
+pub trait SapTableCell<'a> {
+    fn content(&self) -> &Vec<Elements<'a>>;
 }
 
 pub mod header_cell;

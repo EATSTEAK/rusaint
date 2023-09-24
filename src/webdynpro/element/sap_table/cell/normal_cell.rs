@@ -40,7 +40,7 @@ pub struct SapTableNormalCellLSData {
     custom_data: Option<String>,
 }
 
-impl<'a> SapTableCell for SapTableNormalCell<'a> {
+impl<'a> SapTableCell<'a> for SapTableNormalCell<'a> {
     fn content(&self) -> &Vec<Elements<'a>> {
         &self.contents
     }

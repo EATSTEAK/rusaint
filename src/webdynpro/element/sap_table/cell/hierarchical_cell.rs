@@ -44,8 +44,8 @@ pub struct SapTableHierarchicalCellLSData {
     custom_data: Option<String>,
 }
 
-impl<'a> SapTableCell for SapTableHierarchicalCell<'a> {
-    fn content(&self) -> &Vec<Elements> {
+impl<'a> SapTableCell<'a> for SapTableHierarchicalCell<'a> {
+    fn content(&self) -> &Vec<Elements<'a>> {
         &self.contents
     }
 }

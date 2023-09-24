@@ -32,8 +32,8 @@ pub struct SapTableMatrixCellLSData {
     custom_data: Option<String>,
 }
 
-impl<'a> SapTableCell for SapTableMatrixCell<'a> {
-    fn content(&self) -> &Vec<Elements> {
+impl<'a> SapTableCell<'a> for SapTableMatrixCell<'a> {
+    fn content(&self) -> &Vec<Elements<'a>> {
         &self.contents
     }
 }
