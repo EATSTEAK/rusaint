@@ -32,9 +32,28 @@ pub type EventParameterMap = HashMap<String, (UcfParameters, IndexMap<String, St
 
 macro_rules! register_elements {
     [$( $enum:ident : $type: ty ),+ $(,)?] => {
-        #[derive(Debug)]
         pub enum Elements<'a> {
             $( $enum($type), )*
+            Unknown($crate::webdynpro::element::unknown::Unknown<'a>)
+        }
+
+        impl<'a> std::fmt::Debug for Elements<'a> {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                match self {
+                    $( Elements::$enum(elem) => {
+                        f.debug_struct(stringify!($enum))
+                            .field("id", &elem.id().to_string())
+                            .finish()
+                    },)+
+                    Elements::Unknown(elem) => {
+                        f.debug_struct("Unknown")
+                            .field("ct", &elem.ct().to_owned())
+                            .field("id", &elem.id().to_string())
+                            .finish()
+                    },
+                    _ => { Ok(()) }
+                }
+            }
         }
 
         impl<'a> Elements<'a> {
@@ -72,7 +91,6 @@ register_elements![
     TabStripItem: TabStripItem<'a>,
     SapTable: SapTable<'a>,
     TextView: TextView<'a>,
-    Unknown: Unknown<'a>,
     Caption: Caption<'a>,
 ];
 

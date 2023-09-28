@@ -10,6 +10,7 @@ use super::{Element, ElementDef, EventParameterMap};
 pub struct Unknown<'a> {
     id: Cow<'static, str>,
     element_ref: scraper::ElementRef<'a>,
+    ct: OnceCell<Option<String>>,
     lsdata: OnceCell<Option<Value>>,
     lsevents: OnceCell<Option<EventParameterMap>>,
 }
@@ -58,8 +59,15 @@ impl<'a> Unknown<'a> {
         Self {
             id,
             element_ref,
+            ct: OnceCell::new(),
             lsdata: OnceCell::new(),
             lsevents: OnceCell::new(),
         }
+    }
+
+    pub fn ct(&self) -> Option<&String> {
+        self.ct.get_or_init(|| {
+            self.element_ref.value().attr("ct").and_then(|str| Some(str.to_string()))
+        }).as_ref()
     }
 }
