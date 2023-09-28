@@ -9,7 +9,7 @@ use serde_json::{Map, Value};
 
 use crate::webdynpro::element::text_view::TextView;
 
-use self::{button::Button, client_inspector::ClientInspector, combo_box::ComboBox, custom::Custom, form::Form, loading_placeholder::LoadingPlaceholder, tab_strip::{TabStrip, item::TabStripItem}, sap_table::SapTable, unknown::Unknown, caption::Caption, link::Link, button_row::ButtonRow};
+use self::{button::Button, client_inspector::ClientInspector, combo_box::ComboBox, custom::Custom, form::Form, loading_placeholder::LoadingPlaceholder, tab_strip::{TabStrip, item::TabStripItem}, sap_table::SapTable, unknown::Unknown, caption::Caption, link::Link, button_row::ButtonRow, list_box::{ListBoxMultiple, ListBoxPopup, ListBoxPopupFiltered, ListBoxPopupJson, ListBoxPopupJsonFiltered, ListBoxSingle, item::ListBoxItem, action_item::ListBoxActionItem}};
 
 use super::{event::{ucf_parameters::UcfParameters, Event, EventBuilder}, error::{ElementError, BodyError}, application::client::body::Body};
 
@@ -30,53 +30,51 @@ pub mod unknown;
 
 pub type EventParameterMap = HashMap<String, (UcfParameters, IndexMap<String, String>)>;
 
-#[derive(Debug)]
-pub enum Elements<'a> {
-    Button(Button<'a>),
-    ButtonRow(ButtonRow<'a>),
-    ClientInspector(ClientInspector<'a>),
-    ComboBox(ComboBox<'a>),
-    Custom(Custom),
-    Form(Form<'a>),
-    Link(Link<'a>),
-    LoadingPlaceholder(LoadingPlaceholder<'a>),
-    TabStrip(TabStrip<'a>),
-    TabStripItem(TabStripItem<'a>),
-    SapTable(SapTable<'a>),
-    TextView(TextView<'a>),
-    Unknown(Unknown<'a>),
-    Caption(Caption<'a>),
-}
-
-macro_rules! match_elem {
-    ($id: expr, $element: expr, $( $type: ty ),+ $(,)?) => {
-        match $element.value().attr("ct") {
-            $( Some(<$type>::CONTROL_ID) => Ok($crate::webdynpro::element::ElementDef::<$type>::new_dynamic($id).from_elem($element)?.wrap()), )*
-            _ => Ok($crate::webdynpro::element::ElementDef::<$crate::webdynpro::element::unknown::Unknown>::new_dynamic($id).from_elem($element)?.wrap())
+macro_rules! register_elements {
+    [$( $enum:ident : $type: ty ),+ $(,)?] => {
+        #[derive(Debug)]
+        pub enum Elements<'a> {
+            $( $enum($type), )*
         }
+
+        impl<'a> Elements<'a> {
+            fn dyn_elem(element: scraper::ElementRef<'a>) -> Result<Elements> {
+                let value = element.value();
+                let id = value.id().ok_or(ElementError::InvalidId)?.to_owned();
+                match element.value().attr("ct") {
+                    $( Some(<$type>::CONTROL_ID) => Ok($crate::webdynpro::element::ElementDef::<$type>::new_dynamic(id).from_elem(element)?.wrap()), )*
+                    _ => Ok($crate::webdynpro::element::ElementDef::<$crate::webdynpro::element::unknown::Unknown>::new_dynamic(id).from_elem(element)?.wrap())
+                }
+            }
+        }
+        
     };
 }
 
-impl<'a> Elements<'a> {
-    fn dyn_elem(element: scraper::ElementRef) -> Result<Elements> {
-        let value = element.value();
-        let id = value.id().ok_or(ElementError::InvalidId)?.to_owned();
-        match_elem!(id, element, 
-            Button,
-            ButtonRow,
-            Caption,
-            ClientInspector,
-            ComboBox,
-            Form,
-            Link,
-            LoadingPlaceholder,
-            TabStrip, 
-            TabStripItem,
-            TextView,
-            SapTable
-        )
-}
-}
+register_elements![
+    Button: Button<'a>,
+    ButtonRow: ButtonRow<'a>,
+    ClientInspector: ClientInspector<'a>,
+    ComboBox: ComboBox<'a>,
+    Custom: Custom,
+    Form: Form<'a>,
+    Link: Link<'a>,
+    ListBoxPopup: ListBoxPopup<'a>,
+    ListBoxPopupFiltered: ListBoxPopupFiltered<'a>,
+    ListBoxPopupJson: ListBoxPopupJson<'a>,
+    ListBoxPopupJsonFiltered: ListBoxPopupJsonFiltered<'a>,
+    ListBoxMultiple: ListBoxMultiple<'a>,
+    ListBoxSingle: ListBoxSingle<'a>,
+    ListBoxItem: ListBoxItem<'a>,
+    ListBoxActionItem: ListBoxActionItem<'a>,
+    LoadingPlaceholder: LoadingPlaceholder<'a>,
+    TabStrip: TabStrip<'a>,
+    TabStripItem: TabStripItem<'a>,
+    SapTable: SapTable<'a>,
+    TextView: TextView<'a>,
+    Unknown: Unknown<'a>,
+    Caption: Caption<'a>,
+];
 
 #[derive(Debug)]
 pub struct ElementDef<'a, T>
@@ -220,7 +218,7 @@ pub trait Element<'a>: Sized {
 
     fn element_ref(&self) -> &ElementRef<'a>;
 
-
+    fn wrap(self) -> Elements<'a>;
 
     
 }

@@ -119,6 +119,10 @@ impl<'a> Element<'a> for Button<'a> {
     fn element_ref(&self) -> &scraper::ElementRef<'a> {
         &self.element_ref
     }
+
+    fn wrap(self) -> super::Elements<'a> {
+        super::Elements::Button(self)
+    }
 }
 
 impl<'a> Button<'a> {
@@ -129,10 +133,6 @@ impl<'a> Button<'a> {
             lsdata: OnceCell::new(),
             lsevents: OnceCell::new(),
         }
-    }
-
-    pub fn wrap(self) -> super::Elements<'a> {
-        super::Elements::Button(self)
     }
 
     pub fn press(&self) -> Result<Event> {

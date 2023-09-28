@@ -85,6 +85,10 @@ impl<'a> Element<'a> for Caption<'a> {
     fn element_ref(&self) -> &scraper::ElementRef<'a> {
         &self.element_ref
     }
+
+    fn wrap(self) -> super::Elements<'a> {
+        super::Elements::Caption(self)
+    }
 }
 
 impl<'a> Caption<'a> {
@@ -106,9 +110,5 @@ impl<'a> Caption<'a> {
                 "".to_string()
             }
         })
-    }
-
-    pub fn wrap(self) -> super::Elements<'a> {
-        super::Elements::Caption(self)
     }
 }

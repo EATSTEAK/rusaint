@@ -54,6 +54,10 @@ impl<'a> Element<'a> for ButtonRow<'a> {
     fn element_ref(&self) -> &scraper::ElementRef<'a> {
         &self.element_ref
     }
+
+    fn wrap(self) -> super::Elements<'a> {
+        super::Elements::ButtonRow(self)
+    }
 }
 
 impl<'a> ButtonRow<'a> {
@@ -64,10 +68,6 @@ impl<'a> ButtonRow<'a> {
             lsdata: OnceCell::new(),
             buttons: OnceCell::new(),
         }
-    }
-
-    pub fn wrap(self) -> super::Elements<'a> {
-        super::Elements::ButtonRow(self)
     }
 
     pub fn buttons(&'a self) -> &'a Vec<Button<'a>> {

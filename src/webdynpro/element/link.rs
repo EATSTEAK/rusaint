@@ -80,6 +80,10 @@ impl<'a> Element<'a> for Link<'a> {
     fn element_ref(&self) -> &scraper::ElementRef<'a> {
         &self.element_ref
     }
+
+    fn wrap(self) -> super::Elements<'a> {
+        super::Elements::Link(self)
+    }
 }
 
 impl<'a> Link<'a> {
@@ -90,10 +94,6 @@ impl<'a> Link<'a> {
             lsdata: OnceCell::new(),
             lsevents: OnceCell::new(),
         }
-    }
-
-    pub fn wrap(self) -> super::Elements<'a> {
-        super::Elements::Link(self)
     }
 
     pub fn activate(&self, ctrl: bool, shift: bool) -> Result<Event> {

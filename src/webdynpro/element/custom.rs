@@ -88,6 +88,10 @@ impl<'a> Element<'a> for Custom {
     fn element_ref(&self) -> &scraper::ElementRef<'a> {
         panic!("Element Custom is pseudo-element")
     }
+
+    fn wrap(self) -> super::Elements<'a> {
+        super::Elements::Custom(self)
+    }
 }
 
 impl Custom {

@@ -47,6 +47,10 @@ impl<'a> Element<'a> for Unknown<'a> {
     fn element_ref(&self) -> &scraper::ElementRef<'a> {
         &self.element_ref
     }
+
+    fn wrap(self) -> super::Elements<'a> {
+        super::Elements::Unknown(self)
+    }
 }
 
 impl<'a> Unknown<'a> {
@@ -57,9 +61,5 @@ impl<'a> Unknown<'a> {
             lsdata: OnceCell::new(),
             lsevents: OnceCell::new(),
         }
-    }
-
-    pub fn wrap(self) -> super::Elements<'a> {
-        super::Elements::Unknown(self)
     }
 }

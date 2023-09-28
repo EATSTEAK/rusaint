@@ -71,6 +71,10 @@ impl<'a> Element<'a> for TextView<'a> {
     fn element_ref(&self) -> &scraper::ElementRef<'a> {
         &self.element_ref
     }
+
+    fn wrap(self) -> super::Elements<'a> {
+        super::Elements::TextView(self)
+    }
 }
 
 impl<'a> TextView<'a> {
@@ -88,9 +92,5 @@ impl<'a> TextView<'a> {
         self.text
             .get_or_init(|| self.element_ref().text().collect::<String>())
             .to_owned()
-    }
-
-    pub fn wrap(self) -> super::Elements<'a> {
-        super::Elements::TextView(self)
     }
 }

@@ -48,6 +48,10 @@ impl<'a> Element<'a> for LoadingPlaceholder<'a> {
     fn element_ref(&self) -> &scraper::ElementRef<'a> {
         &self.element_ref
     }
+
+    fn wrap(self) -> super::Elements<'a> {
+        super::Elements::LoadingPlaceholder(self)
+    }
 }
 
 #[derive(Deserialize, Debug, Default)]
@@ -67,10 +71,6 @@ impl<'a> LoadingPlaceholder<'a> {
             lsdata: OnceCell::new(),
             lsevents: OnceCell::new(),
         }
-    }
-
-    pub fn wrap(self) -> super::Elements<'a> {
-        super::Elements::LoadingPlaceholder(self)
     }
 
     pub fn load(&self) -> Result<Event> {

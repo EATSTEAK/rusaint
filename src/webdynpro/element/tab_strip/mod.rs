@@ -92,6 +92,10 @@ impl<'a> Element<'a> for TabStrip<'a> {
     fn element_ref(&self) -> &scraper::ElementRef<'a> {
         &self.element_ref
     }
+
+    fn wrap(self) -> super::Elements<'a> {
+        super::Elements::TabStrip(self)
+    }
 }
 
 impl<'a> TabStrip<'a> {
@@ -123,10 +127,6 @@ impl<'a> TabStrip<'a> {
                 )
             })
             .as_ref()
-    }
-
-    pub fn wrap(self) -> super::Elements<'a> {
-        super::Elements::TabStrip(self)
     }
 
     pub fn tab_select(

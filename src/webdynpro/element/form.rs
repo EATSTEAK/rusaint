@@ -51,6 +51,10 @@ impl<'a> Element<'a> for Form<'a> {
     fn element_ref(&self) -> &scraper::ElementRef<'a> {
         &self.element_ref
     }
+
+    fn wrap(self) -> super::Elements<'a> {
+        super::Elements::Form(self)
+    }
 }
 
 #[derive(Debug, Default)]
@@ -86,10 +90,6 @@ impl<'a> Form<'a> {
             lsevents: OnceCell::new(),
             data: OnceCell::new(),
         }
-    }
-
-    pub fn wrap(self) -> super::Elements<'a> {
-        super::Elements::Form(self)
     }
 
     pub fn request(

@@ -114,6 +114,10 @@ impl<'a> Element<'a> for ComboBox<'a> {
     fn element_ref(&self) -> &scraper::ElementRef<'a> {
         &self.element_ref
     }
+
+    fn wrap(self) -> super::Elements<'a> {
+        super::Elements::ComboBox(self)
+    }
 }
 
 impl<'a> ComboBox<'a> {
@@ -124,10 +128,6 @@ impl<'a> ComboBox<'a> {
             lsdata: OnceCell::new(),
             lsevents: OnceCell::new(),
         }
-    }
-
-    pub fn wrap(self) -> super::Elements<'a> {
-        super::Elements::ComboBox(self)
     }
 
     pub fn select(&self, key: &str, by_enter: bool) -> Result<Event> {

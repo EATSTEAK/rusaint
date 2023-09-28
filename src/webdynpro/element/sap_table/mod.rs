@@ -74,6 +74,10 @@ impl<'a> Element<'a> for SapTable<'a> {
     fn element_ref(&self) -> &scraper::ElementRef<'a> {
         &self.element_ref
     }
+
+    fn wrap(self) -> super::Elements<'a> {
+        super::Elements::SapTable(self)
+    }
 }
 
 impl<'a> SapTable<'a> {
@@ -85,10 +89,6 @@ impl<'a> SapTable<'a> {
             lsevents: OnceCell::new(),
             table: OnceCell::new(),
         }
-    }
-
-    pub fn wrap(self) -> super::Elements<'a> {
-        super::Elements::SapTable(self)
     }
 
     pub fn table(&self) -> Option<&SapTableBody<'a>> {

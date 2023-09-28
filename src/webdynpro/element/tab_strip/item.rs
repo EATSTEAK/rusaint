@@ -90,6 +90,10 @@ impl<'a> Element<'a> for TabStripItem<'a> {
     fn element_ref(&self) -> &scraper::ElementRef<'a> {
         &self.element_ref
     }
+
+    fn wrap(self) -> super::super::Elements<'a> {
+        super::super::Elements::TabStripItem(self)
+    }
 }
 
 impl<'a> TabStripItem<'a> {
@@ -99,9 +103,5 @@ impl<'a> TabStripItem<'a> {
             element_ref,
             lsdata: OnceCell::new(),
         }
-    }
-
-    pub fn wrap(self) -> super::super::Elements<'a> {
-        super::super::Elements::TabStripItem(self)
     }
 }
