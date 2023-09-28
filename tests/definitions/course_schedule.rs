@@ -13,6 +13,20 @@ async fn initial_load() {
 }
 
 #[tokio::test]
+async fn examine_elements() {
+    let mut app = CourseSchedule::new().await.unwrap();
+    app.load_placeholder().await.unwrap();
+    let ct_selector = scraper::Selector::parse("[ct]").unwrap();
+    for elem_ref in app.body().document().select(&ct_selector) {
+        let elem = Elements::dyn_elem(elem_ref);
+        if let Ok(elem) = elem {
+            println!("{:?}", elem);
+        }
+    }
+    assert!(false);
+}
+
+#[tokio::test]
 async fn edu_data() {
     let mut app = CourseSchedule::new().await.unwrap();
     app.load_placeholder().await.unwrap();
@@ -26,49 +40,11 @@ async fn edu_data() {
                     SapTableCells::Header(cell) => {
                         let content = cell.content();
                         print!("Header: ");
-                        match content {
-                            None => {
-                                print!("None, ")
-                            }
-                            Some(Elements::Caption(elem)) => {
-                                print!("Caption {{ {:?} }}, ", elem.text());
-                            }
-                            Some(Elements::TextView(elem)) => {
-                                print!("TextView {{ {:?} }}, ", elem.text());
-                            }
-                            Some(Elements::Unknown(elem)) => {
-                                print!("Unknown {{ {:?} }}, ", elem.lsdata());
-                            }
-                            Some(Elements::Button(elem)) => {
-                                print!("Button {{ {:?} }}, ", elem.lsdata());
-                            }
-                            _ => {
-                                print!("{:?}, ", content);
-                            }
-                        };
+                        if let Some(elem) = content { print!("{:?}, ", elem); }
                     }
                     SapTableCells::Normal(cell) => {
                         let content = cell.content();
-                        match content {
-                            None => {
-                                print!("None, ")
-                            }
-                            Some(Elements::Caption(elem)) => {
-                                print!("Caption {{ {:?} }},", elem.text());
-                            }
-                            Some(Elements::TextView(elem)) => {
-                                print!("TextView {{ {:?} }},", elem.text());
-                            }
-                            Some(Elements::Unknown(elem)) => {
-                                print!("Unknown {{ {:?} }}, ", elem.lsdata());
-                            }
-                            Some(Elements::Button(elem)) => {
-                                print!("Button {{ {:?} }}, ", elem.lsdata());
-                            }
-                            _ => {
-                                print!("{:?}, ", content);
-                            }
-                        };
+                        if let Some(elem) = content { print!("{:?}, ", elem); }
                     }
                     _ => {
                         print!("{:?}, ", col);

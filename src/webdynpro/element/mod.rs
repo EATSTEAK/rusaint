@@ -57,7 +57,7 @@ macro_rules! register_elements {
         }
 
         impl<'a> Elements<'a> {
-            fn dyn_elem(element: scraper::ElementRef<'a>) -> Result<Elements> {
+            pub fn dyn_elem(element: scraper::ElementRef<'a>) -> Result<Elements> {
                 let value = element.value();
                 let id = value.id().ok_or(ElementError::InvalidId)?.to_owned();
                 match element.value().attr("ct") {
