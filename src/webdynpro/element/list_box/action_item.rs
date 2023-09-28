@@ -18,8 +18,6 @@ pub struct ListBoxActionItem<'a> {
 #[allow(unused)]
 pub struct ListBoxActionItemLSData {
     #[serde(rename = "0")]
-    visibility: Option<String>,
-    #[serde(rename = "1")]
     custom_data: Option<String>,
 }
 

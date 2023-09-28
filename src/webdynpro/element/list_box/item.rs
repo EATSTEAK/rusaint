@@ -18,8 +18,14 @@ pub struct ListBoxItem<'a> {
 #[allow(unused)]
 pub struct ListBoxItemLSData {
     #[serde(rename = "0")]
-    visibility: Option<String>,
+    icon_src: Option<String>,
     #[serde(rename = "1")]
+    disabled_icon_src: Option<String>,
+    #[serde(rename = "2")]
+    semantic_text_color: Option<String>,
+    #[serde(rename = "3")]
+    is_deletable: Option<bool>,
+    #[serde(rename = "4")]
     custom_data: Option<String>,
 }
 
