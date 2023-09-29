@@ -1,7 +1,5 @@
 use thiserror::Error;
 
-
-
 #[derive(Error, Debug)]
 pub enum ClientError {
     #[error("Failed to request from web")]
@@ -18,8 +16,10 @@ pub enum ClientError {
     InvalidBaseUrl,
     #[error("No form found in desired application")]
     NoForm,
+    #[error("No cookie found in client")]
+    NoCookie,
     #[error("Tried to use invalid element")]
-    InvalidElement(#[from] ElementError)
+    InvalidElement(#[from] ElementError),
 }
 
 #[derive(Error, Debug)]
@@ -47,7 +47,7 @@ pub enum BodyError {
     #[error("Given selector for parsing body is invalid")]
     InvalidSelector,
     #[error("Element data is cannot be parsed")]
-    InvalidElement(#[from] ElementError)
+    InvalidElement(#[from] ElementError),
 }
 
 #[derive(Error, Debug)]
@@ -61,9 +61,8 @@ pub enum ElementError {
     #[error("Cannot find given element from document")]
     NoSuchElement,
     #[error("Cannot fire given event in this element")]
-    NoSuchEvent
+    NoSuchEvent,
 }
-
 
 #[derive(Error, Debug)]
 pub enum EventStrUnescapeError {
@@ -72,5 +71,5 @@ pub enum EventStrUnescapeError {
     #[error("hex string is not valid")]
     Parse(#[from] std::string::FromUtf16Error),
     #[error("No form found in desired application")]
-    NoForm
+    NoForm,
 }

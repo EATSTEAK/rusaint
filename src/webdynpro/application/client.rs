@@ -1,14 +1,14 @@
 use self::body::{Body, BodyUpdate};
-use crate::webdynpro::{
+use crate::{webdynpro::{
     error::ClientError,
     event::{event_queue::EventQueue, Event},
-};
+}, utils::default_header};
 use anyhow::Result;
 use reqwest::{cookie::Jar, header::*, RequestBuilder};
 use std::sync::Arc;
 use url::Url;
 
-pub const USER_AGENT: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36";
+
 
 pub struct Client {
     client: reqwest::Client,
@@ -23,21 +23,6 @@ pub struct SapSsrClient {
     wd_secure_id: String,
     pub app_name: String,
     use_beacon: bool,
-}
-
-pub fn default_header() -> HeaderMap {
-    let mut headers = HeaderMap::new();
-    headers.insert(
-        ACCEPT,
-        "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
-            .parse()
-            .unwrap(),
-    );
-    headers.insert(ACCEPT_ENCODING, "gzip, deflate, br".parse().unwrap());
-    headers.insert(ACCEPT_LANGUAGE, "ko,en;q=0.9,en-US;q=0.8".parse().unwrap());
-    headers.insert(CACHE_CONTROL, "max-age=0".parse().unwrap());
-    headers.insert(CONNECTION, "keep-alive".parse().unwrap());
-    headers
 }
 
 pub fn wd_xhr_header() -> HeaderMap {
