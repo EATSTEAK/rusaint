@@ -3,9 +3,9 @@ use std::{borrow::Cow, cell::OnceCell, ops::DerefMut};
 
 use serde::Deserialize;
 
-use super::{Element, Elements, ElementDef, EventParameterMap};
+use super::{Element, ElementDef, Elements, EventParameterMap};
 
-use self::{item::ListBoxItem, action_item::ListBoxActionItem};
+use self::{action_item::ListBoxActionItem, item::ListBoxItem};
 
 macro_rules! def_listbox_subset {
     [$($name:ident = $id:literal),+ $(,)?] => {$(
@@ -69,6 +69,8 @@ macro_rules! def_listbox_subset {
             }
         }
     )+
+
+    #[derive(Debug)]
     pub enum ListBoxes<'a> {
         $($name($name<'a>),)+
     }
@@ -185,15 +187,17 @@ impl<'a> ListBox<'a> {
     pub fn items(&self) -> &Vec<ListBoxItems<'a>> {
         self.items.get_or_init(|| {
             let items_selector = scraper::Selector::parse("[ct]").unwrap();
-            self.element_ref.select(&items_selector)
+            self.element_ref
+                .select(&items_selector)
                 .filter_map(|elem_ref| {
                     let element = Elements::dyn_elem(elem_ref).ok()?;
                     match element {
                         Elements::ListBoxItem(item) => Some(ListBoxItems::Item(item)),
                         Elements::ListBoxActionItem(item) => Some(ListBoxItems::ActionItem(item)),
-                        _ => None
+                        _ => None,
                     }
-                }).collect()
+                })
+                .collect()
         })
     }
 }
