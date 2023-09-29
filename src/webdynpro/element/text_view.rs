@@ -88,9 +88,8 @@ impl<'a> TextView<'a> {
         }
     }
 
-    pub fn text(&self) -> String {
+    pub fn text(&self) -> &str {
         self.text
             .get_or_init(|| self.element_ref().text().collect::<String>())
-            .to_owned()
     }
 }
