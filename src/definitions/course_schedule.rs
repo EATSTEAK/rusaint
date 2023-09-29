@@ -111,3 +111,95 @@ impl ToString for PeriodType {
         .to_owned()
     }
 }
+
+#[cfg(test)]
+mod test {
+    use crate::{
+        definitions::course_schedule::CourseSchedule,
+        webdynpro::element::{
+            list_box::{ListBoxItems, ListBoxes},
+            sap_table::cell::{SapTableCell, SapTableCells},
+            Elements,
+        },
+    };
+
+    #[tokio::test]
+    async fn initial_load() {
+        let mut app = CourseSchedule::new().await.unwrap();
+        app.load_placeholder().await.unwrap();
+    }
+
+    #[tokio::test]
+    async fn examine_elements() {
+        let mut app = CourseSchedule::new().await.unwrap();
+        app.load_placeholder().await.unwrap();
+        let ct_selector = scraper::Selector::parse("[ct]").unwrap();
+        for elem_ref in app.body().document().select(&ct_selector) {
+            let elem = Elements::dyn_elem(elem_ref);
+            if let Ok(elem) = elem {
+                println!("{:?}", elem);
+            }
+        }
+    }
+
+    #[tokio::test]
+    async fn combobox_items() {
+        let mut app = CourseSchedule::new().await.unwrap();
+        app.load_placeholder().await.unwrap();
+        let period_id_combobox = CourseSchedule::PERIOD_ID.from_body(app.body()).unwrap();
+        let listbox = period_id_combobox.item_list_box(app.body()).unwrap();
+        match listbox {
+            ListBoxes::ListBoxPopup(listbox) => {
+                for item in listbox.items() {
+                    match item {
+                        ListBoxItems::Item(item) => {
+                            println!("{:?}", item);
+                        }
+                        ListBoxItems::ActionItem(item) => {
+                            println!("{:?}", item);
+                        }
+                    }
+                }
+            }
+            _ => {
+                panic!("Unknown Listbox type {:?}", listbox);
+            }
+        }
+        assert!(true);
+    }
+
+    #[tokio::test]
+    async fn table_test() {
+        let mut app = CourseSchedule::new().await.unwrap();
+        app.load_placeholder().await.unwrap();
+        app.load_edu().await.unwrap();
+        let table = app.read_edu_raw().unwrap();
+        if let Some(table) = table.table() {
+            for row in table {
+                print!("row: ");
+                for col in row {
+                    match col {
+                        SapTableCells::Header(cell) => {
+                            let content = cell.content();
+                            print!("Header: ");
+                            if let Some(elem) = content {
+                                print!("{:?}, ", elem);
+                            }
+                        }
+                        SapTableCells::Normal(cell) => {
+                            let content = cell.content();
+                            if let Some(elem) = content {
+                                print!("{:?}, ", elem);
+                            }
+                        }
+                        _ => {
+                            print!("{:?}, ", col);
+                        }
+                    }
+                }
+                println!("");
+            }
+        }
+        assert!(true);
+    }
+}
