@@ -12,6 +12,8 @@ pub struct ListBoxActionItem<'a> {
     id: Cow<'static, str>,
     element_ref: scraper::ElementRef<'a>,
     lsdata: OnceCell<Option<ListBoxActionItemLSData>>,
+    title: OnceCell<String>,
+    text: OnceCell<String>,
 }
 
 #[derive(Debug, Deserialize, Default)]
@@ -63,6 +65,23 @@ impl<'a> ListBoxActionItem<'a> {
             id,
             element_ref,
             lsdata: OnceCell::new(),
+            title: OnceCell::new(),
+            text: OnceCell::new(),
         }
+    }
+
+    pub fn title(&self) -> &str {
+        self.title.get_or_init(|| {
+            self.element_ref
+                .value()
+                .attr("title")
+                .unwrap_or("")
+                .to_owned()
+        })
+    }
+
+    pub fn text(&self) -> &str {
+        self.text
+            .get_or_init(|| self.element_ref().text().collect::<String>())
     }
 }
