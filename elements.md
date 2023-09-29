@@ -9,7 +9,7 @@
 - [ ] ACF: AcpAdapter
 - [ ] AX: ActiveX
 - [ ] AP: Applet
-- [ ] AS: AriaStatic
+- [ ] AS: AriaStatic (!)
 - [ ] BCR: BarcodeReader
 - [ ] BIAF: BiApplicationFrame
 - [ ] BRC: BreadCrumb
@@ -36,7 +36,7 @@
   - [ ] CLC: ColumnLayoutCell(Fragment)
 - [ ] CB: ComboBox
   - [ ] CBS: ComboBoxString
-- [ ] CO: Container
+- [ ] CO: Container (!)
 - [ ] CTAR: ContentArea
 - [ ] CXP: ContextualPanel
 - [ ] DT~: DropTarget~
@@ -52,7 +52,7 @@
 - [ ] DRT: DropTarget
 - [ ] FU: FileUploadInput
 - [ ] FLC: Flash
-- [ ] FL: FlowLayout
+- [ ] FL: FlowLayout (!)
 - [ ] FLL: FluidLayout
   - [ ] FLCL: FluidLayoutCell
 - [ ] FLCO: FluidLayoutContainer
@@ -60,9 +60,9 @@
 - [ ] FTV: FormattedTextView
 - [ ] FRA: FreeContextualArea
 - [ ] GM: GeoMap
-- [ ] GL: GridLayout
-  - [ ] GLC: GridLayoutCell
-- [ ] G: Group
+- [ ] GL: GridLayout (!)
+  - [ ] GLC: GridLayoutCell (!)
+- [ ] G: Group (!)
 - [ ] HTV: HtmlTextView
 - [ ] HAR: HeaderArea
 - [ ] HV: HierarchicalView
@@ -70,23 +70,23 @@
   - [ ] HCNPI: HorizontalContextualPanelItem(standards,ie6)
   - [ ] HCNPMI: HorizontalContextualPanelMenuItems(standards,ie6)
 - [ ] HD: HorizontalDivider
-- [ ] HKC: Hotkeys
+- [ ] HKC: Hotkeys (!)
   - [ ] HK: Hotkey
 - [ ] HI: HTMLIsland
-- [ ] IHUB: IHub
+- [ ] IHUB: IHub (!)
   - [ ] IHUBEVENTING: IHubEventing
   - [ ] IHUBFRAMEPROTECT: IHubFrameProtect
   - [ ] IHUBLEGACYWDJ: IHubLegacyWDJ
   - [ ] IHUBMESSAGING: IHubMessaging
   - [ ] IHUBNAVIGATION: IHubNavigation
   - [ ] IHUBPOSTMESSAGE: IHubPostMessage
-  - [ ] IHUBWEBSOCKET: IHubWebSocket
-  - [ ] IHUBWORKPROTECT: IHubWorkProtect
+  - [ ] IHUBWEBSOCKET: IHubWebSocket (!)
+  - [ ] IHUBWORKPROTECT: IHubWorkProtect (!)
 - [ ] IF: Iframe
 - [ ] IMGM: ImageMap
   - [ ] IMGMA: ImageMapArea
 - [ ] IMG: Image
-- [ ] I: InputField
+- [ ] I: InputField (!)
   - [ ] II: InputField(with DisplayAsText)
   - [ ] IT: InputFieldText
 - [ ] IFA: InteractiveFormAbap
@@ -106,18 +106,18 @@
   - [X] LIB_PJS: ListBox(popup, TableData, searchable)
   - [X] LIB_M: ListBox(MultipleSelection)
   - [X] LIB_S: ListBox(SingleSelection)
-  - [ ] LIB_I: ListBoxItem
-  - [ ] LIB_AI: ListBoxActionItem
+  - [X] LIB_I: ListBoxItem
+  - [X] LIB_AI: ListBoxActionItem
 - [ ] IL: ItemList
   - [ ] ILI: ItemListItem
-- [ ] L: Label
+- [ ] L: Label (!)
 - [ ] LB: LargeButton
 - [ ] LEG: Legend
 - [ ] LNC: LinkChoice
 - [x] LN: LinkContent
-- [ ] LA: LoadingAnimation
+- [ ] LA: LoadingAnimation (!)
 - [x] LP: LoadingPlaceholder
-- [ ] ML: MatrixLayoutBase
+- [ ] ML: MatrixLayoutBase (!)
   - [ ] MLC: MatrixLayoutCell
 - [ ] MG: MeltingGroup
 - [ ] MNB: MenuBar
@@ -144,7 +144,7 @@
 - [ ] PHM: PageHeaderTitle
 - [ ] PLP: PageLayoutPanel
 - [ ] PL: PageLayout
-- [ ] PAGE: Page
+- [ ] PAGE: Page (!)
 - [ ] PGR: Pager
 - [ ] PG: Paginator
 - [ ] P: Panel
@@ -178,8 +178,8 @@
   - [ ] RMI: RoadMapItem(RoadMapStep)
 - [ ] STCS: SapTableCS
 - [ ] ST: SapTable
-- [ ] SC: ScrollContainer
-- [ ] SCB: Scrollbar
+- [ ] SC: ScrollContainer (!)
+- [ ] SCB: Scrollbar (!)
 - [ ] SH: SectionHeader
 - [ ] SB: SegmentedButton
 - [ ] SHC: Shuttle
@@ -193,7 +193,7 @@
 - [ ] STN: StickyNote
 - [ ] SWG: SwitchGroup
 - [ ] SWITCH: Switch
-- [ ] SY: System
+- [ ] SY: System (!)
   - [ ] PROP: Properties
 - [x] TS: TabStrip(standards,ie6)
   - [x] TSITM: TabStripItem(standards,ie6)
@@ -202,7 +202,7 @@
 - [ ] TXB: TextBar
 - [ ] TE: TextEdit
   - [ ] TEI: TextEdit(with DisplayAsText)
-- [ ] TV: TextView
+- [X] TV: TextView
 - [ ] THSL: ThresholdSlider
   - [ ] THSL_dynamic: dynamic THSL
   - [ ] THP_dynamic: Threshold(dynamic THSL)
@@ -214,11 +214,11 @@
 - [ ] TGL: ToggleLink
 - [ ] TOKEN: Token
 - [ ] TOKENIZER: Tokenizer
-- [ ] T: Toolbar
+- [ ] T: Toolbar (!)
   - [ ] T_ie6: Toolbar(ie6)
   - [ ] TBARSEP: ToolbarSeparator
 - [ ] TSW: TrackSwitch
-- [ ] TY: Tray
+- [ ] TY: Tray (!)
 - [ ] TR: Tree
   - [ ] TRN: TreeNode
 - [ ] TRI: TriStateCheckBox(standards,ie6)
