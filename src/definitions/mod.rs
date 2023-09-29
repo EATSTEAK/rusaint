@@ -89,7 +89,6 @@ impl<'a> BasicUSaintApplication {
             .header(COOKIE, token_cookie_str.parse::<HeaderValue>().unwrap())
             .header(HOST, "saint.ssu.ac.kr".parse::<HeaderValue>().unwrap())
             .build()?;
-        println!("{:?}", req);
         let res = client.execute(req).await?;
         if res.cookies().any(|cookie| cookie.name() == "MYSAPSSO2") {
             Ok(client)
