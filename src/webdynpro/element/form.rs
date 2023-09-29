@@ -52,8 +52,8 @@ impl<'a> Element<'a> for Form<'a> {
         &self.element_ref
     }
 
-    fn wrap(self) -> super::Elements<'a> {
-        super::Elements::Form(self)
+    fn wrap(self) -> super::ElementWrapper<'a> {
+        super::ElementWrapper::Form(self)
     }
 }
 

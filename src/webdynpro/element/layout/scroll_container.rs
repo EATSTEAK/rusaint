@@ -1,8 +1,8 @@
 use std::{borrow::Cow, cell::OnceCell};
 
+use crate::webdynpro::element::{Element, ElementDef, ElementWrapper, EventParameterMap};
 use anyhow::Result;
 use serde::Deserialize;
-use crate::webdynpro::element::{EventParameterMap, Element, ElementDef, Elements};
 
 // TODO: Implement additional events and data
 #[derive(Debug)]
@@ -46,8 +46,8 @@ impl<'a> Element<'a> for ScrollContainer<'a> {
         &self.element_ref
     }
 
-    fn wrap(self) -> Elements<'a> {
-        Elements::ScrollContainer(self)
+    fn wrap(self) -> ElementWrapper<'a> {
+        ElementWrapper::ScrollContainer(self)
     }
 }
 

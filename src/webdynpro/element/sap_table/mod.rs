@@ -75,8 +75,8 @@ impl<'a> Element<'a> for SapTable<'a> {
         &self.element_ref
     }
 
-    fn wrap(self) -> super::Elements<'a> {
-        super::Elements::SapTable(self)
+    fn wrap(self) -> super::ElementWrapper<'a> {
+        super::ElementWrapper::SapTable(self)
     }
 }
 

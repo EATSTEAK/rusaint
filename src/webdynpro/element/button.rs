@@ -120,8 +120,8 @@ impl<'a> Element<'a> for Button<'a> {
         &self.element_ref
     }
 
-    fn wrap(self) -> super::Elements<'a> {
-        super::Elements::Button(self)
+    fn wrap(self) -> super::ElementWrapper<'a> {
+        super::ElementWrapper::Button(self)
     }
 }
 

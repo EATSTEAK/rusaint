@@ -4,9 +4,9 @@ use std::{borrow::Cow, cell::OnceCell};
 use indexmap::IndexMap;
 use serde::Deserialize;
 
-use crate::webdynpro::{event::Event, error::ElementError, application::client::body::Body};
+use crate::webdynpro::{application::client::body::Body, error::ElementError, event::Event};
 
-use super::{Element, ElementDef, EventParameterMap, Elements, list_box::ListBoxes};
+use super::{list_box::ListBoxWrapper, Element, ElementDef, ElementWrapper, EventParameterMap};
 
 #[derive(Debug)]
 pub struct ComboBox<'a> {
@@ -115,8 +115,8 @@ impl<'a> Element<'a> for ComboBox<'a> {
         &self.element_ref
     }
 
-    fn wrap(self) -> super::Elements<'a> {
-        super::Elements::ComboBox(self)
+    fn wrap(self) -> super::ElementWrapper<'a> {
+        super::ElementWrapper::ComboBox(self)
     }
 }
 
@@ -130,11 +130,20 @@ impl<'a> ComboBox<'a> {
         }
     }
 
-    pub fn item_list_box(&self, body: &'a Body) -> Result<ListBoxes<'a>> {
-        let listbox_id = self.lsdata().and_then(|lsdata| {lsdata.item_list_box_id.as_ref()}).ok_or(ElementError::InvalidLSData)?;
-        let selector = scraper::Selector::parse(format!(r#"[id="{}"]"#, listbox_id).as_str()).or(Err(ElementError::InvalidId(listbox_id.to_owned())))?;
-        let elem = body.document().select(&selector).next().ok_or(ElementError::NoSuchElement)?;
-        Ok(ListBoxes::from_elements(Elements::dyn_elem(elem)?).ok_or(ElementError::NoSuchElement)?)
+    pub fn item_list_box(&self, body: &'a Body) -> Result<ListBoxWrapper<'a>> {
+        let listbox_id = self
+            .lsdata()
+            .and_then(|lsdata| lsdata.item_list_box_id.as_ref())
+            .ok_or(ElementError::InvalidLSData)?;
+        let selector = scraper::Selector::parse(format!(r#"[id="{}"]"#, listbox_id).as_str())
+            .or(Err(ElementError::InvalidId(listbox_id.to_owned())))?;
+        let elem = body
+            .document()
+            .select(&selector)
+            .next()
+            .ok_or(ElementError::NoSuchElement)?;
+        Ok(ListBoxWrapper::from_elements(ElementWrapper::dyn_elem(elem)?)
+            .ok_or(ElementError::NoSuchElement)?)
     }
 
     pub fn select(&self, key: &str, by_enter: bool) -> Result<Event> {

@@ -81,8 +81,8 @@ impl<'a> Element<'a> for Link<'a> {
         &self.element_ref
     }
 
-    fn wrap(self) -> super::Elements<'a> {
-        super::Elements::Link(self)
+    fn wrap(self) -> super::ElementWrapper<'a> {
+        super::ElementWrapper::Link(self)
     }
 }
 

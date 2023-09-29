@@ -81,8 +81,8 @@ macro_rules! basic_element_def {
                 &self.element_ref
             }
 
-            fn wrap(self) -> $crate::webdynpro::element::Elements<'a> {
-                $crate::webdynpro::element::Elements::$name(self)
+            fn wrap(self) -> $crate::webdynpro::element::ElementWrapper<'a> {
+                $crate::webdynpro::element::ElementWrapper::$name(self)
             }
         }
 
@@ -111,20 +111,20 @@ pub(crate) use basic_element_def;
 
 macro_rules! register_elements {
     [$( $enum:ident : $type: ty ),+ $(,)?] => {
-        pub enum Elements<'a> {
+        pub enum ElementWrapper<'a> {
             $( $enum($type), )*
             Unknown($crate::webdynpro::element::unknown::Unknown<'a>)
         }
 
-        impl<'a> std::fmt::Debug for Elements<'a> {
+        impl<'a> std::fmt::Debug for ElementWrapper<'a> {
             fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
                 match self {
-                    $( Elements::$enum(elem) => {
+                    $( ElementWrapper::$enum(elem) => {
                         f.debug_struct(stringify!($enum))
                             .field("id", &elem.id().to_string())
                             .finish()
                     },)+
-                    Elements::Unknown(elem) => {
+                    ElementWrapper::Unknown(elem) => {
                         f.debug_struct("Unknown")
                             .field("ct", &elem.ct().to_owned())
                             .field("id", &elem.id().to_string())
@@ -134,8 +134,8 @@ macro_rules! register_elements {
             }
         }
 
-        impl<'a> Elements<'a> {
-            pub fn dyn_elem(element: scraper::ElementRef<'a>) -> Result<Elements> {
+        impl<'a> ElementWrapper<'a> {
+            pub fn dyn_elem(element: scraper::ElementRef<'a>) -> Result<ElementWrapper> {
                 let value = element.value();
                 let id = value.id().ok_or(ElementError::NoSuchAttribute("id".to_owned()))?.to_owned();
                 #[allow(unreachable_patterns)]
@@ -325,7 +325,7 @@ pub trait Element<'a>: Sized {
 
     fn element_ref(&self) -> &ElementRef<'a>;
 
-    fn wrap(self) -> Elements<'a>;
+    fn wrap(self) -> ElementWrapper<'a>;
 
     
 }

@@ -89,8 +89,8 @@ impl<'a> Element<'a> for Custom {
         panic!("Element Custom is pseudo-element")
     }
 
-    fn wrap(self) -> super::Elements<'a> {
-        super::Elements::Custom(self)
+    fn wrap(self) -> super::ElementWrapper<'a> {
+        super::ElementWrapper::Custom(self)
     }
 }
 

@@ -145,8 +145,8 @@ impl<'a> Element<'a> for ClientInspector<'a> {
         &self.element_ref
     }
 
-    fn wrap(self) -> super::Elements<'a> {
-        super::Elements::ClientInspector(self)
+    fn wrap(self) -> super::ElementWrapper<'a> {
+        super::ElementWrapper::ClientInspector(self)
     }
 }
 

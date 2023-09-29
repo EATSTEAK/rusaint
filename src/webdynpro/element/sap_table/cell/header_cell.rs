@@ -5,7 +5,7 @@ use scraper::Selector;
 use serde::Deserialize;
 
 use crate::webdynpro::{
-    element::{Element, Elements, SubElement, SubElementDef},
+    element::{Element, ElementWrapper, SubElement, SubElementDef},
     error::BodyError,
 };
 
@@ -16,7 +16,7 @@ pub struct SapTableHeaderCell<'a> {
     id: Cow<'static, str>,
     element_ref: scraper::ElementRef<'a>,
     lsdata: OnceCell<Option<SapTableHeaderCellLSData>>,
-    contents: OnceCell<Option<Elements<'a>>>,
+    contents: OnceCell<Option<ElementWrapper<'a>>>,
 }
 
 #[derive(Deserialize, Debug, Default)]
@@ -92,14 +92,14 @@ impl<'a> SubElement<'a> for SapTableHeaderCell<'a> {
 }
 
 impl<'a> SapTableCell<'a> for SapTableHeaderCell<'a> {
-    fn content(&self) -> Option<&Elements<'a>> {
+    fn content(&self) -> Option<&ElementWrapper<'a>> {
         self.contents
             .get_or_init(|| {
                 let content_selector =
                     Selector::parse(format!(r#"[id="{}-CONTENT"] [ct]"#, &self.id).as_str())
                         .or(Err(BodyError::InvalidSelector))
                         .ok()?;
-                Elements::dyn_elem(
+                ElementWrapper::dyn_elem(
                     self.element_ref
                         .select(&content_selector)
                         .next()?

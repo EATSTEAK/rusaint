@@ -117,9 +117,9 @@ mod test {
     use crate::{
         definitions::course_schedule::CourseSchedule,
         webdynpro::element::{
-            list_box::{ListBoxItems, ListBoxes},
+            list_box::{ListBoxItemWrapper, ListBoxWrapper},
             sap_table::cell::{SapTableCell, SapTableCells},
-            Elements,
+            ElementWrapper,
         },
     };
 
@@ -135,7 +135,7 @@ mod test {
         app.load_placeholder().await.unwrap();
         let ct_selector = scraper::Selector::parse("[ct]").unwrap();
         for elem_ref in app.body().document().select(&ct_selector) {
-            let elem = Elements::dyn_elem(elem_ref);
+            let elem = ElementWrapper::dyn_elem(elem_ref);
             if let Ok(elem) = elem {
                 println!("{:?}", elem);
             }
@@ -149,13 +149,13 @@ mod test {
         let period_id_combobox = CourseSchedule::PERIOD_ID.from_body(app.body()).unwrap();
         let listbox = period_id_combobox.item_list_box(app.body()).unwrap();
         match listbox {
-            ListBoxes::ListBoxPopup(listbox) => {
+            ListBoxWrapper::ListBoxPopup(listbox) => {
                 for item in listbox.items() {
                     match item {
-                        ListBoxItems::Item(item) => {
+                        ListBoxItemWrapper::Item(item) => {
                             println!("{:?}", item);
                         }
-                        ListBoxItems::ActionItem(item) => {
+                        ListBoxItemWrapper::ActionItem(item) => {
                             println!("{:?}", item);
                         }
                     }

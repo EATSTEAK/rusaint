@@ -86,8 +86,8 @@ impl<'a> Element<'a> for Caption<'a> {
         &self.element_ref
     }
 
-    fn wrap(self) -> super::Elements<'a> {
-        super::Elements::Caption(self)
+    fn wrap(self) -> super::ElementWrapper<'a> {
+        super::ElementWrapper::Caption(self)
     }
 }
 

@@ -49,8 +49,8 @@ impl<'a> Element<'a> for LoadingPlaceholder<'a> {
         &self.element_ref
     }
 
-    fn wrap(self) -> super::Elements<'a> {
-        super::Elements::LoadingPlaceholder(self)
+    fn wrap(self) -> super::ElementWrapper<'a> {
+        super::ElementWrapper::LoadingPlaceholder(self)
     }
 }
 

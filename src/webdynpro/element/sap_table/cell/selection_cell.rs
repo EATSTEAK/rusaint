@@ -4,7 +4,7 @@ use std::{borrow::Cow, cell::OnceCell};
 use scraper::Selector;
 use serde::Deserialize;
 
-use crate::webdynpro::element::{Element, Elements, SubElement, SubElementDef};
+use crate::webdynpro::element::{Element, ElementWrapper, SubElement, SubElementDef};
 
 use super::{SapTableCell, SapTableCells};
 
@@ -13,7 +13,7 @@ pub struct SapTableSelectionCell<'a> {
     id: Cow<'static, str>,
     element_ref: scraper::ElementRef<'a>,
     lsdata: OnceCell<Option<SapTableSelectionCellLSData>>,
-    contents: OnceCell<Option<Elements<'a>>>,
+    contents: OnceCell<Option<ElementWrapper<'a>>>,
 }
 
 #[derive(Deserialize, Debug, Default)]
@@ -38,11 +38,11 @@ pub struct SapTableSelectionCellLSData {
 }
 
 impl<'a> SapTableCell<'a> for SapTableSelectionCell<'a> {
-    fn content(&self) -> Option<&Elements<'a>> {
+    fn content(&self) -> Option<&ElementWrapper<'a>> {
         self.contents
             .get_or_init(|| {
                 let content_selector = Selector::parse(":root > div > div [ct]").unwrap();
-                Elements::dyn_elem(
+                ElementWrapper::dyn_elem(
                     self.element_ref
                         .select(&content_selector)
                         .next()?

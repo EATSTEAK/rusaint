@@ -3,7 +3,7 @@ use std::{borrow::Cow, cell::OnceCell};
 
 use serde::Deserialize;
 
-use crate::webdynpro::element::Elements;
+use crate::webdynpro::element::ElementWrapper;
 
 use super::{Element, ElementDef, EventParameterMap};
 
@@ -64,8 +64,8 @@ impl<'a> Element<'a> for ListBoxActionItem<'a> {
         &self.element_ref
     }
 
-    fn wrap(self) -> Elements<'a> {
-        Elements::ListBoxActionItem(self)
+    fn wrap(self) -> ElementWrapper<'a> {
+        ElementWrapper::ListBoxActionItem(self)
     }
 }
 

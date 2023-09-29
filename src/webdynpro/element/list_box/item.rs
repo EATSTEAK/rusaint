@@ -3,10 +3,9 @@ use std::{borrow::Cow, cell::OnceCell};
 
 use serde::Deserialize;
 
-use crate::webdynpro::element::Elements;
+use crate::webdynpro::element::ElementWrapper;
 
 use super::{Element, ElementDef, EventParameterMap};
-
 
 pub struct ListBoxItem<'a> {
     id: Cow<'static, str>,
@@ -89,8 +88,8 @@ impl<'a> Element<'a> for ListBoxItem<'a> {
         &self.element_ref
     }
 
-    fn wrap(self) -> Elements<'a> {
-        Elements::ListBoxItem(self)
+    fn wrap(self) -> ElementWrapper<'a> {
+        ElementWrapper::ListBoxItem(self)
     }
 }
 

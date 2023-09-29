@@ -30,8 +30,11 @@ impl StudentInformation {
 
 #[cfg(test)]
 mod test {
+    use crate::{
+        definitions::student_information::StudentInformation, utils::obtain_ssu_sso_token,
+        webdynpro::element::ElementWrapper,
+    };
     use dotenv::dotenv;
-    use crate::{webdynpro::element::Elements, definitions::student_information::StudentInformation, utils::obtain_ssu_sso_token};
 
     #[tokio::test]
     async fn examine_elements() {
@@ -43,7 +46,7 @@ mod test {
         app.load_placeholder().await.unwrap();
         let ct_selector = scraper::Selector::parse("[ct]").unwrap();
         for elem_ref in app.body().document().select(&ct_selector) {
-            let elem = Elements::dyn_elem(elem_ref);
+            let elem = ElementWrapper::dyn_elem(elem_ref);
             if let Ok(elem) = elem {
                 println!("{:?}", elem);
             }

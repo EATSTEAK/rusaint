@@ -3,7 +3,7 @@ use std::{borrow::Cow, cell::OnceCell, ops::DerefMut};
 
 use serde::Deserialize;
 
-use super::{Element, ElementDef, Elements, EventParameterMap};
+use super::{Element, ElementDef, ElementWrapper, EventParameterMap};
 
 use self::{action_item::ListBoxActionItem, item::ListBoxItem};
 
@@ -58,8 +58,8 @@ macro_rules! def_listbox_subset {
                 &self.element_ref
             }
 
-            fn wrap(self) -> $crate::webdynpro::element::Elements<'a> {
-                $crate::webdynpro::element::Elements::$name(self)
+            fn wrap(self) -> $crate::webdynpro::element::ElementWrapper<'a> {
+                $crate::webdynpro::element::ElementWrapper::$name(self)
             }
         }
 
@@ -71,14 +71,14 @@ macro_rules! def_listbox_subset {
     )+
 
     #[derive(Debug)]
-    pub enum ListBoxes<'a> {
+    pub enum ListBoxWrapper<'a> {
         $($name($name<'a>),)+
     }
 
-    impl<'a> ListBoxes<'a> {
-        pub fn from_elements(elements: $crate::webdynpro::element::Elements<'a>) -> Option<ListBoxes<'a>> {
+    impl<'a> ListBoxWrapper<'a> {
+        pub fn from_elements(elements: $crate::webdynpro::element::ElementWrapper<'a>) -> Option<ListBoxWrapper<'a>> {
             match elements {
-                $($crate::webdynpro::element::Elements::$name(elem) => Some(ListBoxes::$name(elem)),)+
+                $($crate::webdynpro::element::ElementWrapper::$name(elem) => Some(ListBoxWrapper::$name(elem)),)+
                 _ => None
             }
         }
@@ -92,7 +92,7 @@ pub struct ListBox<'a> {
     element_ref: scraper::ElementRef<'a>,
     lsdata: OnceCell<Option<ListBoxLSData>>,
     lsevents: OnceCell<Option<EventParameterMap>>,
-    items: OnceCell<Vec<ListBoxItems<'a>>>,
+    items: OnceCell<Vec<ListBoxItemWrapper<'a>>>,
 }
 
 def_listbox_subset![
@@ -105,7 +105,7 @@ def_listbox_subset![
 ];
 
 #[derive(Debug)]
-pub enum ListBoxItems<'a> {
+pub enum ListBoxItemWrapper<'a> {
     Item(ListBoxItem<'a>),
     ActionItem(ListBoxActionItem<'a>),
 }
@@ -184,16 +184,18 @@ impl<'a> ListBox<'a> {
         }
     }
 
-    pub fn items(&self) -> &Vec<ListBoxItems<'a>> {
+    pub fn items(&self) -> &Vec<ListBoxItemWrapper<'a>> {
         self.items.get_or_init(|| {
             let items_selector = scraper::Selector::parse("[ct]").unwrap();
             self.element_ref
                 .select(&items_selector)
                 .filter_map(|elem_ref| {
-                    let element = Elements::dyn_elem(elem_ref).ok()?;
+                    let element = ElementWrapper::dyn_elem(elem_ref).ok()?;
                     match element {
-                        Elements::ListBoxItem(item) => Some(ListBoxItems::Item(item)),
-                        Elements::ListBoxActionItem(item) => Some(ListBoxItems::ActionItem(item)),
+                        ElementWrapper::ListBoxItem(item) => Some(ListBoxItemWrapper::Item(item)),
+                        ElementWrapper::ListBoxActionItem(item) => {
+                            Some(ListBoxItemWrapper::ActionItem(item))
+                        }
                         _ => None,
                     }
                 })

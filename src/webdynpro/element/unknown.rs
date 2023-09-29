@@ -49,8 +49,8 @@ impl<'a> Element<'a> for Unknown<'a> {
         &self.element_ref
     }
 
-    fn wrap(self) -> super::Elements<'a> {
-        super::Elements::Unknown(self)
+    fn wrap(self) -> super::ElementWrapper<'a> {
+        super::ElementWrapper::Unknown(self)
     }
 }
 
@@ -66,8 +66,13 @@ impl<'a> Unknown<'a> {
     }
 
     pub fn ct(&self) -> Option<&String> {
-        self.ct.get_or_init(|| {
-            self.element_ref.value().attr("ct").and_then(|str| Some(str.to_string()))
-        }).as_ref()
+        self.ct
+            .get_or_init(|| {
+                self.element_ref
+                    .value()
+                    .attr("ct")
+                    .and_then(|str| Some(str.to_string()))
+            })
+            .as_ref()
     }
 }

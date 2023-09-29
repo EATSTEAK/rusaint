@@ -91,8 +91,8 @@ impl<'a> Element<'a> for TabStripItem<'a> {
         &self.element_ref
     }
 
-    fn wrap(self) -> super::super::Elements<'a> {
-        super::super::Elements::TabStripItem(self)
+    fn wrap(self) -> super::super::ElementWrapper<'a> {
+        super::super::ElementWrapper::TabStripItem(self)
     }
 }
 

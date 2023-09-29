@@ -1,4 +1,4 @@
-use crate::webdynpro::element::Elements;
+use crate::webdynpro::element::ElementWrapper;
 
 use self::{
     header_cell::SapTableHeaderCell, hierarchical_cell::SapTableHierarchicalCell,
@@ -16,7 +16,7 @@ pub enum SapTableCells<'a> {
 }
 
 pub trait SapTableCell<'a> {
-    fn content(&self) -> Option<&Elements<'a>>;
+    fn content(&self) -> Option<&ElementWrapper<'a>>;
 }
 
 pub mod header_cell;

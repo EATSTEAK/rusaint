@@ -4,7 +4,7 @@ use std::{borrow::Cow, cell::OnceCell};
 
 use serde::Deserialize;
 
-use super::{button::Button, Element, ElementDef, Elements, EventParameterMap};
+use super::{button::Button, Element, ElementDef, ElementWrapper, EventParameterMap};
 
 #[derive(Debug)]
 pub struct ButtonRow<'a> {
@@ -55,8 +55,8 @@ impl<'a> Element<'a> for ButtonRow<'a> {
         &self.element_ref
     }
 
-    fn wrap(self) -> super::Elements<'a> {
-        super::Elements::ButtonRow(self)
+    fn wrap(self) -> super::ElementWrapper<'a> {
+        super::ElementWrapper::ButtonRow(self)
     }
 }
 
@@ -76,9 +76,9 @@ impl<'a> ButtonRow<'a> {
             self.element_ref
                 .select(button_selector)
                 .filter_map(|elem| {
-                    let elem = Elements::dyn_elem(elem);
+                    let elem = ElementWrapper::dyn_elem(elem);
                     match elem {
-                        Ok(Elements::Button(button)) => Some(button),
+                        Ok(ElementWrapper::Button(button)) => Some(button),
                         _ => None,
                     }
                 })

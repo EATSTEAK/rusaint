@@ -72,8 +72,8 @@ impl<'a> Element<'a> for TextView<'a> {
         &self.element_ref
     }
 
-    fn wrap(self) -> super::Elements<'a> {
-        super::Elements::TextView(self)
+    fn wrap(self) -> super::ElementWrapper<'a> {
+        super::ElementWrapper::TextView(self)
     }
 }
 
