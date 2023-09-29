@@ -7,13 +7,23 @@ use crate::webdynpro::element::Elements;
 
 use super::{Element, ElementDef, EventParameterMap};
 
-#[derive(Debug)]
 pub struct ListBoxActionItem<'a> {
     id: Cow<'static, str>,
     element_ref: scraper::ElementRef<'a>,
     lsdata: OnceCell<Option<ListBoxActionItemLSData>>,
     title: OnceCell<String>,
     text: OnceCell<String>,
+}
+
+impl<'a> std::fmt::Debug for ListBoxActionItem<'a> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("ListBoxActionItem")
+            .field("id", &self.id())
+            .field("lsdata", &self.lsdata())
+            .field("text", &self.text())
+            .field("title", &self.title())
+            .finish()
+    }
 }
 
 #[derive(Debug, Deserialize, Default)]

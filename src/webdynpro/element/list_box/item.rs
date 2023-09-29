@@ -7,7 +7,7 @@ use crate::webdynpro::element::Elements;
 
 use super::{Element, ElementDef, EventParameterMap};
 
-#[derive(Debug)]
+
 pub struct ListBoxItem<'a> {
     id: Cow<'static, str>,
     element_ref: scraper::ElementRef<'a>,
@@ -22,6 +22,25 @@ pub struct ListBoxItem<'a> {
     enabled: OnceCell<Option<bool>>,
     group_title: OnceCell<Option<&'a str>>,
     title: OnceCell<&'a str>,
+}
+
+impl<'a> std::fmt::Debug for ListBoxItem<'a> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("ListBoxItem")
+            .field("id", &self.id())
+            .field("lsdata", &self.lsdata())
+            .field("index", &self.index())
+            .field("key", &self.key())
+            .field("tooltip", &self.tooltip())
+            .field("value1", &self.value1())
+            .field("value2", &self.value2())
+            .field("selected", &self.selected())
+            .field("icon_tooltip", &self.icon_tooltip())
+            .field("enabled", &self.enabled())
+            .field("group_title", &self.group_title())
+            .field("title", &self.title())
+            .finish()
+    }
 }
 
 #[derive(Debug, Deserialize, Default)]
