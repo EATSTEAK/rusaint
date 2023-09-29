@@ -68,7 +68,20 @@ macro_rules! def_listbox_subset {
                 Self($crate::webdynpro::element::list_box::ListBox::new(id, element_ref))
             }
         }
-    )+};
+    )+
+    pub enum ListBoxes<'a> {
+        $($name($name<'a>),)+
+    }
+
+    impl<'a> ListBoxes<'a> {
+        pub fn from_elements(elements: $crate::webdynpro::element::Elements<'a>) -> Option<ListBoxes<'a>> {
+            match elements {
+                $($crate::webdynpro::element::Elements::$name(elem) => Some(ListBoxes::$name(elem)),)+
+                _ => None
+            }
+        }
+    }
+};
 }
 
 #[derive(Debug)]

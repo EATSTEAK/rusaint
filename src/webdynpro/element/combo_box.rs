@@ -6,7 +6,7 @@ use serde::Deserialize;
 
 use crate::webdynpro::{event::Event, error::ElementError, application::client::body::Body};
 
-use super::{Element, ElementDef, EventParameterMap, Elements};
+use super::{Element, ElementDef, EventParameterMap, Elements, list_box::ListBoxes};
 
 #[derive(Debug)]
 pub struct ComboBox<'a> {
@@ -130,11 +130,11 @@ impl<'a> ComboBox<'a> {
         }
     }
 
-    pub fn item_list_box(&self, body: &'a Body) -> Result<Elements> {
+    pub fn item_list_box(&self, body: &'a Body) -> Result<ListBoxes<'a>> {
         let listbox_id = self.lsdata().and_then(|lsdata| {lsdata.item_list_box_id.as_ref()}).ok_or(ElementError::InvalidLSData)?;
         let selector = scraper::Selector::parse(format!(r#"[id="{}"]"#, listbox_id).as_str()).or(Err(ElementError::InvalidId))?;
         let elem = body.document().select(&selector).next().ok_or(ElementError::NoSuchElement)?;
-        Ok(Elements::dyn_elem(elem)?)
+        Ok(ListBoxes::from_elements(Elements::dyn_elem(elem)?).ok_or(ElementError::NoSuchElement)?)
     }
 
     pub fn select(&self, key: &str, by_enter: bool) -> Result<Event> {
