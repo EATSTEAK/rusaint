@@ -5,7 +5,7 @@ use dotenv::dotenv;
 use anyhow::Result;
 use rusaint::{
     element_ref,
-    webdynpro::element::{button::Button, link::Link, text_view::TextView},
+    webdynpro::element::{button::Button, link::Link, text_view::TextView}, utils::obtain_ssu_sso_token,
 };
 
 use super::EventTestSuite;
@@ -39,8 +39,9 @@ impl<'a> EventTestSuite {
 async fn test_button_events() {
     dotenv().ok();
     let id = std::env::var("SSO_ID").unwrap();
-    let token = std::env::var("SSO_TOKEN").unwrap();
-    let mut suite = EventTestSuite::new(id.as_str(), token.as_str())
+    let password = std::env::var("SSO_PASSWORD").unwrap();
+    let token = obtain_ssu_sso_token(&id, &password).await.unwrap();
+    let mut suite = EventTestSuite::new(&id, &token)
         .await
         .unwrap();
     suite.test_button().await.unwrap();
