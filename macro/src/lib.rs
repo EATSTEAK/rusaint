@@ -5,6 +5,6 @@ use syn::{parse_macro_input, DeriveInput};
 
 #[proc_macro_derive(Element, attributes(lsdata, lsevents, ignore))]
 pub fn derive_element(input: TokenStream) -> TokenStream {
-    let input = parse_macro_input!(input as DeriveInput);
+    let _input = parse_macro_input!(input as DeriveInput);
     TokenStream::new()
 }
