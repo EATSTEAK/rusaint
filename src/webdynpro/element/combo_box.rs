@@ -132,7 +132,7 @@ impl<'a> ComboBox<'a> {
 
     pub fn item_list_box(&self, body: &'a Body) -> Result<ListBoxes<'a>> {
         let listbox_id = self.lsdata().and_then(|lsdata| {lsdata.item_list_box_id.as_ref()}).ok_or(ElementError::InvalidLSData)?;
-        let selector = scraper::Selector::parse(format!(r#"[id="{}"]"#, listbox_id).as_str()).or(Err(ElementError::InvalidId))?;
+        let selector = scraper::Selector::parse(format!(r#"[id="{}"]"#, listbox_id).as_str()).or(Err(ElementError::InvalidId(listbox_id.to_owned())))?;
         let elem = body.document().select(&selector).next().ok_or(ElementError::NoSuchElement)?;
         Ok(ListBoxes::from_elements(Elements::dyn_elem(elem)?).ok_or(ElementError::NoSuchElement)?)
     }

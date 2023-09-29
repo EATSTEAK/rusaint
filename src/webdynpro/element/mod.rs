@@ -58,7 +58,7 @@ macro_rules! register_elements {
         impl<'a> Elements<'a> {
             pub fn dyn_elem(element: scraper::ElementRef<'a>) -> Result<Elements> {
                 let value = element.value();
-                let id = value.id().ok_or(ElementError::InvalidId)?.to_owned();
+                let id = value.id().ok_or(ElementError::NoSuchAttribute("id".to_owned()))?.to_owned();
                 #[allow(unreachable_patterns)]
                 match element.value().attr("ct") {
                     $( Some(<$type>::CONTROL_ID) => Ok($crate::webdynpro::element::ElementDef::<$type>::new_dynamic(id).from_elem(element)?.wrap()), )*
@@ -209,7 +209,7 @@ pub trait Element<'a>: Sized {
             .document()
             .select(selector)
             .next()
-            .ok_or(ElementError::InvalidId)?;
+            .ok_or(ElementError::InvalidId(elem_def.id().to_owned()))?;
         Self::from_elem(elem_def, element)
     }
 
@@ -280,7 +280,7 @@ where Parent: Element<'a>, T: SubElement<'a>
 
     pub fn selector(&self) -> Result<Selector> {
         Selector::parse(format!(r#"[id="{}"] [id="{}"]"#, self.parent.id, self.id).as_str())
-        .or(Err(ElementError::InvalidId)?)
+        .or(Err(ElementError::InvalidId(format!("{}, {}", self.parent.id, self.id)))?)
     }
     pub fn from_body(self, body: &'a Body) -> Result<T> {
         T::from_body(self, body)
@@ -311,7 +311,7 @@ pub trait SubElement<'a>: Sized {
             .document()
             .select(selector)
             .next()
-            .ok_or(ElementError::InvalidId)?;
+            .ok_or(ElementError::InvalidId((&elem_def.id).clone().into_owned()))?;
         Self::from_elem(elem_def, element)
     }
 

@@ -52,8 +52,10 @@ pub enum BodyError {
 
 #[derive(Error, Debug)]
 pub enum ElementError {
-    #[error("Cannot parse selector from id, is id valid?")]
-    InvalidId,
+    #[error("Cannot find attribute {0}")]
+    NoSuchAttribute(String),
+    #[error("Invalid id {0}")]
+    InvalidId(String),
     #[error("Element has invalid lsdata attribute")]
     InvalidLSData,
     #[error("Failed parse lsdata json-like object")]
