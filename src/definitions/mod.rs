@@ -1,23 +1,26 @@
 use anyhow::Result;
-use reqwest::cookie::Jar;
+use reqwest::{
+    cookie::Jar,
+    header::{HeaderValue, COOKIE, HOST},
+};
 use std::{
     ops::{Deref, DerefMut},
     sync::Arc,
 };
 use url::Url;
 
-use crate::webdynpro::{
-    application::{
-        client::{default_header, Client, USER_AGENT},
-        BasicApplication,
+use crate::{
+    utils::{default_header, DEFAULT_USER_AGENT},
+    webdynpro::{
+        application::{client::Client, BasicApplication},
+        element::{
+            client_inspector::ClientInspector,
+            custom::{Custom, CustomClientInfo},
+            element_ref,
+            loading_placeholder::LoadingPlaceholder,
+        },
+        error::ClientError,
     },
-    element::{
-        client_inspector::ClientInspector,
-        custom::{Custom, CustomClientInfo},
-        element_ref,
-        loading_placeholder::LoadingPlaceholder,
-    },
-    error::ClientError,
 };
 
 const SSU_USAINT_SSO_URL: &str = "https://saint.ssu.ac.kr/webSSO/sso.jsp";
@@ -56,24 +59,38 @@ impl<'a> BasicUSaintApplication {
 
     async fn client_with_session(sso_idno: &str, sso_token: &str) -> Result<reqwest::Client> {
         let jar: Arc<Jar> = Arc::new(Jar::default());
-        jar.add_cookie_str(
-            format!("sToken={}; domain=.ssu.ac.kr; path=/; secure", sso_token).as_str(),
-            &Url::parse("https://smartid.ssu.ac.kr")?,
-        );
         let client = reqwest::Client::builder()
             .cookie_provider(jar)
             .cookie_store(true)
-            .user_agent(USER_AGENT)
+            .user_agent(DEFAULT_USER_AGENT)
             .build()
             .unwrap();
-        let res = client
+        // Manually include WAF cookies because of bug in reqwest::cookie::Jar
+        let portal = client
+            .get("https://saint.ssu.ac.kr/irj/portal")
+            .headers(default_header())
+            .header(HOST, "saint.ssu.ac.kr".parse::<HeaderValue>().unwrap())
+            .send()
+            .await?;
+        let waf = portal
+            .cookies()
+            .find(|cookie| cookie.name() == "WAF")
+            .ok_or(ClientError::NoCookie)?;
+        let waf_cookie_str = format!("WAF={}; domain=saint.ssu.ac.kr; path=/;", waf.value());
+        let token_cookie_str = format!("sToken={}; domain=.ssu.ac.kr; path=/; secure", sso_token);
+        let req = client
             .get(format!(
                 "{}?sToken={}&sIdno={}",
                 SSU_USAINT_SSO_URL, sso_token, sso_idno
             ))
+            .query(&[("sToken", sso_token), ("sIdno", sso_idno)])
             .headers(default_header())
-            .send()
-            .await?;
+            .header(COOKIE, waf_cookie_str.parse::<HeaderValue>().unwrap())
+            .header(COOKIE, token_cookie_str.parse::<HeaderValue>().unwrap())
+            .header(HOST, "saint.ssu.ac.kr".parse::<HeaderValue>().unwrap())
+            .build()?;
+        println!("{:?}", req);
+        let res = client.execute(req).await?;
         if res.cookies().any(|cookie| cookie.name() == "MYSAPSSO2") {
             Ok(client)
         } else {
@@ -118,3 +135,21 @@ impl<'a> BasicUSaintApplication {
 
 pub mod course_schedule;
 pub mod student_information;
+
+#[cfg(test)]
+mod test {
+    use crate::{definitions::BasicUSaintApplication, utils::obtain_ssu_sso_token};
+    use dotenv::dotenv;
+
+    #[tokio::test]
+    async fn test_sso_login() {
+        dotenv().ok();
+        let id = std::env::var("SSO_ID").unwrap();
+        let password = std::env::var("SSO_PASSWORD").unwrap();
+        let token = obtain_ssu_sso_token(&id, &password).await.unwrap();
+        println!("Got token: {}", &token);
+        BasicUSaintApplication::with_auth("ZCMW1001n", &id, &token)
+            .await
+            .unwrap();
+    }
+}
