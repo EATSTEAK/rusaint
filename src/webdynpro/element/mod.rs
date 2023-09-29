@@ -9,7 +9,7 @@ use serde_json::{Map, Value};
 
 use crate::webdynpro::element::text_view::TextView;
 
-use self::{button::Button, client_inspector::ClientInspector, combo_box::ComboBox, custom::Custom, form::Form, loading_placeholder::LoadingPlaceholder, tab_strip::{TabStrip, item::TabStripItem}, sap_table::SapTable, caption::Caption, link::Link, button_row::ButtonRow, list_box::{ListBoxMultiple, ListBoxPopup, ListBoxPopupFiltered, ListBoxPopupJson, ListBoxPopupJsonFiltered, ListBoxSingle, item::ListBoxItem, action_item::ListBoxActionItem}, layout::{FlowLayout, scroll_container::ScrollContainer, grid_layout::{GridLayout, cell::GridLayoutCell}}};
+use self::{button::Button, client_inspector::ClientInspector, combo_box::ComboBox, custom::Custom, form::Form, loading_placeholder::LoadingPlaceholder, tab_strip::{TabStrip, item::TabStripItem}, sap_table::SapTable, caption::Caption, link::Link, button_row::ButtonRow, list_box::{ListBoxMultiple, ListBoxPopup, ListBoxPopupFiltered, ListBoxPopupJson, ListBoxPopupJsonFiltered, ListBoxSingle, item::ListBoxItem, action_item::ListBoxActionItem}, layout::{FlowLayout, scroll_container::ScrollContainer, grid_layout::{GridLayout, cell::GridLayoutCell}}, image::Image, input_field::InputField, label::Label};
 
 use super::{event::{ucf_parameters::UcfParameters, Event, EventBuilder}, error::{ElementError, BodyError}, application::client::body::Body};
 
@@ -20,6 +20,9 @@ pub mod client_inspector;
 pub mod combo_box;
 pub mod custom;
 pub mod form;
+pub mod image;
+pub mod input_field;
+pub mod label;
 pub mod layout;
 pub mod link;
 pub mod loading_placeholder;
@@ -154,6 +157,9 @@ register_elements![
     Form: Form<'a>,
     GridLayout: GridLayout<'a>,
     GridLayoutCell: GridLayoutCell<'a>,
+    Image: Image<'a>,
+    InputField: InputField<'a>,
+    Label: Label<'a>,
     Link: Link<'a>,
     ListBoxPopup: ListBoxPopup<'a>,
     ListBoxPopupFiltered: ListBoxPopupFiltered<'a>,
