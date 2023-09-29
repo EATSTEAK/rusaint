@@ -29,6 +29,20 @@ pub struct ListBoxItemLSData {
     custom_data: Option<String>,
 }
 
+#[derive(Debug, Default)]
+#[allow(unused)]
+pub struct ListBoxItemData {
+    key: Option<String>,
+    tooltip: Option<String>,
+    value1: Option<String>,
+    value2: Option<String>,
+    selected: Option<bool>,
+    icon_tooltip: Option<String>,
+    enabled: Option<bool>,
+    group_title: Option<String>,
+    escape: Option<bool>
+}
+
 impl<'a> Element<'a> for ListBoxItem<'a> {
     const CONTROL_ID: &'static str = "LIB_I";
     const ELEMENT_NAME: &'static str = "ListBoxItem";
