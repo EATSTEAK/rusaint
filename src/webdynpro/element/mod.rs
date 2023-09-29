@@ -9,7 +9,7 @@ use serde_json::{Map, Value};
 
 use crate::webdynpro::element::text_view::TextView;
 
-use self::{button::Button, client_inspector::ClientInspector, combo_box::ComboBox, custom::Custom, form::Form, loading_placeholder::LoadingPlaceholder, tab_strip::{TabStrip, item::TabStripItem}, sap_table::SapTable, caption::Caption, link::Link, button_row::ButtonRow, list_box::{ListBoxMultiple, ListBoxPopup, ListBoxPopupFiltered, ListBoxPopupJson, ListBoxPopupJsonFiltered, ListBoxSingle, item::ListBoxItem, action_item::ListBoxActionItem}};
+use self::{button::Button, client_inspector::ClientInspector, combo_box::ComboBox, custom::Custom, form::Form, loading_placeholder::LoadingPlaceholder, tab_strip::{TabStrip, item::TabStripItem}, sap_table::SapTable, caption::Caption, link::Link, button_row::ButtonRow, list_box::{ListBoxMultiple, ListBoxPopup, ListBoxPopupFiltered, ListBoxPopupJson, ListBoxPopupJsonFiltered, ListBoxSingle, item::ListBoxItem, action_item::ListBoxActionItem}, layout::{FlowLayout, scroll_container::ScrollContainer, grid_layout::{GridLayout, cell::GridLayoutCell}}};
 
 use super::{event::{ucf_parameters::UcfParameters, Event, EventBuilder}, error::{ElementError, BodyError}, application::client::body::Body};
 
@@ -20,6 +20,7 @@ pub mod client_inspector;
 pub mod combo_box;
 pub mod custom;
 pub mod form;
+pub mod layout;
 pub mod link;
 pub mod loading_placeholder;
 pub mod tab_strip;
@@ -29,6 +30,79 @@ pub mod text_view;
 pub mod unknown;
 
 pub type EventParameterMap = HashMap<String, (UcfParameters, IndexMap<String, String>)>;
+
+macro_rules! basic_element_def {
+    ($name:ident($controlid:literal, $lsdata:ident), {
+        $($field:ident: $ftype:tt -> $encoded:literal),+ $(,)?
+    }) => {
+        #[derive(Debug)]
+        pub struct $name<'a> {
+            id: std::borrow::Cow<'static, str>,
+            element_ref: scraper::ElementRef<'a>,
+            lsdata: std::cell::OnceCell<Option<$lsdata>>
+        }
+        impl<'a> $crate::webdynpro::element::Element<'a> for $name<'a> {
+            const CONTROL_ID: &'static str = $controlid;
+
+            const ELEMENT_NAME: &'static str = stringify!($name);
+
+            type ElementLSData = $lsdata;
+
+            fn lsdata(&self) -> Option<&Self::ElementLSData> {
+                self.lsdata
+                    .get_or_init(|| {
+                        let lsdata_obj = Self::lsdata_elem(self.element_ref).ok()?;
+                        serde_json::from_value::<Self::ElementLSData>(lsdata_obj).ok()
+                    })
+                    .as_ref()
+            }
+
+            fn lsevents(&self) -> Option<&$crate::webdynpro::element::EventParameterMap> {
+                None
+            }
+
+            fn from_elem(
+                elem_def: $crate::webdynpro::element::ElementDef<'a, Self>,
+                element: scraper::ElementRef<'a>,
+            ) -> anyhow::Result<Self> {
+                Ok(Self::new(elem_def.id.to_owned(), element))
+            }
+
+            fn id(&self) -> &str {
+                &self.id
+            }
+
+            fn element_ref(&self) -> &scraper::ElementRef<'a> {
+                &self.element_ref
+            }
+
+            fn wrap(self) -> $crate::webdynpro::element::Elements<'a> {
+                $crate::webdynpro::element::Elements::$name(self)
+            }
+        }
+
+        #[derive(serde::Deserialize, Debug, Default)]
+        #[allow(unused)]
+        pub struct $lsdata {
+            $(
+                #[serde(rename = $encoded)]
+                $field: Option<$ftype>,
+            )+
+        }
+
+        impl<'a> $name<'a> {
+            pub const fn new(id: std::borrow::Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {
+                Self {
+                    id,
+                    element_ref,
+                    lsdata: std::cell::OnceCell::new(),
+                }
+            }
+        }
+    };
+}
+
+pub(crate) use basic_element_def;
 
 macro_rules! register_elements {
     [$( $enum:ident : $type: ty ),+ $(,)?] => {
@@ -76,7 +150,10 @@ register_elements![
     ClientInspector: ClientInspector<'a>,
     ComboBox: ComboBox<'a>,
     Custom: Custom,
+    FlowLayout: FlowLayout<'a>,
     Form: Form<'a>,
+    GridLayout: GridLayout<'a>,
+    GridLayoutCell: GridLayoutCell<'a>,
     Link: Link<'a>,
     ListBoxPopup: ListBoxPopup<'a>,
     ListBoxPopupFiltered: ListBoxPopupFiltered<'a>,
@@ -90,6 +167,7 @@ register_elements![
     TabStrip: TabStrip<'a>,
     TabStripItem: TabStripItem<'a>,
     SapTable: SapTable<'a>,
+    ScrollContainer: ScrollContainer<'a>,
     TextView: TextView<'a>,
     Caption: Caption<'a>,
 ];
