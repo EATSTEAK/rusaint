@@ -12,9 +12,10 @@ use crate::webdynpro::{
 
 use super::{SapTableCell, SapTableCellWrapper};
 
-#[derive(Debug)]
+#[derive(custom_debug_derive::Debug)]
 pub struct SapTableHeaderCell<'a> {
     id: Cow<'static, str>,
+    #[debug(skip)]
     element_ref: scraper::ElementRef<'a>,
     lsdata: OnceCell<Option<SapTableHeaderCellLSData>>,
     content: OnceCell<Option<ElementWrapper<'a>>>,

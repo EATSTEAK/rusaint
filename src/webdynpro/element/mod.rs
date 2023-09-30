@@ -1,7 +1,7 @@
 use std::{marker, collections::HashMap, borrow::Cow};
 use anyhow::Result;
 
-use indexmap::IndexMap;
+
 use regex::Regex;
 use scraper::{Selector, ElementRef};
 use serde_json::{Map, Value};
@@ -35,7 +35,7 @@ pub mod list_box;
 pub mod text_view;
 pub mod unknown;
 
-pub type EventParameterMap = HashMap<String, (UcfParameters, IndexMap<String, String>)>;
+pub type EventParameterMap = HashMap<String, (UcfParameters, HashMap<String, String>)>;
 
 macro_rules! define_element_base {
     {$name:ident<$controlid:literal, $element_name:literal> {
@@ -44,10 +44,11 @@ macro_rules! define_element_base {
     $lsdata:ident {
         $($field:ident: $ftype:ty => $encoded:literal),* $(,)?
     }} => {
-        #[derive(Debug)]
+        #[derive(custom_debug_derive::Debug)]
         #[allow(unused)]
         pub struct $name<'a> {
             id: std::borrow::Cow<'static, str>,
+            #[debug(skip)]
             element_ref: scraper::ElementRef<'a>,
             lsdata: std::cell::OnceCell<Option<$lsdata>>,
             $($sfield: $stype, )*
@@ -335,7 +336,7 @@ pub trait Element<'a>: Sized {
 
 pub trait Interactable<'a>: Element<'a> {
 
-    unsafe fn fire_event_unchecked(event: String, parameters: IndexMap<String, String>, ucf_params: UcfParameters, custom_params: IndexMap<String, String>) -> Event {
+    unsafe fn fire_event_unchecked(event: String, parameters: HashMap<String, String>, ucf_params: UcfParameters, custom_params: HashMap<String, String>) -> Event {
         EventBuilder::default()
         .control(Self::ELEMENT_NAME.to_owned())
         .event(event)
@@ -350,19 +351,19 @@ pub trait Interactable<'a>: Element<'a> {
         let raw_data = element.value().attr("lsevents").ok_or(BodyError::Invalid)?;
         let normalized = normalize_lsjson(raw_data);
         let json: Map<String, Value> = serde_json::from_str::<Map<String, Value>>(&normalized).or(Err(BodyError::Invalid))?.to_owned();
-        Ok(json.into_iter().flat_map(|(key, value)| -> Result<(String, (UcfParameters, IndexMap<String, String>)), BodyError> {
+        Ok(json.into_iter().flat_map(|(key, value)| -> Result<(String, (UcfParameters, HashMap<String, String>)), BodyError> {
                     let mut parameters = value.as_array().ok_or(BodyError::Invalid)?.to_owned().into_iter();
                     let raw_ucf = parameters.next().ok_or(BodyError::Invalid)?;
                     let ucf: UcfParameters = serde_json::from_value(raw_ucf).or(Err(BodyError::Invalid))?;
                     let mut custom = parameters.next().ok_or(BodyError::Invalid)?.as_object().ok_or(BodyError::Invalid)?.to_owned();
                     let custom_map = custom.iter_mut().map(|(key, value)| { 
                         (key.to_owned(), value.to_string())
-                    }).collect::<IndexMap<String, String>>();
+                    }).collect::<HashMap<String, String>>();
                     Ok((key, (ucf, custom_map)))
                 }).collect::<EventParameterMap>())
     }
 
-    fn event_parameter(&self, event: &str) -> Result<&(UcfParameters, IndexMap<String, String>), ElementError> {
+    fn event_parameter(&self, event: &str) -> Result<&(UcfParameters, HashMap<String, String>), ElementError> {
         if let Some(lsevents) = self.lsevents() {
             lsevents.get(event).ok_or(ElementError::NoSuchEvent)
         } else {
@@ -370,7 +371,7 @@ pub trait Interactable<'a>: Element<'a> {
         }
     }
 
-    fn fire_event(&self, event: String, parameters: IndexMap<String, String>) -> Result<Event> {
+    fn fire_event(&self, event: String, parameters: HashMap<String, String>) -> Result<Event> {
         let (ucf_params, custom_params) = self.event_parameter(&event)?;
         Ok(unsafe { Self::fire_event_unchecked(event, parameters, ucf_params.to_owned(), custom_params.to_owned()) })
     }
