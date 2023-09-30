@@ -1,4 +1,5 @@
 use anyhow::Result;
+use getset::Getters;
 use std::{borrow::Cow, cell::OnceCell};
 
 use scraper::Selector;
@@ -16,8 +17,9 @@ pub struct SapTableMatrixCell<'a> {
     contents: OnceCell<Option<ElementWrapper<'a>>>,
 }
 
-#[derive(Deserialize, Debug, Default)]
+#[derive(Getters, Deserialize, Debug, Default)]
 #[allow(unused)]
+#[get = "pub"]
 pub struct SapTableMatrixCellLSData {
     #[serde(rename = "0")]
     cell_background_design: Option<String>,

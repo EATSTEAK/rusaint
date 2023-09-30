@@ -1,4 +1,5 @@
 use anyhow::Result;
+use getset::Getters;
 use std::{borrow::Cow, cell::OnceCell};
 
 use scraper::Selector;
@@ -16,8 +17,9 @@ pub struct SapTableNormalCell<'a> {
     contents: OnceCell<Option<ElementWrapper<'a>>>,
 }
 
-#[derive(Deserialize, Debug, Default)]
+#[derive(Getters, Deserialize, Debug, Default)]
 #[allow(unused)]
+#[get = "pub"]
 pub struct SapTableNormalCellLSData {
     #[serde(rename = "0")]
     is_selected: Option<bool>,
