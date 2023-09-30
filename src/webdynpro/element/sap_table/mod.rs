@@ -11,12 +11,12 @@ use crate::webdynpro::{
 use self::cell::{
     header_cell::SapTableHeaderCell, hierarchical_cell::SapTableHierarchicalCell,
     matrix_cell::SapTableMatrixCell, normal_cell::SapTableNormalCell,
-    selection_cell::SapTableSelectionCell, SapTableCells,
+    selection_cell::SapTableSelectionCell, SapTableCellWrapper,
 };
 
 use super::{define_element_interactable, ElementDef, SubElementDef};
 
-pub type SapTableBody<'a> = Vec<Vec<SapTableCells<'a>>>;
+pub type SapTableBody<'a> = Vec<Vec<SapTableCellWrapper<'a>>>;
 
 define_element_interactable! {
     SapTable<"ST", "SapTable"> {
@@ -72,11 +72,11 @@ impl<'a> SapTable<'a> {
         Ok(tbody
             .children()
             .filter_map(|node| scraper::ElementRef::wrap(node))
-            .map(|row_ref| -> Vec<SapTableCells<'a>> {
+            .map(|row_ref| -> Vec<SapTableCellWrapper<'a>> {
                 let subct_selector = Selector::parse("[subct]").unwrap();
                 let subcts = row_ref.select(&subct_selector);
                 subcts
-                    .filter_map(|subct_ref| -> Option<SapTableCells<'a>> {
+                    .filter_map(|subct_ref| -> Option<SapTableCellWrapper<'a>> {
                         let subct_value = subct_ref.value();
                         match subct_value.attr("subct") {
                             Some(SapTableNormalCell::SUBCONTROL_ID) => Some(
@@ -127,7 +127,7 @@ impl<'a> SapTable<'a> {
                             _ => None,
                         }
                     })
-                    .collect::<Vec<SapTableCells<'a>>>()
+                    .collect::<Vec<SapTableCellWrapper<'a>>>()
             })
             .collect())
     }

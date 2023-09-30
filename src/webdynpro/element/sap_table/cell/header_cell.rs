@@ -9,7 +9,7 @@ use crate::webdynpro::{
     error::BodyError,
 };
 
-use super::{SapTableCell, SapTableCells};
+use super::{SapTableCell, SapTableCellWrapper};
 
 #[derive(Debug)]
 pub struct SapTableHeaderCell<'a> {
@@ -121,7 +121,7 @@ impl<'a> SapTableHeaderCell<'a> {
         }
     }
 
-    pub fn wrap(self) -> SapTableCells<'a> {
-        SapTableCells::Header(self)
+    pub fn wrap(self) -> SapTableCellWrapper<'a> {
+        SapTableCellWrapper::Header(self)
     }
 }

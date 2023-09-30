@@ -6,7 +6,7 @@ use serde::Deserialize;
 
 use crate::webdynpro::element::{Element, ElementWrapper, SubElement, SubElementDef};
 
-use super::{SapTableCell, SapTableCells};
+use super::{SapTableCell, SapTableCellWrapper};
 
 #[derive(Debug)]
 pub struct SapTableSelectionCell<'a> {
@@ -95,7 +95,7 @@ impl<'a> SapTableSelectionCell<'a> {
         }
     }
 
-    pub fn wrap(self) -> SapTableCells<'a> {
-        SapTableCells::Selection(self)
+    pub fn wrap(self) -> SapTableCellWrapper<'a> {
+        SapTableCellWrapper::Selection(self)
     }
 }

@@ -118,7 +118,7 @@ mod test {
         application::course_schedule::CourseSchedule,
         webdynpro::element::{
             list_box::{ListBoxItemWrapper, ListBoxWrapper},
-            sap_table::cell::{SapTableCell, SapTableCells},
+            sap_table::cell::{SapTableCell, SapTableCellWrapper},
             ElementWrapper,
         },
     };
@@ -179,14 +179,14 @@ mod test {
                 print!("row: ");
                 for col in row {
                     match col {
-                        SapTableCells::Header(cell) => {
+                        SapTableCellWrapper::Header(cell) => {
                             let content = cell.content();
                             print!("Header: ");
                             if let Some(elem) = content {
                                 print!("{:?}, ", elem);
                             }
                         }
-                        SapTableCells::Normal(cell) => {
+                        SapTableCellWrapper::Normal(cell) => {
                             let content = cell.content();
                             if let Some(elem) = content {
                                 print!("{:?}, ", elem);

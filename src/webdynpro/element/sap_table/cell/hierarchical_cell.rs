@@ -6,7 +6,7 @@ use serde::Deserialize;
 
 use crate::webdynpro::element::{Element, ElementWrapper, SubElement, SubElementDef};
 
-use super::{SapTableCell, SapTableCells};
+use super::{SapTableCell, SapTableCellWrapper};
 
 #[derive(Debug)]
 pub struct SapTableHierarchicalCell<'a> {
@@ -99,7 +99,7 @@ impl<'a> SapTableHierarchicalCell<'a> {
         }
     }
 
-    pub fn wrap(self) -> SapTableCells<'a> {
-        SapTableCells::Hierarchical(self)
+    pub fn wrap(self) -> SapTableCellWrapper<'a> {
+        SapTableCellWrapper::Hierarchical(self)
     }
 }

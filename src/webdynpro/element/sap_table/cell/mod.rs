@@ -7,7 +7,7 @@ use self::{
 };
 
 #[derive(Debug)]
-pub enum SapTableCells<'a> {
+pub enum SapTableCellWrapper<'a> {
     Normal(SapTableNormalCell<'a>),
     Header(SapTableHeaderCell<'a>),
     Hierarchical(SapTableHierarchicalCell<'a>),
