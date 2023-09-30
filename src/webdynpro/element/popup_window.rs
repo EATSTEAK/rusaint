@@ -1,6 +1,10 @@
-use std::{borrow::Cow, cell::OnceCell};
+use anyhow::Result;
 
-use super::define_element_interactable;
+use std::{borrow::Cow, cell::OnceCell, collections::HashMap};
+
+use crate::webdynpro::event::Event;
+
+use super::{define_element_interactable, Interactable};
 
 // TODO: Implement additional events and data
 define_element_interactable! {
@@ -49,5 +53,17 @@ impl<'a> PopupWindow<'a> {
             lsdata: OnceCell::new(),
             lsevents: OnceCell::new(),
         }
+    }
+
+    pub fn close(&self) -> Result<Event> {
+        let mut parameters: HashMap<String, String> = HashMap::new();
+        parameters.insert("Id".to_string(), self.id.clone().to_string());
+        self.fire_event("Close".to_string(), parameters)
+    }
+
+    pub fn help(&self) -> Result<Event> {
+        let mut parameters: HashMap<String, String> = HashMap::new();
+        parameters.insert("Id".to_string(), self.id.clone().to_string());
+        self.fire_event("Help".to_string(), parameters)
     }
 }

@@ -1,7 +1,7 @@
 use self::ucf_parameters::UcfParameters;
 use derive_builder::Builder;
-use indexmap::IndexMap;
-use std::{borrow::Cow, num::ParseIntError};
+
+use std::{borrow::Cow, num::ParseIntError, collections::HashMap};
 
 pub const EVENT_SPECTATOR: &str = "~E001";
 pub const EVENT_DATA_START: &str = "~E002";
@@ -86,11 +86,11 @@ pub struct Event {
     event: String,
     control: String,
     #[builder(default)]
-    parameters: IndexMap<String, String>,
+    parameters: HashMap<String, String>,
     #[builder(default)]
     ucf_parameters: UcfParameters,
     #[builder(default)]
-    custom_parameters: IndexMap<String, String>,
+    custom_parameters: HashMap<String, String>,
 }
 
 impl ToString for Event {

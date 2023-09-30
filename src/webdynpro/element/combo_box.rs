@@ -1,7 +1,5 @@
 use anyhow::Result;
-use std::{borrow::Cow, cell::OnceCell};
-
-use indexmap::IndexMap;
+use std::{borrow::Cow, cell::OnceCell, collections::HashMap};
 
 use crate::webdynpro::{application::client::body::Body, error::ElementError, event::Event};
 
@@ -74,7 +72,7 @@ impl<'a> ComboBox<'a> {
     }
 
     pub fn select(&self, key: &str, by_enter: bool) -> Result<Event> {
-        let mut parameters: IndexMap<String, String> = IndexMap::new();
+        let mut parameters: HashMap<String, String> = HashMap::new();
         parameters.insert("Id".to_string(), self.id.clone().to_string());
         parameters.insert("Key".to_string(), key.to_string());
         parameters.insert("ByEnter".to_string(), by_enter.to_string());

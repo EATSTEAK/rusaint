@@ -1,7 +1,6 @@
 use anyhow::Result;
-use std::{borrow::Cow, cell::OnceCell};
+use std::{borrow::Cow, cell::OnceCell, collections::HashMap};
 
-use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 
 use crate::webdynpro::event::Event;
@@ -167,7 +166,7 @@ impl<'a> ClientInspector<'a> {
     }
 
     pub fn notify(&self, data: &str) -> Result<Event> {
-        let mut parameters: IndexMap<String, String> = IndexMap::new();
+        let mut parameters: HashMap<String, String> = HashMap::new();
 
         parameters.insert("Id".to_string(), self.id.clone().to_string());
         parameters.insert("Data".to_string(), data.to_string());

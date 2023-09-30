@@ -1,7 +1,6 @@
 use anyhow::Result;
-use std::{borrow::Cow, cell::OnceCell};
+use std::{borrow::Cow, cell::OnceCell, collections::HashMap};
 
-use indexmap::IndexMap;
 use scraper::Selector;
 
 use crate::webdynpro::{error::BodyError, event::Event};
@@ -73,7 +72,7 @@ impl<'a> TabStrip<'a> {
         item_index: u32,
         first_visible_item_index: u32,
     ) -> Result<Event> {
-        let mut parameters: IndexMap<String, String> = IndexMap::new();
+        let mut parameters: HashMap<String, String> = HashMap::new();
         parameters.insert("Id".to_string(), self.id.clone().to_string());
         parameters.insert("ItemId".to_string(), item_id.to_string());
         parameters.insert("ItemIndex".to_string(), item_index.to_string());

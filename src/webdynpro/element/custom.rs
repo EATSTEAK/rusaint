@@ -1,7 +1,5 @@
 use anyhow::Result;
-use std::borrow::Cow;
-
-use indexmap::IndexMap;
+use std::{borrow::Cow, collections::HashMap};
 
 use crate::webdynpro::event::{
     ucf_parameters::{UcfAction, UcfParametersBuilder, UcfResponseData},
@@ -100,7 +98,7 @@ impl Custom {
     }
 
     pub fn client_infos(&self, infos: CustomClientInfo) -> Event {
-        let mut parameters: IndexMap<String, String> = IndexMap::new();
+        let mut parameters: HashMap<String, String> = HashMap::new();
         let ucf_params = UcfParametersBuilder::default()
             .action(Some(UcfAction::Enqueue))
             .response(Some(UcfResponseData::Delta))

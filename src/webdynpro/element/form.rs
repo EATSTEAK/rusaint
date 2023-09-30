@@ -1,7 +1,5 @@
 use anyhow::Result;
-use std::{borrow::Cow, cell::OnceCell};
-
-use indexmap::IndexMap;
+use std::{borrow::Cow, cell::OnceCell, collections::HashMap};
 
 use crate::webdynpro::event::Event;
 
@@ -50,7 +48,7 @@ impl<'a> Form<'a> {
         dom_changed: bool,
         is_dirty: bool,
     ) -> Result<Event> {
-        let mut parameters: IndexMap<String, String> = IndexMap::new();
+        let mut parameters: HashMap<String, String> = HashMap::new();
         parameters.insert("Id".to_string(), self.id.clone().to_string());
         parameters.insert("Async".to_string(), is_async.to_string());
         parameters.insert("FocusInfo".to_string(), focus_info.to_string());
