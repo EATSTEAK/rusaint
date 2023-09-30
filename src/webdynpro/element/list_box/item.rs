@@ -1,29 +1,30 @@
-use anyhow::Result;
 use std::{borrow::Cow, cell::OnceCell};
 
-use serde::Deserialize;
+use crate::webdynpro::element::define_element_base;
 
-use crate::webdynpro::element::ElementWrapper;
-
-use super::{Element, ElementDef, EventParameterMap};
-
-pub struct ListBoxItem<'a> {
-    id: Cow<'static, str>,
-    element_ref: scraper::ElementRef<'a>,
-    lsdata: OnceCell<Option<ListBoxItemLSData>>,
-    index: OnceCell<Option<&'a str>>,
-    key: OnceCell<Option<&'a str>>,
-    tooltip: OnceCell<Option<&'a str>>,
-    value1: OnceCell<Option<&'a str>>,
-    value2: OnceCell<Option<&'a str>>,
-    selected: OnceCell<Option<bool>>,
-    icon_tooltip: OnceCell<Option<&'a str>>,
-    enabled: OnceCell<Option<bool>>,
-    group_title: OnceCell<Option<&'a str>>,
-    title: OnceCell<&'a str>,
+define_element_base! {
+    ListBoxItem<"LIB_I", "ListBoxItem"> {
+        index: OnceCell<Option<&'a str>>,
+        key: OnceCell<Option<&'a str>>,
+        tooltip: OnceCell<Option<&'a str>>,
+        value1: OnceCell<Option<&'a str>>,
+        value2: OnceCell<Option<&'a str>>,
+        selected: OnceCell<Option<bool>>,
+        icon_tooltip: OnceCell<Option<&'a str>>,
+        enabled: OnceCell<Option<bool>>,
+        group_title: OnceCell<Option<&'a str>>,
+        title: OnceCell<&'a str>,
+    },
+    ListBoxItemLSData {
+        icon_src: String => "0",
+        disabled_icon_src: String => "1",
+        semantic_text_color: String => "2",
+        is_deletable: bool => "3",
+        custom_data: String => "4",
+    }
 }
 
-impl<'a> std::fmt::Debug for ListBoxItem<'a> {
+/* impl<'a> std::fmt::Debug for ListBoxItem<'a> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("ListBoxItem")
             .field("id", &self.id())
@@ -40,58 +41,7 @@ impl<'a> std::fmt::Debug for ListBoxItem<'a> {
             .field("title", &self.title())
             .finish()
     }
-}
-
-#[derive(Debug, Deserialize, Default)]
-#[allow(unused)]
-pub struct ListBoxItemLSData {
-    #[serde(rename = "0")]
-    icon_src: Option<String>,
-    #[serde(rename = "1")]
-    disabled_icon_src: Option<String>,
-    #[serde(rename = "2")]
-    semantic_text_color: Option<String>,
-    #[serde(rename = "3")]
-    is_deletable: Option<bool>,
-    #[serde(rename = "4")]
-    custom_data: Option<String>,
-}
-
-impl<'a> Element<'a> for ListBoxItem<'a> {
-    const CONTROL_ID: &'static str = "LIB_I";
-    const ELEMENT_NAME: &'static str = "ListBoxItem";
-
-    type ElementLSData = ListBoxItemLSData;
-
-    fn lsdata(&self) -> Option<&Self::ElementLSData> {
-        self.lsdata
-            .get_or_init(|| {
-                let lsdata_obj = Self::lsdata_elem(self.element_ref).ok()?;
-                serde_json::from_value::<Self::ElementLSData>(lsdata_obj).ok()
-            })
-            .as_ref()
-    }
-
-    fn lsevents(&self) -> Option<&EventParameterMap> {
-        None
-    }
-
-    fn from_elem(elem_def: ElementDef<'a, Self>, element: scraper::ElementRef<'a>) -> Result<Self> {
-        Ok(Self::new(elem_def.id.to_owned(), element))
-    }
-
-    fn id(&self) -> &str {
-        &self.id
-    }
-
-    fn element_ref(&self) -> &scraper::ElementRef<'a> {
-        &self.element_ref
-    }
-
-    fn wrap(self) -> ElementWrapper<'a> {
-        ElementWrapper::ListBoxItem(self)
-    }
-}
+} */
 
 impl<'a> ListBoxItem<'a> {
     pub fn new(id: Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {

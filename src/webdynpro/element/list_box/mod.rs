@@ -40,12 +40,6 @@ macro_rules! def_listbox_subset {
                     .as_ref()
             }
 
-            fn lsevents(&self) -> Option<&EventParameterMap> {
-                self.lsevents
-                    .get_or_init(|| Self::lsevents_elem(self.element_ref).ok())
-                    .as_ref()
-            }
-
             fn from_elem(elem_def: ElementDef<'a, Self>, element: scraper::ElementRef<'a>) -> Result<Self> {
                 Ok(Self::new(elem_def.id.to_owned(), element))
             }
@@ -60,6 +54,18 @@ macro_rules! def_listbox_subset {
 
             fn wrap(self) -> $crate::webdynpro::element::ElementWrapper<'a> {
                 $crate::webdynpro::element::ElementWrapper::$name(self)
+            }
+
+            fn children(&self) -> Vec<$crate::webdynpro::element::ElementWrapper<'a>> {
+                Self::children_elem(self.element_ref().clone())
+            }
+        }
+
+        impl<'a> $crate::webdynpro::element::Interactable<'a> for $name<'a> {
+            fn lsevents(&self) -> Option<&EventParameterMap> {
+                self.lsevents
+                    .get_or_init(|| Self::lsevents_elem(self.element_ref).ok())
+                    .as_ref()
             }
         }
 

@@ -2,7 +2,6 @@ use anyhow::Result;
 use std::{borrow::Cow, cell::OnceCell};
 
 use scraper::Selector;
-use serde::Deserialize;
 
 use crate::webdynpro::{
     element::SubElement,
@@ -15,68 +14,19 @@ use self::cell::{
     selection_cell::SapTableSelectionCell, SapTableCells,
 };
 
-use super::{Element, ElementDef, EventParameterMap, SubElementDef};
+use super::{define_element_interactable, ElementDef, SubElementDef};
 
 pub type SapTableBody<'a> = Vec<Vec<SapTableCells<'a>>>;
 
-#[derive(Debug)]
-pub struct SapTable<'a> {
-    id: Cow<'static, str>,
-    element_ref: scraper::ElementRef<'a>,
-    lsdata: OnceCell<Option<SapTableLSData>>,
-    lsevents: OnceCell<Option<EventParameterMap>>,
-    table: OnceCell<Option<SapTableBody<'a>>>,
-}
-
-#[derive(Deserialize, Debug, Default)]
-#[allow(unused)]
-pub struct SapTableLSData {
-    #[serde(rename = "0")]
-    title_text: Option<String>,
-    #[serde(rename = "1")]
-    accessibility_description: Option<String>,
-    #[serde(rename = "2")]
-    row_count: Option<u32>,
-    #[serde(rename = "3")]
-    col_count: Option<u32>,
-}
-
-impl<'a> Element<'a> for SapTable<'a> {
-    const CONTROL_ID: &'static str = "ST";
-
-    const ELEMENT_NAME: &'static str = "SapTable";
-
-    type ElementLSData = SapTableLSData;
-
-    fn lsdata(&self) -> Option<&Self::ElementLSData> {
-        self.lsdata
-            .get_or_init(|| {
-                let lsdata_obj = Self::lsdata_elem(self.element_ref).ok()?;
-                serde_json::from_value::<Self::ElementLSData>(lsdata_obj).ok()
-            })
-            .as_ref()
-    }
-
-    fn lsevents(&self) -> Option<&EventParameterMap> {
-        self.lsevents
-            .get_or_init(|| Self::lsevents_elem(self.element_ref).ok())
-            .as_ref()
-    }
-
-    fn from_elem(elem_def: ElementDef<'a, Self>, element: scraper::ElementRef<'a>) -> Result<Self> {
-        Ok(Self::new(elem_def.id.to_owned(), element))
-    }
-
-    fn id(&self) -> &str {
-        &self.id
-    }
-
-    fn element_ref(&self) -> &scraper::ElementRef<'a> {
-        &self.element_ref
-    }
-
-    fn wrap(self) -> super::ElementWrapper<'a> {
-        super::ElementWrapper::SapTable(self)
+define_element_interactable! {
+    SapTable<"ST", "SapTable"> {
+        table: OnceCell<Option<SapTableBody<'a>>>,
+    },
+    SapTableLSData {
+        title_text: String => "0",
+        accessibility_description: String => "1",
+        row_count: u32 => "2",
+        col_count: u32 => "3",
     }
 }
 

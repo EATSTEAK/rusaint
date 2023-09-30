@@ -9,7 +9,7 @@ use serde_json::{Map, Value};
 
 use crate::webdynpro::element::text_view::TextView;
 
-use self::{button::Button, client_inspector::ClientInspector, combo_box::ComboBox, custom::Custom, form::Form, loading_placeholder::LoadingPlaceholder, tab_strip::{TabStrip, item::TabStripItem}, sap_table::SapTable, caption::Caption, link::Link, button_row::ButtonRow, list_box::{ListBoxMultiple, ListBoxPopup, ListBoxPopupFiltered, ListBoxPopupJson, ListBoxPopupJsonFiltered, ListBoxSingle, item::ListBoxItem, action_item::ListBoxActionItem}, layout::{FlowLayout, scroll_container::ScrollContainer, grid_layout::{GridLayout, cell::GridLayoutCell}, Container}, image::Image, input_field::InputField, label::Label, tray::Tray, scrollbar::Scrollbar};
+use self::{button::Button, client_inspector::ClientInspector, combo_box::ComboBox, custom::Custom, form::Form, loading_placeholder::LoadingPlaceholder, tab_strip::{TabStrip, item::TabStripItem}, sap_table::SapTable, caption::Caption, link::Link, button_row::ButtonRow, list_box::{ListBoxMultiple, ListBoxPopup, ListBoxPopupFiltered, ListBoxPopupJson, ListBoxPopupJsonFiltered, ListBoxSingle, item::ListBoxItem, action_item::ListBoxActionItem}, layout::{FlowLayout, scroll_container::ScrollContainer, grid_layout::{GridLayout, cell::GridLayoutCell}, Container}, image::Image, input_field::InputField, label::Label, tray::Tray, scrollbar::Scrollbar, popup_window::PopupWindow};
 
 use super::{event::{ucf_parameters::UcfParameters, Event, EventBuilder}, error::{ElementError, BodyError}, application::client::body::Body};
 
@@ -26,6 +26,7 @@ pub mod label;
 pub mod layout;
 pub mod link;
 pub mod loading_placeholder;
+pub mod popup_window;
 pub mod tab_strip;
 pub mod tray;
 pub mod sap_table;
@@ -36,20 +37,25 @@ pub mod unknown;
 
 pub type EventParameterMap = HashMap<String, (UcfParameters, IndexMap<String, String>)>;
 
-macro_rules! basic_element_def {
-    ($name:ident($controlid:literal, $lsdata:ident), {
-        $($field:ident: $ftype:tt -> $encoded:literal),+ $(,)?
-    }) => {
+macro_rules! define_element_base {
+    {$name:ident<$controlid:literal, $element_name:literal> {
+        $($sfield:ident : $stype:ty),* $(,)?
+    },
+    $lsdata:ident {
+        $($field:ident: $ftype:ty => $encoded:literal),* $(,)?
+    }} => {
         #[derive(Debug)]
+        #[allow(unused)]
         pub struct $name<'a> {
             id: std::borrow::Cow<'static, str>,
             element_ref: scraper::ElementRef<'a>,
-            lsdata: std::cell::OnceCell<Option<$lsdata>>
+            lsdata: std::cell::OnceCell<Option<$lsdata>>,
+            $($sfield: $stype, )*
         }
         impl<'a> $crate::webdynpro::element::Element<'a> for $name<'a> {
             const CONTROL_ID: &'static str = $controlid;
 
-            const ELEMENT_NAME: &'static str = stringify!($name);
+            const ELEMENT_NAME: &'static str = $element_name;
 
             type ElementLSData = $lsdata;
 
@@ -60,10 +66,6 @@ macro_rules! basic_element_def {
                         serde_json::from_value::<Self::ElementLSData>(lsdata_obj).ok()
                     })
                     .as_ref()
-            }
-
-            fn lsevents(&self) -> Option<&$crate::webdynpro::element::EventParameterMap> {
-                None
             }
 
             fn from_elem(
@@ -84,30 +86,53 @@ macro_rules! basic_element_def {
             fn wrap(self) -> $crate::webdynpro::element::ElementWrapper<'a> {
                 $crate::webdynpro::element::ElementWrapper::$name(self)
             }
+
+            fn children(&self) -> Vec<$crate::webdynpro::element::ElementWrapper<'a>> {
+                Self::children_elem(self.element_ref().clone())
+            }
         }
 
-        #[derive(serde::Deserialize, Debug, Default)]
+        #[derive(getset::Getters, serde::Deserialize, Debug, Default)]
         #[allow(unused)]
+        #[get = "pub"]
         pub struct $lsdata {
             $(
                 #[serde(rename = $encoded)]
                 $field: Option<$ftype>,
-            )+
-        }
-
-        impl<'a> $name<'a> {
-            pub const fn new(id: std::borrow::Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {
-                Self {
-                    id,
-                    element_ref,
-                    lsdata: std::cell::OnceCell::new(),
-                }
-            }
+            )*
         }
     };
 }
 
-pub(crate) use basic_element_def;
+macro_rules! define_element_interactable {
+    {$name:ident<$controlid:literal, $element_name:literal> {
+        $($sfield:ident : $stype:ty),* $(,)?
+    },
+    $lsdata:ident {
+        $($field:ident: $ftype:ty => $encoded:literal),* $(,)?
+    }} => {
+        $crate::webdynpro::element::define_element_base!{
+            $name<$controlid, $element_name> {
+                lsevents: std::cell::OnceCell<Option<$crate::webdynpro::element::EventParameterMap>>,
+                $($sfield : $stype, )*
+            },
+            $lsdata {
+                $($field: $ftype => $encoded, )*
+            }
+        }
+
+        impl<'a> $crate::webdynpro::element::Interactable<'a> for $name<'a> {
+            fn lsevents(&self) -> Option<&$crate::webdynpro::element::EventParameterMap> {
+                self.lsevents
+                    .get_or_init(|| Self::lsevents_elem(self.element_ref).ok())
+                    .as_ref()
+            }
+        }
+    }
+}
+
+pub(crate) use define_element_base;
+pub(crate) use define_element_interactable;
 
 macro_rules! register_elements {
     [$( $enum:ident : $type: ty ),+ $(,)?] => {
@@ -173,6 +198,7 @@ register_elements![
     ListBoxItem: ListBoxItem<'a>,
     ListBoxActionItem: ListBoxActionItem<'a>,
     LoadingPlaceholder: LoadingPlaceholder<'a>,
+    PopupWindow: PopupWindow<'a>,
     TabStrip: TabStrip<'a>,
     TabStripItem: TabStripItem<'a>,
     Tray: Tray<'a>,
@@ -259,6 +285,56 @@ pub trait Element<'a>: Sized {
     const ELEMENT_NAME: &'static str;
     type ElementLSData;
 
+    fn lsdata_elem(element: scraper::ElementRef) -> Result<Value> {
+        let raw_data = element.value().attr("lsdata").ok_or(ElementError::InvalidLSData)?;
+        let normalized = normalize_lsjson(raw_data);
+        return Ok(serde_json::from_str(&normalized)?);
+    }
+
+    fn from_body(elem_def: ElementDef<'a, Self>, body: &'a Body) -> Result<Self> {
+        let selector = &elem_def.selector().or(Err(BodyError::InvalidSelector))?;
+        let element = body
+            .document()
+            .select(selector)
+            .next()
+            .ok_or(ElementError::InvalidId(elem_def.id().to_owned()))?;
+        Self::from_elem(elem_def, element)
+    }
+
+    fn from_elem(elem_def: ElementDef<'a, Self>, element: scraper::ElementRef<'a>) -> Result<Self>;
+
+    fn children_elem(root: scraper::ElementRef<'a>) -> Vec<ElementWrapper<'a>> {
+        let mut next_refs = vec![root];
+        let mut cts: Vec<ElementRef<'_>> = vec![];
+        while let Some(elem) = next_refs.pop() {
+            for child in elem.children() {
+                if let scraper::Node::Element(child_elem) = child.value() {
+                    let child_elem_ref = scraper::ElementRef::wrap(child).unwrap();
+                    if child_elem.attr("ct").is_some() {
+                        cts.push(child_elem_ref);
+                    } else {
+                        next_refs.push(child_elem_ref);
+                    }
+
+                }
+            }
+        }
+        cts.into_iter().rev().filter_map(|eref| ElementWrapper::dyn_elem(eref).ok()).collect()
+    }
+
+    fn children(&self) -> Vec<ElementWrapper<'a>>;
+
+    fn lsdata(&self) -> Option<&Self::ElementLSData>;
+
+    fn id(&self) -> &str;
+
+    fn element_ref(&self) -> &ElementRef<'a>;
+
+    fn wrap(self) -> ElementWrapper<'a>;
+}
+
+pub trait Interactable<'a>: Element<'a> {
+
     unsafe fn fire_event_unchecked(event: String, parameters: IndexMap<String, String>, ucf_params: UcfParameters, custom_params: IndexMap<String, String>) -> Event {
         EventBuilder::default()
         .control(Self::ELEMENT_NAME.to_owned())
@@ -268,12 +344,6 @@ pub trait Element<'a>: Sized {
         .custom_parameters(custom_params)
         .build()
         .unwrap()
-    }
-
-    fn lsdata_elem(element: scraper::ElementRef) -> Result<Value> {
-        let raw_data = element.value().attr("lsdata").ok_or(ElementError::InvalidLSData)?;
-        let normalized = normalize_lsjson(raw_data);
-        return Ok(serde_json::from_str(&normalized)?);
     }
 
     fn lsevents_elem(element: scraper::ElementRef) -> Result<EventParameterMap> {
@@ -292,18 +362,6 @@ pub trait Element<'a>: Sized {
                 }).collect::<EventParameterMap>())
     }
 
-    fn from_body(elem_def: ElementDef<'a, Self>, body: &'a Body) -> Result<Self> {
-        let selector = &elem_def.selector().or(Err(BodyError::InvalidSelector))?;
-        let element = body
-            .document()
-            .select(selector)
-            .next()
-            .ok_or(ElementError::InvalidId(elem_def.id().to_owned()))?;
-        Self::from_elem(elem_def, element)
-    }
-
-    fn from_elem(elem_def: ElementDef<'a, Self>, element: scraper::ElementRef<'a>) -> Result<Self>;
-
     fn event_parameter(&self, event: &str) -> Result<&(UcfParameters, IndexMap<String, String>), ElementError> {
         if let Some(lsevents) = self.lsevents() {
             lsevents.get(event).ok_or(ElementError::NoSuchEvent)
@@ -317,19 +375,8 @@ pub trait Element<'a>: Sized {
         Ok(unsafe { Self::fire_event_unchecked(event, parameters, ucf_params.to_owned(), custom_params.to_owned()) })
     }
 
-    fn lsdata(&self) -> Option<&Self::ElementLSData>;
-
     fn lsevents(&self) -> Option<&EventParameterMap>;
-
-    fn id(&self) -> &str;
-
-    fn element_ref(&self) -> &ElementRef<'a>;
-
-    fn wrap(self) -> ElementWrapper<'a>;
-
-    
 }
-
 
 #[derive(Debug)]
 pub struct SubElementDef<'a, Parent, T>

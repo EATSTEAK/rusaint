@@ -73,10 +73,6 @@ impl<'a> Element<'a> for Custom {
         None
     }
 
-    fn lsevents(&self) -> Option<&super::EventParameterMap> {
-        None
-    }
-
     fn from_elem(elem_def: ElementDef<'_, Self>, _element: scraper::ElementRef) -> Result<Self> {
         Ok(Self::new(elem_def.id.to_owned()))
     }
@@ -91,6 +87,10 @@ impl<'a> Element<'a> for Custom {
 
     fn wrap(self) -> super::ElementWrapper<'a> {
         super::ElementWrapper::Custom(self)
+    }
+
+    fn children(&self) -> Vec<super::ElementWrapper<'a>> {
+        vec![]
     }
 }
 

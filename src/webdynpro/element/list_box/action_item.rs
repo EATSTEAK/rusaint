@@ -1,21 +1,20 @@
-use anyhow::Result;
 use std::{borrow::Cow, cell::OnceCell};
 
-use serde::Deserialize;
+use crate::webdynpro::element::define_element_base;
 
-use crate::webdynpro::element::ElementWrapper;
+use super::Element;
 
-use super::{Element, ElementDef, EventParameterMap};
-
-pub struct ListBoxActionItem<'a> {
-    id: Cow<'static, str>,
-    element_ref: scraper::ElementRef<'a>,
-    lsdata: OnceCell<Option<ListBoxActionItemLSData>>,
-    title: OnceCell<String>,
-    text: OnceCell<String>,
+define_element_base! {
+    ListBoxActionItem<"LIB_AI", "ListBoxActionItem"> {
+        title: OnceCell<String>,
+        text: OnceCell<String>,
+    },
+    ListBoxActionItemLSData {
+        custom_data: String => "0",
+    }
 }
 
-impl<'a> std::fmt::Debug for ListBoxActionItem<'a> {
+/* impl<'a> std::fmt::Debug for ListBoxActionItem<'a> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("ListBoxActionItem")
             .field("id", &self.id())
@@ -24,50 +23,7 @@ impl<'a> std::fmt::Debug for ListBoxActionItem<'a> {
             .field("title", &self.title())
             .finish()
     }
-}
-
-#[derive(Debug, Deserialize, Default)]
-#[allow(unused)]
-pub struct ListBoxActionItemLSData {
-    #[serde(rename = "0")]
-    custom_data: Option<String>,
-}
-
-impl<'a> Element<'a> for ListBoxActionItem<'a> {
-    const CONTROL_ID: &'static str = "LIB_AI";
-    const ELEMENT_NAME: &'static str = "ListBoxActionItem";
-
-    type ElementLSData = ListBoxActionItemLSData;
-
-    fn lsdata(&self) -> Option<&Self::ElementLSData> {
-        self.lsdata
-            .get_or_init(|| {
-                let lsdata_obj = Self::lsdata_elem(self.element_ref).ok()?;
-                serde_json::from_value::<Self::ElementLSData>(lsdata_obj).ok()
-            })
-            .as_ref()
-    }
-
-    fn lsevents(&self) -> Option<&EventParameterMap> {
-        None
-    }
-
-    fn from_elem(elem_def: ElementDef<'a, Self>, element: scraper::ElementRef<'a>) -> Result<Self> {
-        Ok(Self::new(elem_def.id.to_owned(), element))
-    }
-
-    fn id(&self) -> &str {
-        &self.id
-    }
-
-    fn element_ref(&self) -> &scraper::ElementRef<'a> {
-        &self.element_ref
-    }
-
-    fn wrap(self) -> ElementWrapper<'a> {
-        ElementWrapper::ListBoxActionItem(self)
-    }
-}
+} */
 
 impl<'a> ListBoxActionItem<'a> {
     pub fn new(id: Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {

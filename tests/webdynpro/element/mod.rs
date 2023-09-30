@@ -1,8 +1,5 @@
 use anyhow::Result;
-use std::{
-    ops::{Deref, DerefMut},
-    sync::RwLock,
-};
+use std::ops::{Deref, DerefMut};
 
 use rusaint::application::BasicUSaintApplication;
 

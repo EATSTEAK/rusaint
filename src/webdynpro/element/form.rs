@@ -2,58 +2,19 @@ use anyhow::Result;
 use std::{borrow::Cow, cell::OnceCell};
 
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use crate::webdynpro::event::Event;
 
-use super::{Element, ElementDef, EventParameterMap};
+use super::{define_element_interactable, Interactable};
 
-#[derive(Debug)]
-#[allow(unused)]
-pub struct Form<'a> {
-    id: Cow<'static, str>,
-    element_ref: scraper::ElementRef<'a>,
-    lsdata: OnceCell<Option<FormLSData>>,
-    lsevents: OnceCell<Option<EventParameterMap>>,
-    data: OnceCell<Option<FormData>>,
-}
-
-impl<'a> Element<'a> for Form<'a> {
-    const CONTROL_ID: &'static str = "FOR";
-
-    const ELEMENT_NAME: &'static str = "Form";
-
-    type ElementLSData = FormLSData;
-
-    fn lsdata(&self) -> Option<&Self::ElementLSData> {
-        self.lsdata
-            .get_or_init(|| {
-                let lsdata_obj = Self::lsdata_elem(self.element_ref).ok()?;
-                serde_json::from_value::<Self::ElementLSData>(lsdata_obj).ok()
-            })
-            .as_ref()
-    }
-
-    fn lsevents(&self) -> Option<&EventParameterMap> {
-        self.lsevents
-            .get_or_init(|| Self::lsevents_elem(self.element_ref).ok())
-            .as_ref()
-    }
-
-    fn from_elem(elem_def: ElementDef<'a, Self>, element: scraper::ElementRef<'a>) -> Result<Self> {
-        Ok(Self::new(elem_def.id.to_owned(), element))
-    }
-
-    fn id(&self) -> &str {
-        &self.id
-    }
-
-    fn element_ref(&self) -> &scraper::ElementRef<'a> {
-        &self.element_ref
-    }
-
-    fn wrap(self) -> super::ElementWrapper<'a> {
-        super::ElementWrapper::Form(self)
+define_element_interactable! {
+    Form<"FOR", "Form"> {
+        data: OnceCell<FormData>
+    },
+    FormLSData {
+        has_event_queue: bool => "0",
+        response_data: String => "1",
+        custom_data: String => "2",
     }
 }
 
@@ -68,17 +29,6 @@ pub struct FormData {
     accept_charset: Option<String>,
     enctype: Option<String>,
     target: Option<String>,
-}
-
-#[derive(Deserialize, Debug, Default)]
-#[allow(unused)]
-pub struct FormLSData {
-    #[serde(rename = "0")]
-    has_event_queue: Option<bool>,
-    #[serde(rename = "1")]
-    response_data: Option<String>,
-    #[serde(rename = "2")]
-    custom_data: Option<String>,
 }
 
 impl<'a> Form<'a> {

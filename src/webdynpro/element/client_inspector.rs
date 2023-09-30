@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::webdynpro::event::Event;
 
-use super::{Element, ElementDef, EventParameterMap};
+use super::{Element, ElementDef, EventParameterMap, Interactable};
 
 #[derive(Debug)]
 pub struct ClientInspector<'a> {
@@ -127,12 +127,6 @@ impl<'a> Element<'a> for ClientInspector<'a> {
             .as_ref()
     }
 
-    fn lsevents(&self) -> Option<&EventParameterMap> {
-        self.lsevents
-            .get_or_init(|| Self::lsevents_elem(self.element_ref).ok())
-            .as_ref()
-    }
-
     fn from_elem(elem_def: ElementDef<'a, Self>, element: scraper::ElementRef<'a>) -> Result<Self> {
         Ok(Self::new(elem_def.id.to_owned(), element))
     }
@@ -147,6 +141,18 @@ impl<'a> Element<'a> for ClientInspector<'a> {
 
     fn wrap(self) -> super::ElementWrapper<'a> {
         super::ElementWrapper::ClientInspector(self)
+    }
+
+    fn children(&self) -> Vec<super::ElementWrapper<'a>> {
+        Self::children_elem(self.element_ref().clone())
+    }
+}
+
+impl<'a> Interactable<'a> for ClientInspector<'a> {
+    fn lsevents(&self) -> Option<&EventParameterMap> {
+        self.lsevents
+            .get_or_init(|| Self::lsevents_elem(self.element_ref).ok())
+            .as_ref()
     }
 }
 

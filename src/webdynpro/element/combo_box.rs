@@ -2,121 +2,46 @@ use anyhow::Result;
 use std::{borrow::Cow, cell::OnceCell};
 
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use crate::webdynpro::{application::client::body::Body, error::ElementError, event::Event};
 
-use super::{list_box::ListBoxWrapper, Element, ElementDef, ElementWrapper, EventParameterMap};
+use super::{
+    define_element_interactable, list_box::ListBoxWrapper, Element, ElementWrapper, Interactable,
+};
 
-#[derive(Debug)]
-pub struct ComboBox<'a> {
-    id: Cow<'static, str>,
-    element_ref: scraper::ElementRef<'a>,
-    lsdata: OnceCell<Option<ComboBoxLSData>>,
-    lsevents: OnceCell<Option<EventParameterMap>>,
-}
-
-#[derive(Deserialize, Debug, Default)]
-#[allow(unused)]
-pub struct ComboBoxLSData {
-    #[serde(rename = "0")]
-    behavior: Option<String>,
-    #[serde(rename = "1")]
-    allow_virtual_typing: Option<String>,
-    #[serde(rename = "2")]
-    item_list_box_id: Option<String>,
-    #[serde(rename = "3")]
-    key: Option<String>,
-    #[serde(rename = "4")]
-    value: Option<String>,
-    #[serde(rename = "5")]
-    visibility: Option<String>,
-    #[serde(rename = "6")]
-    container_width_set: Option<bool>,
-    #[serde(rename = "7")]
-    label_text: Option<String>,
-    #[serde(rename = "8")]
-    label_for: Option<String>,
-    #[serde(rename = "9")]
-    ime_mode: Option<String>,
-    #[serde(rename = "10")]
-    component_type: Option<String>, // originally "type"
-    #[serde(rename = "11")]
-    show_help_button_always: Option<String>,
-    #[serde(rename = "12")]
-    access_key: Option<String>,
-    #[serde(rename = "13")]
-    suggest_filter: Option<String>,
-    #[serde(rename = "14")]
-    display_as_text: Option<bool>,
-    #[serde(rename = "15")]
-    hide_field_help: Option<bool>,
-    #[serde(rename = "16")]
-    show_help_button: Option<bool>,
-    #[serde(rename = "17")]
-    suggest_auto_complete: Option<bool>,
-    #[serde(rename = "18")]
-    suggest_filter_condition: Option<String>,
-    #[serde(rename = "19")]
-    field_help_floating: Option<bool>,
-    #[serde(rename = "20")]
-    custom_data: Option<String>,
-    #[serde(rename = "21")]
-    custom_style: Option<String>,
-    #[serde(rename = "22")]
-    text_style: Option<String>,
-    #[serde(rename = "23")]
-    semantic_color: Option<String>,
-    #[serde(rename = "24")]
-    embedding_behaviour: Option<String>,
-    #[serde(rename = "25")]
-    sap_table_field_design: Option<String>,
-    #[serde(rename = "26")]
-    field_help_embedding: Option<bool>,
-    #[serde(rename = "27")]
-    labelled_by: Option<String>,
-    #[serde(rename = "28")]
-    tab_behaviour: Option<String>,
-    #[serde(rename = "29")]
-    described_by: Option<String>,
-}
-
-impl<'a> Element<'a> for ComboBox<'a> {
-    const CONTROL_ID: &'static str = "CB";
-
-    const ELEMENT_NAME: &'static str = "ComboBox";
-
-    type ElementLSData = ComboBoxLSData;
-
-    fn lsdata(&self) -> Option<&Self::ElementLSData> {
-        self.lsdata
-            .get_or_init(|| {
-                let lsdata_obj = Self::lsdata_elem(self.element_ref).ok()?;
-                serde_json::from_value::<Self::ElementLSData>(lsdata_obj).ok()
-            })
-            .as_ref()
-    }
-
-    fn lsevents(&self) -> Option<&EventParameterMap> {
-        self.lsevents
-            .get_or_init(|| Self::lsevents_elem(self.element_ref).ok())
-            .as_ref()
-    }
-
-    fn from_elem(elem_def: ElementDef<'a, Self>, element: scraper::ElementRef<'a>) -> Result<Self> {
-        Ok(Self::new(elem_def.id.to_owned(), element))
-    }
-
-    fn id(&self) -> &str {
-        &self.id
-    }
-
-    fn element_ref(&self) -> &scraper::ElementRef<'a> {
-        &self.element_ref
-    }
-
-    fn wrap(self) -> super::ElementWrapper<'a> {
-        super::ElementWrapper::ComboBox(self)
+define_element_interactable! {
+    ComboBox<"CB", "ComboBox"> {},
+    ComboBoxLSData {
+        behavior: String => "0",
+        allow_virtual_typing: String => "1",
+        item_list_box_id: String => "2",
+        key: String => "3",
+        value: String => "4",
+        visibility: String => "5",
+        container_width_set: bool => "6",
+        label_text: String => "7",
+        label_for: String => "8",
+        ime_mode: String => "9",
+        component_type: String => "10", // originally "type"
+        show_help_button_always: String => "11",
+        access_key: String => "12",
+        suggest_filter: String => "13",
+        display_as_text: bool => "14",
+        hide_field_help: bool => "15",
+        show_help_button: bool => "16",
+        suggest_auto_complete: bool => "17",
+        suggest_filter_condition: String => "18",
+        field_help_floating: bool => "19",
+        custom_data: String => "20",
+        custom_style: String => "21",
+        text_style: String => "22",
+        semantic_color: String => "23",
+        embedding_behaviour: String => "24",
+        sap_table_field_design: String => "25",
+        field_help_embedding: bool => "26",
+        labelled_by: String => "27",
+        tab_behaviour: String => "28",
+        described_by: String => "29",
     }
 }
 
@@ -142,8 +67,10 @@ impl<'a> ComboBox<'a> {
             .select(&selector)
             .next()
             .ok_or(ElementError::NoSuchElement)?;
-        Ok(ListBoxWrapper::from_elements(ElementWrapper::dyn_elem(elem)?)
-            .ok_or(ElementError::NoSuchElement)?)
+        Ok(
+            ListBoxWrapper::from_elements(ElementWrapper::dyn_elem(elem)?)
+                .ok_or(ElementError::NoSuchElement)?,
+        )
     }
 
     pub fn select(&self, key: &str, by_enter: bool) -> Result<Event> {

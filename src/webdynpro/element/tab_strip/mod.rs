@@ -3,98 +3,36 @@ use std::{borrow::Cow, cell::OnceCell};
 
 use indexmap::IndexMap;
 use scraper::Selector;
-use serde::Deserialize;
 
 use crate::webdynpro::{error::BodyError, event::Event};
 
 use self::item::TabStripItem;
-use super::{Element, ElementDef, EventParameterMap};
+use super::{define_element_interactable, Element, ElementDef, Interactable};
 
 type TabItems<'a> = Vec<ElementDef<'a, TabStripItem<'a>>>;
 
-#[derive(Debug)]
-pub struct TabStrip<'a> {
-    id: Cow<'static, str>,
-    element_ref: scraper::ElementRef<'a>,
-    lsdata: OnceCell<Option<TabStripLSData>>,
-    lsevents: OnceCell<Option<EventParameterMap>>,
-    tab_items: OnceCell<Option<TabItems<'a>>>,
-}
-
-#[derive(Deserialize, Debug, Default)]
-#[allow(unused)]
-pub struct TabStripLSData {
-    #[serde(rename = "0")]
-    current_index: Option<i32>,
-    #[serde(rename = "1")]
-    height: Option<String>,
-    #[serde(rename = "2")]
-    width: Option<String>,
-    #[serde(rename = "3")]
-    accessibility_description: Option<String>,
-    #[serde(rename = "4")]
-    visibility: Option<String>,
-    #[serde(rename = "5")]
-    first_visible_item_idx: Option<i32>,
-    #[serde(rename = "6")]
-    scrollable: Option<bool>,
-    #[serde(rename = "7")]
-    exact_tab_alignment: Option<bool>,
-    #[serde(rename = "8")]
-    client_tab_select: Option<bool>,
-    #[serde(rename = "9")]
-    drag_source_info: Option<String>,
-    #[serde(rename = "10")]
-    drop_target_info: Option<String>,
-    #[serde(rename = "11")]
-    tab_items_position: Option<String>,
-    #[serde(rename = "12")]
-    custom_data: Option<String>,
-    #[serde(rename = "13")]
-    custom_style: Option<String>,
-    #[serde(rename = "14")]
-    tab_items_design: Option<String>,
-    #[serde(rename = "15")]
-    heading_level: Option<i32>,
-}
-
-impl<'a> Element<'a> for TabStrip<'a> {
+define_element_interactable! {
     // Note: This element renders as "TS_ie6" if >= IE6
-    const CONTROL_ID: &'static str = "TS_standards";
-
-    const ELEMENT_NAME: &'static str = "TabStrip";
-
-    type ElementLSData = TabStripLSData;
-
-    fn lsdata(&self) -> Option<&Self::ElementLSData> {
-        self.lsdata
-            .get_or_init(|| {
-                let lsdata_obj = Self::lsdata_elem(self.element_ref).ok()?;
-                serde_json::from_value::<Self::ElementLSData>(lsdata_obj).ok()
-            })
-            .as_ref()
-    }
-
-    fn lsevents(&self) -> Option<&EventParameterMap> {
-        self.lsevents
-            .get_or_init(|| Self::lsevents_elem(self.element_ref).ok())
-            .as_ref()
-    }
-
-    fn from_elem(elem_def: ElementDef<'a, Self>, element: scraper::ElementRef<'a>) -> Result<Self> {
-        Ok(Self::new(elem_def.id.to_owned(), element))
-    }
-
-    fn id(&self) -> &str {
-        &self.id
-    }
-
-    fn element_ref(&self) -> &scraper::ElementRef<'a> {
-        &self.element_ref
-    }
-
-    fn wrap(self) -> super::ElementWrapper<'a> {
-        super::ElementWrapper::TabStrip(self)
+    TabStrip<"TS_standards", "TabStrip"> {
+        tab_items: OnceCell<Option<TabItems<'a>>>,
+    },
+    TabStripLSData {
+        current_index: i32 => "0",
+        height: String => "1",
+        width: String => "2",
+        accessibility_description: String => "3",
+        visibility: String => "4",
+        first_visible_item_idx: i32 => "5",
+        scrollable: bool => "6",
+        exact_tab_alignment: bool => "7",
+        client_tab_select: bool => "8",
+        drag_source_info: String => "9",
+        drop_target_info: String => "10",
+        tab_items_position: String => "11",
+        custom_data: String => "12",
+        custom_style: String => "13",
+        tab_items_design: String => "14",
+        heading_level: i32 => "15",
     }
 }
 
