@@ -4,7 +4,7 @@ use std::{
     sync::RwLock,
 };
 
-use rusaint::definitions::BasicUSaintApplication;
+use rusaint::application::BasicUSaintApplication;
 
 pub(crate) struct EventTestSuite(BasicUSaintApplication);
 

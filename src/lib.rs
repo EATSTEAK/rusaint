@@ -1,3 +1,3 @@
-pub mod definitions;
+pub mod application;
 pub mod utils;
 pub mod webdynpro;

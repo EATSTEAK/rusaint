@@ -137,7 +137,7 @@ pub mod student_information;
 
 #[cfg(test)]
 mod test {
-    use crate::{definitions::BasicUSaintApplication, utils::obtain_ssu_sso_token};
+    use crate::{application::BasicUSaintApplication, utils::obtain_ssu_sso_token};
     use dotenv::dotenv;
 
     #[tokio::test]

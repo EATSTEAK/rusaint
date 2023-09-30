@@ -31,7 +31,7 @@ impl StudentInformation {
 #[cfg(test)]
 mod test {
     use crate::{
-        definitions::student_information::StudentInformation, utils::obtain_ssu_sso_token,
+        application::student_information::StudentInformation, utils::obtain_ssu_sso_token,
         webdynpro::element::ElementWrapper,
     };
     use dotenv::dotenv;

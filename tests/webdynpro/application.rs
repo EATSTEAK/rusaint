@@ -1,4 +1,4 @@
-use rusaint::definitions::BasicUSaintApplication;
+use rusaint::application::BasicUSaintApplication;
 
 
 #[tokio::test]

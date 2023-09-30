@@ -115,7 +115,7 @@ impl ToString for PeriodType {
 #[cfg(test)]
 mod test {
     use crate::{
-        definitions::course_schedule::CourseSchedule,
+        application::course_schedule::CourseSchedule,
         webdynpro::element::{
             list_box::{ListBoxItemWrapper, ListBoxWrapper},
             sap_table::cell::{SapTableCell, SapTableCells},
