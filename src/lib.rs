@@ -1,5 +1,3 @@
+pub mod application;
+pub mod utils;
 pub mod webdynpro;
-
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
-}

@@ -25,3 +25,10 @@ Cargo.lock
 
 #/target
 /Cargo.lock
+
+# dotenv
+**/.env
+
+
+# reference
+/reference

@@ -1,0 +1,232 @@
+- [ ] AL: AbapList
+  - [ ] ALT: AbapListText
+  - [ ] ALI: AbapListImage
+  - [ ] ALC: AbapListCheckBox
+  - [ ] ALCO: AbapListContainer
+  - [ ] ALTA: AbapListTabActor
+- [ ] ACR: Accordion
+  - [ ] ACRI: AccordionItem
+- [ ] ACF: AcpAdapter
+- [ ] AX: ActiveX
+- [ ] AP: Applet
+- [ ] AS: AriaStatic (!)
+- [ ] BCR: BarcodeReader
+- [ ] BIAF: BiApplicationFrame
+- [ ] BRC: BreadCrumb
+  - [ ] BRCI: BreadCrumbItem
+- [x] B: Button
+- [ ] BR: ButtonRow
+- [ ] CGR: CssGrid
+  - [ ] CGRI: CssGridItem
+- [ ] CAL_DAY: CalendarDayView
+- [ ] CAL_ENTRY: CalendarEntry
+- [ ] CAL_MONTH: CalendarMonthView
+- [ ] CAL_YEAR: CalendarYearView
+- [ ] CAL_RH: CalendarRowHeader
+- [ ] CP: Caption
+- [ ] CARS: Carousel(Single)
+- [ ] CARM: Carousel(Multiple)
+- [ ] CHART: Chart
+- [ ] CG: CheckBoxGroup
+- [ ] C: Checkbox(standards,ie6)
+- [x] CI: ClientInspector
+- [ ] COI: ColorItem
+- [ ] CL: ColumnLayout
+  - [ ] CLS: ColumnLayoutSection
+  - [ ] CLC: ColumnLayoutCell(Fragment)
+- [ ] CB: ComboBox
+  - [ ] CBS: ComboBoxString
+- [ ] CO: Container (!)
+- [ ] CTAR: ContentArea
+- [ ] CXP: ContextualPanel
+- [ ] DT~: DropTarget~
+  - [ ] DTC: DropTargetContainer(DTContainer)
+  - [ ] DTE: DropTargetElement(DTElement)
+- [ ] DG: DataGrid
+  - [ ] DGSC: DataGridSegmentCell
+  - [ ] DGS: DataGridSegment
+- [ ] DT: DataTip
+- [ ] DN: DateNavigator
+- [ ] DSI: DragSourceInfo
+- [ ] DTI: DropTargetInfo
+- [ ] DRT: DropTarget
+- [ ] FU: FileUploadInput
+- [ ] FLC: Flash
+- [ ] FL: FlowLayout (!)
+- [ ] FLL: FluidLayout
+  - [ ] FLCL: FluidLayoutCell
+- [ ] FLCO: FluidLayoutContainer
+- [x] FOR: Form
+- [ ] FTV: FormattedTextView
+- [ ] FRA: FreeContextualArea
+- [ ] GM: GeoMap
+- [ ] GL: GridLayout (!)
+  - [ ] GLC: GridLayoutCell (!)
+- [ ] G: Group (!)
+- [ ] HTV: HtmlTextView
+- [ ] HAR: HeaderArea
+- [ ] HV: HierarchicalView
+- [ ] HCNP: HorizontalContextualPanel(standards,ie6)
+  - [ ] HCNPI: HorizontalContextualPanelItem(standards,ie6)
+  - [ ] HCNPMI: HorizontalContextualPanelMenuItems(standards,ie6)
+- [ ] HD: HorizontalDivider
+- [ ] HKC: Hotkeys (!)
+  - [ ] HK: Hotkey
+- [ ] HI: HTMLIsland
+- [ ] IHUB: IHub (!)
+  - [ ] IHUBEVENTING: IHubEventing
+  - [ ] IHUBFRAMEPROTECT: IHubFrameProtect
+  - [ ] IHUBLEGACYWDJ: IHubLegacyWDJ
+  - [ ] IHUBMESSAGING: IHubMessaging
+  - [ ] IHUBNAVIGATION: IHubNavigation
+  - [ ] IHUBPOSTMESSAGE: IHubPostMessage
+  - [ ] IHUBWEBSOCKET: IHubWebSocket (!)
+  - [ ] IHUBWORKPROTECT: IHubWorkProtect (!)
+- [ ] IF: Iframe
+- [ ] IMGM: ImageMap
+  - [ ] IMGMA: ImageMapArea
+- [ ] IMG: Image
+- [ ] I: InputField (!)
+  - [ ] II: InputField(with DisplayAsText)
+  - [ ] IT: InputFieldText
+- [ ] IFA: InteractiveFormAbap
+- [ ] IFO: InteractiveForm
+- [ ] INV: Invisible
+- [ ] ILB~: ItemListBox
+  - [ ] ILBS: ItemListBoxSingle
+  - [ ] ILBM: ItemListBoxMultiple
+  - [ ] ILBI: ItemListBoxItem
+  - [ ] CBSLB: ComboBoxSearchListBox
+  - [ ] CBILB: ComboBoxItemListBox
+  - [ ] ILBAI: ItemListBoxActionItem
+- [X] LIB_~: ListBox
+  - [X] LIB_P: ListBox(in Popup)
+  - [X] LIB_PJ: ListBox(popup, TableData)
+  - [X] LIB_PS: ListBox(popup, searchable)
+  - [X] LIB_PJS: ListBox(popup, TableData, searchable)
+  - [X] LIB_M: ListBox(MultipleSelection)
+  - [X] LIB_S: ListBox(SingleSelection)
+  - [X] LIB_I: ListBoxItem
+  - [X] LIB_AI: ListBoxActionItem
+- [ ] IL: ItemList
+  - [ ] ILI: ItemListItem
+- [ ] L: Label (!)
+- [ ] LB: LargeButton
+- [ ] LEG: Legend
+- [ ] LNC: LinkChoice
+- [x] LN: LinkContent
+- [ ] LA: LoadingAnimation (!)
+- [x] LP: LoadingPlaceholder
+- [ ] ML: MatrixLayoutBase (!)
+  - [ ] MLC: MatrixLayoutCell
+- [ ] MG: MeltingGroup
+- [ ] MNB: MenuBar
+  - [ ] MNBI: MenuBarItem
+- [ ] MA: MessageArea
+  - [ ] MSG: Message
+- [ ] MB: MessageBar
+- [ ] MSGT: MessagingTrigger
+- [ ] MODELCONTROL: ModelControl
+- [ ] NL: NavigationList
+  - [ ] NLG: NavigationListGroup
+  - [ ] NLI: NavigationListItem
+- [ ] OC: ObjectContainer
+  - [ ] OH: ObjectHeader
+  - [ ] ONI: ObjectNavigationItem
+  - [ ] ON: ObjectNavigation
+- [ ] PDF: PDF
+- [ ] PMSDIRTY: PMServiceDirty
+- [ ] PMSGENRESP: PMServiceGenericResponder
+- [ ] PMSTHEMECHANGE: PMServiceThemeChange
+- [ ] PMSTIMEOUT: PMServiceTimeout
+- [ ] PMSUSHELLSESSION: PMServiceUShellSessionHandler
+- [ ] PMSWEBASSIST: PMServiceWebAssistant
+- [ ] PHM: PageHeaderTitle
+- [ ] PLP: PageLayoutPanel
+- [ ] PL: PageLayout
+- [ ] PAGE: Page (!)
+- [ ] PGR: Pager
+- [ ] PG: Paginator
+- [ ] P: Panel
+- [ ] PST: PanelStack
+- [ ] PCI: PatternContainerIconButton
+- [ ] PCSEQ: PatternContainerSequence
+  - [ ] PCSEQITEM: PatternContainerSequenceItem
+- [ ] PCTAB: PatternContainerTab
+  - [ ] PCTABITM: PatternContainerTabItem
+- [ ] PCTIT: PatternContainerTitle
+- [ ] PERSONASFACADE: PersonasFacade
+- [ ] PHI: PhaseIndicator
+  - [ ] PHII: PhaseIndicatorItem(PhaseIndicatorPhase)
+- [ ] PI: PopIn
+- [ ] POPOVERCONTAINER: PopoverContainer
+- [ ] POMN: PopupMenu
+  - [ ] POMNI: PopupMenuItem
+- [ ] POTRG: PopupTrigger
+- [ ] PW: PopupWindow
+- [ ] PMSS: PostMessageServices
+- [ ] PRI: ProgressIndicator
+- [ ] QV: QuickView
+- [ ] RG: RadioButtonGroup
+- [ ] R: RadioButton(standards,ie6)
+- [ ] RL: RasterLayout
+  - [ ] RLI: RasterLayoutItem
+- [ ] RI: RatingIndicator
+- [ ] RTE: RichTextEdit
+- [ ] RTT: RichTooltip
+- [ ] RM: RoadMap
+  - [ ] RMI: RoadMapItem(RoadMapStep)
+- [ ] STCS: SapTableCS
+- [ ] ST: SapTable
+- [ ] SC: ScrollContainer (!)
+- [ ] SCB: Scrollbar (!)
+- [ ] SH: SectionHeader
+- [ ] SB: SegmentedButton
+- [ ] SHC: Shuttle
+- [ ] SPW: SidePopup
+- [ ] SLC: SilverlightFragment
+- [ ] SL: SingleColumnLayout
+- [ ] SP: SplitterTable
+  - [ ] SPC: SplitterTableColumn
+- [ ] SPR: SplitterRowTable
+- [ ] SPCE: SplitterCellTable
+- [ ] STN: StickyNote
+- [ ] SWG: SwitchGroup
+- [ ] SWITCH: Switch
+- [ ] SY: System (!)
+  - [ ] PROP: Properties
+- [x] TS: TabStrip(standards,ie6)
+  - [x] TSITM: TabStripItem(standards,ie6)
+- [ ] TAGCLOUD: TagCloud
+  - [ ] TAGCLOUDITEM: TagCloudItem
+- [ ] TXB: TextBar
+- [ ] TE: TextEdit
+  - [ ] TEI: TextEdit(with DisplayAsText)
+- [X] TV: TextView
+- [ ] THSL: ThresholdSlider
+  - [ ] THSL_dynamic: dynamic THSL
+  - [ ] THP_dynamic: Threshold(dynamic THSL)
+  - [ ] THSL_static: static THSL
+  - [ ] THP_static: Threshold(static THSL)
+- [ ] TL: TileLayout
+  - [ ] TLC: TileLayoutCell
+- [ ] TTR: TimeTrigger
+- [ ] TGL: ToggleLink
+- [ ] TOKEN: Token
+- [ ] TOKENIZER: Tokenizer
+- [ ] T: Toolbar (!)
+  - [ ] T_ie6: Toolbar(ie6)
+  - [ ] TBARSEP: ToolbarSeparator
+- [ ] TSW: TrackSwitch
+- [ ] TY: Tray (!)
+- [ ] TR: Tree
+  - [ ] TRN: TreeNode
+- [ ] TRI: TriStateCheckBox(standards,ie6)
+- [ ] UrBase: UrBase
+- [ ] VC: ValueComparison
+- [ ] ViewContainer: ViewContainer
+- [ ] VS: ViewSwitch
+  - [ ] VSI: ViewSwitchItem
+- [ ] VIZFRAME: VizFrame
+- [ ] W: WebWidget
+  - [ ] WA: WebWidgetAction

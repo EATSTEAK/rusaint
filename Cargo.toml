@@ -1,6 +1,9 @@
 [package]
 name = "rusaint"
 version = "0.1.0"
+authors = ["Hyomin Koo <me@eatsteak.dev>"]
+license = "MIT"
+repository = "https://github.com/EATSTEAK/rusaint"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -8,4 +11,24 @@ edition = "2021"
 [dependencies]
 derive_builder = "0.12.0"
 reqwest = { version = "0.11.18", features = ["cookies", "gzip", "brotli", "json", "multipart"] }
+thiserror = "1.0.44"
 tokio = { version = "1.29.1", features = ["full"] }
+html-escape = "0.2.13"
+url = "2.4.1"
+roxmltree = "0.18.0"
+lol_html = "1.1.1"
+scraper = "0.17.1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+regex = "1.9.5"
+anyhow = "1.0.75"
+rusaint-macro = { version = "=0.1.0", path = "macro" }
+getset = "0.1.2"
+custom_debug_derive = "0.5.1"
+
+
+[workspace]
+members = ["macro"]
+
+[dev-dependencies]
+dotenv = "0.15.0"

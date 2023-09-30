@@ -1,0 +1,30 @@
+use std::{borrow::Cow, cell::OnceCell};
+
+use crate::webdynpro::element::define_element_interactable;
+
+// TODO: Implement additional events and data
+define_element_interactable! {
+    GridLayout<"GL", "GridLayout"> {},
+    GridLayoutLSData {
+        height: String => "0",
+        visibility: String => "1",
+        drag_source_info: String => "2",
+        drop_target_info: String => "3",
+        drop_decorator_type: String => "4",
+        custom_style: String => "5",
+        custom_data: String => "6",
+    }
+}
+
+impl<'a> GridLayout<'a> {
+    pub const fn new(id: Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {
+        Self {
+            id,
+            element_ref,
+            lsdata: OnceCell::new(),
+            lsevents: OnceCell::new(),
+        }
+    }
+}
+
+pub mod cell;

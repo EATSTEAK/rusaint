@@ -1,10 +1,3 @@
 #[cfg(test)]
-mod tests {
-    use rusaint::*;
-
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
-}
+mod webdynpro;
+mod application;
