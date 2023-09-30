@@ -14,7 +14,7 @@ pub struct SapTableHierarchicalCell<'a> {
     id: Cow<'static, str>,
     element_ref: scraper::ElementRef<'a>,
     lsdata: OnceCell<Option<SapTableHierarchicalCellLSData>>,
-    contents: OnceCell<Option<ElementWrapper<'a>>>,
+    content: OnceCell<Option<ElementWrapper<'a>>>,
 }
 
 #[derive(Getters, Deserialize, Debug, Default)]
@@ -45,7 +45,7 @@ pub struct SapTableHierarchicalCellLSData {
 
 impl<'a> SapTableCell<'a> for SapTableHierarchicalCell<'a> {
     fn content(&self) -> Option<&ElementWrapper<'a>> {
-        self.contents
+        self.content
             .get_or_init(|| {
                 let content_selector = Selector::parse(":root [ct]").unwrap();
                 ElementWrapper::dyn_elem(
@@ -97,7 +97,7 @@ impl<'a> SapTableHierarchicalCell<'a> {
             id,
             element_ref,
             lsdata: OnceCell::new(),
-            contents: OnceCell::new(),
+            content: OnceCell::new(),
         }
     }
 

@@ -14,7 +14,7 @@ pub struct SapTableNormalCell<'a> {
     id: Cow<'static, str>,
     element_ref: scraper::ElementRef<'a>,
     lsdata: OnceCell<Option<SapTableNormalCellLSData>>,
-    contents: OnceCell<Option<ElementWrapper<'a>>>,
+    content: OnceCell<Option<ElementWrapper<'a>>>,
 }
 
 #[derive(Getters, Deserialize, Debug, Default)]
@@ -41,7 +41,7 @@ pub struct SapTableNormalCellLSData {
 
 impl<'a> SapTableCell<'a> for SapTableNormalCell<'a> {
     fn content(&self) -> Option<&ElementWrapper<'a>> {
-        self.contents
+        self.content
             .get_or_init(|| {
                 let content_selector = Selector::parse(":root [ct]").unwrap();
                 ElementWrapper::dyn_elem(
@@ -93,7 +93,7 @@ impl<'a> SapTableNormalCell<'a> {
             id,
             element_ref,
             lsdata: OnceCell::new(),
-            contents: OnceCell::new(),
+            content: OnceCell::new(),
         }
     }
 

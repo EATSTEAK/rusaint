@@ -17,7 +17,7 @@ pub struct SapTableHeaderCell<'a> {
     id: Cow<'static, str>,
     element_ref: scraper::ElementRef<'a>,
     lsdata: OnceCell<Option<SapTableHeaderCellLSData>>,
-    contents: OnceCell<Option<ElementWrapper<'a>>>,
+    content: OnceCell<Option<ElementWrapper<'a>>>,
 }
 
 #[derive(Getters, Deserialize, Debug, Default)]
@@ -95,7 +95,7 @@ impl<'a> SubElement<'a> for SapTableHeaderCell<'a> {
 
 impl<'a> SapTableCell<'a> for SapTableHeaderCell<'a> {
     fn content(&self) -> Option<&ElementWrapper<'a>> {
-        self.contents
+        self.content
             .get_or_init(|| {
                 let content_selector =
                     Selector::parse(format!(r#"[id="{}-CONTENT"] [ct]"#, &self.id).as_str())
@@ -119,7 +119,7 @@ impl<'a> SapTableHeaderCell<'a> {
             id,
             element_ref,
             lsdata: OnceCell::new(),
-            contents: OnceCell::new(),
+            content: OnceCell::new(),
         }
     }
 
