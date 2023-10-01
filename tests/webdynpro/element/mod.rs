@@ -24,10 +24,9 @@ impl<'a> DerefMut for EventTestSuite {
 impl<'a> EventTestSuite {
     const APP_NAME: &str = "WDR_TEST_EVENTS";
 
-    pub async fn new(id: &str, token: &str) -> Result<EventTestSuite> {
-        let session = USaintSession::with_password(id, token).await?;
+    pub async fn new(session: Arc<USaintSession>) -> Result<EventTestSuite> {
         Ok(EventTestSuite(
-            USaintApplication::with_session(Self::APP_NAME, Arc::new(session)).await?,
+            USaintApplication::with_session(Self::APP_NAME, session).await?,
         ))
     }
 }

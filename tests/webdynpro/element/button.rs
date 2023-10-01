@@ -1,13 +1,10 @@
-extern crate dotenv;
-
-use dotenv::dotenv;
-
 use anyhow::Result;
 use rusaint::{
     element_ref,
-    utils::obtain_ssu_sso_token,
     webdynpro::element::{button::Button, link::Link, text_view::TextView},
 };
+
+use crate::get_session;
 
 use super::EventTestSuite;
 
@@ -43,10 +40,7 @@ impl<'a> EventTestSuite {
 
 #[tokio::test]
 async fn test_button_events() {
-    dotenv().ok();
-    let id = std::env::var("SSO_ID").unwrap();
-    let password = std::env::var("SSO_PASSWORD").unwrap();
-    let token = obtain_ssu_sso_token(&id, &password).await.unwrap();
-    let mut suite = EventTestSuite::new(&id, &token).await.unwrap();
+    let session = get_session().await.unwrap();
+    let mut suite = EventTestSuite::new(session).await.unwrap();
     suite.test_button().await.unwrap();
 }
