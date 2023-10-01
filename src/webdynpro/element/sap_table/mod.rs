@@ -165,7 +165,7 @@ impl<'a> SapTable<'a> {
         trigger_cell_id: &str,
     ) -> Result<Event> {
         let parameters: HashMap<String, String> = HashMap::from([
-            ("Id".to_string(), self.id.into_owned()),
+            ("Id".to_string(), self.id.clone().to_string()),
             ("RowIndex".to_string(), format!("{}", row_index)),
             ("RowUserData".to_string(), row_user_data.to_owned()),
             ("CellUserData".to_string(), cell_user_data.to_owned()),
@@ -186,7 +186,7 @@ impl<'a> SapTable<'a> {
         access_type: AccessType,
     ) -> Result<Event> {
         let parameters: HashMap<String, String> = HashMap::from([
-            ("Id".to_string(), self.id.into_owned()),
+            ("Id".to_string(), self.id.clone().to_string()),
             ("CellId".to_string(), cell_id.to_owned()),
             ("CellType".to_string(), cell_type.to_owned()),
             ("RowIndex".to_string(), format!("{}", row_index)),

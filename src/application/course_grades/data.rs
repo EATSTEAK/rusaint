@@ -63,7 +63,7 @@ pub struct ClassGrade {
     score: ClassScore,
     rank: String,
     professor: String,
-    detail: HashMap<String, f32>,
+    detail: Option<HashMap<String, f32>>,
 }
 
 impl ClassGrade {
@@ -76,7 +76,7 @@ impl ClassGrade {
         score: ClassScore,
         rank: String,
         professor: String,
-        detail: HashMap<String, f32>,
+        detail: Option<HashMap<String, f32>>,
     ) -> ClassGrade {
         ClassGrade {
             year,
