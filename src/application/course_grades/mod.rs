@@ -1,8 +1,12 @@
 use anyhow::Result;
-use std::ops::{Deref, DerefMut};
+use std::{
+    ops::{Deref, DerefMut},
+    sync::Arc,
+};
 
 use crate::{
     element_ref,
+    session::USaintSession,
     webdynpro::{
         element::{
             combo_box::ComboBox,
@@ -21,12 +25,12 @@ use crate::{
 
 use self::data::GradeSummary;
 
-use super::BasicUSaintApplication;
+use super::USaintApplication;
 
-pub struct CourseGrades(BasicUSaintApplication);
+pub struct CourseGrades(USaintApplication);
 
 impl Deref for CourseGrades {
-    type Target = BasicUSaintApplication;
+    type Target = USaintApplication;
     fn deref(&self) -> &Self::Target {
         &self.0
     }
@@ -61,9 +65,9 @@ impl<'a> CourseGrades {
         SPECIFIC_GRADE_SUMMARY_TABLE: SapTable<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.TABLE_1",
     );
 
-    pub async fn new(id: &str, token: &str) -> Result<CourseGrades> {
+    pub async fn new(session: Arc<USaintSession>) -> Result<CourseGrades> {
         Ok(CourseGrades(
-            BasicUSaintApplication::with_auth(Self::APP_NAME, id, token).await?,
+            USaintApplication::with_session(Self::APP_NAME, session).await?,
         ))
     }
 
@@ -167,34 +171,52 @@ pub mod data;
 
 #[cfg(test)]
 mod test {
+    use anyhow::{Error, Result};
+    use std::sync::{Arc, OnceLock};
+
     use crate::{
-        application::course_grades::CourseGrades, utils::obtain_ssu_sso_token,
-        webdynpro::element::{ElementWrapper, popup_window::PopupWindow, Element},
+        application::course_grades::CourseGrades,
+        session::USaintSession,
+        webdynpro::element::{popup_window::PopupWindow, Element, ElementWrapper},
     };
     use dotenv::dotenv;
 
+    static SESSION: OnceLock<Arc<USaintSession>> = OnceLock::new();
+
+    async fn get_session() -> Result<Arc<USaintSession>> {
+        if let Some(session) = SESSION.get() {
+            Ok(session.to_owned())
+        } else {
+            dotenv().ok();
+            let id = std::env::var("SSO_ID").unwrap();
+            let password = std::env::var("SSO_PASSWORD").unwrap();
+            let session = USaintSession::with_password(&id, &password).await?;
+            let _ = SESSION.set(Arc::new(session));
+            SESSION
+                .get()
+                .and_then(|arc| Some(arc.to_owned()))
+                .ok_or(Error::msg("Session is not initsiated"))
+        }
+    }
+
     #[tokio::test]
     async fn close_popups() {
-        dotenv().ok();
-        let id = std::env::var("SSO_ID").unwrap();
-        let password = std::env::var("SSO_PASSWORD").unwrap();
-        let token = obtain_ssu_sso_token(&id, &password).await.unwrap();
-        let mut app = CourseGrades::new(&id, &token).await.unwrap();
+        let session = get_session().await.unwrap();
+        let mut app = CourseGrades::new(session).await.unwrap();
         app.load_placeholder().await.unwrap();
         app.close_popups().await.unwrap();
         let body = app.body();
-        let popup_selector = scraper::Selector::parse(format!(r#"[ct="{}"]"#, PopupWindow::CONTROL_ID).as_str()).unwrap();
+        let popup_selector =
+            scraper::Selector::parse(format!(r#"[ct="{}"]"#, PopupWindow::CONTROL_ID).as_str())
+                .unwrap();
         let mut result = body.document().select(&popup_selector);
         assert!(result.next().is_none());
     }
 
     #[tokio::test]
     async fn read_grades() {
-        dotenv().ok();
-        let id = std::env::var("SSO_ID").unwrap();
-        let password = std::env::var("SSO_PASSWORD").unwrap();
-        let token = obtain_ssu_sso_token(&id, &password).await.unwrap();
-        let mut app = CourseGrades::new(&id, &token).await.unwrap();
+        let session = get_session().await.unwrap();
+        let mut app = CourseGrades::new(session).await.unwrap();
         app.load_placeholder().await.unwrap();
         let summary = app.grade_summary().unwrap();
         println!("{:?}", summary);
@@ -203,11 +225,8 @@ mod test {
 
     #[tokio::test]
     async fn examine_elements() {
-        dotenv().ok();
-        let id = std::env::var("SSO_ID").unwrap();
-        let password = std::env::var("SSO_PASSWORD").unwrap();
-        let token = obtain_ssu_sso_token(&id, &password).await.unwrap();
-        let mut app = CourseGrades::new(&id, &token).await.unwrap();
+        let session = get_session().await.unwrap();
+        let mut app = CourseGrades::new(session).await.unwrap();
         app.load_placeholder().await.unwrap();
         let ct_selector = scraper::Selector::parse("[ct]").unwrap();
         for elem_ref in app.body().document().select(&ct_selector) {

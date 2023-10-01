@@ -1,14 +1,15 @@
 use self::body::{Body, BodyUpdate};
-use crate::{webdynpro::{
-    error::ClientError,
-    event::{event_queue::EventQueue, Event},
-}, utils::default_header};
+use crate::{
+    utils::{default_header, DEFAULT_USER_AGENT},
+    webdynpro::{
+        error::ClientError,
+        event::{event_queue::EventQueue, Event},
+    },
+};
 use anyhow::Result;
 use reqwest::{cookie::Jar, header::*, RequestBuilder};
 use std::sync::Arc;
 use url::Url;
-
-
 
 pub struct Client {
     client: reqwest::Client,
@@ -46,7 +47,7 @@ impl Client {
         let client = reqwest::Client::builder()
             .cookie_provider(jar)
             .cookie_store(true)
-            .user_agent(USER_AGENT)
+            .user_agent(DEFAULT_USER_AGENT)
             .build()
             .unwrap();
         Self::with_client(client, base_url, app_name).await

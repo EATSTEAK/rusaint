@@ -5,12 +5,12 @@ use crate::webdynpro::element::{
     button::Button, combo_box::ComboBox, element_ref, sap_table::SapTable, tab_strip::TabStrip,
 };
 
-use super::BasicUSaintApplication;
+use super::USaintApplication;
 
-pub struct CourseSchedule(BasicUSaintApplication);
+pub struct CourseSchedule(USaintApplication);
 
 impl Deref for CourseSchedule {
-    type Target = BasicUSaintApplication;
+    type Target = USaintApplication;
     fn deref(&self) -> &Self::Target {
         &self.0
     }
@@ -36,7 +36,7 @@ impl<'a> CourseSchedule {
 
     pub async fn new() -> Result<CourseSchedule> {
         Ok(CourseSchedule(
-            BasicUSaintApplication::new(Self::APP_NAME).await?,
+            USaintApplication::new(Self::APP_NAME).await?,
         ))
     }
 
