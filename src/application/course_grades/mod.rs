@@ -178,10 +178,8 @@ impl<'a> CourseGrades {
                     let row = iter.next().ok_or(ElementError::InvalidBody)?;
                     let head_str =
                         CourseGrades::row_to_string(head).ok_or(ElementError::InvalidBody)?;
-                    println!("{:?}", head_str);
                     let row_str =
                         CourseGrades::row_to_string(row).ok_or(ElementError::InvalidBody)?;
-                    println!("{:?}", row_str);
                     let zip = head_str.into_iter().zip(row_str.into_iter());
                     zip.skip(4)
                         .map(|(key, val)| Ok((key, val.trim().parse::<f32>()?)))
