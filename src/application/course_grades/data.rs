@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, num::ParseIntError, str::FromStr};
 
 #[derive(Debug)]
 #[allow(unused)]
@@ -98,4 +98,16 @@ pub enum ClassScore {
     Pass,
     Failed,
     Score(u32),
+}
+
+impl FromStr for ClassScore {
+    type Err = ParseIntError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(match s {
+            "P" => Self::Pass,
+            "F" => Self::Failed,
+            _ => Self::Score(s.parse::<u32>()?),
+        })
+    }
 }
