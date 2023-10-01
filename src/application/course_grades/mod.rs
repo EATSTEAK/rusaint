@@ -201,7 +201,12 @@ impl<'a> CourseGrades {
         Ok(HashMap::from_iter(table))
     }
 
-    pub async fn grade_detail(&mut self, year: &str, semester: &str) -> Result<Vec<ClassGrade>> {
+    pub async fn grade_detail(
+        &mut self,
+        year: &str,
+        semester: &str,
+        include_details: bool,
+    ) -> Result<Vec<ClassGrade>> {
         self.close_popups().await?;
         let select = {
             let year_combobox = Self::PERIOD_YEAR.from_body(self.body())?;
@@ -240,8 +245,12 @@ impl<'a> CourseGrades {
         let mut ret: Vec<ClassGrade> = vec![];
         for (btn_id, values) in class_grades {
             let detail: Option<HashMap<String, f32>> = if let Some(btn_id) = btn_id {
-                let btn_def = ElementDef::<Button<'_>>::new_dynamic(btn_id);
-                Some(self.class_grade_detail(btn_def).await?)
+                if include_details {
+                    let btn_def = ElementDef::<Button<'_>>::new_dynamic(btn_id);
+                    Some(self.class_grade_detail(btn_def).await?)
+                } else {
+                    None
+                }
             } else {
                 None
             };
@@ -295,7 +304,7 @@ mod test {
     use crate::{
         application::course_grades::CourseGrades,
         session::USaintSession,
-        webdynpro::element::{popup_window::PopupWindow, Element, ElementWrapper},
+        webdynpro::element::{popup_window::PopupWindow, Element},
     };
     use dotenv::dotenv;
 
@@ -346,22 +355,8 @@ mod test {
         let session = get_session().await.unwrap();
         let mut app = CourseGrades::new(session).await.unwrap();
         app.load_placeholder().await.unwrap();
-        let detail = app.grade_detail("2022", "092").await.unwrap();
+        let detail = app.grade_detail("2022", "092", true).await.unwrap();
         println!("{:?}", detail);
         assert!(!detail.is_empty());
-    }
-
-    #[tokio::test]
-    async fn examine_elements() {
-        let session = get_session().await.unwrap();
-        let mut app = CourseGrades::new(session).await.unwrap();
-        app.load_placeholder().await.unwrap();
-        let ct_selector = scraper::Selector::parse("[ct]").unwrap();
-        for elem_ref in app.body().document().select(&ct_selector) {
-            let elem = ElementWrapper::dyn_elem(elem_ref);
-            if let Ok(elem) = elem {
-                println!("{:?}", elem);
-            }
-        }
     }
 }
