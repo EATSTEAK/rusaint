@@ -97,11 +97,11 @@ impl<'a> CourseGrades {
         let select = {
             let mut vec = Vec::with_capacity(2);
             let year_combobox = Self::PERIOD_YEAR.from_body(self.body())?;
-            if (|| Some(year_combobox.lsdata()?.key().as_ref()?.as_str()))() == Some(year) {
+            if (|| Some(year_combobox.lsdata()?.key().as_ref()?.as_str()))() != Some(year) {
                 vec.push(year_combobox.select(&year.to_string(), false)?);
             }
             let semester_combobox = Self::PERIOD_SEMESTER.from_body(self.body())?;
-            if (|| Some(semester_combobox.lsdata()?.key().as_ref()?.as_str()))() == Some(semester) {
+            if (|| Some(semester_combobox.lsdata()?.key().as_ref()?.as_str()))() != Some(semester) {
                 vec.push(semester_combobox.select(semester, false)?);
             }
             Result::<Vec<Event>>::Ok(vec)
