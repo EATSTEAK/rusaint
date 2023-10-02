@@ -320,22 +320,4 @@ mod test {
         let mut result = body.document().select(&popup_selector);
         assert!(result.next().is_none());
     }
-
-    #[tokio::test]
-    async fn read_grades() {
-        let session = get_session().await.unwrap();
-        let app = CourseGrades::new(session).await.unwrap();
-        let summary = app.grade_summary().unwrap();
-        println!("{:?}", summary);
-        assert!(!summary.is_empty());
-    }
-
-    #[tokio::test]
-    async fn grade_detail() {
-        let session = get_session().await.unwrap();
-        let mut app = CourseGrades::new(session).await.unwrap();
-        let detail = app.grade_detail("2022", "092", true).await.unwrap();
-        println!("{:?}", detail);
-        assert!(!detail.is_empty());
-    }
 }

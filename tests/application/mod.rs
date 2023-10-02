@@ -1,1 +1,1 @@
-mod course_schedule;
+mod course_grades;
