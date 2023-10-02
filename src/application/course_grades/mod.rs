@@ -324,7 +324,7 @@ mod test {
     #[tokio::test]
     async fn read_grades() {
         let session = get_session().await.unwrap();
-        let mut app = CourseGrades::new(session).await.unwrap();
+        let app = CourseGrades::new(session).await.unwrap();
         let summary = app.grade_summary().unwrap();
         println!("{:?}", summary);
         assert!(!summary.is_empty());

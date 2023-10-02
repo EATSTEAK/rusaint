@@ -125,7 +125,7 @@ mod test {
 
     #[tokio::test]
     async fn examine_elements() {
-        let mut app = CourseSchedule::new().await.unwrap();
+        let app = CourseSchedule::new().await.unwrap();
         let ct_selector = scraper::Selector::parse("[ct]").unwrap();
         for elem_ref in app.body().document().select(&ct_selector) {
             let elem = ElementWrapper::dyn_elem(elem_ref);
@@ -137,7 +137,7 @@ mod test {
 
     #[tokio::test]
     async fn combobox_items() {
-        let mut app = CourseSchedule::new().await.unwrap();
+        let app = CourseSchedule::new().await.unwrap();
         let period_id_combobox = CourseSchedule::PERIOD_ID.from_body(app.body()).unwrap();
         let listbox = period_id_combobox.item_list_box(app.body()).unwrap();
         match listbox {
