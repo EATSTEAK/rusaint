@@ -3,11 +3,11 @@ use derive_builder::Builder;
 
 use std::{borrow::Cow, num::ParseIntError, collections::HashMap};
 
-pub const EVENT_SPECTATOR: &str = "~E001";
-pub const EVENT_DATA_START: &str = "~E002";
-pub const EVENT_DATA_END: &str = "~E003";
-pub const EVENT_DATA_COLON: &str = "~E004";
-pub const EVENT_DATA_COMMA: &str = "~E005";
+const EVENT_SPECTATOR: &str = "~E001";
+const EVENT_DATA_START: &str = "~E002";
+const EVENT_DATA_END: &str = "~E003";
+const EVENT_DATA_COLON: &str = "~E004";
+const EVENT_DATA_COMMA: &str = "~E005";
 
 pub fn escape_str<'a>(text: &'a str) -> String {
     let chars = text.chars();
