@@ -7,23 +7,20 @@ use scraper::{Selector, ElementRef};
 use serde_json::{Map, Value};
 
 
-use crate::webdynpro::element::text_view::TextView;
 
-use self::{button::Button, client_inspector::ClientInspector, combo_box::ComboBox, custom::Custom, form::Form, loading_placeholder::LoadingPlaceholder, tab_strip::{TabStrip, item::TabStripItem}, sap_table::SapTable, caption::Caption, link::Link, button_row::ButtonRow, list_box::{ListBoxMultiple, ListBoxPopup, ListBoxPopupFiltered, ListBoxPopupJson, ListBoxPopupJsonFiltered, ListBoxSingle, item::ListBoxItem, action_item::ListBoxActionItem}, layout::{FlowLayout, scroll_container::ScrollContainer, grid_layout::{GridLayout, cell::GridLayoutCell}, Container}, image::Image, input_field::InputField, label::Label, tray::Tray, scrollbar::Scrollbar, popup_window::PopupWindow};
+use self::{button::Button, client_inspector::ClientInspector, combo_box::ComboBox, custom::Custom, form::Form, loading_placeholder::LoadingPlaceholder, tab_strip::{TabStrip, item::TabStripItem}, sap_table::SapTable, link::Link, button_row::ButtonRow, list_box::{ListBoxMultiple, ListBoxPopup, ListBoxPopupFiltered, ListBoxPopupJson, ListBoxPopupJsonFiltered, ListBoxSingle, item::ListBoxItem, action_item::ListBoxActionItem}, layout::{FlowLayout, scroll_container::ScrollContainer, grid_layout::{GridLayout, cell::GridLayoutCell}, Container}, image::Image, tray::Tray, scrollbar::Scrollbar, popup_window::PopupWindow, text::{text_view::TextView, input_field::InputField, label::Label, caption::Caption}};
 
 use super::{event::{ucf_parameters::UcfParameters, Event, EventBuilder}, error::{ElementError, BodyError}, application::client::body::Body};
 
 pub mod button;
 pub mod button_row;
-pub mod caption;
 pub mod client_inspector;
 pub mod combo_box;
 pub mod custom;
 pub mod form;
 pub mod image;
-pub mod input_field;
-pub mod label;
 pub mod layout;
+pub mod text;
 pub mod link;
 pub mod loading_placeholder;
 pub mod popup_window;
@@ -32,7 +29,6 @@ pub mod tray;
 pub mod sap_table;
 pub mod scrollbar;
 pub mod list_box;
-pub mod text_view;
 pub mod unknown;
 
 pub type EventParameterMap = HashMap<String, (UcfParameters, HashMap<String, String>)>;

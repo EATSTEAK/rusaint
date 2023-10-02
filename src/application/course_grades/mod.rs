@@ -13,10 +13,9 @@ use crate::{
         element::{
             button::Button,
             combo_box::ComboBox,
-            input_field::InputField,
             popup_window::PopupWindow,
             sap_table::{cell::SapTableCellWrapper, SapTable},
-            Element, ElementDef, ElementWrapper, SubElement,
+            Element, ElementDef, ElementWrapper, SubElement, text::input_field::InputField,
         },
         error::ElementError,
         event::Event,
