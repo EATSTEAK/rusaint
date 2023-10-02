@@ -14,7 +14,7 @@ type BodyUpdateContentId = String;
 type BodyUpdateControlId = String;
 
 #[derive(Debug)]
-pub enum BodyUpdateType {
+pub(super) enum BodyUpdateType {
     Full(BodyUpdateWindowId, BodyUpdateContentId, String),
     Delta(BodyUpdateWindowId, HashMap<BodyUpdateControlId, String>),
 }
