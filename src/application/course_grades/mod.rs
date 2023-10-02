@@ -114,7 +114,7 @@ impl<'a> CourseGrades {
     }
 
     fn row_to_string(row: &Vec<SapTableCellWrapper>) -> Option<Vec<String>> {
-        if row.len() == 0 || !row[0].is_empty_row() {
+        if row.len() == 0 || row[0].is_empty_row() {
             return None;
         };
         Some(
