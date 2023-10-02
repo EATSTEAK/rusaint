@@ -47,7 +47,8 @@ impl<'a> USaintApplication {
     pub const CUSTOM: Custom = Custom::new(std::borrow::Cow::Borrowed("WD01"));
 
     pub async fn new(app_name: &str) -> Result<USaintApplication> {
-        let mut app = USaintApplication(BasicApplication::new(SSU_WEBDYNPRO_BASE_URL, app_name).await?);
+        let mut app =
+            USaintApplication(BasicApplication::new(SSU_WEBDYNPRO_BASE_URL, app_name).await?);
         app.load_placeholder().await?;
         Ok(app)
     }
@@ -63,9 +64,9 @@ impl<'a> USaintApplication {
             .build()
             .unwrap();
         let client = Client::with_client(r_client, &base_url, app_name).await?;
-        Ok(USaintApplication(BasicApplication::with_client(
-            base_url, app_name, client,
-        )?))
+        let mut app = USaintApplication(BasicApplication::with_client(base_url, app_name, client)?);
+        app.load_placeholder().await?;
+        Ok(app)
     }
 
     async fn load_placeholder(&mut self) -> Result<()> {
