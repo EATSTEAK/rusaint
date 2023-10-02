@@ -92,8 +92,8 @@ impl<'a> USaintApplication {
 }
 
 pub mod course_grades;
-pub mod course_schedule;
-pub mod student_information;
+mod course_schedule;
+mod student_information;
 
 #[cfg(test)]
 mod test {

@@ -22,6 +22,7 @@ impl<'a> DerefMut for CourseSchedule {
     }
 }
 
+#[allow(unused)]
 impl<'a> CourseSchedule {
     const APP_NAME: &str = "ZCMW2100";
 
@@ -40,14 +41,14 @@ impl<'a> CourseSchedule {
         ))
     }
 
-    pub async fn select_period(&mut self, year: u32, period: PeriodType) -> Result<()> {
+    pub async fn select_period(&mut self, year: u32, period: &str) -> Result<()> {
         let events = {
             let body = self.body();
             let period_year = Self::PERIOD_YEAR.from_body(body)?;
             let period_id = Self::PERIOD_ID.from_body(body)?;
             vec![
                 period_year.select(year.to_string().as_str(), false)?,
-                period_id.select(period.to_string().as_str(), false)?,
+                period_id.select(period, false)?,
             ]
         };
         self.send_events(events).await
@@ -90,25 +91,6 @@ impl<'a> CourseSchedule {
         let body = self.body();
         let main_table = Self::MAIN_TABLE.from_body(body)?;
         Ok(main_table)
-    }
-}
-
-pub enum PeriodType {
-    One,
-    Summer,
-    Two,
-    Winter,
-}
-
-impl ToString for PeriodType {
-    fn to_string(&self) -> String {
-        match self {
-            PeriodType::One => "090",
-            PeriodType::Summer => "091",
-            PeriodType::Two => "092",
-            PeriodType::Winter => "093",
-        }
-        .to_owned()
     }
 }
 
