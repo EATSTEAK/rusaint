@@ -171,6 +171,19 @@ macro_rules! register_elements {
                 }
             }
         }
+
+        $(
+            impl<'a> std::convert::TryInto<$type> for ElementWrapper<'a> {
+                type Error = $crate::webdynpro::error::ElementError;
+    
+                fn try_into(self) -> Result<$type, Self::Error> {
+                    match self {
+                        ElementWrapper::$enum(res) => Ok(res),
+                        _ => Err(Self::Error::NoSuchElement)
+                    }
+                }
+            }
+        )+
         
     };
 }
