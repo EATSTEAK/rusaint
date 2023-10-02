@@ -15,10 +15,7 @@ use crate::{
             combo_box::ComboBox,
             input_field::InputField,
             popup_window::PopupWindow,
-            sap_table::{
-                cell::{SapTableCell, SapTableCellWrapper},
-                SapTable,
-            },
+            sap_table::{cell::SapTableCellWrapper, SapTable},
             Element, ElementDef, ElementWrapper, SubElement,
         },
         error::ElementError,
@@ -96,53 +93,59 @@ impl<'a> CourseGrades {
         Ok(())
     }
 
-    fn row_to_string(row: &Vec<SapTableCellWrapper>) -> Option<Vec<String>> {
-        if row.len() > 0 && !row[0].is_empty_row() {
-            Some(
-                row.iter()
-                    .map(|val| {
-                        let cell_content: Option<String> = match val {
-                            SapTableCellWrapper::Normal(cell) => {
-                                let tv = cell.content();
-                                if let Some(ElementWrapper::TextView(tv)) = tv {
-                                    Some(tv.text().to_owned())
-                                } else {
-                                    None
-                                }
-                            }
-                            SapTableCellWrapper::Header(cell) => {
-                                let caption = cell.content();
-                                if let Some(ElementWrapper::Caption(caption)) = caption {
-                                    Some(caption.text().to_owned())
-                                } else {
-                                    None
-                                }
-                            }
-                            _ => None,
-                        };
-                        cell_content.unwrap_or("".to_string())
-                    })
-                    .collect::<Vec<String>>(),
-            )
+    async fn select_year_semester(&mut self, year: &str, semester: &str) -> Result<()> {
+        let select = {
+            let mut vec = Vec::with_capacity(2);
+            let year_combobox = Self::PERIOD_YEAR.from_body(self.body())?;
+            if (|| Some(year_combobox.lsdata()?.key().as_ref()?.as_str()))() == Some(year) {
+                vec.push(year_combobox.select(&year.to_string(), false)?);
+            }
+            let semester_combobox = Self::PERIOD_SEMESTER.from_body(self.body())?;
+            if (|| Some(semester_combobox.lsdata()?.key().as_ref()?.as_str()))() == Some(semester) {
+                vec.push(semester_combobox.select(semester, false)?);
+            }
+            Result::<Vec<Event>>::Ok(vec)
+        }?;
+        if !select.is_empty() {
+            self.send_events(select).await
         } else {
-            None
+            Ok(())
         }
     }
 
+    fn row_to_string(row: &Vec<SapTableCellWrapper>) -> Option<Vec<String>> {
+        if row.len() == 0 || !row[0].is_empty_row() {
+            return None;
+        };
+        Some(
+            row.iter()
+                .map(|val| {
+                    match val.content() {
+                        Some(ElementWrapper::TextView(tv)) => Some(tv.text().to_owned()),
+                        Some(ElementWrapper::Caption(cap)) => Some(cap.text().to_owned()),
+                        _ => None,
+                    }
+                    .unwrap_or("".to_string())
+                })
+                .collect::<Vec<String>>(),
+        )
+    }
+
     pub fn grade_summary(&self) -> Result<Vec<GradeSummary>> {
+        fn parse_rank(value: String) -> Option<(u32, u32)> {
+            let mut spl = value.split("/");
+            let first: u32 = spl.next()?.parse().ok()?;
+            let second: u32 = spl.next()?.parse().ok()?;
+            Some((first, second))
+        }
+
         let table_elem = Self::GRADES_SUMMARY_TABLE.from_body(self.body())?;
         let table = table_elem.table().ok_or(ElementError::NoSuchElement)?;
-        let iter = table.iter();
-        let ret = iter
+        let ret = table
+            .iter()
             .skip(1)
             .filter_map(Self::row_to_string)
             .filter_map(|values| {
-                fn parse_rank(value: String) -> Option<(u32, u32)> {
-                    let mut spl = value.split("/");
-                    let first: u32 = spl.next()?.parse().ok()?;
-                    let second: u32 = spl.next()?.parse().ok()?;
-                    Some((first, second))
-                }
                 Some(GradeSummary::new(
                     values[1].parse().ok()?,
                     values[2].clone(),
@@ -162,7 +165,7 @@ impl<'a> CourseGrades {
         Ok(ret.collect())
     }
 
-    pub async fn class_grade_detail<'f>(
+    async fn grade_detail_in_popup<'f>(
         &mut self,
         open_button: ElementDef<'f, Button<'f>>,
     ) -> Result<HashMap<String, f32>> {
@@ -170,31 +173,22 @@ impl<'a> CourseGrades {
             let table_inside_popup_selector =
                 scraper::Selector::parse(r#"[ct="PW"] [ct="ST"]"#).unwrap();
             let mut table_inside_popup = body.document().select(&table_inside_popup_selector);
-            if let Some(table_ref) = table_inside_popup.next() {
-                if let Ok(ElementWrapper::SapTable(table)) = ElementWrapper::dyn_elem(table_ref) {
-                    let table = table.table().ok_or(ElementError::NoSuchElement)?;
-                    let mut iter = table.iter();
-                    let head = iter.next().ok_or(ElementError::InvalidBody)?;
-                    let row = iter.next().ok_or(ElementError::InvalidBody)?;
-                    let head_str =
-                        CourseGrades::row_to_string(head).ok_or(ElementError::InvalidBody)?;
-                    let row_str =
-                        CourseGrades::row_to_string(row).ok_or(ElementError::InvalidBody)?;
-                    let zip = head_str.into_iter().zip(row_str.into_iter());
-                    zip.skip(4)
-                        .map(|(key, val)| Ok((key, val.trim().parse::<f32>()?)))
-                        .collect::<Result<Vec<(String, f32)>>>()
-                } else {
-                    Err(ElementError::NoSuchElement)?
-                }
-            } else {
-                Err(ElementError::NoSuchElement)?
-            }
+            let table_ref = table_inside_popup
+                .next()
+                .ok_or(ElementError::NoSuchElement)?;
+            let table_elem: SapTable<'_> = ElementWrapper::dyn_elem(table_ref)?.try_into()?;
+            let zip = (|| {
+                let mut iter = table_elem.table()?.iter();
+                let head_str = CourseGrades::row_to_string(iter.next()?)?;
+                let row_str = CourseGrades::row_to_string(iter.next()?)?;
+                Some(head_str.into_iter().zip(row_str.into_iter()))
+            })()
+            .ok_or(ElementError::InvalidBody)?;
+            zip.skip(4)
+                .map(|(key, val)| Ok((key, val.trim().parse::<f32>()?)))
+                .collect::<Result<Vec<(String, f32)>>>()
         };
-        let event = {
-            let btn = open_button.from_body(self.body())?;
-            btn.press()
-        }?;
+        let event = { open_button.from_body(self.body())?.press() }?;
         self.send_events(vec![event]).await?;
         let table = parse_table_in_popup(self.body())?;
         self.close_popups().await?;
@@ -208,46 +202,34 @@ impl<'a> CourseGrades {
         include_details: bool,
     ) -> Result<Vec<ClassGrade>> {
         self.close_popups().await?;
-        let select = {
-            let year_combobox = Self::PERIOD_YEAR.from_body(self.body())?;
-            let year_select = year_combobox.select(year, false)?;
-            let semester_combobox = Self::PERIOD_SEMESTER.from_body(self.body())?;
-            let semester_select = semester_combobox.select(semester, false)?;
-            Result::<Vec<Event>>::Ok(vec![year_select, semester_select])
-        }?;
-        self.send_events(select).await?;
+        self.select_year_semester(year, semester).await?;
         let class_grades: Vec<(Option<String>, Vec<String>)> = {
             let grade_table_elem = Self::SPECIFIC_GRADE_SUMMARY_TABLE.from_body(self.body())?;
             let iter = grade_table_elem
                 .table()
                 .ok_or(ElementError::NoSuchElement)?
-                .iter();
-            iter.skip(1)
-                .map(|row| {
-                    let btn_cell = &row[10];
-                    let btn_id = if let SapTableCellWrapper::Normal(btn_cell) = btn_cell {
-                        let btn = btn_cell.content();
-                        if let Some(ElementWrapper::Button(btn)) = btn {
-                            Some(btn.id().to_owned())
-                        } else {
-                            None
-                        }
-                    } else {
-                        None
-                    };
-                    (btn_id, row)
-                })
-                .filter_map(|(btn_id, row)| {
-                    Self::row_to_string(row).and_then(|row| Some((btn_id, row)))
-                })
-                .collect()
+                .iter()
+                .skip(1);
+            iter.map(|row| {
+                let btn_cell = &row[10];
+                let btn_id = if let Some(ElementWrapper::Button(btn)) = btn_cell.content() {
+                    Some(btn.id().to_owned())
+                } else {
+                    None
+                };
+                (btn_id, row)
+            })
+            .filter_map(|(btn_id, row)| {
+                Self::row_to_string(row).and_then(|row| Some((btn_id, row)))
+            })
+            .collect()
         };
         let mut ret: Vec<ClassGrade> = vec![];
         for (btn_id, values) in class_grades {
             let detail: Option<HashMap<String, f32>> = if let Some(btn_id) = btn_id {
                 if include_details {
                     let btn_def = ElementDef::<Button<'_>>::new_dynamic(btn_id);
-                    Some(self.class_grade_detail(btn_def).await?)
+                    Some(self.grade_detail_in_popup(btn_def).await?)
                 } else {
                     None
                 }
