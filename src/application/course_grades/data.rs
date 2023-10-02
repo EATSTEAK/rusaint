@@ -1,7 +1,10 @@
 use std::{collections::HashMap, num::ParseIntError, str::FromStr};
 
-#[derive(Debug)]
+use getset::Getters;
+
+#[derive(Debug, Getters)]
 #[allow(unused)]
+#[get = "pub"]
 pub struct GradeSummary {
     year: u32,
     semester: String,
@@ -52,8 +55,9 @@ impl GradeSummary {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Getters)]
 #[allow(unused)]
+#[get = "pub"]
 pub struct ClassGrade {
     year: String,
     semester: String,
