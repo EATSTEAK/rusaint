@@ -13,12 +13,12 @@ use url::Url;
 
 pub struct Client {
     client: reqwest::Client,
-    pub ssr_client: SapSsrClient,
+    ssr_client: SapSsrClient,
     event_queue: EventQueue,
     pub(super) body: Body,
 }
 
-pub struct SapSsrClient {
+pub(super) struct SapSsrClient {
     action: String,
     charset: String,
     wd_secure_id: String,
@@ -75,11 +75,11 @@ impl Client {
         Ok(wd_client)
     }
 
-    pub fn add_event(&mut self, event: Event) {
+    pub(crate) fn add_event(&mut self, event: Event) {
         self.event_queue.add(event)
     }
 
-    pub async fn send_event(&mut self, base_url: &Url) -> Result<()> {
+    pub(crate) async fn send_event(&mut self, base_url: &Url) -> Result<()> {
         let res = self.event_request(base_url).await?;
         self.mutate_body(res)
     }
@@ -165,3 +165,20 @@ impl Requests for reqwest::Client {
 }
 
 pub mod body;
+
+#[cfg(test)]
+mod test {
+    use url::Url;
+
+    use crate::webdynpro::application::client::Client;
+    #[tokio::test]
+    async fn initial_load() {
+        let client = Client::new(
+            &Url::parse("https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/").unwrap(),
+            "ZCMW2100",
+        )
+        .await
+        .unwrap();
+        assert_eq!(client.ssr_client.app_name, "ZCMW2100");
+    }
+}

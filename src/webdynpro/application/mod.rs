@@ -33,7 +33,7 @@ impl<'a> BasicApplication {
         })
     }
 
-    pub fn client_url(&self) -> String {
+    pub(crate) fn client_url(&self) -> String {
         let mut url = "".to_owned();
         url.push_str(&self.base_url.as_str());
         if !url.ends_with('/') {
@@ -67,10 +67,6 @@ impl<'a> BasicApplication {
 
     pub fn body(&self) -> &Body {
         &self.client.body
-    }
-
-    pub fn body_mut(&mut self) -> &mut Body {
-        &mut self.client.body
     }
 }
 

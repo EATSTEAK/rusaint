@@ -21,7 +21,7 @@ pub enum BodyUpdateType {
 
 #[derive(Debug)]
 #[allow(unused)]
-pub struct BodyUpdate {
+pub(super) struct BodyUpdate {
     update: Option<BodyUpdateType>,
     initialize_ids: Option<String>,
     script_calls: Option<Vec<String>>,
@@ -30,7 +30,7 @@ pub struct BodyUpdate {
 }
 
 impl BodyUpdate {
-    pub fn new(response: &str) -> Result<BodyUpdate> {
+    pub(super) fn new(response: &str) -> Result<BodyUpdate> {
         let response_xml = roxmltree::Document::parse(response)?;
         let updates = response_xml
             .root()
@@ -149,7 +149,7 @@ impl Body {
         &self.document
     }
 
-    pub fn parse_sap_ssr_client(&self) -> Result<SapSsrClient> {
+    pub(super) fn parse_sap_ssr_client(&self) -> Result<SapSsrClient> {
         let document = &self.document;
         let selector = Selector::parse(r#"#sap\.client\.SsrClient\.form"#).unwrap();
         let client_form = document
@@ -204,7 +204,7 @@ impl Body {
         })
     }
 
-    pub fn apply(&mut self, updates: BodyUpdate) -> Result<()> {
+    pub(super) fn apply(&mut self, updates: BodyUpdate) -> Result<()> {
         if let Some(update) = updates.update {
             let output: String = match update {
                 BodyUpdateType::Full(_, contentid, content) => {
