@@ -1,12 +1,15 @@
 use anyhow::Result;
 use std::{borrow::Cow, collections::HashMap};
 
-use crate::webdynpro::event::{
-    ucf_parameters::{UcfAction, UcfParametersBuilder, UcfResponseData},
-    Event, EventBuilder,
+use crate::webdynpro::{
+    element::ElementWrapper,
+    event::{
+        ucf_parameters::{UcfAction, UcfParametersBuilder, UcfResponseData},
+        Event, EventBuilder,
+    },
 };
 
-use super::{Element, ElementDef};
+use crate::webdynpro::element::{Element, ElementDef};
 
 pub struct CustomClientInfo {
     pub window_opener_exists: bool,
@@ -83,11 +86,11 @@ impl<'a> Element<'a> for Custom {
         panic!("Element Custom is pseudo-element")
     }
 
-    fn wrap(self) -> super::ElementWrapper<'a> {
-        super::ElementWrapper::Custom(self)
+    fn wrap(self) -> ElementWrapper<'a> {
+        ElementWrapper::Custom(self)
     }
 
-    fn children(&self) -> Vec<super::ElementWrapper<'a>> {
+    fn children(&self) -> Vec<ElementWrapper<'a>> {
         vec![]
     }
 }

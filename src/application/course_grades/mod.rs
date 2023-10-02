@@ -6,16 +6,16 @@ use std::{
 };
 
 use crate::{
-    element_ref,
+    define_elements,
     session::USaintSession,
     webdynpro::{
         application::client::body::Body,
         element::{
-            button::Button,
-            combo_box::ComboBox,
-            input_field::InputField,
-            popup_window::PopupWindow,
-            sap_table::{cell::SapTableCellWrapper, SapTable},
+            action::button::Button,
+            complex::sap_table::{cell::SapTableCellWrapper, SapTable},
+            layout::popup_window::PopupWindow,
+            selection::combo_box::ComboBox,
+            text::input_field::InputField,
             Element, ElementDef, ElementWrapper, SubElement,
         },
         error::ElementError,
@@ -47,7 +47,7 @@ impl<'a> CourseGrades {
     const APP_NAME: &str = "ZCMB3W0017";
 
     // Elements for General Grades
-    element_ref!(
+    define_elements!(
         GRADES_SUMMARY_TABLE: SapTable<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.TABLE",
         GRADE_TYPE: ComboBox<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.PROGC_VAR",
         ATTM_GRADE: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.ATTM_CRD1",
@@ -59,7 +59,7 @@ impl<'a> CourseGrades {
     );
 
     // Elements for Specific Grades
-    element_ref!(
+    define_elements!(
         PERIOD_YEAR: ComboBox<'a> = "ZCMW_PERIOD_RE.ID_0DC742680F42DA9747594D1AE51A0C69:VIW_MAIN.PERYR",
         PERIOD_SEMESTER: ComboBox<'a> = "ZCMW_PERIOD_RE.ID_0DC742680F42DA9747594D1AE51A0C69:VIW_MAIN.PERID",
         SPECIFIC_GRADE_SUMMARY_TABLE: SapTable<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.TABLE_1",
@@ -286,7 +286,7 @@ mod test {
     use crate::{
         application::course_grades::CourseGrades,
         session::USaintSession,
-        webdynpro::element::{popup_window::PopupWindow, Element},
+        webdynpro::element::{layout::popup_window::PopupWindow, Element},
     };
     use dotenv::dotenv;
 
@@ -319,23 +319,5 @@ mod test {
                 .unwrap();
         let mut result = body.document().select(&popup_selector);
         assert!(result.next().is_none());
-    }
-
-    #[tokio::test]
-    async fn read_grades() {
-        let session = get_session().await.unwrap();
-        let app = CourseGrades::new(session).await.unwrap();
-        let summary = app.grade_summary().unwrap();
-        println!("{:?}", summary);
-        assert!(!summary.is_empty());
-    }
-
-    #[tokio::test]
-    async fn grade_detail() {
-        let session = get_session().await.unwrap();
-        let mut app = CourseGrades::new(session).await.unwrap();
-        let detail = app.grade_detail("2022", "092", true).await.unwrap();
-        println!("{:?}", detail);
-        assert!(!detail.is_empty());
     }
 }

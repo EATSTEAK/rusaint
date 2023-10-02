@@ -3,10 +3,13 @@ use std::{borrow::Cow, cell::OnceCell, collections::HashMap};
 
 use scraper::Selector;
 
-use crate::webdynpro::{error::BodyError, event::Event};
+use crate::webdynpro::{
+    element::{define_element_interactable, Element, ElementDef, Interactable},
+    error::BodyError,
+    event::Event,
+};
 
 use self::item::TabStripItem;
-use super::{define_element_interactable, Element, ElementDef, Interactable};
 
 type TabItems<'a> = Vec<ElementDef<'a, TabStripItem<'a>>>;
 

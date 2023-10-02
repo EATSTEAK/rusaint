@@ -6,33 +6,17 @@ use regex::Regex;
 use scraper::{Selector, ElementRef};
 use serde_json::{Map, Value};
 
-
-use crate::webdynpro::element::text_view::TextView;
-
-use self::{button::Button, client_inspector::ClientInspector, combo_box::ComboBox, custom::Custom, form::Form, loading_placeholder::LoadingPlaceholder, tab_strip::{TabStrip, item::TabStripItem}, sap_table::SapTable, caption::Caption, link::Link, button_row::ButtonRow, list_box::{ListBoxMultiple, ListBoxPopup, ListBoxPopupFiltered, ListBoxPopupJson, ListBoxPopupJsonFiltered, ListBoxSingle, item::ListBoxItem, action_item::ListBoxActionItem}, layout::{FlowLayout, scroll_container::ScrollContainer, grid_layout::{GridLayout, cell::GridLayoutCell}, Container}, image::Image, input_field::InputField, label::Label, tray::Tray, scrollbar::Scrollbar, popup_window::PopupWindow};
+use self::{action::{button::Button, link::Link}, layout::{button_row::ButtonRow, Container, FlowLayout, form::Form, grid_layout::{GridLayout, cell::GridLayoutCell}, tab_strip::{TabStrip, item::TabStripItem}, popup_window::PopupWindow, tray::Tray, scrollbar::Scrollbar, scroll_container::ScrollContainer}, system::{client_inspector::ClientInspector, custom::Custom, loading_placeholder::LoadingPlaceholder}, selection::{combo_box::ComboBox, list_box::{ListBoxPopup, ListBoxPopupFiltered, ListBoxPopupJson, ListBoxPopupJsonFiltered, ListBoxMultiple, ListBoxSingle, item::ListBoxItem, action_item::ListBoxActionItem}}, graphic::image::Image, text::{input_field::InputField, label::Label, text_view::TextView, caption::Caption}, complex::sap_table::SapTable};
 
 use super::{event::{ucf_parameters::UcfParameters, Event, EventBuilder}, error::{ElementError, BodyError}, application::client::body::Body};
 
-pub mod button;
-pub mod button_row;
-pub mod caption;
-pub mod client_inspector;
-pub mod combo_box;
-pub mod custom;
-pub mod form;
-pub mod image;
-pub mod input_field;
-pub mod label;
+pub mod action;
+pub mod complex;
+pub mod graphic;
 pub mod layout;
-pub mod link;
-pub mod loading_placeholder;
-pub mod popup_window;
-pub mod tab_strip;
-pub mod tray;
-pub mod sap_table;
-pub mod scrollbar;
-pub mod list_box;
-pub mod text_view;
+pub mod selection;
+pub mod system;
+pub mod text;
 pub mod unknown;
 
 pub type EventParameterMap = HashMap<String, (UcfParameters, HashMap<String, String>)>;
@@ -275,13 +259,13 @@ where T: Element<'a>
 }
 
 #[macro_export]
-macro_rules! element_ref {
+macro_rules! define_elements {
     ($($name:ident : $eltype:tt<$lt:lifetime> = $id:literal),+ $(,)?) => {
         $(const $name: $crate::webdynpro::element::ElementDef<$lt, $eltype<$lt>> = $crate::webdynpro::element::ElementDef::new($id);)*
     }
 }
 
-pub use element_ref;
+pub use define_elements;
 
 // TODO: Do multiple replacements without owning
 fn normalize_lsjson(lsjson: &str) -> String {

@@ -1,9 +1,8 @@
 use anyhow::Result;
 use std::{borrow::Cow, cell::OnceCell, collections::HashMap};
 
-use crate::webdynpro::event::Event;
+use crate::webdynpro::{event::Event, element::{define_element_interactable, Interactable}};
 
-use super::{define_element_interactable, Interactable};
 
 define_element_interactable! {
     Button<"B", "Button"> {},

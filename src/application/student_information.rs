@@ -23,6 +23,7 @@ impl<'a> DerefMut for StudentInformation {
     }
 }
 
+#[allow(unused)]
 impl StudentInformation {
     const APP_NAME: &str = "ZCMW1001n";
 

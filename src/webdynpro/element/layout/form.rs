@@ -3,7 +3,7 @@ use std::{borrow::Cow, cell::OnceCell, collections::HashMap};
 
 use crate::webdynpro::event::Event;
 
-use super::{define_element_interactable, Interactable};
+use crate::webdynpro::element::{define_element_interactable, Interactable};
 
 define_element_interactable! {
     Form<"FOR", "Form"> {

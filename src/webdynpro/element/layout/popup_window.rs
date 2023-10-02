@@ -1,11 +1,15 @@
-use std::{borrow::Cow, cell::OnceCell};
+use anyhow::Result;
 
-use super::define_element_interactable;
+use std::{borrow::Cow, cell::OnceCell, collections::HashMap};
+
+use crate::webdynpro::event::Event;
+
+use crate::webdynpro::element::{define_element_interactable, Interactable};
 
 // TODO: Implement additional events and data
 define_element_interactable! {
-    InputField<"I", "InputField"> {},
-    InputFieldLSData {
+    PopupWindow<"PW", "PopupWindow"> {},
+    PopupWindowLSData {
         value: String => "0",
         show_help_button: bool => "1",
         // This field originally named "type"
@@ -41,7 +45,7 @@ define_element_interactable! {
     }
 }
 
-impl<'a> InputField<'a> {
+impl<'a> PopupWindow<'a> {
     pub const fn new(id: Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {
         Self {
             id,
@@ -49,5 +53,17 @@ impl<'a> InputField<'a> {
             lsdata: OnceCell::new(),
             lsevents: OnceCell::new(),
         }
+    }
+
+    pub fn close(&self) -> Result<Event> {
+        let mut parameters: HashMap<String, String> = HashMap::new();
+        parameters.insert("Id".to_string(), self.id.clone().to_string());
+        self.fire_event("Close".to_string(), parameters)
+    }
+
+    pub fn help(&self) -> Result<Event> {
+        let mut parameters: HashMap<String, String> = HashMap::new();
+        parameters.insert("Id".to_string(), self.id.clone().to_string());
+        self.fire_event("Help".to_string(), parameters)
     }
 }

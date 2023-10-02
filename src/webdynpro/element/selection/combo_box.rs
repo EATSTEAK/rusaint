@@ -3,9 +3,11 @@ use std::{borrow::Cow, cell::OnceCell, collections::HashMap};
 
 use crate::webdynpro::{application::client::body::Body, error::ElementError, event::Event};
 
-use super::{
-    define_element_interactable, list_box::ListBoxWrapper, Element, ElementWrapper, Interactable,
+use crate::webdynpro::element::{
+    define_element_interactable, Element, ElementWrapper, Interactable,
 };
+
+use super::list_box::ListBoxWrapper;
 
 define_element_interactable! {
     ComboBox<"CB", "ComboBox"> {},

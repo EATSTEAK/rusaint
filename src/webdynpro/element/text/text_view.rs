@@ -1,6 +1,6 @@
 use std::{borrow::Cow, cell::OnceCell};
 
-use super::{define_element_interactable, Element};
+use crate::webdynpro::element::{define_element_interactable, Element};
 
 define_element_interactable! {
     TextView<"TV", "TextView"> {

@@ -1,8 +1,12 @@
 use anyhow::Result;
 use std::ops::{Deref, DerefMut};
 
-use crate::webdynpro::element::{
-    button::Button, combo_box::ComboBox, element_ref, sap_table::SapTable, tab_strip::TabStrip,
+use crate::{
+    define_elements,
+    webdynpro::element::{
+        action::button::Button, complex::sap_table::SapTable, layout::tab_strip::TabStrip,
+        selection::combo_box::ComboBox,
+    },
 };
 
 use super::USaintApplication;
@@ -22,10 +26,11 @@ impl<'a> DerefMut for CourseSchedule {
     }
 }
 
+#[allow(unused)]
 impl<'a> CourseSchedule {
     const APP_NAME: &str = "ZCMW2100";
 
-    element_ref! {
+    define_elements! {
         PERIOD_YEAR: ComboBox<'a> = "ZCMW_PERIOD_RE.ID_A61C4ED604A2BFC2A8F6C6038DE6AF18:VIW_MAIN.PERYR",
         PERIOD_ID: ComboBox<'a> = "ZCMW_PERIOD_RE.ID_A61C4ED604A2BFC2A8F6C6038DE6AF18:VIW_MAIN.PERID",
         TABLE_ROWS: ComboBox<'a> = "ZCMW2100.ID_0001:VIW_MODULES.ROWS",
@@ -40,14 +45,14 @@ impl<'a> CourseSchedule {
         ))
     }
 
-    pub async fn select_period(&mut self, year: u32, period: PeriodType) -> Result<()> {
+    pub async fn select_period(&mut self, year: u32, period: &str) -> Result<()> {
         let events = {
             let body = self.body();
             let period_year = Self::PERIOD_YEAR.from_body(body)?;
             let period_id = Self::PERIOD_ID.from_body(body)?;
             vec![
                 period_year.select(year.to_string().as_str(), false)?,
-                period_id.select(period.to_string().as_str(), false)?,
+                period_id.select(period, false)?,
             ]
         };
         self.send_events(events).await
@@ -93,32 +98,13 @@ impl<'a> CourseSchedule {
     }
 }
 
-pub enum PeriodType {
-    One,
-    Summer,
-    Two,
-    Winter,
-}
-
-impl ToString for PeriodType {
-    fn to_string(&self) -> String {
-        match self {
-            PeriodType::One => "090",
-            PeriodType::Summer => "091",
-            PeriodType::Two => "092",
-            PeriodType::Winter => "093",
-        }
-        .to_owned()
-    }
-}
-
 #[cfg(test)]
 mod test {
     use crate::{
         application::course_schedule::CourseSchedule,
         webdynpro::element::{
-            list_box::{ListBoxItemWrapper, ListBoxWrapper},
-            sap_table::cell::{SapTableCell, SapTableCellWrapper},
+            complex::sap_table::cell::{SapTableCell, SapTableCellWrapper},
+            selection::list_box::{ListBoxItemWrapper, ListBoxWrapper},
             ElementWrapper,
         },
     };
