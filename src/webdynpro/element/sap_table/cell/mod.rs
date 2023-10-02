@@ -15,6 +15,18 @@ pub enum SapTableCellWrapper<'a> {
     Selection(SapTableSelectionCell<'a>),
 }
 
+impl<'a> SapTableCellWrapper<'a> {
+    pub fn content(&self) -> Option<&ElementWrapper<'a>> {
+        match self {
+            SapTableCellWrapper::Normal(elem) => elem.content(),
+            SapTableCellWrapper::Header(elem) => elem.content(),
+            SapTableCellWrapper::Hierarchical(elem) => elem.content(),
+            SapTableCellWrapper::Matrix(elem) => elem.content(),
+            SapTableCellWrapper::Selection(elem) => elem.content(),
+        }
+    }
+}
+
 pub trait SapTableCell<'a> {
     fn content(&self) -> Option<&ElementWrapper<'a>>;
 }

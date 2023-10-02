@@ -1,11 +1,12 @@
 use anyhow::Result;
-use std::{borrow::Cow, cell::OnceCell};
+use std::{borrow::Cow, cell::OnceCell, collections::HashMap};
 
 use scraper::Selector;
 
 use crate::webdynpro::{
     element::SubElement,
     error::{BodyError, ElementError},
+    event::Event,
 };
 
 use self::cell::{
@@ -14,7 +15,7 @@ use self::cell::{
     selection_cell::SapTableSelectionCell, SapTableCellWrapper,
 };
 
-use super::{define_element_interactable, ElementDef, SubElementDef};
+use super::{define_element_interactable, ElementDef, Interactable, SubElementDef};
 
 pub type SapTableBody<'a> = Vec<Vec<SapTableCellWrapper<'a>>>;
 
@@ -27,6 +28,29 @@ define_element_interactable! {
         accessibility_description: String => "1",
         row_count: u32 => "2",
         col_count: u32 => "3",
+    }
+}
+
+pub enum AccessType {
+    Invalid,
+    Standard,
+    Range,
+    Toggle,
+    SelectAll,
+    DeselectAll,
+}
+
+impl ToString for AccessType {
+    fn to_string(&self) -> String {
+        match self {
+            AccessType::Invalid => "INVALID",
+            AccessType::Standard => "STANDARD",
+            AccessType::Range => "RANGE",
+            AccessType::Toggle => "TOGGLE",
+            AccessType::SelectAll => "SELECT_ALL",
+            AccessType::DeselectAll => "DESELECT_ALL",
+        }
+        .to_owned()
     }
 }
 
@@ -130,6 +154,48 @@ impl<'a> SapTable<'a> {
                     .collect::<Vec<SapTableCellWrapper<'a>>>()
             })
             .collect())
+    }
+
+    pub fn row_select(
+        &self,
+        row_index: i32,
+        row_user_data: &str,
+        cell_user_data: &str,
+        access_type: AccessType,
+        trigger_cell_id: &str,
+    ) -> Result<Event> {
+        let parameters: HashMap<String, String> = HashMap::from([
+            ("Id".to_string(), self.id.clone().to_string()),
+            ("RowIndex".to_string(), format!("{}", row_index)),
+            ("RowUserData".to_string(), row_user_data.to_owned()),
+            ("CellUserData".to_string(), cell_user_data.to_owned()),
+            ("AccessType".to_string(), access_type.to_string()),
+            ("TriggerCellId".to_string(), trigger_cell_id.to_owned()),
+        ]);
+        self.fire_event("RowSelect".to_string(), parameters)
+    }
+
+    pub fn cell_select(
+        &self,
+        cell_id: &str,
+        cell_type: &str,
+        row_index: i32,
+        col_index: i32,
+        row_user_data: &str,
+        cell_user_data: &str,
+        access_type: AccessType,
+    ) -> Result<Event> {
+        let parameters: HashMap<String, String> = HashMap::from([
+            ("Id".to_string(), self.id.clone().to_string()),
+            ("CellId".to_string(), cell_id.to_owned()),
+            ("CellType".to_string(), cell_type.to_owned()),
+            ("RowIndex".to_string(), format!("{}", row_index)),
+            ("ColIndex".to_string(), format!("{}", col_index)),
+            ("RowUserData".to_string(), row_user_data.to_owned()),
+            ("CellUserData".to_string(), cell_user_data.to_owned()),
+            ("AccessType".to_string(), access_type.to_string()),
+        ]);
+        self.fire_event("CellSelect".to_string(), parameters)
     }
 }
 

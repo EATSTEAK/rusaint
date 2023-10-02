@@ -81,6 +81,16 @@ macro_rules! def_listbox_subset {
         $($name($name<'a>),)+
     }
 
+    impl<'a> core::ops::Deref for ListBoxWrapper<'a> {
+        type Target = ListBox<'a>;
+
+        fn deref(&self) -> &Self::Target {
+            match self {
+                $( Self::$name(elem) => { &elem.0 }, )+
+            }
+        }
+    }
+
     impl<'a> ListBoxWrapper<'a> {
         pub fn from_elements(elements: $crate::webdynpro::element::ElementWrapper<'a>) -> Option<ListBoxWrapper<'a>> {
             match elements {

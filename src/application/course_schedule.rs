@@ -5,12 +5,12 @@ use crate::webdynpro::element::{
     button::Button, combo_box::ComboBox, element_ref, sap_table::SapTable, tab_strip::TabStrip,
 };
 
-use super::BasicUSaintApplication;
+use super::USaintApplication;
 
-pub struct CourseSchedule(BasicUSaintApplication);
+pub struct CourseSchedule(USaintApplication);
 
 impl Deref for CourseSchedule {
-    type Target = BasicUSaintApplication;
+    type Target = USaintApplication;
     fn deref(&self) -> &Self::Target {
         &self.0
     }
@@ -36,7 +36,7 @@ impl<'a> CourseSchedule {
 
     pub async fn new() -> Result<CourseSchedule> {
         Ok(CourseSchedule(
-            BasicUSaintApplication::new(Self::APP_NAME).await?,
+            USaintApplication::new(Self::APP_NAME).await?,
         ))
     }
 
@@ -124,15 +124,8 @@ mod test {
     };
 
     #[tokio::test]
-    async fn initial_load() {
-        let mut app = CourseSchedule::new().await.unwrap();
-        app.load_placeholder().await.unwrap();
-    }
-
-    #[tokio::test]
     async fn examine_elements() {
-        let mut app = CourseSchedule::new().await.unwrap();
-        app.load_placeholder().await.unwrap();
+        let app = CourseSchedule::new().await.unwrap();
         let ct_selector = scraper::Selector::parse("[ct]").unwrap();
         for elem_ref in app.body().document().select(&ct_selector) {
             let elem = ElementWrapper::dyn_elem(elem_ref);
@@ -144,8 +137,7 @@ mod test {
 
     #[tokio::test]
     async fn combobox_items() {
-        let mut app = CourseSchedule::new().await.unwrap();
-        app.load_placeholder().await.unwrap();
+        let app = CourseSchedule::new().await.unwrap();
         let period_id_combobox = CourseSchedule::PERIOD_ID.from_body(app.body()).unwrap();
         let listbox = period_id_combobox.item_list_box(app.body()).unwrap();
         match listbox {
@@ -171,7 +163,6 @@ mod test {
     #[tokio::test]
     async fn table_test() {
         let mut app = CourseSchedule::new().await.unwrap();
-        app.load_placeholder().await.unwrap();
         app.load_edu().await.unwrap();
         let table = app.read_edu_raw().unwrap();
         if let Some(table) = table.table() {

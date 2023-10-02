@@ -56,6 +56,8 @@ pub enum ElementError {
     NoSuchAttribute(String),
     #[error("Invalid id {0}")]
     InvalidId(String),
+    #[error("Invalid body of element")]
+    InvalidBody,
     #[error("Element has invalid lsdata attribute")]
     InvalidLSData,
     #[error("Failed parse lsdata json-like object")]

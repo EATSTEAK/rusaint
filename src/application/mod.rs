@@ -1,8 +1,4 @@
 use anyhow::Result;
-use reqwest::{
-    cookie::Jar,
-    header::{HeaderValue, COOKIE, HOST},
-};
 use std::{
     ops::{Deref, DerefMut},
     sync::Arc,
@@ -10,7 +6,8 @@ use std::{
 use url::Url;
 
 use crate::{
-    utils::{default_header, DEFAULT_USER_AGENT},
+    session::USaintSession,
+    utils::DEFAULT_USER_AGENT,
     webdynpro::{
         application::{client::Client, BasicApplication},
         element::{
@@ -19,30 +16,28 @@ use crate::{
             element_ref,
             loading_placeholder::LoadingPlaceholder,
         },
-        error::ClientError,
     },
 };
-const SSU_USAINT_PORTAL_URL: &str = "https://saint.ssu.ac.kr/irj/portal";
-const SSU_USAINT_SSO_URL: &str = "https://saint.ssu.ac.kr/webSSO/sso.jsp";
+
 const SSU_WEBDYNPRO_BASE_URL: &str = "https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/";
 const INITIAL_CLIENT_DATA_WD01: &str = "ClientWidth:1920px;ClientHeight:1000px;ScreenWidth:1920px;ScreenHeight:1080px;ScreenOrientation:landscape;ThemedTableRowHeight:33px;ThemedFormLayoutRowHeight:32px;ThemedSvgLibUrls:{\"SAPGUI-icons\":\"https://ecc.ssu.ac.kr:8443/sap/public/bc/ur/nw5/themes/~cache-20210223121230/Base/baseLib/sap_fiori_3/svg/libs/SAPGUI-icons.svg\",\"SAPWeb-icons\":\"https://ecc.ssu.ac.kr:8443/sap/public/bc/ur/nw5/themes/~cache-20210223121230/Base/baseLib/sap_fiori_3/svg/libs/SAPWeb-icons.svg\"};ThemeTags:Fiori_3,Touch;ThemeID:sap_fiori_3;SapThemeID:sap_fiori_3;DeviceType:DESKTOP";
 const INITIAL_CLIENT_DATA_WD02: &str = "ThemedTableRowHeight:25px";
-pub struct BasicUSaintApplication(BasicApplication);
+pub struct USaintApplication(BasicApplication);
 
-impl Deref for BasicUSaintApplication {
+impl Deref for USaintApplication {
     type Target = BasicApplication;
     fn deref(&self) -> &Self::Target {
         &self.0
     }
 }
 
-impl<'a> DerefMut for BasicUSaintApplication {
+impl<'a> DerefMut for USaintApplication {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.0
     }
 }
 
-impl<'a> BasicUSaintApplication {
+impl<'a> USaintApplication {
     element_ref! {
         CLIENT_INSPECTOR_WD01:ClientInspector<'a> = "WD01",
         CLIENT_INSPECTOR_WD02:ClientInspector<'a> = "WD02",
@@ -51,66 +46,30 @@ impl<'a> BasicUSaintApplication {
 
     pub const CUSTOM: Custom = Custom::new(std::borrow::Cow::Borrowed("WD01"));
 
-    pub async fn new(app_name: &str) -> Result<BasicUSaintApplication> {
-        Ok(BasicUSaintApplication(
-            BasicApplication::new(SSU_WEBDYNPRO_BASE_URL, app_name).await?,
-        ))
+    pub async fn new(app_name: &str) -> Result<USaintApplication> {
+        let mut app =
+            USaintApplication(BasicApplication::new(SSU_WEBDYNPRO_BASE_URL, app_name).await?);
+        app.load_placeholder().await?;
+        Ok(app)
     }
 
-    async fn client_with_session(sso_idno: &str, sso_token: &str) -> Result<reqwest::Client> {
-        let jar: Arc<Jar> = Arc::new(Jar::default());
-        let client = reqwest::Client::builder()
-            .cookie_provider(jar)
-            .cookie_store(true)
+    pub async fn with_session(
+        app_name: &str,
+        session: Arc<USaintSession>,
+    ) -> Result<USaintApplication> {
+        let base_url = Url::parse(SSU_WEBDYNPRO_BASE_URL)?;
+        let r_client = reqwest::Client::builder()
+            .cookie_provider(session)
             .user_agent(DEFAULT_USER_AGENT)
             .build()
             .unwrap();
-        // Manually include WAF cookies because of bug in reqwest::cookie::Jar
-        let portal = client
-            .get(SSU_USAINT_PORTAL_URL)
-            .headers(default_header())
-            .header(HOST, "saint.ssu.ac.kr".parse::<HeaderValue>().unwrap())
-            .send()
-            .await?;
-        let waf = portal
-            .cookies()
-            .find(|cookie| cookie.name() == "WAF")
-            .ok_or(ClientError::NoCookie)?;
-        let waf_cookie_str = format!("WAF={}; domain=saint.ssu.ac.kr; path=/;", waf.value());
-        let token_cookie_str = format!("sToken={}; domain=.ssu.ac.kr; path=/; secure", sso_token);
-        let req = client
-            .get(format!(
-                "{}?sToken={}&sIdno={}",
-                SSU_USAINT_SSO_URL, sso_token, sso_idno
-            ))
-            .query(&[("sToken", sso_token), ("sIdno", sso_idno)])
-            .headers(default_header())
-            .header(COOKIE, waf_cookie_str.parse::<HeaderValue>().unwrap())
-            .header(COOKIE, token_cookie_str.parse::<HeaderValue>().unwrap())
-            .header(HOST, "saint.ssu.ac.kr".parse::<HeaderValue>().unwrap())
-            .build()?;
-        let res = client.execute(req).await?;
-        if res.cookies().any(|cookie| cookie.name() == "MYSAPSSO2") {
-            Ok(client)
-        } else {
-            Err(ClientError::RequestFailed(res))?
-        }
-    }
-
-    pub async fn with_auth(
-        app_name: &str,
-        id: &str,
-        token: &str,
-    ) -> Result<BasicUSaintApplication> {
-        let base_url = Url::parse(SSU_WEBDYNPRO_BASE_URL)?;
-        let r_client = Self::client_with_session(id, token).await?;
         let client = Client::with_client(r_client, &base_url, app_name).await?;
-        Ok(BasicUSaintApplication(BasicApplication::with_client(
-            base_url, app_name, client,
-        )?))
+        let mut app = USaintApplication(BasicApplication::with_client(base_url, app_name, client)?);
+        app.load_placeholder().await?;
+        Ok(app)
     }
 
-    pub async fn load_placeholder(&mut self) -> Result<()> {
+    async fn load_placeholder(&mut self) -> Result<()> {
         let events = {
             let body = self.body();
             let wd01 = Self::CLIENT_INSPECTOR_WD01.from_body(body)?;
@@ -138,7 +97,9 @@ pub mod student_information;
 
 #[cfg(test)]
 mod test {
-    use crate::{application::BasicUSaintApplication, utils::obtain_ssu_sso_token};
+    use std::sync::Arc;
+
+    use crate::{application::USaintApplication, session::USaintSession};
     use dotenv::dotenv;
 
     #[tokio::test]
@@ -146,9 +107,8 @@ mod test {
         dotenv().ok();
         let id = std::env::var("SSO_ID").unwrap();
         let password = std::env::var("SSO_PASSWORD").unwrap();
-        let token = obtain_ssu_sso_token(&id, &password).await.unwrap();
-        println!("Got token: {}", &token);
-        BasicUSaintApplication::with_auth("ZCMW1001n", &id, &token)
+        let session = Arc::new(USaintSession::with_password(&id, &password).await.unwrap());
+        USaintApplication::with_session("ZCMW1001n", session)
             .await
             .unwrap();
     }
