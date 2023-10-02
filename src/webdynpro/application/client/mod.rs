@@ -26,7 +26,7 @@ pub(super) struct SapSsrClient {
     use_beacon: bool,
 }
 
-pub fn wd_xhr_header() -> HeaderMap {
+pub(super) fn wd_xhr_header() -> HeaderMap {
     let mut headers = HeaderMap::new();
     headers.insert(ACCEPT, "*/*".parse().unwrap());
     headers.insert(ACCEPT_ENCODING, "gzip, deflate, br".parse().unwrap());
