@@ -1,7 +1,7 @@
 use self::ucf_parameters::UcfParameters;
 use derive_builder::Builder;
 
-use std::{borrow::Cow, num::ParseIntError, collections::HashMap};
+use std::{borrow::Cow, collections::HashMap, num::ParseIntError};
 
 const EVENT_SPECTATOR: &str = "~E001";
 const EVENT_DATA_START: &str = "~E002";
@@ -137,7 +137,7 @@ impl Event {
     }
 }
 
-pub mod event_queue;
+pub(crate) mod event_queue;
 pub mod ucf_parameters;
 
 #[cfg(test)]
