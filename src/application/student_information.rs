@@ -63,7 +63,6 @@ mod test {
     async fn examine_elements() {
         let session = get_session().await.unwrap();
         let mut app = StudentInformation::new(session).await.unwrap();
-        app.load_placeholder().await.unwrap();
         let ct_selector = scraper::Selector::parse("[ct]").unwrap();
         for elem_ref in app.body().document().select(&ct_selector) {
             let elem = ElementWrapper::dyn_elem(elem_ref);

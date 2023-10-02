@@ -47,9 +47,9 @@ impl<'a> USaintApplication {
     pub const CUSTOM: Custom = Custom::new(std::borrow::Cow::Borrowed("WD01"));
 
     pub async fn new(app_name: &str) -> Result<USaintApplication> {
-        Ok(USaintApplication(
-            BasicApplication::new(SSU_WEBDYNPRO_BASE_URL, app_name).await?,
-        ))
+        let mut app = USaintApplication(BasicApplication::new(SSU_WEBDYNPRO_BASE_URL, app_name).await?);
+        app.load_placeholder().await?;
+        Ok(app)
     }
 
     pub async fn with_session(
@@ -68,7 +68,7 @@ impl<'a> USaintApplication {
         )?))
     }
 
-    pub async fn load_placeholder(&mut self) -> Result<()> {
+    async fn load_placeholder(&mut self) -> Result<()> {
         let events = {
             let body = self.body();
             let wd01 = Self::CLIENT_INSPECTOR_WD01.from_body(body)?;

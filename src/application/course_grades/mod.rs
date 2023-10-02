@@ -312,7 +312,6 @@ mod test {
     async fn close_popups() {
         let session = get_session().await.unwrap();
         let mut app = CourseGrades::new(session).await.unwrap();
-        app.load_placeholder().await.unwrap();
         app.close_popups().await.unwrap();
         let body = app.body();
         let popup_selector =
@@ -326,7 +325,6 @@ mod test {
     async fn read_grades() {
         let session = get_session().await.unwrap();
         let mut app = CourseGrades::new(session).await.unwrap();
-        app.load_placeholder().await.unwrap();
         let summary = app.grade_summary().unwrap();
         println!("{:?}", summary);
         assert!(!summary.is_empty());
@@ -336,7 +334,6 @@ mod test {
     async fn grade_detail() {
         let session = get_session().await.unwrap();
         let mut app = CourseGrades::new(session).await.unwrap();
-        app.load_placeholder().await.unwrap();
         let detail = app.grade_detail("2022", "092", true).await.unwrap();
         println!("{:?}", detail);
         assert!(!detail.is_empty());

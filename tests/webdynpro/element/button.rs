@@ -17,7 +17,6 @@ impl<'a> EventTestSuite {
     }
 
     async fn test_button(&mut self) -> Result<()> {
-        self.load_placeholder().await?;
         let load_btn_pane = {
             let body = self.body();
             let link = Self::LINK_TO_BUTTON.from_body(body)?;
