@@ -5,7 +5,9 @@ use serde::{Deserialize, Serialize};
 
 use crate::webdynpro::event::Event;
 
-use super::{Element, ElementDef, EventParameterMap, Interactable};
+use crate::webdynpro::element::{
+    Element, ElementDef, ElementWrapper, EventParameterMap, Interactable,
+};
 
 #[derive(Debug)]
 pub struct ClientInspector<'a> {
@@ -138,11 +140,11 @@ impl<'a> Element<'a> for ClientInspector<'a> {
         &self.element_ref
     }
 
-    fn wrap(self) -> super::ElementWrapper<'a> {
-        super::ElementWrapper::ClientInspector(self)
+    fn wrap(self) -> ElementWrapper<'a> {
+        ElementWrapper::ClientInspector(self)
     }
 
-    fn children(&self) -> Vec<super::ElementWrapper<'a>> {
+    fn children(&self) -> Vec<ElementWrapper<'a>> {
         Self::children_elem(self.element_ref().clone())
     }
 }

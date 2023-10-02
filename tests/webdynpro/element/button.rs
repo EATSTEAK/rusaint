@@ -1,7 +1,10 @@
 use anyhow::Result;
 use rusaint::{
     define_elements,
-    webdynpro::element::{button::Button, link::Link, text_view::TextView},
+    webdynpro::element::{
+        action::{button::Button, link::Link},
+        text::text_view::TextView,
+    },
 };
 
 use crate::get_session;

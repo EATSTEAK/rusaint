@@ -3,17 +3,17 @@ use std::{borrow::Cow, cell::OnceCell, ops::DerefMut};
 
 use serde::Deserialize;
 
-use super::{Element, ElementDef, ElementWrapper, EventParameterMap};
+use crate::webdynpro::element::{Element, ElementDef, ElementWrapper, EventParameterMap};
 
 use self::{action_item::ListBoxActionItem, item::ListBoxItem};
 
 macro_rules! def_listbox_subset {
     [$($name:ident = $id:literal),+ $(,)?] => {$(
         #[derive(Debug)]
-        pub struct $name<'a>($crate::webdynpro::element::list_box::ListBox<'a>);
+        pub struct $name<'a>($crate::webdynpro::element::selection::list_box::ListBox<'a>);
 
         impl<'a> std::ops::Deref for $name<'a> {
-            type Target = $crate::webdynpro::element::list_box::ListBox<'a>;
+            type Target = $crate::webdynpro::element::selection::list_box::ListBox<'a>;
             fn deref(&self) -> &Self::Target {
                 &self.0
             }
@@ -71,7 +71,7 @@ macro_rules! def_listbox_subset {
 
         impl<'a> $name<'a> {
             pub const fn new(id: std::borrow::Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {
-                Self($crate::webdynpro::element::list_box::ListBox::new(id, element_ref))
+                Self($crate::webdynpro::element::selection::list_box::ListBox::new(id, element_ref))
             }
         }
     )+

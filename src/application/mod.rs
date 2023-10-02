@@ -11,10 +11,12 @@ use crate::{
     webdynpro::{
         application::{client::Client, BasicApplication},
         element::{
-            client_inspector::ClientInspector,
-            custom::{Custom, CustomClientInfo},
             define_elements,
-            loading_placeholder::LoadingPlaceholder,
+            system::{
+                client_inspector::ClientInspector,
+                custom::{Custom, CustomClientInfo},
+                loading_placeholder::LoadingPlaceholder,
+            },
         },
     },
 };
@@ -39,8 +41,8 @@ impl<'a> DerefMut for USaintApplication {
 
 impl<'a> USaintApplication {
     define_elements! {
-        CLIENT_INSPECTOR_WD01:ClientInspector<'a> = "WD01",
-        CLIENT_INSPECTOR_WD02:ClientInspector<'a> = "WD02",
+        CLIENT_INSPECTOR_WD01: ClientInspector<'a> = "WD01",
+        CLIENT_INSPECTOR_WD02: ClientInspector<'a> = "WD02",
         LOADING_PLACEHOLDER: LoadingPlaceholder<'a> = "_loadingPlaceholder_"
     }
 

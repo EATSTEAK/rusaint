@@ -3,7 +3,7 @@ use anyhow::Result;
 use url::Url;
 
 use super::{
-    element::{define_elements, form::Form},
+    element::{define_elements, layout::form::Form},
     error::ClientError,
     event::Event,
 };

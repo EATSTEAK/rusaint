@@ -1,7 +1,7 @@
 use scraper::Selector;
 use std::{borrow::Cow, cell::OnceCell};
 
-use super::{button::Button, define_element_base, ElementWrapper};
+use crate::webdynpro::element::{action::button::Button, define_element_base, ElementWrapper};
 
 define_element_base! {
     ButtonRow<"BR", "ButtonRow"> {

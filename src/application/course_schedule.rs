@@ -1,8 +1,12 @@
 use anyhow::Result;
 use std::ops::{Deref, DerefMut};
 
-use crate::webdynpro::element::{
-    button::Button, combo_box::ComboBox, define_elements, sap_table::SapTable, tab_strip::TabStrip,
+use crate::{
+    define_elements,
+    webdynpro::element::{
+        action::button::Button, complex::sap_table::SapTable, layout::tab_strip::TabStrip,
+        selection::combo_box::ComboBox,
+    },
 };
 
 use super::USaintApplication;
@@ -99,8 +103,8 @@ mod test {
     use crate::{
         application::course_schedule::CourseSchedule,
         webdynpro::element::{
-            list_box::{ListBoxItemWrapper, ListBoxWrapper},
-            sap_table::cell::{SapTableCell, SapTableCellWrapper},
+            complex::sap_table::cell::{SapTableCell, SapTableCellWrapper},
+            selection::list_box::{ListBoxItemWrapper, ListBoxWrapper},
             ElementWrapper,
         },
     };

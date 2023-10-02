@@ -4,7 +4,7 @@ use std::{borrow::Cow, cell::OnceCell, collections::HashMap};
 
 use crate::webdynpro::event::Event;
 
-use super::{define_element_interactable, Interactable};
+use crate::webdynpro::element::{define_element_interactable, Interactable};
 
 // TODO: Implement additional events and data
 define_element_interactable! {

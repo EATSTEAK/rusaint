@@ -4,7 +4,7 @@ use std::{borrow::Cow, cell::OnceCell, collections::HashMap};
 use scraper::Selector;
 
 use crate::webdynpro::{
-    element::SubElement,
+    element::{define_element_interactable, ElementDef, Interactable, SubElement, SubElementDef},
     error::{BodyError, ElementError},
     event::Event,
 };
@@ -14,8 +14,6 @@ use self::cell::{
     matrix_cell::SapTableMatrixCell, normal_cell::SapTableNormalCell,
     selection_cell::SapTableSelectionCell, SapTableCellWrapper,
 };
-
-use super::{define_element_interactable, ElementDef, Interactable, SubElementDef};
 
 pub type SapTableBody<'a> = Vec<Vec<SapTableCellWrapper<'a>>>;
 
