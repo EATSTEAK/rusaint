@@ -2,7 +2,7 @@ use anyhow::Result;
 use std::ops::{Deref, DerefMut};
 
 use crate::webdynpro::element::{
-    button::Button, combo_box::ComboBox, element_ref, sap_table::SapTable, tab_strip::TabStrip,
+    button::Button, combo_box::ComboBox, define_elements, sap_table::SapTable, tab_strip::TabStrip,
 };
 
 use super::USaintApplication;
@@ -26,7 +26,7 @@ impl<'a> DerefMut for CourseSchedule {
 impl<'a> CourseSchedule {
     const APP_NAME: &str = "ZCMW2100";
 
-    element_ref! {
+    define_elements! {
         PERIOD_YEAR: ComboBox<'a> = "ZCMW_PERIOD_RE.ID_A61C4ED604A2BFC2A8F6C6038DE6AF18:VIW_MAIN.PERYR",
         PERIOD_ID: ComboBox<'a> = "ZCMW_PERIOD_RE.ID_A61C4ED604A2BFC2A8F6C6038DE6AF18:VIW_MAIN.PERID",
         TABLE_ROWS: ComboBox<'a> = "ZCMW2100.ID_0001:VIW_MODULES.ROWS",

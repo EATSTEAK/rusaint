@@ -1,6 +1,6 @@
 use anyhow::Result;
 use rusaint::{
-    element_ref,
+    define_elements,
     webdynpro::element::{button::Button, link::Link, text_view::TextView},
 };
 
@@ -9,7 +9,7 @@ use crate::get_session;
 use super::EventTestSuite;
 
 impl<'a> EventTestSuite {
-    element_ref! {
+    define_elements! {
         /* Button Test */
         LINK_TO_BUTTON: Link<'a> = "WDR_TEST_EVENTS.ID_0001:MAIN.TOBUTTON",
         TEST_BUTTON: Button<'a> = "WDR_TEST_EVENTS.ID_0001:BUTTON.BUTTON1",

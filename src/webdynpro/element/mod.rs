@@ -275,13 +275,13 @@ where T: Element<'a>
 }
 
 #[macro_export]
-macro_rules! element_ref {
+macro_rules! define_elements {
     ($($name:ident : $eltype:tt<$lt:lifetime> = $id:literal),+ $(,)?) => {
         $(const $name: $crate::webdynpro::element::ElementDef<$lt, $eltype<$lt>> = $crate::webdynpro::element::ElementDef::new($id);)*
     }
 }
 
-pub use element_ref;
+pub use define_elements;
 
 // TODO: Do multiple replacements without owning
 fn normalize_lsjson(lsjson: &str) -> String {

@@ -6,7 +6,7 @@ use std::{
 };
 
 use crate::{
-    element_ref,
+    define_elements,
     session::USaintSession,
     webdynpro::{
         application::client::body::Body,
@@ -47,7 +47,7 @@ impl<'a> CourseGrades {
     const APP_NAME: &str = "ZCMB3W0017";
 
     // Elements for General Grades
-    element_ref!(
+    define_elements!(
         GRADES_SUMMARY_TABLE: SapTable<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.TABLE",
         GRADE_TYPE: ComboBox<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.PROGC_VAR",
         ATTM_GRADE: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.ATTM_CRD1",
@@ -59,7 +59,7 @@ impl<'a> CourseGrades {
     );
 
     // Elements for Specific Grades
-    element_ref!(
+    define_elements!(
         PERIOD_YEAR: ComboBox<'a> = "ZCMW_PERIOD_RE.ID_0DC742680F42DA9747594D1AE51A0C69:VIW_MAIN.PERYR",
         PERIOD_SEMESTER: ComboBox<'a> = "ZCMW_PERIOD_RE.ID_0DC742680F42DA9747594D1AE51A0C69:VIW_MAIN.PERID",
         SPECIFIC_GRADE_SUMMARY_TABLE: SapTable<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.TABLE_1",

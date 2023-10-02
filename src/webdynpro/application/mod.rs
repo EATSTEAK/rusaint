@@ -3,7 +3,7 @@ use anyhow::Result;
 use url::Url;
 
 use super::{
-    element::{element_ref, form::Form},
+    element::{define_elements, form::Form},
     error::ClientError,
     event::Event,
 };
@@ -15,7 +15,7 @@ pub struct BasicApplication {
 }
 
 impl<'a> BasicApplication {
-    element_ref! {
+    define_elements! {
         SSR_FORM: Form<'a> = "sap.client.SsrClient.form"
     }
 

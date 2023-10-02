@@ -13,7 +13,7 @@ use crate::{
         element::{
             client_inspector::ClientInspector,
             custom::{Custom, CustomClientInfo},
-            element_ref,
+            define_elements,
             loading_placeholder::LoadingPlaceholder,
         },
     },
@@ -38,7 +38,7 @@ impl<'a> DerefMut for USaintApplication {
 }
 
 impl<'a> USaintApplication {
-    element_ref! {
+    define_elements! {
         CLIENT_INSPECTOR_WD01:ClientInspector<'a> = "WD01",
         CLIENT_INSPECTOR_WD02:ClientInspector<'a> = "WD02",
         LOADING_PLACEHOLDER: LoadingPlaceholder<'a> = "_loadingPlaceholder_"
