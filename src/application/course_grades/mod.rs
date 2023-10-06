@@ -62,7 +62,7 @@ impl<'a> CourseGrades {
     define_elements!(
         PERIOD_YEAR: ComboBox<'a> = "ZCMW_PERIOD_RE.ID_0DC742680F42DA9747594D1AE51A0C69:VIW_MAIN.PERYR",
         PERIOD_SEMESTER: ComboBox<'a> = "ZCMW_PERIOD_RE.ID_0DC742680F42DA9747594D1AE51A0C69:VIW_MAIN.PERID",
-        SPECIFIC_GRADE_SUMMARY_TABLE: SapTable<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.TABLE_1",
+        GRADE_BY_CLASSES_TABLE: SapTable<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.TABLE_1",
     );
 
     pub async fn new(session: Arc<USaintSession>) -> Result<CourseGrades> {
@@ -169,6 +169,7 @@ impl<'a> CourseGrades {
         &mut self,
         open_button: ElementDef<'f, Button<'f>>,
     ) -> Result<HashMap<String, f32>> {
+        println!("{}", open_button.id());
         fn parse_table_in_popup(body: &Body) -> Result<Vec<(String, f32)>> {
             let table_inside_popup_selector =
                 scraper::Selector::parse(r#"[ct="PW"] [ct="ST"]"#).unwrap();
@@ -195,6 +196,37 @@ impl<'a> CourseGrades {
         Ok(HashMap::from_iter(table))
     }
 
+    pub async fn class_grade_detail(
+        &mut self,
+        year: &str,
+        semester: &str,
+        code: &str
+    ) -> Result<HashMap<String, f32>> {
+        self.select_year_semester(year, semester).await?;
+        let table_elem = Self::GRADE_BY_CLASSES_TABLE.from_body(self.body())?;
+        let Some(table) = table_elem.table()  else {
+            return Err(ElementError::NoSuchElement)?;
+        };
+        let Some(btn) = ({
+            table.iter().find(|row| {
+                if let Some(ElementWrapper::TextView(code_elem)) = row[3].content() {
+                    code_elem.text() == code
+                } else {
+                    false
+                }
+            }).and_then(|row| {
+                if let Some(ElementWrapper::Button(btn)) = row[10].content() {
+                    Some(ElementDef::<'_, Button<'_>>::new_dynamic(btn.id().to_owned()))
+                } else {
+                    None
+                }
+            })
+        }) else {
+            return Ok(HashMap::default());
+        };
+        self.grade_detail_in_popup(btn).await
+    }
+
     pub async fn grade_detail(
         &mut self,
         year: &str,
@@ -204,7 +236,7 @@ impl<'a> CourseGrades {
         self.close_popups().await?;
         self.select_year_semester(year, semester).await?;
         let class_grades: Vec<(Option<String>, Vec<String>)> = {
-            let grade_table_elem = Self::SPECIFIC_GRADE_SUMMARY_TABLE.from_body(self.body())?;
+            let grade_table_elem = Self::GRADE_BY_CLASSES_TABLE.from_body(self.body())?;
             let iter = grade_table_elem
                 .table()
                 .ok_or(ElementError::NoSuchElement)?
