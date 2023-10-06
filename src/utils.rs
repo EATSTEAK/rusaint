@@ -80,7 +80,7 @@ pub async fn obtain_ssu_sso_token(id: &str, password: &str) -> Result<String> {
         .await?;
     let cookie_token = res
         .cookies()
-        .find(|cookie| cookie.name() == "sToken")
+        .find(|cookie| cookie.name() == "sToken" && !cookie.value().is_empty())
         .ok_or(SsuSsoError::CantFindToken)?;
     Ok(cookie_token.value().to_string())
 }
