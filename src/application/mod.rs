@@ -93,9 +93,11 @@ impl<'a> USaintApplication {
     }
 }
 
-pub mod course_grades;
+mod course_grades;
 mod course_schedule;
 mod student_information;
+
+pub use self::course_grades::CourseGrades;
 
 #[cfg(test)]
 mod test {
