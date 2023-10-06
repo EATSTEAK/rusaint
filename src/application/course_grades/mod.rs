@@ -23,7 +23,7 @@ use crate::{
     },
 };
 
-use self::data::{ClassGrade, GradeSummary};
+use self::model::{ClassGrade, GradeSummary, SemesterGrade};
 
 use super::USaintApplication;
 
@@ -46,19 +46,19 @@ impl<'a> DerefMut for CourseGrades {
 impl<'a> CourseGrades {
     const APP_NAME: &str = "ZCMB3W0017";
 
-    // Elements for General Grades
+    // Elements for Grade Summaries
     define_elements!(
         GRADES_SUMMARY_TABLE: SapTable<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.TABLE",
         GRADE_TYPE: ComboBox<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.PROGC_VAR",
-        ATTM_GRADE: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.ATTM_CRD1",
-        EARN_GRADE: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.EARN_CRD1",
-        GT_GPA: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.GT_GPA1",
-        CGPA: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.CGPA1",
-        AVG: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.AVG1",
-        PF_EARN: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.PF_EARN_CRD",
+        ATTM_CRD1: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.ATTM_CRD1",
+        EARN_CRD1: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.EARN_CRD1",
+        GT_GPA1: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.GT_GPA1",
+        CGPA1: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.CGPA1",
+        AVG1: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.AVG1",
+        PF_EARN_CRD: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.PF_EARN_CRD",
     );
 
-    // Elements for Specific Grades
+    // Elements for Class Grades
     define_elements!(
         PERIOD_YEAR: ComboBox<'a> = "ZCMW_PERIOD_RE.ID_0DC742680F42DA9747594D1AE51A0C69:VIW_MAIN.PERYR",
         PERIOD_SEMESTER: ComboBox<'a> = "ZCMW_PERIOD_RE.ID_0DC742680F42DA9747594D1AE51A0C69:VIW_MAIN.PERID",
@@ -131,7 +131,7 @@ impl<'a> CourseGrades {
         )
     }
 
-    pub fn grade_summary(&self) -> Result<Vec<GradeSummary>> {
+    pub fn semesters(&self) -> Result<Vec<SemesterGrade>> {
         fn parse_rank(value: String) -> Option<(u32, u32)> {
             let mut spl = value.split("/");
             let first: u32 = spl.next()?.parse().ok()?;
@@ -146,7 +146,7 @@ impl<'a> CourseGrades {
             .skip(1)
             .filter_map(Self::row_to_string)
             .filter_map(|values| {
-                Some(GradeSummary::new(
+                Some(SemesterGrade::new(
                     values[1].parse().ok()?,
                     values[2].clone(),
                     values[3].parse().ok()?,
@@ -165,7 +165,7 @@ impl<'a> CourseGrades {
         Ok(ret.collect())
     }
 
-    async fn grade_detail_in_popup<'f>(
+    async fn class_detail_in_popup<'f>(
         &mut self,
         open_button: ElementDef<'f, Button<'f>>,
     ) -> Result<HashMap<String, f32>> {
@@ -196,7 +196,7 @@ impl<'a> CourseGrades {
         Ok(HashMap::from_iter(table))
     }
 
-    pub async fn class_grade_detail(
+    pub async fn class_detail(
         &mut self,
         year: &str,
         semester: &str,
@@ -224,10 +224,10 @@ impl<'a> CourseGrades {
         }) else {
             return Ok(HashMap::default());
         };
-        self.grade_detail_in_popup(btn).await
+        self.class_detail_in_popup(btn).await
     }
 
-    pub async fn grade_detail(
+    pub async fn classes(
         &mut self,
         year: &str,
         semester: &str,
@@ -261,7 +261,7 @@ impl<'a> CourseGrades {
             let detail: Option<HashMap<String, f32>> = if let Some(btn_id) = btn_id {
                 if include_details {
                     let btn_def = ElementDef::<Button<'_>>::new_dynamic(btn_id);
-                    Some(self.grade_detail_in_popup(btn_def).await?)
+                    Some(self.class_detail_in_popup(btn_def).await?)
                 } else {
                     None
                 }
@@ -308,7 +308,7 @@ impl<'a> SapTableCellWrapper<'a> {
     }
 }
 
-pub mod data;
+pub mod model;
 
 #[cfg(test)]
 mod test {

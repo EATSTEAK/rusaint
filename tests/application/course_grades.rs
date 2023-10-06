@@ -22,22 +22,31 @@ async fn get_session() -> Result<Arc<USaintSession>> {
             .ok_or(Error::msg("Session is not initsiated"))
     }
 }
+
 #[tokio::test]
 #[serial]
-async fn read_grades() {
+async fn summary() {
     let session = get_session().await.unwrap();
     let app = CourseGrades::new(session).await.unwrap();
-    let summary = app.grade_summary().unwrap();
+    let summary = app.summary().unwrap();
     println!("{:?}", summary);
-    assert!(!summary.is_empty());
+}
+#[tokio::test]
+#[serial]
+async fn semesters() {
+    let session = get_session().await.unwrap();
+    let app = CourseGrades::new(session).await.unwrap();
+    let semesters = app.semesters().unwrap();
+    println!("{:?}", semesters);
+    assert!(!semesters.is_empty());
 }
 
 #[tokio::test]
 #[serial]
-async fn grade_detail() {
+async fn classes_with_detail() {
     let session = get_session().await.unwrap();
     let mut app = CourseGrades::new(session).await.unwrap();
-    let detail = app.grade_detail("2022", "092", true).await.unwrap();
+    let detail = app.classes("2022", "092", true).await.unwrap();
     println!("{:?}", detail);
     assert!(!detail.is_empty());
 }
