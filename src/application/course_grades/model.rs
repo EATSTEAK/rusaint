@@ -13,6 +13,18 @@ pub struct GradeSummary {
     avg: f32,
     pf_earned_credits: f32
 }
+impl GradeSummary {
+    pub(crate) fn new(attempted_credits: f32, earned_credits: f32, gpa: f32, cgpa: f32, avg: f32, pf_earned_credits: f32) -> GradeSummary {
+        GradeSummary {
+            attempted_credits,
+            earned_credits,
+            gpa,
+            cgpa,
+            avg,
+            pf_earned_credits
+        }
+    }
+}
 
 
 

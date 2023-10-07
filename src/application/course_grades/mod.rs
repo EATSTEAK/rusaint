@@ -48,14 +48,34 @@ impl<'a> CourseGrades {
 
     // Elements for Grade Summaries
     define_elements!(
+        // Grade summaries by semester
         GRADES_SUMMARY_TABLE: SapTable<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.TABLE",
-        GRADE_TYPE: ComboBox<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.PROGC_VAR",
+        // Progress type
+        PROGRESS_TYPE: ComboBox<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.PROGC_VAR",
+        // Attempted Credits in Record
         ATTM_CRD1: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.ATTM_CRD1",
+        // Earned Credits in Record
         EARN_CRD1: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.EARN_CRD1",
+        // GPA in Record
         GT_GPA1: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.GT_GPA1",
+        // Class GPA in Record
         CGPA1: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.CGPA1",
+        // Average Points in Record
         AVG1: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.AVG1",
+        // Credits earned in P/F Classes in Record
         PF_EARN_CRD: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.PF_EARN_CRD",
+        // Attempted Credits in Certificate
+        ATTM_CRD2: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.ATTM_CRD2",
+        // Earned Credits in Certificate
+        EARN_CRD2: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.EARN_CRD2",
+        // GPA in Certificate
+        GT_GPA2: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.GT_GPA2",
+        // Class GPA in Certificate
+        CGPA2: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.CGPA2",
+        // Average Points in Certificate
+        AVG2: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.AVG2",
+        // Credits earned in P/F Classes in Certificate
+        PF_EARN_CRD1: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.T_PF_EARN_CRD1",
     );
 
     // Elements for Class Grades
@@ -131,6 +151,49 @@ impl<'a> CourseGrades {
         )
     }
 
+    fn value_as_f32(field: InputField<'_>) -> Result<f32> {
+        let Some(value) = field.lsdata().and_then(|lsdata| lsdata.value().as_ref()) else {
+            return Err(ElementError::InvalidLSData)?;
+        };
+        Ok(value.parse::<f32>()?)
+    }
+
+    pub fn recorded_summary(&self) -> Result<GradeSummary> {
+        let body = self.body();
+        let attempted_credits = Self::value_as_f32(Self::ATTM_CRD1.from_body(body)?)?;
+        let earned_credits = Self::value_as_f32(Self::EARN_CRD1.from_body(body)?)?;
+        let gpa = Self::value_as_f32(Self::GT_GPA1.from_body(body)?)?;
+        let cgpa = Self::value_as_f32(Self::CGPA1.from_body(body)?)?;
+        let avg = Self::value_as_f32(Self::AVG1.from_body(body)?)?;
+        let pf_earned_credits = Self::value_as_f32(Self::PF_EARN_CRD.from_body(body)?)?;
+        Ok(GradeSummary::new(
+            attempted_credits,
+            earned_credits,
+            gpa,
+            cgpa,
+            avg,
+            pf_earned_credits,
+        ))
+    }
+
+    pub fn certificated_summary(&self) -> Result<GradeSummary> {
+        let body = self.body();
+        let attempted_credits = Self::value_as_f32(Self::ATTM_CRD2.from_body(body)?)?;
+        let earned_credits = Self::value_as_f32(Self::EARN_CRD2.from_body(body)?)?;
+        let gpa = Self::value_as_f32(Self::GT_GPA2.from_body(body)?)?;
+        let cgpa = Self::value_as_f32(Self::CGPA2.from_body(body)?)?;
+        let avg = Self::value_as_f32(Self::AVG2.from_body(body)?)?;
+        let pf_earned_credits = Self::value_as_f32(Self::PF_EARN_CRD1.from_body(body)?)?;
+        Ok(GradeSummary::new(
+            attempted_credits,
+            earned_credits,
+            gpa,
+            cgpa,
+            avg,
+            pf_earned_credits,
+        ))
+    }
+
     pub fn semesters(&self) -> Result<Vec<SemesterGrade>> {
         fn parse_rank(value: String) -> Option<(u32, u32)> {
             let mut spl = value.split("/");
@@ -169,7 +232,6 @@ impl<'a> CourseGrades {
         &mut self,
         open_button: ElementDef<'f, Button<'f>>,
     ) -> Result<HashMap<String, f32>> {
-        println!("{}", open_button.id());
         fn parse_table_in_popup(body: &Body) -> Result<Vec<(String, f32)>> {
             let table_inside_popup_selector =
                 scraper::Selector::parse(r#"[ct="PW"] [ct="ST"]"#).unwrap();
@@ -200,7 +262,7 @@ impl<'a> CourseGrades {
         &mut self,
         year: &str,
         semester: &str,
-        code: &str
+        code: &str,
     ) -> Result<HashMap<String, f32>> {
         self.select_year_semester(year, semester).await?;
         let table_elem = Self::GRADE_BY_CLASSES_TABLE.from_body(self.body())?;
@@ -222,7 +284,7 @@ impl<'a> CourseGrades {
                 }
             })
         }) else {
-            return Ok(HashMap::default());
+            return Err(ElementError::NoSuchAttribute("detail".to_string()))?;
         };
         self.class_detail_in_popup(btn).await
     }

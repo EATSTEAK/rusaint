@@ -25,11 +25,13 @@ async fn get_session() -> Result<Arc<USaintSession>> {
 
 #[tokio::test]
 #[serial]
-async fn summary() {
+async fn summaries() {
     let session = get_session().await.unwrap();
     let app = CourseGrades::new(session).await.unwrap();
-    let summary = app.summary().unwrap();
-    println!("{:?}", summary);
+    let recorded_summary = app.recorded_summary().unwrap();
+    println!("Recorded: {:?}", recorded_summary);
+    let certificated_summary = app.certificated_summary().unwrap();
+    println!("Certificated: {:?}", certificated_summary);
 }
 #[tokio::test]
 #[serial]
@@ -46,7 +48,12 @@ async fn semesters() {
 async fn classes_with_detail() {
     let session = get_session().await.unwrap();
     let mut app = CourseGrades::new(session).await.unwrap();
-    let detail = app.classes("2022", "092", true).await.unwrap();
+    let details = app.classes("2022", "092", true).await.unwrap();
+    println!("{:?}", details);
+    assert!(!details.is_empty());
+    println!("Try to obtain class's detail");
+    let detail_code = details.iter().find(|grade| grade.detail().is_some()).unwrap();
+    let detail = app.class_detail("2022", "092", detail_code.code()).await.unwrap();
     println!("{:?}", detail);
     assert!(!detail.is_empty());
 }
