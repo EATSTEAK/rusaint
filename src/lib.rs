@@ -24,11 +24,7 @@
 //! // 성적 정보를 출력하는 애플리케이션
 //! fn main() {
 //!     block_on(print_grades());
-//!     /* GradeSummary { year: 2023, semester: "여름학기", attempt_credits: 2.0, earn_credits: 2.0, pf_credits: 2.0, grade_points_avarage: 0.0, grade_points_sum: 0.0, arithmetic_mean: 0.0, semester_rank: (0, 0), general_rank: (0, 0), academic_probation: false, consult: false, flunked: false }
-//!      * GradeSummary { year: 2022, semester: "2 학기", attempt_credits: 17.5, earn_credits: 17.5, pf_credits: 0.5, grade_points_avarage: 4.5, grade_points_sum: 100.0, arithmetic_mean: 100.0, semester_rank: (1, 99), general_rank: (1, 99), academic_probation: false, consult: false, flunked: false }
-//!      * GradeSummary { year: 2022, semester: "1 학기", attempt_credits: 19.5, earn_credits: 19.5, pf_credits: 0.5, grade_points_avarage: 4.5, grade_points_sum: 100.0, arithmetic_mean: 100.0, semester_rank: (1, 100), general_rank: (1, 100), academic_probation: false, consult: false, flunked: false }
-//!      * GradeSummary { year: 2021, semester: "2 학기", attempt_credits: 19.5, earn_credits: 19.5, pf_credits: 0.5, grade_points_avarage: 4.5, grade_points_sum: 100.0, arithmetic_mean: 100.0, semester_rank: (1, 99), general_rank: (1, 99), academic_probation: false, consult: false, flunked: false }
-//!      * GradeSummary { year: 2021, semester: "1 학기", attempt_credits: 20.5, earn_credits: 20.5, pf_credits: 2.5, grade_points_avarage: 4.5, grade_points_sum: 100.0, arithmetic_mean: 100.0, semester_rank: (1, 103), general_rank: (1, 103), academic_probation: false, consult: false, flunked: false }
+//!     /* GradeSummary { year: 2022, semester: "2 학기", attempted_credits: 17.5, earned_credits: 17.5, pf_earned_credits: 0.5, grade_points_avarage: 4.5, grade_points_sum: 100.0, arithmetic_mean: 100.0, semester_rank: (1, 99), general_rank: (1, 99), academic_probation: false, consult: false, flunked: false }
 //!      */
 //! }
 //!
