@@ -2,7 +2,7 @@ use anyhow::{Error, Result};
 use std::sync::{Arc, OnceLock};
 
 use dotenv::dotenv;
-use rusaint::{application::CourseGrades, session::USaintSession};
+use rusaint::{application::CourseGrades, model::SemesterType, session::USaintSession};
 use serial_test::serial;
 
 static SESSION: OnceLock<Arc<USaintSession>> = OnceLock::new();
@@ -48,12 +48,18 @@ async fn semesters() {
 async fn classes_with_detail() {
     let session = get_session().await.unwrap();
     let mut app = CourseGrades::new(session).await.unwrap();
-    let details = app.classes("2022", "092", true).await.unwrap();
+    let details = app.classes("2022", SemesterType::Two, true).await.unwrap();
     println!("{:?}", details);
     assert!(!details.is_empty());
     println!("Try to obtain class's detail");
-    let detail_code = details.iter().find(|grade| grade.detail().is_some()).unwrap();
-    let detail = app.class_detail("2022", "092", detail_code.code()).await.unwrap();
+    let detail_code = details
+        .iter()
+        .find(|grade| grade.detail().is_some())
+        .unwrap();
+    let detail = app
+        .class_detail("2022", SemesterType::Two, detail_code.code())
+        .await
+        .unwrap();
     println!("{:?}", detail);
     assert!(!detail.is_empty());
 }

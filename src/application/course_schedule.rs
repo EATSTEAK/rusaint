@@ -3,6 +3,7 @@ use std::ops::{Deref, DerefMut};
 
 use crate::{
     define_elements,
+    model::SemesterType,
     webdynpro::element::{
         action::button::Button, complex::sap_table::SapTable, layout::tab_strip::TabStrip,
         selection::combo_box::ComboBox,
@@ -45,14 +46,27 @@ impl<'a> CourseSchedule {
         ))
     }
 
-    pub async fn select_period(&mut self, year: u32, period: &str) -> Result<()> {
+    fn semester_to_key(period: SemesterType) -> &'static str {
+        match period {
+            SemesterType
+    ::One => "090",
+            SemesterType
+    ::Summer => "091",
+            SemesterType
+    ::Two => "092",
+            SemesterType
+    ::Winter => "0923",
+        }
+    }
+
+    pub async fn select_period(&mut self, year: &str, period: SemesterType) -> Result<()> {
         let events = {
             let body = self.body();
             let period_year = Self::PERIOD_YEAR.from_body(body)?;
             let period_id = Self::PERIOD_ID.from_body(body)?;
             vec![
-                period_year.select(year.to_string().as_str(), false)?,
-                period_id.select(period, false)?,
+                period_year.select(year, false)?,
+                period_id.select(Self::semester_to_key(period), false)?,
             ]
         };
         self.send_events(events).await
@@ -131,10 +145,10 @@ mod test {
                 for item in listbox.items() {
                     match item {
                         ListBoxItemWrapper::Item(item) => {
-                            println!("{:?}", item);
+                            println!("value: {:?}, key: {:?}", item.value1(), item.key());
                         }
                         ListBoxItemWrapper::ActionItem(item) => {
-                            println!("{:?}", item);
+                            println!("title: {:?}, text: {:?}", item.title(), item.text());
                         }
                     }
                 }
