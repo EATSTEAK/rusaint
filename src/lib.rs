@@ -1,6 +1,10 @@
+#[cfg(feature = "application")]
 pub mod application;
+#[cfg(feature = "application")]
 pub mod error;
+#[cfg(feature = "model")]
 pub mod model;
+#[cfg(feature = "application")]
 pub mod session;
 pub mod utils;
 pub mod webdynpro;

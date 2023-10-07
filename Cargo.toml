@@ -6,11 +6,19 @@ license = "MIT"
 repository = "https://github.com/EATSTEAK/rusaint"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[features]
+default = ["application", "model"]
+application = []
+model = ["application"]
 
 [dependencies]
 derive_builder = "0.12.0"
-reqwest = { version = "0.11.18", features = ["cookies", "gzip", "brotli", "deflate"] }
+reqwest = { version = "0.11.18", features = [
+    "cookies",
+    "gzip",
+    "brotli",
+    "deflate",
+] }
 thiserror = "1.0.44"
 tokio = { version = "1.29.1", features = ["macros", "test-util"] }
 html-escape = "0.2.13"
