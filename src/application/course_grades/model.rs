@@ -2,10 +2,36 @@ use std::{collections::HashMap, num::ParseIntError, str::FromStr};
 
 use getset::Getters;
 
-#[derive(Debug, Getters)]
+#[derive(Getters, Debug)]
 #[allow(unused)]
 #[get = "pub"]
 pub struct GradeSummary {
+    attempted_credits: f32,
+    earned_credits: f32,
+    gpa: f32,
+    cgpa: f32,
+    avg: f32,
+    pf_earned_credits: f32
+}
+impl GradeSummary {
+    pub(crate) fn new(attempted_credits: f32, earned_credits: f32, gpa: f32, cgpa: f32, avg: f32, pf_earned_credits: f32) -> GradeSummary {
+        GradeSummary {
+            attempted_credits,
+            earned_credits,
+            gpa,
+            cgpa,
+            avg,
+            pf_earned_credits
+        }
+    }
+}
+
+
+
+#[derive(Debug, Getters)]
+#[allow(unused)]
+#[get = "pub"]
+pub struct SemesterGrade {
     year: u32,
     semester: String,
     attempt_credits: f32,
@@ -21,7 +47,7 @@ pub struct GradeSummary {
     flunked: bool,
 }
 
-impl GradeSummary {
+impl SemesterGrade {
     pub fn new(
         year: u32,
         semester: String,
@@ -36,8 +62,8 @@ impl GradeSummary {
         academic_probation: bool,
         consult: bool,
         flunked: bool,
-    ) -> GradeSummary {
-        GradeSummary {
+    ) -> Self {
+        Self {
             year,
             semester,
             attempt_credits,

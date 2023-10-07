@@ -23,7 +23,7 @@ use crate::{
     },
 };
 
-use self::data::{ClassGrade, GradeSummary};
+use self::model::{ClassGrade, GradeSummary, SemesterGrade};
 
 use super::USaintApplication;
 
@@ -46,23 +46,43 @@ impl<'a> DerefMut for CourseGrades {
 impl<'a> CourseGrades {
     const APP_NAME: &str = "ZCMB3W0017";
 
-    // Elements for General Grades
+    // Elements for Grade Summaries
     define_elements!(
+        // Grade summaries by semester
         GRADES_SUMMARY_TABLE: SapTable<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.TABLE",
-        GRADE_TYPE: ComboBox<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.PROGC_VAR",
-        ATTM_GRADE: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.ATTM_CRD1",
-        EARN_GRADE: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.EARN_CRD1",
-        GT_GPA: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.GT_GPA1",
-        CGPA: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.CGPA1",
-        AVG: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.AVG1",
-        PF_EARN: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.PF_EARN_CRD",
+        // Progress type
+        PROGRESS_TYPE: ComboBox<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.PROGC_VAR",
+        // Attempted Credits in Record
+        ATTM_CRD1: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.ATTM_CRD1",
+        // Earned Credits in Record
+        EARN_CRD1: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.EARN_CRD1",
+        // GPA in Record
+        GT_GPA1: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.GT_GPA1",
+        // Class GPA in Record
+        CGPA1: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.CGPA1",
+        // Average Points in Record
+        AVG1: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.AVG1",
+        // Credits earned in P/F Classes in Record
+        PF_EARN_CRD: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.PF_EARN_CRD",
+        // Attempted Credits in Certificate
+        ATTM_CRD2: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.ATTM_CRD2",
+        // Earned Credits in Certificate
+        EARN_CRD2: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.EARN_CRD2",
+        // GPA in Certificate
+        GT_GPA2: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.GT_GPA2",
+        // Class GPA in Certificate
+        CGPA2: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.CGPA2",
+        // Average Points in Certificate
+        AVG2: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.AVG2",
+        // Credits earned in P/F Classes in Certificate
+        PF_EARN_CRD1: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.T_PF_EARN_CRD1",
     );
 
-    // Elements for Specific Grades
+    // Elements for Class Grades
     define_elements!(
         PERIOD_YEAR: ComboBox<'a> = "ZCMW_PERIOD_RE.ID_0DC742680F42DA9747594D1AE51A0C69:VIW_MAIN.PERYR",
         PERIOD_SEMESTER: ComboBox<'a> = "ZCMW_PERIOD_RE.ID_0DC742680F42DA9747594D1AE51A0C69:VIW_MAIN.PERID",
-        SPECIFIC_GRADE_SUMMARY_TABLE: SapTable<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.TABLE_1",
+        GRADE_BY_CLASSES_TABLE: SapTable<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.TABLE_1",
     );
 
     pub async fn new(session: Arc<USaintSession>) -> Result<CourseGrades> {
@@ -131,7 +151,50 @@ impl<'a> CourseGrades {
         )
     }
 
-    pub fn grade_summary(&self) -> Result<Vec<GradeSummary>> {
+    fn value_as_f32(field: InputField<'_>) -> Result<f32> {
+        let Some(value) = field.lsdata().and_then(|lsdata| lsdata.value().as_ref()) else {
+            return Err(ElementError::InvalidLSData)?;
+        };
+        Ok(value.parse::<f32>()?)
+    }
+
+    pub fn recorded_summary(&self) -> Result<GradeSummary> {
+        let body = self.body();
+        let attempted_credits = Self::value_as_f32(Self::ATTM_CRD1.from_body(body)?)?;
+        let earned_credits = Self::value_as_f32(Self::EARN_CRD1.from_body(body)?)?;
+        let gpa = Self::value_as_f32(Self::GT_GPA1.from_body(body)?)?;
+        let cgpa = Self::value_as_f32(Self::CGPA1.from_body(body)?)?;
+        let avg = Self::value_as_f32(Self::AVG1.from_body(body)?)?;
+        let pf_earned_credits = Self::value_as_f32(Self::PF_EARN_CRD.from_body(body)?)?;
+        Ok(GradeSummary::new(
+            attempted_credits,
+            earned_credits,
+            gpa,
+            cgpa,
+            avg,
+            pf_earned_credits,
+        ))
+    }
+
+    pub fn certificated_summary(&self) -> Result<GradeSummary> {
+        let body = self.body();
+        let attempted_credits = Self::value_as_f32(Self::ATTM_CRD2.from_body(body)?)?;
+        let earned_credits = Self::value_as_f32(Self::EARN_CRD2.from_body(body)?)?;
+        let gpa = Self::value_as_f32(Self::GT_GPA2.from_body(body)?)?;
+        let cgpa = Self::value_as_f32(Self::CGPA2.from_body(body)?)?;
+        let avg = Self::value_as_f32(Self::AVG2.from_body(body)?)?;
+        let pf_earned_credits = Self::value_as_f32(Self::PF_EARN_CRD1.from_body(body)?)?;
+        Ok(GradeSummary::new(
+            attempted_credits,
+            earned_credits,
+            gpa,
+            cgpa,
+            avg,
+            pf_earned_credits,
+        ))
+    }
+
+    pub fn semesters(&self) -> Result<Vec<SemesterGrade>> {
         fn parse_rank(value: String) -> Option<(u32, u32)> {
             let mut spl = value.split("/");
             let first: u32 = spl.next()?.parse().ok()?;
@@ -146,7 +209,7 @@ impl<'a> CourseGrades {
             .skip(1)
             .filter_map(Self::row_to_string)
             .filter_map(|values| {
-                Some(GradeSummary::new(
+                Some(SemesterGrade::new(
                     values[1].parse().ok()?,
                     values[2].clone(),
                     values[3].parse().ok()?,
@@ -165,7 +228,7 @@ impl<'a> CourseGrades {
         Ok(ret.collect())
     }
 
-    async fn grade_detail_in_popup<'f>(
+    async fn class_detail_in_popup<'f>(
         &mut self,
         open_button: ElementDef<'f, Button<'f>>,
     ) -> Result<HashMap<String, f32>> {
@@ -195,7 +258,38 @@ impl<'a> CourseGrades {
         Ok(HashMap::from_iter(table))
     }
 
-    pub async fn grade_detail(
+    pub async fn class_detail(
+        &mut self,
+        year: &str,
+        semester: &str,
+        code: &str,
+    ) -> Result<HashMap<String, f32>> {
+        self.select_year_semester(year, semester).await?;
+        let table_elem = Self::GRADE_BY_CLASSES_TABLE.from_body(self.body())?;
+        let Some(table) = table_elem.table()  else {
+            return Err(ElementError::NoSuchElement)?;
+        };
+        let Some(btn) = ({
+            table.iter().find(|row| {
+                if let Some(ElementWrapper::TextView(code_elem)) = row[3].content() {
+                    code_elem.text() == code
+                } else {
+                    false
+                }
+            }).and_then(|row| {
+                if let Some(ElementWrapper::Button(btn)) = row[10].content() {
+                    Some(ElementDef::<'_, Button<'_>>::new_dynamic(btn.id().to_owned()))
+                } else {
+                    None
+                }
+            })
+        }) else {
+            return Err(ElementError::NoSuchAttribute("detail".to_string()))?;
+        };
+        self.class_detail_in_popup(btn).await
+    }
+
+    pub async fn classes(
         &mut self,
         year: &str,
         semester: &str,
@@ -204,7 +298,7 @@ impl<'a> CourseGrades {
         self.close_popups().await?;
         self.select_year_semester(year, semester).await?;
         let class_grades: Vec<(Option<String>, Vec<String>)> = {
-            let grade_table_elem = Self::SPECIFIC_GRADE_SUMMARY_TABLE.from_body(self.body())?;
+            let grade_table_elem = Self::GRADE_BY_CLASSES_TABLE.from_body(self.body())?;
             let iter = grade_table_elem
                 .table()
                 .ok_or(ElementError::NoSuchElement)?
@@ -229,7 +323,7 @@ impl<'a> CourseGrades {
             let detail: Option<HashMap<String, f32>> = if let Some(btn_id) = btn_id {
                 if include_details {
                     let btn_def = ElementDef::<Button<'_>>::new_dynamic(btn_id);
-                    Some(self.grade_detail_in_popup(btn_def).await?)
+                    Some(self.class_detail_in_popup(btn_def).await?)
                 } else {
                     None
                 }
@@ -276,7 +370,7 @@ impl<'a> SapTableCellWrapper<'a> {
     }
 }
 
-pub mod data;
+pub mod model;
 
 #[cfg(test)]
 mod test {
