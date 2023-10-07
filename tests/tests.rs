@@ -2,7 +2,7 @@ use anyhow::{Error, Result};
 use dotenv::dotenv;
 use std::sync::{Arc, OnceLock};
 
-use rusaint::session::USaintSession;
+use rusaint::USaintSession;
 
 static SESSION: OnceLock<Arc<USaintSession>> = OnceLock::new();
 
