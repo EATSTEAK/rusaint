@@ -504,6 +504,7 @@ impl<'a> SapTableCellWrapper<'a> {
     }
 }
 
+/// `[CourseGrades]`에서 사용하는 데이터 모델
 pub mod model;
 
 #[cfg(test)]

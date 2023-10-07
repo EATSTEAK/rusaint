@@ -2,6 +2,7 @@ use std::{collections::HashMap, num::ParseIntError, str::FromStr};
 
 use getset::Getters;
 
+/// 총 성적(학적부, 증명)
 #[derive(Getters, Debug)]
 #[allow(unused)]
 #[get = "pub"]
@@ -33,7 +34,7 @@ impl GradeSummary {
 }
 
 
-
+/// 학기별 성적
 #[derive(Debug, Getters)]
 #[allow(unused)]
 #[get = "pub"]
@@ -100,6 +101,7 @@ impl SemesterGrade {
     }
 }
 
+/// 과목별 성적
 #[derive(Debug, Getters)]
 #[allow(unused)]
 #[get = "pub"]
@@ -150,6 +152,7 @@ impl ClassGrade {
     }
 }
 
+/// 과목 점수
 #[derive(Debug)]
 #[allow(unused)]
 pub enum ClassScore {
