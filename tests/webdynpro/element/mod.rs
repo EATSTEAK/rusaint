@@ -3,7 +3,7 @@ use std::{
     sync::Arc,
 };
 
-use rusaint::{application::USaintApplication, session::USaintSession, webdynpro::error::WebDynproError};
+use rusaint::{application::USaintApplication, webdynpro::error::WebDynproError, USaintSession};
 
 pub(crate) struct EventTestSuite(USaintApplication);
 
