@@ -2,7 +2,7 @@ use anyhow::{Error, Result};
 use std::sync::{Arc, OnceLock};
 
 use dotenv::dotenv;
-use rusaint::{application::CourseGrades, model::SemesterType, USaintSession};
+use rusaint::{application::course_grades::CourseGrades, model::SemesterType, USaintSession};
 use serial_test::serial;
 
 static SESSION: OnceLock<Arc<USaintSession>> = OnceLock::new();
