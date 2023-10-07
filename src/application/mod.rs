@@ -46,7 +46,7 @@ impl<'a> USaintApplication {
         LOADING_PLACEHOLDER: LoadingPlaceholder<'a> = "_loadingPlaceholder_"
     }
 
-    pub const CUSTOM: Custom = Custom::new(std::borrow::Cow::Borrowed("WD01"));
+    const CUSTOM: Custom = Custom::new(std::borrow::Cow::Borrowed("WD01"));
 
     pub async fn new(app_name: &str) -> Result<USaintApplication, WebDynproError> {
         let mut app =
