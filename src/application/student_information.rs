@@ -1,10 +1,9 @@
-use anyhow::Result;
 use std::{
     ops::{Deref, DerefMut},
     sync::Arc,
 };
 
-use crate::session::USaintSession;
+use crate::{session::USaintSession, webdynpro::error::WebDynproError};
 
 use super::USaintApplication;
 
@@ -27,7 +26,7 @@ impl<'a> DerefMut for StudentInformation {
 impl StudentInformation {
     const APP_NAME: &str = "ZCMW1001n";
 
-    pub async fn new(session: Arc<USaintSession>) -> Result<StudentInformation> {
+    pub async fn new(session: Arc<USaintSession>) -> Result<StudentInformation, WebDynproError> {
         Ok(StudentInformation(
             USaintApplication::with_session(Self::APP_NAME, session).await?,
         ))

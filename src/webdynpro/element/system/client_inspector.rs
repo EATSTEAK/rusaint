@@ -1,8 +1,8 @@
-use anyhow::Result;
 use std::{borrow::Cow, cell::OnceCell, collections::HashMap};
 
 use serde::{Deserialize, Serialize};
 
+use crate::webdynpro::error::WebDynproError;
 use crate::webdynpro::event::Event;
 
 use crate::webdynpro::element::{
@@ -128,7 +128,7 @@ impl<'a> Element<'a> for ClientInspector<'a> {
             .as_ref()
     }
 
-    fn from_elem(elem_def: ElementDef<'a, Self>, element: scraper::ElementRef<'a>) -> Result<Self> {
+    fn from_elem(elem_def: ElementDef<'a, Self>, element: scraper::ElementRef<'a>) -> Result<Self, WebDynproError> {
         Ok(Self::new(elem_def.id.to_owned(), element))
     }
 
@@ -167,7 +167,7 @@ impl<'a> ClientInspector<'a> {
         }
     }
 
-    pub fn notify(&self, data: &str) -> Result<Event> {
+    pub fn notify(&self, data: &str) -> Result<Event, WebDynproError> {
         let mut parameters: HashMap<String, String> = HashMap::new();
 
         parameters.insert("Id".to_string(), self.id.clone().to_string());

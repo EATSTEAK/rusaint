@@ -28,7 +28,6 @@ _추가 예정_
 ## 예시
 
 ```rust
-use anyhow::Result;
 use rusaint::application::course_grades::{CourseGrades, data::GradeSummary};
 use rusaint::session::USaintSession;
 use futures::executor::block_on;

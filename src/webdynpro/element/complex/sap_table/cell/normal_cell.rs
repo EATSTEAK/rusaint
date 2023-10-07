@@ -1,11 +1,13 @@
-use anyhow::Result;
 use getset::Getters;
 use std::{borrow::Cow, cell::OnceCell};
 
 use scraper::Selector;
 use serde::Deserialize;
 
-use crate::webdynpro::element::{Element, ElementWrapper, SubElement, SubElementDef};
+use crate::webdynpro::{
+    element::{Element, ElementWrapper, SubElement, SubElementDef},
+    error::WebDynproError,
+};
 
 use super::{SapTableCell, SapTableCellWrapper};
 
@@ -75,7 +77,7 @@ impl<'a> SubElement<'a> for SapTableNormalCell<'a> {
     fn from_elem<Parent: Element<'a>>(
         elem_def: SubElementDef<'a, Parent, Self>,
         element: scraper::ElementRef<'a>,
-    ) -> Result<Self> {
+    ) -> Result<Self, WebDynproError> {
         Ok(Self::new(elem_def.id.to_owned(), element))
     }
 

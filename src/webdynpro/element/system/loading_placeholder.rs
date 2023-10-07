@@ -1,6 +1,6 @@
-use anyhow::Result;
 use std::{borrow::Cow, cell::OnceCell, collections::HashMap};
 
+use crate::webdynpro::error::WebDynproError;
 use crate::webdynpro::event::Event;
 
 use crate::webdynpro::element::{define_element_interactable, Interactable};
@@ -23,7 +23,7 @@ impl<'a> LoadingPlaceholder<'a> {
         }
     }
 
-    pub fn load(&self) -> Result<Event> {
+    pub fn load(&self) -> Result<Event, WebDynproError> {
         let mut parameters: HashMap<String, String> = HashMap::new();
         parameters.insert("Id".to_string(), self.id.clone().to_string());
         self.fire_event("Load".to_string(), parameters)

@@ -1,4 +1,3 @@
-use anyhow::Result;
 use std::{
     ops::{Deref, DerefMut},
     sync::Arc,
@@ -18,6 +17,7 @@ use crate::{
                 loading_placeholder::LoadingPlaceholder,
             },
         },
+        error::{ClientError, WebDynproError},
     },
 };
 
@@ -48,7 +48,7 @@ impl<'a> USaintApplication {
 
     pub const CUSTOM: Custom = Custom::new(std::borrow::Cow::Borrowed("WD01"));
 
-    pub async fn new(app_name: &str) -> Result<USaintApplication> {
+    pub async fn new(app_name: &str) -> Result<USaintApplication, WebDynproError> {
         let mut app =
             USaintApplication(BasicApplication::new(SSU_WEBDYNPRO_BASE_URL, app_name).await?);
         app.load_placeholder().await?;
@@ -58,8 +58,10 @@ impl<'a> USaintApplication {
     pub async fn with_session(
         app_name: &str,
         session: Arc<USaintSession>,
-    ) -> Result<USaintApplication> {
-        let base_url = Url::parse(SSU_WEBDYNPRO_BASE_URL)?;
+    ) -> Result<USaintApplication, WebDynproError> {
+        let base_url = Url::parse(SSU_WEBDYNPRO_BASE_URL).or(Err(ClientError::InvalidBaseUrl(
+            SSU_WEBDYNPRO_BASE_URL.to_string(),
+        )))?;
         let r_client = reqwest::Client::builder()
             .cookie_provider(session)
             .user_agent(DEFAULT_USER_AGENT)
@@ -71,7 +73,7 @@ impl<'a> USaintApplication {
         Ok(app)
     }
 
-    async fn load_placeholder(&mut self) -> Result<()> {
+    async fn load_placeholder(&mut self) -> Result<(), WebDynproError> {
         let events = {
             let body = self.body();
             let wd01 = Self::CLIENT_INSPECTOR_WD01.from_body(body)?;

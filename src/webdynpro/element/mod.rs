@@ -1,5 +1,4 @@
 use std::{marker, collections::HashMap, borrow::Cow};
-use anyhow::Result;
 
 
 use regex::Regex;
@@ -8,7 +7,7 @@ use serde_json::{Map, Value};
 
 use self::{action::{button::Button, link::Link}, layout::{button_row::ButtonRow, Container, FlowLayout, form::Form, grid_layout::{GridLayout, cell::GridLayoutCell}, tab_strip::{TabStrip, item::TabStripItem}, popup_window::PopupWindow, tray::Tray, scrollbar::Scrollbar, scroll_container::ScrollContainer}, system::{client_inspector::ClientInspector, custom::Custom, loading_placeholder::LoadingPlaceholder}, selection::{combo_box::ComboBox, list_box::{ListBoxPopup, ListBoxPopupFiltered, ListBoxPopupJson, ListBoxPopupJsonFiltered, ListBoxMultiple, ListBoxSingle, item::ListBoxItem, action_item::ListBoxActionItem}}, graphic::image::Image, text::{input_field::InputField, label::Label, text_view::TextView, caption::Caption}, complex::sap_table::SapTable};
 
-use super::{event::{ucf_parameters::UcfParameters, Event, EventBuilder}, error::{ElementError, BodyError}, application::client::body::Body};
+use super::{event::{ucf_parameters::UcfParameters, Event, EventBuilder}, error::{ElementError, BodyError, WebDynproError}, application::client::body::Body};
 
 pub mod action;
 pub mod complex;
@@ -56,7 +55,7 @@ macro_rules! define_element_base {
             fn from_elem(
                 elem_def: $crate::webdynpro::element::ElementDef<'a, Self>,
                 element: scraper::ElementRef<'a>,
-            ) -> anyhow::Result<Self> {
+            ) -> Result<Self, $crate::webdynpro::error::WebDynproError> {
                 Ok(Self::new(elem_def.id.to_owned(), element))
             }
 
@@ -145,7 +144,7 @@ macro_rules! register_elements {
         }
 
         impl<'a> ElementWrapper<'a> {
-            pub fn dyn_elem(element: scraper::ElementRef<'a>) -> Result<ElementWrapper> {
+            pub fn dyn_elem(element: scraper::ElementRef<'a>) -> Result<ElementWrapper, WebDynproError> {
                 let value = element.value();
                 let id = value.id().ok_or(BodyError::NoSuchAttribute("id".to_owned()))?.to_owned();
                 #[allow(unreachable_patterns)]
@@ -245,15 +244,15 @@ where T: Element<'a>
         &self.id
     }
 
-    pub fn selector(&self) -> Result<Selector> {
+    pub fn selector(&self) -> Result<Selector, WebDynproError> {
         Ok(std::result::Result::or(Selector::parse(format!(r#"[id="{}"]"#, &self.id).as_str()), Err(BodyError::InvalidSelector))?)
     }
 
-    pub fn from_body(self, body: &'a Body) -> Result<T> {
+    pub fn from_body(self, body: &'a Body) -> Result<T, WebDynproError> {
         T::from_body(self, body)
     }
 
-    pub fn from_elem(self, element: scraper::ElementRef<'a>) -> Result<T> {
+    pub fn from_elem(self, element: scraper::ElementRef<'a>) -> Result<T, WebDynproError> {
         T::from_elem(self, element)
     }
 }
@@ -283,13 +282,13 @@ pub trait Element<'a>: Sized {
     const ELEMENT_NAME: &'static str;
     type ElementLSData;
 
-    fn lsdata_elem(element: scraper::ElementRef) -> Result<Value> {
+    fn lsdata_elem(element: scraper::ElementRef) -> Result<Value, WebDynproError> {
         let raw_data = element.value().attr("lsdata").ok_or(ElementError::InvalidLSData(element.value().id().unwrap().to_string()))?;
         let normalized = normalize_lsjson(raw_data);
-        return Ok(serde_json::from_str(&normalized)?);
+        return Ok(serde_json::from_str(&normalized).or(Err(ElementError::InvalidLSData(element.value().id().unwrap().to_string())))?);
     }
 
-    fn from_body(elem_def: ElementDef<'a, Self>, body: &'a Body) -> Result<Self> {
+    fn from_body(elem_def: ElementDef<'a, Self>, body: &'a Body) -> Result<Self, WebDynproError> {
         let selector = &elem_def.selector().or(Err(BodyError::InvalidSelector))?;
         let element = body
             .document()
@@ -299,7 +298,7 @@ pub trait Element<'a>: Sized {
         Self::from_elem(elem_def, element)
     }
 
-    fn from_elem(elem_def: ElementDef<'a, Self>, element: scraper::ElementRef<'a>) -> Result<Self>;
+    fn from_elem(elem_def: ElementDef<'a, Self>, element: scraper::ElementRef<'a>) -> Result<Self, WebDynproError>;
 
     fn children_elem(root: scraper::ElementRef<'a>) -> Vec<ElementWrapper<'a>> {
         let mut next_refs = vec![root];
@@ -344,7 +343,7 @@ pub trait Interactable<'a>: Element<'a> {
         .unwrap()
     }
 
-    fn lsevents_elem(element: scraper::ElementRef) -> Result<EventParameterMap> {
+    fn lsevents_elem(element: scraper::ElementRef) -> Result<EventParameterMap, WebDynproError> {
         let raw_data = element.value().attr("lsevents").ok_or(BodyError::Invalid)?;
         let normalized = normalize_lsjson(raw_data);
         let json: Map<String, Value> = serde_json::from_str::<Map<String, Value>>(&normalized).or(Err(BodyError::Invalid))?.to_owned();
@@ -368,7 +367,7 @@ pub trait Interactable<'a>: Element<'a> {
         }
     }
 
-    fn fire_event(&self, event: String, parameters: HashMap<String, String>) -> Result<Event> {
+    fn fire_event(&self, event: String, parameters: HashMap<String, String>) -> Result<Event, WebDynproError> {
         let (ucf_params, custom_params) = self.event_parameter(&event)?;
         Ok(unsafe { Self::fire_event_unchecked(event, parameters, ucf_params.to_owned(), custom_params.to_owned()) })
     }
@@ -412,15 +411,15 @@ where Parent: Element<'a>, T: SubElement<'a>
         }
     }
 
-    pub fn selector(&self) -> Result<Selector> {
+    pub fn selector(&self) -> Result<Selector, WebDynproError> {
         Selector::parse(format!(r#"[id="{}"] [id="{}"]"#, self.parent.id, self.id).as_str())
         .or(Err(ElementError::InvalidId(format!("{}, {}", self.parent.id, self.id)))?)
     }
-    pub fn from_body(self, body: &'a Body) -> Result<T> {
+    pub fn from_body(self, body: &'a Body) -> Result<T, WebDynproError> {
         T::from_body(self, body)
     }
 
-    pub fn from_elem(self, element: scraper::ElementRef<'a>) -> Result<T> {
+    pub fn from_elem(self, element: scraper::ElementRef<'a>) -> Result<T, WebDynproError> {
         T::from_elem(self, element)
     }
 }
@@ -430,16 +429,16 @@ pub trait SubElement<'a>: Sized {
     const ELEMENT_NAME: &'static str;
     type SubElementLSData;
 
-    fn lsdata_elem(element: scraper::ElementRef) -> Result<Value> {
+    fn lsdata_elem(element: scraper::ElementRef) -> Result<Value, WebDynproError> {
         let raw_data = element.value().attr("lsdata").ok_or(ElementError::InvalidLSData(element.value().id().unwrap().to_string()))?;
         let normalized = normalize_lsjson(raw_data);
-        return Ok(serde_json::from_str(&normalized)?);
+        return Ok(serde_json::from_str(&normalized).or(Err(ElementError::InvalidLSData(element.value().id().unwrap().to_string())))?);
     }
 
     fn from_body<Parent: Element<'a>>(
         elem_def: SubElementDef<'a, Parent, Self>,
         body: &'a Body,
-    ) -> Result<Self> {
+    ) -> Result<Self, WebDynproError> {
         let selector = &elem_def.selector().or(Err(BodyError::InvalidSelector))?;
         let element = body
             .document()
@@ -452,7 +451,7 @@ pub trait SubElement<'a>: Sized {
     fn from_elem<Parent: Element<'a>>(
         elem_def: SubElementDef<'a, Parent, Self>,
         element: scraper::ElementRef<'a>
-    ) -> Result<Self>;
+    ) -> Result<Self, WebDynproError>;
 
     fn lsdata(&self) -> Option<&Self::SubElementLSData>;
 

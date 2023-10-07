@@ -1,7 +1,6 @@
-use anyhow::Result;
 use std::{borrow::Cow, cell::OnceCell, collections::HashMap};
 
-use crate::webdynpro::error::BodyError;
+use crate::webdynpro::error::{BodyError, WebDynproError};
 use crate::webdynpro::{application::client::body::Body, error::ElementError, event::Event};
 
 use crate::webdynpro::element::{
@@ -56,11 +55,14 @@ impl<'a> ComboBox<'a> {
         }
     }
 
-    pub fn item_list_box(&self, body: &'a Body) -> Result<ListBoxWrapper<'a>> {
+    pub fn item_list_box(&self, body: &'a Body) -> Result<ListBoxWrapper<'a>, WebDynproError> {
         let listbox_id = self
             .lsdata()
             .and_then(|lsdata| lsdata.item_list_box_id.as_ref())
-            .ok_or(ElementError::NoSuchData { element: self.id().to_string(), field: "item_list_box_id".to_string() })?;
+            .ok_or(ElementError::NoSuchData {
+                element: self.id().to_string(),
+                field: "item_list_box_id".to_string(),
+            })?;
         let selector = scraper::Selector::parse(format!(r#"[id="{}"]"#, listbox_id).as_str())
             .or(Err(ElementError::InvalidId(listbox_id.to_owned())))?;
         let elem = body
@@ -74,7 +76,7 @@ impl<'a> ComboBox<'a> {
         )
     }
 
-    pub fn select(&self, key: &str, by_enter: bool) -> Result<Event> {
+    pub fn select(&self, key: &str, by_enter: bool) -> Result<Event, WebDynproError> {
         let mut parameters: HashMap<String, String> = HashMap::new();
         parameters.insert("Id".to_string(), self.id.clone().to_string());
         parameters.insert("Key".to_string(), key.to_string());

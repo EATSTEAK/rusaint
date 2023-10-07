@@ -1,4 +1,3 @@
-use anyhow::Result;
 use std::{borrow::Cow, cell::OnceCell, ops::DerefMut};
 
 use serde::Deserialize;
@@ -40,7 +39,7 @@ macro_rules! def_listbox_subset {
                     .as_ref()
             }
 
-            fn from_elem(elem_def: ElementDef<'a, Self>, element: scraper::ElementRef<'a>) -> Result<Self> {
+            fn from_elem(elem_def: ElementDef<'a, Self>, element: scraper::ElementRef<'a>) -> Result<Self, $crate::webdynpro::error::WebDynproError> {
                 Ok(Self::new(elem_def.id.to_owned(), element))
             }
 

@@ -1,7 +1,7 @@
 use thiserror::Error;
 
 #[derive(Error, Debug)]
-pub enum RusaintError {
+pub enum WebDynproError {
     #[error("Error in client request/response: {0}")]
     ClientError(#[from] ClientError),
     #[error("Error in parsing document body: {0}")]
@@ -64,6 +64,8 @@ pub enum BodyError {
     NoSuchElement(String),
     #[error("Cannot find attribute: {0}")]
     NoSuchAttribute(String),
+    #[error("Cannot parse event str/struct: {0}")]
+    CannotParseEvents(#[from] EventStrUnescapeError)
 }
 
 #[derive(Error, Debug)]
