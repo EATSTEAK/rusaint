@@ -18,6 +18,7 @@ const SSU_USAINT_SSO_URL: &str = "https://saint.ssu.ac.kr/webSSO/sso.jsp";
 const SMARTID_LOGIN_URL: &str = "https://smartid.ssu.ac.kr/Symtra_sso/smln.asp";
 const SMARTID_LOGIN_FORM_REQUEST_URL: &str = "https://smartid.ssu.ac.kr/Symtra_sso/smln_pcs.asp";
 
+/// u-saint 세션을 포함한 reqwest CookieStore 구현체
 #[derive(Debug, Default)]
 pub struct USaintSession(Jar);
 
@@ -40,10 +41,12 @@ impl CookieStore for USaintSession {
 }
 
 impl USaintSession {
+    /// 익명 세션을 반환합니다. 인증이 필요 없는 애플리케이션에서의 세션 동작과 동일합니다.
     pub fn anonymous() -> USaintSession {
         USaintSession(Jar::default())
     }
 
+    /// SSO 로그인 토큰과 학번으로 인증된 세션을 반환합니다.
     pub async fn with_token(id: &str, token: &str) -> Result<USaintSession, ClientError> {
         let session_store = Self::anonymous();
         let client = reqwest::Client::builder()
@@ -120,6 +123,7 @@ impl USaintSession {
         }
     }
 
+    /// 학번과 비밀번호로 인증된 세션을 반환합니다.
     pub async fn with_password(id: &str, password: &str) -> Result<USaintSession, RusaintError> {
         let token = obtain_ssu_sso_token(id, password).await?;
         Ok(Self::with_token(id, &token)
@@ -128,6 +132,7 @@ impl USaintSession {
     }
 }
 
+/// 학번과 비밀번호를 이용해 SSO 토큰을 발급받습니다.
 pub async fn obtain_ssu_sso_token(id: &str, password: &str) -> Result<String, SsuSsoError> {
     let jar: Arc<Jar> = Arc::new(Jar::default());
     let client = Client::builder()
