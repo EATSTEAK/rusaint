@@ -147,7 +147,7 @@ macro_rules! register_elements {
         impl<'a> ElementWrapper<'a> {
             pub fn dyn_elem(element: scraper::ElementRef<'a>) -> Result<ElementWrapper> {
                 let value = element.value();
-                let id = value.id().ok_or(ElementError::NoSuchAttribute("id".to_owned()))?.to_owned();
+                let id = value.id().ok_or(BodyError::NoSuchAttribute("id".to_owned()))?.to_owned();
                 #[allow(unreachable_patterns)]
                 match element.value().attr("ct") {
                     $( Some(<$type>::CONTROL_ID) => Ok($crate::webdynpro::element::ElementDef::<$type>::new_dynamic(id).from_elem(element)?.wrap()), )*
@@ -158,12 +158,12 @@ macro_rules! register_elements {
 
         $(
             impl<'a> std::convert::TryInto<$type> for ElementWrapper<'a> {
-                type Error = $crate::webdynpro::error::ElementError;
+                type Error = $crate::webdynpro::error::BodyError;
     
                 fn try_into(self) -> Result<$type, Self::Error> {
                     match self {
                         ElementWrapper::$enum(res) => Ok(res),
-                        _ => Err(Self::Error::NoSuchElement)
+                        _ => Err(Self::Error::InvalidElement)
                     }
                 }
             }
@@ -284,7 +284,7 @@ pub trait Element<'a>: Sized {
     type ElementLSData;
 
     fn lsdata_elem(element: scraper::ElementRef) -> Result<Value> {
-        let raw_data = element.value().attr("lsdata").ok_or(ElementError::InvalidLSData)?;
+        let raw_data = element.value().attr("lsdata").ok_or(ElementError::InvalidLSData(element.value().id().unwrap().to_string()))?;
         let normalized = normalize_lsjson(raw_data);
         return Ok(serde_json::from_str(&normalized)?);
     }
@@ -362,9 +362,9 @@ pub trait Interactable<'a>: Element<'a> {
 
     fn event_parameter(&self, event: &str) -> Result<&(UcfParameters, HashMap<String, String>), ElementError> {
         if let Some(lsevents) = self.lsevents() {
-            lsevents.get(event).ok_or(ElementError::NoSuchEvent)
+            lsevents.get(event).ok_or(ElementError::NoSuchEvent { element: self.id().to_string(), event: event.to_string() })
         } else {
-            Err(ElementError::NoSuchEvent)
+            Err(ElementError::NoSuchEvent { element: self.id().to_string(), event: event.to_string() })
         }
     }
 
@@ -431,7 +431,7 @@ pub trait SubElement<'a>: Sized {
     type SubElementLSData;
 
     fn lsdata_elem(element: scraper::ElementRef) -> Result<Value> {
-        let raw_data = element.value().attr("lsdata").ok_or(ElementError::InvalidLSData)?;
+        let raw_data = element.value().attr("lsdata").ok_or(ElementError::InvalidLSData(element.value().id().unwrap().to_string()))?;
         let normalized = normalize_lsjson(raw_data);
         return Ok(serde_json::from_str(&normalized)?);
     }

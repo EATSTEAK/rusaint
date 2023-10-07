@@ -80,9 +80,10 @@ impl<'a> SapTable<'a> {
         let tbody_selector = Selector::parse(
             format!(
                 r#"[id="{}-contentTBody"]"#,
-                elem_value
-                    .id()
-                    .ok_or(ElementError::NoSuchAttribute("id".to_string()))?
+                elem_value.id().ok_or(ElementError::NoSuchData {
+                    element: self.id.clone().into_owned(),
+                    field: "id".to_string()
+                })?
             )
             .as_str(),
         )
@@ -90,7 +91,10 @@ impl<'a> SapTable<'a> {
         let tbody = element
             .select(&tbody_selector)
             .next()
-            .ok_or(ElementError::NoSuchElement)?;
+            .ok_or(ElementError::NoSuchContent {
+                element: self.id.clone().into_owned(),
+                content: "Table content".to_string(),
+            })?;
         Ok(tbody
             .children()
             .filter_map(|node| scraper::ElementRef::wrap(node))

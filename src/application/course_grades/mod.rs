@@ -19,7 +19,7 @@ use crate::{
             text::input_field::InputField,
             Element, ElementDef, ElementWrapper, SubElement,
         },
-        error::ElementError,
+        error::{BodyError, ElementError},
         event::Event,
     },
 };
@@ -164,7 +164,7 @@ impl<'a> CourseGrades {
 
     fn value_as_f32(field: InputField<'_>) -> Result<f32> {
         let Some(value) = field.lsdata().and_then(|lsdata| lsdata.value().as_ref()) else {
-            return Err(ElementError::InvalidLSData)?;
+            return Err(ElementError::NoSuchData { element: field.id().to_string(), field: "value1".to_string() })?;
         };
         Ok(value.parse::<f32>()?)
     }
@@ -214,7 +214,10 @@ impl<'a> CourseGrades {
         }
 
         let table_elem = Self::GRADES_SUMMARY_TABLE.from_body(self.body())?;
-        let table = table_elem.table().ok_or(ElementError::NoSuchElement)?;
+        let table = table_elem.table().ok_or(ElementError::NoSuchContent {
+            element: table_elem.id().to_string(),
+            content: "table".to_string(),
+        })?;
         let ret = table
             .iter()
             .skip(1)
@@ -249,7 +252,7 @@ impl<'a> CourseGrades {
             let mut table_inside_popup = body.document().select(&table_inside_popup_selector);
             let table_ref = table_inside_popup
                 .next()
-                .ok_or(ElementError::NoSuchElement)?;
+                .ok_or(BodyError::NoSuchElement("Table in popup".to_string()))?;
             let table_elem: SapTable<'_> = ElementWrapper::dyn_elem(table_ref)?.try_into()?;
             let zip = (|| {
                 let mut iter = table_elem.table()?.iter();
@@ -257,7 +260,10 @@ impl<'a> CourseGrades {
                 let row_str = CourseGrades::row_to_string(iter.next()?)?;
                 Some(head_str.into_iter().zip(row_str.into_iter()))
             })()
-            .ok_or(ElementError::InvalidBody)?;
+            .ok_or(ElementError::InvalidContent {
+                element: table_elem.id().to_string(),
+                content: "header and first row".to_string(),
+            })?;
             zip.skip(4)
                 .map(|(key, val)| Ok((key, val.trim().parse::<f32>()?)))
                 .collect::<Result<Vec<(String, f32)>>>()
@@ -278,7 +284,7 @@ impl<'a> CourseGrades {
         self.select_semester(year, semester).await?;
         let table_elem = Self::GRADE_BY_CLASSES_TABLE.from_body(self.body())?;
         let Some(table) = table_elem.table()  else {
-            return Err(ElementError::NoSuchElement)?;
+            return Err(ElementError::NoSuchContent { element: table_elem.id().to_string(), content: "Table body".to_string() })?;
         };
         let Some(btn) = ({
             table.iter().find(|row| {
@@ -295,7 +301,7 @@ impl<'a> CourseGrades {
                 }
             })
         }) else {
-            return Err(ElementError::NoSuchAttribute("detail".to_string()))?;
+            return Err(ElementError::NoSuchData { element: table_elem.id().to_string(), field: format!("details of class {}", code) })?;
         };
         self.class_detail_in_popup(btn).await
     }
@@ -312,7 +318,7 @@ impl<'a> CourseGrades {
             let grade_table_elem = Self::GRADE_BY_CLASSES_TABLE.from_body(self.body())?;
             let iter = grade_table_elem
                 .table()
-                .ok_or(ElementError::NoSuchElement)?
+                .ok_or(ElementError::NoSuchContent { element: grade_table_elem.id().to_string(), content: "Table body".to_string() })?
                 .iter()
                 .skip(1);
             iter.map(|row| {

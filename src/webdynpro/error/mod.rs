@@ -1,6 +1,18 @@
 use thiserror::Error;
 
 #[derive(Error, Debug)]
+pub enum RusaintError {
+    #[error("Error in client request/response: {0}")]
+    ClientError(#[from] ClientError),
+    #[error("Error in parsing document body: {0}")]
+    BodyError(#[from] BodyError),
+    #[error("Error in updating document body from server response: {0}")]
+    BodyUpdateError(#[from] BodyUpdateError),
+    #[error("Error in parse or construct event of element: {0}")]
+    ElementError(#[from] ElementError),
+}
+
+#[derive(Error, Debug)]
 pub enum ClientError {
     #[error("Failed to request from web")]
     RequestError(#[from] reqwest::Error),
@@ -12,29 +24,29 @@ pub enum ClientError {
     BaseUrlParse(#[from] url::ParseError),
     #[error("Server's update response is invalid")]
     InvalidUpdate(#[from] BodyUpdateError),
-    #[error("Given base url is not valid")]
-    InvalidBaseUrl,
-    #[error("No form found in desired application")]
-    NoForm,
-    #[error("No cookie found in client")]
-    NoCookie,
-    #[error("Tried to use invalid element")]
-    InvalidElement(#[from] ElementError),
+    #[error("Given base url is not valid: {0}")]
+    InvalidBaseUrl(String),
+    #[error("No form {0} found in desired application")]
+    NoSuchForm(String),
+    #[error("No cookie found: {0}")]
+    NoSuchCookie(String),
+    #[error("Empty cookie store for given url: {0}")]
+    NoCookies(String),
 }
 
 #[derive(Error, Debug)]
 pub enum BodyUpdateError {
-    #[error("Failed to parse update document")]
+    #[error("Failed to parse update document: {0}")]
     Parse(#[from] roxmltree::Error),
     #[error("Cannot find a node from given document: {0}")]
-    CannotFindNode(String),
+    NoSuchNode(String),
     #[error("Cannot find an attribute {attribute:?} from a node {node:?}")]
-    CannotFindAttribute { node: String, attribute: String },
+    NoSuchAttribute { node: String, attribute: String },
     #[error("{0} has no content")]
-    NoContent(String),
+    NoSuchContent(String),
     #[error("Unknown element found: {0}")]
     UnknownElement(String),
-    #[error("Failed to rewrite body document")]
+    #[error("Failed to rewrite body document: {0}")]
     Rewrite(#[from] lol_html::errors::RewritingError),
 }
 
@@ -46,26 +58,30 @@ pub enum BodyError {
     Invalid,
     #[error("Given selector for parsing body is invalid")]
     InvalidSelector,
-    #[error("Element data is cannot be parsed")]
-    InvalidElement(#[from] ElementError),
+    #[error("Invalid element")]
+    InvalidElement,
+    #[error("Cannot find element from document: {0}")]
+    NoSuchElement(String),
+    #[error("Cannot find attribute: {0}")]
+    NoSuchAttribute(String),
 }
 
 #[derive(Error, Debug)]
 pub enum ElementError {
-    #[error("Cannot find attribute {0}")]
-    NoSuchAttribute(String),
+    #[error("Cannot find data {field} in element: {element}")]
+    NoSuchData { element: String, field: String },
+    #[error("Cannot fire event {event} in element: {element}")]
+    NoSuchEvent { element: String, event: String },
+    #[error("Cannot find content {content} in element: {element}")]
+    NoSuchContent { element: String, content: String },
     #[error("Invalid id {0}")]
     InvalidId(String),
-    #[error("Invalid body of element")]
-    InvalidBody,
-    #[error("Element has invalid lsdata attribute")]
-    InvalidLSData,
+    #[error("Invalid content {content} in element: {element}")]
+    InvalidContent { element: String, content: String },
+    #[error("Element {0} has invalid lsdata attribute")]
+    InvalidLSData(String),
     #[error("Failed parse lsdata json-like object")]
     ParseLSDataFailed(#[from] serde_json::Error),
-    #[error("Cannot find given element from document")]
-    NoSuchElement,
-    #[error("Cannot fire given event in this element")]
-    NoSuchEvent,
 }
 
 #[derive(Error, Debug)]

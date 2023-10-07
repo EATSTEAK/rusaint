@@ -1,6 +1,7 @@
 use anyhow::Result;
 use std::{borrow::Cow, cell::OnceCell, collections::HashMap};
 
+use crate::webdynpro::error::BodyError;
 use crate::webdynpro::{application::client::body::Body, error::ElementError, event::Event};
 
 use crate::webdynpro::element::{
@@ -59,17 +60,17 @@ impl<'a> ComboBox<'a> {
         let listbox_id = self
             .lsdata()
             .and_then(|lsdata| lsdata.item_list_box_id.as_ref())
-            .ok_or(ElementError::InvalidLSData)?;
+            .ok_or(ElementError::NoSuchData { element: self.id().to_string(), field: "item_list_box_id".to_string() })?;
         let selector = scraper::Selector::parse(format!(r#"[id="{}"]"#, listbox_id).as_str())
             .or(Err(ElementError::InvalidId(listbox_id.to_owned())))?;
         let elem = body
             .document()
             .select(&selector)
             .next()
-            .ok_or(ElementError::NoSuchElement)?;
+            .ok_or(BodyError::NoSuchElement(listbox_id.to_owned()))?;
         Ok(
             ListBoxWrapper::from_elements(ElementWrapper::dyn_elem(elem)?)
-                .ok_or(ElementError::NoSuchElement)?,
+                .ok_or(BodyError::NoSuchElement(listbox_id.to_owned()))?,
         )
     }
 

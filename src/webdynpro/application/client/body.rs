@@ -35,10 +35,10 @@ impl BodyUpdate {
         let updates = response_xml
             .root()
             .first_child()
-            .ok_or(BodyUpdateError::CannotFindNode("<updates>".to_string()))?;
+            .ok_or(BodyUpdateError::NoSuchNode("<updates>".to_string()))?;
         let update = updates
             .first_child()
-            .ok_or(BodyUpdateError::CannotFindNode(
+            .ok_or(BodyUpdateError::NoSuchNode(
                 "<full-update> or <delta-update>".to_string(),
             ))?;
         let update_type: Option<BodyUpdateType>;
@@ -46,17 +46,17 @@ impl BodyUpdate {
             let windowid =
                 update
                     .attribute("windowid")
-                    .ok_or(BodyUpdateError::CannotFindAttribute {
+                    .ok_or(BodyUpdateError::NoSuchAttribute {
                         node: "full-update".to_string(),
                         attribute: "windowid".to_string(),
                     })?;
             let content = update
                 .first_child()
-                .ok_or(BodyUpdateError::NoContent("full-update".to_string()))?;
+                .ok_or(BodyUpdateError::NoSuchContent("full-update".to_string()))?;
             let contentid =
                 content
                     .attribute("id")
-                    .ok_or(BodyUpdateError::CannotFindAttribute {
+                    .ok_or(BodyUpdateError::NoSuchAttribute {
                         node: "content-update".to_string(),
                         attribute: "id".to_string(),
                     })?;
@@ -70,14 +70,14 @@ impl BodyUpdate {
                 contentid.to_owned(),
                 content
                     .text()
-                    .ok_or(BodyUpdateError::NoContent("full-content".to_string()))?
+                    .ok_or(BodyUpdateError::NoSuchContent("full-content".to_string()))?
                     .to_owned(),
             ));
         } else if update.tag_name().name() == "delta-update" {
             let windowid =
                 update
                     .attribute("windowid")
-                    .ok_or(BodyUpdateError::CannotFindAttribute {
+                    .ok_or(BodyUpdateError::NoSuchAttribute {
                         node: "delta-update".to_string(),
                         attribute: "windowid".to_string(),
                     })?;
@@ -89,19 +89,19 @@ impl BodyUpdate {
                 match tag_name {
                     "control-update" => {
                         let control_id = children.attribute("id").ok_or(
-                            BodyUpdateError::CannotFindAttribute {
+                            BodyUpdateError::NoSuchAttribute {
                                 node: "control-update".to_string(),
                                 attribute: "id".to_string(),
                             },
                         )?;
                         let content = children
                             .first_child()
-                            .ok_or(BodyUpdateError::NoContent("control-update".to_string()))?;
+                            .ok_or(BodyUpdateError::NoSuchContent("control-update".to_string()))?;
                         update_map.insert(
                             control_id.to_owned(),
                             content
                                 .text()
-                                .ok_or(BodyUpdateError::NoContent("content".to_string()))?
+                                .ok_or(BodyUpdateError::NoSuchContent("content".to_string()))?
                                 .to_owned(),
                         );
                     }

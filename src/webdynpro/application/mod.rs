@@ -48,7 +48,9 @@ impl<'a> BasicApplication {
         let form_req = Self::SSR_FORM
             .from_body(&self.client.body)?
             .request(false, "", "", false, false)
-            .or(Err(ClientError::NoForm))?;
+            .or(Err(ClientError::NoSuchForm(
+                Self::SSR_FORM.id().to_string(),
+            )))?;
         for event in events.into_iter() {
             if !event.is_enqueable() && event.is_submitable() {
                 {

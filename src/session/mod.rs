@@ -57,7 +57,7 @@ impl USaintSession {
         let waf = portal
             .cookies()
             .find(|cookie| cookie.name() == "WAF")
-            .ok_or(ClientError::NoCookie)?;
+            .ok_or(ClientError::NoSuchCookie("WAF".to_string()))?;
         let waf_cookie_str = format!("WAF={}; domain=saint.ssu.ac.kr; path=/;", waf.value());
         session_store.set_cookies(
             portal
@@ -108,10 +108,10 @@ impl USaintSession {
             if str.contains("MYSAPSSO2") {
                 Ok(session_store)
             } else {
-                Err(ClientError::NoCookie)?
+                Err(ClientError::NoSuchCookie("MYSAPSSO2".to_string()))?
             }
         } else {
-            Err(ClientError::NoCookie)?
+            Err(ClientError::NoCookies(res.url().to_string()))?
         }
     }
 
