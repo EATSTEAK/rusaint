@@ -7,6 +7,7 @@ use std::{
 
 use crate::{
     define_elements,
+    model::SemesterType,
     session::USaintSession,
     webdynpro::{
         application::client::body::Body,
@@ -91,7 +92,7 @@ impl<'a> CourseGrades {
         ))
     }
 
-    pub async fn close_popups(&mut self) -> Result<()> {
+    async fn close_popups(&mut self) -> Result<()> {
         fn make_close_event(app: &CourseGrades) -> Option<Event> {
             let body = app.body();
             let popup_selector =
@@ -113,8 +114,18 @@ impl<'a> CourseGrades {
         Ok(())
     }
 
-    async fn select_year_semester(&mut self, year: &str, semester: &str) -> Result<()> {
+    fn semester_to_key(period: SemesterType) -> &'static str {
+        match period {
+            SemesterType::One => "090",
+            SemesterType::Summer => "091",
+            SemesterType::Two => "092",
+            SemesterType::Winter => "0923",
+        }
+    }
+
+    async fn select_semester(&mut self, year: &str, semester: SemesterType) -> Result<()> {
         let select = {
+            let semester = Self::semester_to_key(semester);
             let mut vec = Vec::with_capacity(2);
             let year_combobox = Self::PERIOD_YEAR.from_body(self.body())?;
             if (|| Some(year_combobox.lsdata()?.key().as_ref()?.as_str()))() != Some(year) {
@@ -261,10 +272,10 @@ impl<'a> CourseGrades {
     pub async fn class_detail(
         &mut self,
         year: &str,
-        semester: &str,
+        semester: SemesterType,
         code: &str,
     ) -> Result<HashMap<String, f32>> {
-        self.select_year_semester(year, semester).await?;
+        self.select_semester(year, semester).await?;
         let table_elem = Self::GRADE_BY_CLASSES_TABLE.from_body(self.body())?;
         let Some(table) = table_elem.table()  else {
             return Err(ElementError::NoSuchElement)?;
@@ -292,11 +303,11 @@ impl<'a> CourseGrades {
     pub async fn classes(
         &mut self,
         year: &str,
-        semester: &str,
+        semester: SemesterType,
         include_details: bool,
     ) -> Result<Vec<ClassGrade>> {
         self.close_popups().await?;
-        self.select_year_semester(year, semester).await?;
+        self.select_semester(year, semester).await?;
         let class_grades: Vec<(Option<String>, Vec<String>)> = {
             let grade_table_elem = Self::GRADE_BY_CLASSES_TABLE.from_body(self.body())?;
             let iter = grade_table_elem
