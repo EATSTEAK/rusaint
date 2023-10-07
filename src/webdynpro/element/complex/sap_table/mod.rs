@@ -1,11 +1,10 @@
-use anyhow::Result;
 use std::{borrow::Cow, cell::OnceCell, collections::HashMap};
 
 use scraper::Selector;
 
 use crate::webdynpro::{
     element::{define_element_interactable, ElementDef, Interactable, SubElement, SubElementDef},
-    error::{BodyError, ElementError},
+    error::{BodyError, ElementError, WebDynproError},
     event::Event,
 };
 
@@ -67,7 +66,7 @@ impl<'a> SapTable<'a> {
         self.table.get_or_init(|| self.parse_table().ok()).as_ref()
     }
 
-    fn parse_table(&self) -> Result<SapTableBody<'a>> {
+    fn parse_table(&self) -> Result<SapTableBody<'a>, WebDynproError> {
         let def: ElementDef<'a, SapTable<'a>> = {
             if let Cow::Borrowed(id) = self.id {
                 ElementDef::new(id)
@@ -80,9 +79,10 @@ impl<'a> SapTable<'a> {
         let tbody_selector = Selector::parse(
             format!(
                 r#"[id="{}-contentTBody"]"#,
-                elem_value
-                    .id()
-                    .ok_or(ElementError::NoSuchAttribute("id".to_string()))?
+                elem_value.id().ok_or(ElementError::NoSuchData {
+                    element: self.id.clone().into_owned(),
+                    field: "id".to_string()
+                })?
             )
             .as_str(),
         )
@@ -90,7 +90,10 @@ impl<'a> SapTable<'a> {
         let tbody = element
             .select(&tbody_selector)
             .next()
-            .ok_or(ElementError::NoSuchElement)?;
+            .ok_or(ElementError::NoSuchContent {
+                element: self.id.clone().into_owned(),
+                content: "Table content".to_string(),
+            })?;
         Ok(tbody
             .children()
             .filter_map(|node| scraper::ElementRef::wrap(node))
@@ -161,7 +164,7 @@ impl<'a> SapTable<'a> {
         cell_user_data: &str,
         access_type: AccessType,
         trigger_cell_id: &str,
-    ) -> Result<Event> {
+    ) -> Result<Event, WebDynproError> {
         let parameters: HashMap<String, String> = HashMap::from([
             ("Id".to_string(), self.id.clone().to_string()),
             ("RowIndex".to_string(), format!("{}", row_index)),
@@ -182,7 +185,7 @@ impl<'a> SapTable<'a> {
         row_user_data: &str,
         cell_user_data: &str,
         access_type: AccessType,
-    ) -> Result<Event> {
+    ) -> Result<Event, WebDynproError> {
         let parameters: HashMap<String, String> = HashMap::from([
             ("Id".to_string(), self.id.clone().to_string()),
             ("CellId".to_string(), cell_id.to_owned()),

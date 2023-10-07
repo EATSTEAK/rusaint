@@ -1,12 +1,12 @@
 use std::sync::Arc;
 
-use anyhow::Result;
 use reqwest::{
     cookie::Jar,
     header::{HeaderMap, ACCEPT, ACCEPT_ENCODING, ACCEPT_LANGUAGE, CACHE_CONTROL, CONNECTION},
     Client,
 };
-use thiserror::Error;
+
+use crate::error::SsuSsoError;
 
 pub(crate) const DEFAULT_USER_AGENT: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36";
 const SMARTID_LOGIN_URL: &str = "https://smartid.ssu.ac.kr/Symtra_sso/smln.asp";
@@ -26,15 +26,8 @@ pub(crate) fn default_header() -> HeaderMap {
     headers.insert(CONNECTION, "keep-alive".parse().unwrap());
     headers
 }
-#[derive(Error, Debug)]
-pub enum SsuSsoError {
-    #[error("Can't load form data from page, is page changed?")]
-    CantLoadForm,
-    #[error("Token is not included in response.")]
-    CantFindToken,
-}
 
-pub async fn obtain_ssu_sso_token(id: &str, password: &str) -> Result<String> {
+pub async fn obtain_ssu_sso_token(id: &str, password: &str) -> Result<String, SsuSsoError> {
     let jar: Arc<Jar> = Arc::new(Jar::default());
     let client = Client::builder()
         .cookie_provider(jar)

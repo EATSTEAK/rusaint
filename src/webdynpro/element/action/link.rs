@@ -1,8 +1,8 @@
-use anyhow::Result;
 use std::{borrow::Cow, cell::OnceCell, collections::HashMap};
 
 use crate::webdynpro::{
     element::{define_element_interactable, Interactable},
+    error::WebDynproError,
     event::Event,
 };
 
@@ -35,7 +35,7 @@ impl<'a> Link<'a> {
         }
     }
 
-    pub fn activate(&self, ctrl: bool, shift: bool) -> Result<Event> {
+    pub fn activate(&self, ctrl: bool, shift: bool) -> Result<Event, WebDynproError> {
         let mut parameters: HashMap<String, String> = HashMap::new();
         parameters.insert("Id".to_string(), self.id.clone().to_string());
         parameters.insert("Ctrl".to_string(), ctrl.to_string());
@@ -43,7 +43,7 @@ impl<'a> Link<'a> {
         self.fire_event("Activate".to_string(), parameters)
     }
 
-    pub fn double_click(&self) -> Result<Event> {
+    pub fn double_click(&self) -> Result<Event, WebDynproError> {
         let mut parameters: HashMap<String, String> = HashMap::new();
         parameters.insert("Id".to_string(), self.id.clone().to_string());
         self.fire_event("DoubleClick".to_string(), parameters)

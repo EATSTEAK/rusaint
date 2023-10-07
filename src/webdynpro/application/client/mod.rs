@@ -2,11 +2,10 @@ use self::body::{Body, BodyUpdate};
 use crate::{
     utils::{default_header, DEFAULT_USER_AGENT},
     webdynpro::{
-        error::ClientError,
+        error::{ClientError, WebDynproError},
         event::{event_queue::EventQueue, Event},
     },
 };
-use anyhow::Result;
 use reqwest::{cookie::Jar, header::*, RequestBuilder};
 use std::sync::Arc;
 use url::Url;
@@ -42,7 +41,7 @@ pub(super) fn wd_xhr_header() -> HeaderMap {
 }
 
 impl Client {
-    pub async fn new(base_url: &Url, app_name: &str) -> Result<Client> {
+    pub async fn new(base_url: &Url, app_name: &str) -> Result<Client, ClientError> {
         let jar: Arc<Jar> = Arc::new(Jar::default());
         let client = reqwest::Client::builder()
             .cookie_provider(jar)
@@ -57,7 +56,7 @@ impl Client {
         client: reqwest::Client,
         base_url: &Url,
         app_name: &str,
-    ) -> Result<Client> {
+    ) -> Result<Client, ClientError> {
         let raw_body = client
             .wd_navigate(base_url, app_name)
             .send()
@@ -79,12 +78,12 @@ impl Client {
         self.event_queue.add(event)
     }
 
-    pub(crate) async fn send_event(&mut self, base_url: &Url) -> Result<()> {
+    pub(crate) async fn send_event(&mut self, base_url: &Url) -> Result<(), WebDynproError> {
         let res = self.event_request(base_url).await?;
         self.mutate_body(res)
     }
 
-    async fn event_request(&mut self, base_url: &Url) -> Result<String> {
+    async fn event_request(&mut self, base_url: &Url) -> Result<String, ClientError> {
         let res = self
             .client
             .wd_xhr(base_url, &self.ssr_client, &mut self.event_queue)?
@@ -96,7 +95,7 @@ impl Client {
         Ok(res.text().await?)
     }
 
-    fn mutate_body(&mut self, response: String) -> Result<()> {
+    fn mutate_body(&mut self, response: String) -> Result<(), WebDynproError> {
         let body = &mut self.body;
         let update = BodyUpdate::new(&response)?;
         Ok(body.apply(update)?)
@@ -111,7 +110,7 @@ trait Requests {
         base_url: &Url,
         ssr_client: &SapSsrClient,
         event_queue: &mut EventQueue,
-    ) -> Result<RequestBuilder>;
+    ) -> Result<RequestBuilder, ClientError>;
 }
 
 impl Requests for reqwest::Client {
@@ -131,14 +130,14 @@ impl Requests for reqwest::Client {
         base_url: &Url,
         ssr_client: &SapSsrClient,
         event_queue: &mut EventQueue,
-    ) -> Result<RequestBuilder> {
+    ) -> Result<RequestBuilder, ClientError> {
         let mut url = "".to_owned();
         url.push_str(base_url.scheme());
         url.push_str("://");
         if let Some(host_str) = base_url.host_str() {
             url.push_str(host_str);
         } else {
-            return Err(ClientError::InvalidBaseUrl)?;
+            return Err(ClientError::InvalidBaseUrl(base_url.to_string()))?;
         }
         if let Some(port) = base_url.port() {
             url.push_str(":");

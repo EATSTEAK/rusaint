@@ -1,10 +1,9 @@
 use self::client::{body::Body, Client};
-use anyhow::Result;
 use url::Url;
 
 use super::{
     element::{define_elements, layout::form::Form},
-    error::ClientError,
+    error::{ClientError, WebDynproError},
     event::Event,
 };
 
@@ -19,13 +18,14 @@ impl<'a> BasicApplication {
         SSR_FORM: Form<'a> = "sap.client.SsrClient.form"
     }
 
-    pub async fn new(base_url_str: &str, name: &str) -> Result<Self> {
-        let base_url = Url::parse(base_url_str)?;
+    pub async fn new(base_url_str: &str, name: &str) -> Result<Self, WebDynproError> {
+        let base_url = Url::parse(base_url_str)
+            .or(Err(ClientError::InvalidBaseUrl(base_url_str.to_string())))?;
         let client = Client::new(&base_url, name).await?;
         Ok(Self::with_client(base_url, name, client)?)
     }
 
-    pub fn with_client(base_url: Url, name: &str, client: Client) -> Result<Self> {
+    pub fn with_client(base_url: Url, name: &str, client: Client) -> Result<Self, WebDynproError> {
         Ok(BasicApplication {
             base_url,
             name: name.to_owned(),
@@ -44,11 +44,13 @@ impl<'a> BasicApplication {
         url
     }
 
-    pub async fn send_events(&mut self, events: Vec<Event>) -> Result<()> {
+    pub async fn send_events(&mut self, events: Vec<Event>) -> Result<(), WebDynproError> {
         let form_req = Self::SSR_FORM
             .from_body(&self.client.body)?
             .request(false, "", "", false, false)
-            .or(Err(ClientError::NoForm))?;
+            .or(Err(ClientError::NoSuchForm(
+                Self::SSR_FORM.id().to_string(),
+            )))?;
         for event in events.into_iter() {
             if !event.is_enqueable() && event.is_submitable() {
                 {

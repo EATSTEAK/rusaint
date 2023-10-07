@@ -1,8 +1,9 @@
-use anyhow::Result;
 use std::{borrow::Cow, cell::OnceCell, collections::HashMap};
 
-use crate::webdynpro::{event::Event, element::{define_element_interactable, Interactable}};
-
+use crate::webdynpro::{
+    element::{define_element_interactable, Interactable},
+    event::Event, error::WebDynproError,
+};
 
 define_element_interactable! {
     Button<"B", "Button"> {},
@@ -52,7 +53,7 @@ impl<'a> Button<'a> {
         }
     }
 
-    pub fn press(&self) -> Result<Event> {
+    pub fn press(&self) -> Result<Event, WebDynproError> {
         let mut parameters: HashMap<String, String> = HashMap::new();
         parameters.insert("Id".to_string(), self.id.clone().to_string());
         self.fire_event("Press".to_string(), parameters)

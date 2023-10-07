@@ -1,12 +1,14 @@
-use anyhow::Result;
 use std::ops::{Deref, DerefMut};
 
 use crate::{
     define_elements,
     model::SemesterType,
-    webdynpro::element::{
-        action::button::Button, complex::sap_table::SapTable, layout::tab_strip::TabStrip,
-        selection::combo_box::ComboBox,
+    webdynpro::{
+        element::{
+            action::button::Button, complex::sap_table::SapTable, layout::tab_strip::TabStrip,
+            selection::combo_box::ComboBox,
+        },
+        error::WebDynproError,
     },
 };
 
@@ -40,7 +42,7 @@ impl<'a> CourseSchedule {
         MAIN_TABLE: SapTable<'a> = "SALV_WD_TABLE.ID_DE0D9128A4327646C94670E2A892C99C:VIEW_TABLE.SALV_WD_UIE_TABLE"
     }
 
-    pub async fn new() -> Result<CourseSchedule> {
+    pub async fn new() -> Result<CourseSchedule, WebDynproError> {
         Ok(CourseSchedule(
             USaintApplication::new(Self::APP_NAME).await?,
         ))
@@ -48,18 +50,18 @@ impl<'a> CourseSchedule {
 
     fn semester_to_key(period: SemesterType) -> &'static str {
         match period {
-            SemesterType
-    ::One => "090",
-            SemesterType
-    ::Summer => "091",
-            SemesterType
-    ::Two => "092",
-            SemesterType
-    ::Winter => "0923",
+            SemesterType::One => "090",
+            SemesterType::Summer => "091",
+            SemesterType::Two => "092",
+            SemesterType::Winter => "0923",
         }
     }
 
-    pub async fn select_period(&mut self, year: &str, period: SemesterType) -> Result<()> {
+    pub async fn select_period(
+        &mut self,
+        year: &str,
+        period: SemesterType,
+    ) -> Result<(), WebDynproError> {
         let events = {
             let body = self.body();
             let period_year = Self::PERIOD_YEAR.from_body(body)?;
@@ -72,7 +74,7 @@ impl<'a> CourseSchedule {
         self.send_events(events).await
     }
 
-    pub async fn select_rows(&mut self, row: u32) -> Result<()> {
+    pub async fn select_rows(&mut self, row: u32) -> Result<(), WebDynproError> {
         let events = {
             let body = self.body();
             let table_rows = Self::TABLE_ROWS.from_body(body)?;
@@ -81,7 +83,7 @@ impl<'a> CourseSchedule {
         self.send_events(events).await
     }
 
-    pub async fn select_edu(&mut self) -> Result<()> {
+    pub async fn select_edu(&mut self) -> Result<(), WebDynproError> {
         let events = {
             let body = self.body();
             let tab_strip = Self::TABSTRIP.from_body(body)?;
@@ -90,7 +92,7 @@ impl<'a> CourseSchedule {
         self.send_events(events).await
     }
 
-    async fn search_edu(&mut self) -> Result<()> {
+    async fn search_edu(&mut self) -> Result<(), WebDynproError> {
         let events = {
             let body = self.body();
             let button_edu = Self::BUTTON_EDU.from_body(body)?;
@@ -99,13 +101,13 @@ impl<'a> CourseSchedule {
         self.send_events(events).await
     }
 
-    pub async fn load_edu(&mut self) -> Result<()> {
+    pub async fn load_edu(&mut self) -> Result<(), WebDynproError> {
         self.select_edu().await?;
         self.search_edu().await?;
         Ok(())
     }
 
-    pub fn read_edu_raw(&self) -> Result<SapTable> {
+    pub fn read_edu_raw(&self) -> Result<SapTable, WebDynproError> {
         let body = self.body();
         let main_table = Self::MAIN_TABLE.from_body(body)?;
         Ok(main_table)

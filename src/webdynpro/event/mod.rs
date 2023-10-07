@@ -3,6 +3,8 @@ use derive_builder::Builder;
 
 use std::{borrow::Cow, collections::HashMap, num::ParseIntError};
 
+use super::error::EventStrUnescapeError;
+
 const EVENT_SPECTATOR: &str = "~E001";
 const EVENT_DATA_START: &str = "~E002";
 const EVENT_DATA_END: &str = "~E003";
@@ -41,7 +43,7 @@ fn decode_hex(s: &str) -> Result<Vec<u16>, ParseIntError> {
         .collect()
 }
 
-pub fn unescape_str<'a>(text: &'a str) -> anyhow::Result<Cow<'a, str>> {
+pub fn unescape_str<'a>(text: &'a str) -> Result<Cow<'a, str>, EventStrUnescapeError> {
     let bytes = text.as_bytes();
 
     let mut owned = None;

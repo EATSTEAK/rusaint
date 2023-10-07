@@ -1,7 +1,8 @@
-use anyhow::Result;
 use std::{borrow::Cow, cell::OnceCell};
 
 use serde_json::Value;
+
+use crate::webdynpro::error::WebDynproError;
 
 use super::{Element, ElementDef, EventParameterMap, Interactable};
 
@@ -31,7 +32,10 @@ impl<'a> Element<'a> for Unknown<'a> {
             .as_ref()
     }
 
-    fn from_elem(elem_def: ElementDef<'a, Self>, element: scraper::ElementRef<'a>) -> Result<Self> {
+    fn from_elem(
+        elem_def: ElementDef<'a, Self>,
+        element: scraper::ElementRef<'a>,
+    ) -> Result<Self, WebDynproError> {
         Ok(Self::new(elem_def.id.to_owned(), element))
     }
 

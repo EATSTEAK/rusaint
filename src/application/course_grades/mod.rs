@@ -1,4 +1,3 @@
-use anyhow::Result;
 use std::{
     collections::HashMap,
     ops::{Deref, DerefMut},
@@ -19,7 +18,7 @@ use crate::{
             text::input_field::InputField,
             Element, ElementDef, ElementWrapper, SubElement,
         },
-        error::ElementError,
+        error::{BodyError, ElementError, WebDynproError},
         event::Event,
     },
 };
@@ -86,13 +85,13 @@ impl<'a> CourseGrades {
         GRADE_BY_CLASSES_TABLE: SapTable<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.TABLE_1",
     );
 
-    pub async fn new(session: Arc<USaintSession>) -> Result<CourseGrades> {
+    pub async fn new(session: Arc<USaintSession>) -> Result<CourseGrades, WebDynproError> {
         Ok(CourseGrades(
             USaintApplication::with_session(Self::APP_NAME, session).await?,
         ))
     }
 
-    async fn close_popups(&mut self) -> Result<()> {
+    async fn close_popups(&mut self) -> Result<(), WebDynproError> {
         fn make_close_event(app: &CourseGrades) -> Option<Event> {
             let body = app.body();
             let popup_selector =
@@ -123,7 +122,11 @@ impl<'a> CourseGrades {
         }
     }
 
-    async fn select_semester(&mut self, year: &str, semester: SemesterType) -> Result<()> {
+    async fn select_semester(
+        &mut self,
+        year: &str,
+        semester: SemesterType,
+    ) -> Result<(), WebDynproError> {
         let select = {
             let semester = Self::semester_to_key(semester);
             let mut vec = Vec::with_capacity(2);
@@ -135,7 +138,7 @@ impl<'a> CourseGrades {
             if (|| Some(semester_combobox.lsdata()?.key().as_ref()?.as_str()))() != Some(semester) {
                 vec.push(semester_combobox.select(semester, false)?);
             }
-            Result::<Vec<Event>>::Ok(vec)
+            Result::<Vec<Event>, WebDynproError>::Ok(vec)
         }?;
         if !select.is_empty() {
             self.send_events(select).await
@@ -162,14 +165,17 @@ impl<'a> CourseGrades {
         )
     }
 
-    fn value_as_f32(field: InputField<'_>) -> Result<f32> {
+    fn value_as_f32(field: InputField<'_>) -> Result<f32, WebDynproError> {
         let Some(value) = field.lsdata().and_then(|lsdata| lsdata.value().as_ref()) else {
-            return Err(ElementError::InvalidLSData)?;
+            return Err(ElementError::NoSuchData { element: field.id().to_string(), field: "value1".to_string() })?;
         };
-        Ok(value.parse::<f32>()?)
+        Ok(value.parse::<f32>().or(Err(ElementError::InvalidContent {
+            element: field.id().to_string(),
+            content: "value1(not an correct f32)".to_string(),
+        }))?)
     }
 
-    pub fn recorded_summary(&self) -> Result<GradeSummary> {
+    pub fn recorded_summary(&self) -> Result<GradeSummary, WebDynproError> {
         let body = self.body();
         let attempted_credits = Self::value_as_f32(Self::ATTM_CRD1.from_body(body)?)?;
         let earned_credits = Self::value_as_f32(Self::EARN_CRD1.from_body(body)?)?;
@@ -187,7 +193,7 @@ impl<'a> CourseGrades {
         ))
     }
 
-    pub fn certificated_summary(&self) -> Result<GradeSummary> {
+    pub fn certificated_summary(&self) -> Result<GradeSummary, WebDynproError> {
         let body = self.body();
         let attempted_credits = Self::value_as_f32(Self::ATTM_CRD2.from_body(body)?)?;
         let earned_credits = Self::value_as_f32(Self::EARN_CRD2.from_body(body)?)?;
@@ -205,7 +211,7 @@ impl<'a> CourseGrades {
         ))
     }
 
-    pub fn semesters(&self) -> Result<Vec<SemesterGrade>> {
+    pub fn semesters(&self) -> Result<Vec<SemesterGrade>, WebDynproError> {
         fn parse_rank(value: String) -> Option<(u32, u32)> {
             let mut spl = value.split("/");
             let first: u32 = spl.next()?.parse().ok()?;
@@ -214,7 +220,10 @@ impl<'a> CourseGrades {
         }
 
         let table_elem = Self::GRADES_SUMMARY_TABLE.from_body(self.body())?;
-        let table = table_elem.table().ok_or(ElementError::NoSuchElement)?;
+        let table = table_elem.table().ok_or(ElementError::NoSuchContent {
+            element: table_elem.id().to_string(),
+            content: "table".to_string(),
+        })?;
         let ret = table
             .iter()
             .skip(1)
@@ -242,14 +251,14 @@ impl<'a> CourseGrades {
     async fn class_detail_in_popup<'f>(
         &mut self,
         open_button: ElementDef<'f, Button<'f>>,
-    ) -> Result<HashMap<String, f32>> {
-        fn parse_table_in_popup(body: &Body) -> Result<Vec<(String, f32)>> {
+    ) -> Result<HashMap<String, f32>, WebDynproError> {
+        fn parse_table_in_popup(body: &Body) -> Result<Vec<(String, f32)>, WebDynproError> {
             let table_inside_popup_selector =
                 scraper::Selector::parse(r#"[ct="PW"] [ct="ST"]"#).unwrap();
             let mut table_inside_popup = body.document().select(&table_inside_popup_selector);
             let table_ref = table_inside_popup
                 .next()
-                .ok_or(ElementError::NoSuchElement)?;
+                .ok_or(BodyError::NoSuchElement("Table in popup".to_string()))?;
             let table_elem: SapTable<'_> = ElementWrapper::dyn_elem(table_ref)?.try_into()?;
             let zip = (|| {
                 let mut iter = table_elem.table()?.iter();
@@ -257,10 +266,23 @@ impl<'a> CourseGrades {
                 let row_str = CourseGrades::row_to_string(iter.next()?)?;
                 Some(head_str.into_iter().zip(row_str.into_iter()))
             })()
-            .ok_or(ElementError::InvalidBody)?;
+            .ok_or(ElementError::InvalidContent {
+                element: table_elem.id().to_string(),
+                content: "header and first row".to_string(),
+            })?;
             zip.skip(4)
-                .map(|(key, val)| Ok((key, val.trim().parse::<f32>()?)))
-                .collect::<Result<Vec<(String, f32)>>>()
+                .map(|(key, val)| {
+                    Ok((
+                        key,
+                        val.trim()
+                            .parse::<f32>()
+                            .or(Err(ElementError::InvalidContent {
+                                element: table_elem.id().to_string(),
+                                content: "(not an correct f32)".to_string(),
+                            }))?,
+                    ))
+                })
+                .collect::<Result<Vec<(String, f32)>, WebDynproError>>()
         };
         let event = { open_button.from_body(self.body())?.press() }?;
         self.send_events(vec![event]).await?;
@@ -274,11 +296,11 @@ impl<'a> CourseGrades {
         year: &str,
         semester: SemesterType,
         code: &str,
-    ) -> Result<HashMap<String, f32>> {
+    ) -> Result<HashMap<String, f32>, WebDynproError> {
         self.select_semester(year, semester).await?;
         let table_elem = Self::GRADE_BY_CLASSES_TABLE.from_body(self.body())?;
         let Some(table) = table_elem.table()  else {
-            return Err(ElementError::NoSuchElement)?;
+            return Err(ElementError::NoSuchContent { element: table_elem.id().to_string(), content: "Table body".to_string() })?;
         };
         let Some(btn) = ({
             table.iter().find(|row| {
@@ -295,7 +317,7 @@ impl<'a> CourseGrades {
                 }
             })
         }) else {
-            return Err(ElementError::NoSuchAttribute("detail".to_string()))?;
+            return Err(ElementError::NoSuchData { element: table_elem.id().to_string(), field: format!("details of class {}", code) })?;
         };
         self.class_detail_in_popup(btn).await
     }
@@ -305,14 +327,17 @@ impl<'a> CourseGrades {
         year: &str,
         semester: SemesterType,
         include_details: bool,
-    ) -> Result<Vec<ClassGrade>> {
+    ) -> Result<Vec<ClassGrade>, WebDynproError> {
         self.close_popups().await?;
         self.select_semester(year, semester).await?;
         let class_grades: Vec<(Option<String>, Vec<String>)> = {
             let grade_table_elem = Self::GRADE_BY_CLASSES_TABLE.from_body(self.body())?;
             let iter = grade_table_elem
                 .table()
-                .ok_or(ElementError::NoSuchElement)?
+                .ok_or(ElementError::NoSuchContent {
+                    element: grade_table_elem.id().to_string(),
+                    content: "Table body".to_string(),
+                })?
                 .iter()
                 .skip(1);
             iter.map(|row| {

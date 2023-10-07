@@ -1,8 +1,8 @@
-use anyhow::Result;
 use std::{borrow::Cow, collections::HashMap};
 
 use crate::webdynpro::{
     element::ElementWrapper,
+    error::WebDynproError,
     event::{
         ucf_parameters::{UcfAction, UcfParametersBuilder, UcfResponseData},
         Event, EventBuilder,
@@ -74,7 +74,10 @@ impl<'a> Element<'a> for Custom {
         None
     }
 
-    fn from_elem(elem_def: ElementDef<'_, Self>, _element: scraper::ElementRef) -> Result<Self> {
+    fn from_elem(
+        elem_def: ElementDef<'_, Self>,
+        _element: scraper::ElementRef,
+    ) -> Result<Self, WebDynproError> {
         Ok(Self::new(elem_def.id.to_owned()))
     }
 

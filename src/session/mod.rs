@@ -1,6 +1,5 @@
 use std::{borrow::BorrowMut, ops::Deref};
 
-use anyhow::Result;
 use reqwest::{
     cookie::{CookieStore, Jar},
     header::{HeaderValue, COOKIE, HOST, SET_COOKIE},
@@ -9,7 +8,7 @@ use url::Url;
 
 use crate::{
     utils::{default_header, obtain_ssu_sso_token, DEFAULT_USER_AGENT},
-    webdynpro::error::ClientError,
+    webdynpro::error::{ClientError, WebDynproError}, error::RusaintError,
 };
 
 const SSU_USAINT_PORTAL_URL: &str = "https://saint.ssu.ac.kr/irj/portal";
@@ -41,7 +40,7 @@ impl USaintSession {
         USaintSession(Jar::default())
     }
 
-    pub async fn with_token(id: &str, token: &str) -> Result<USaintSession> {
+    pub async fn with_token(id: &str, token: &str) -> Result<USaintSession, ClientError> {
         let session_store = Self::anonymous();
         let client = reqwest::Client::builder()
             .user_agent(DEFAULT_USER_AGENT)
@@ -57,7 +56,7 @@ impl USaintSession {
         let waf = portal
             .cookies()
             .find(|cookie| cookie.name() == "WAF")
-            .ok_or(ClientError::NoCookie)?;
+            .ok_or(ClientError::NoSuchCookie("WAF".to_string()))?;
         let waf_cookie_str = format!("WAF={}; domain=saint.ssu.ac.kr; path=/;", waf.value());
         session_store.set_cookies(
             portal
@@ -104,20 +103,22 @@ impl USaintSession {
         });
         session_store.set_cookies(&mut new_cookies, res.url());
         if let Some(sapsso_cookies) = session_store.cookies(res.url()) {
-            let str = sapsso_cookies.to_str()?;
+            let str = sapsso_cookies
+                .to_str()
+                .or(Err(ClientError::NoCookies(res.url().to_string())))?;
             if str.contains("MYSAPSSO2") {
                 Ok(session_store)
             } else {
-                Err(ClientError::NoCookie)?
+                Err(ClientError::NoSuchCookie("MYSAPSSO2".to_string()))?
             }
         } else {
-            Err(ClientError::NoCookie)?
+            Err(ClientError::NoCookies(res.url().to_string()))?
         }
     }
 
-    pub async fn with_password(id: &str, password: &str) -> Result<USaintSession> {
+    pub async fn with_password(id: &str, password: &str) -> Result<USaintSession, RusaintError> {
         let token = obtain_ssu_sso_token(id, password).await?;
-        Self::with_token(id, &token).await
+        Ok(Self::with_token(id, &token).await.or_else(|e| Err(WebDynproError::ClientError(e)))?)
     }
 }
 

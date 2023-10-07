@@ -1,6 +1,6 @@
-use anyhow::Result;
 use std::{borrow::Cow, cell::OnceCell, collections::HashMap};
 
+use crate::webdynpro::error::WebDynproError;
 use crate::webdynpro::event::Event;
 
 use crate::webdynpro::element::{define_element_interactable, Interactable};
@@ -47,7 +47,7 @@ impl<'a> Form<'a> {
         hash: &str,
         dom_changed: bool,
         is_dirty: bool,
-    ) -> Result<Event> {
+    ) -> Result<Event, WebDynproError> {
         let mut parameters: HashMap<String, String> = HashMap::new();
         parameters.insert("Id".to_string(), self.id.clone().to_string());
         parameters.insert("Async".to_string(), is_async.to_string());
