@@ -129,6 +129,7 @@ pub(crate) use define_element_interactable;
 
 macro_rules! register_elements {
     [$( $enum:ident : $type: ty ),+ $(,)?] => {
+    	/// 도큐먼트에서 파싱한 [`Element`]를 공통의 타입으로 취급할 수 있게 하는 Wrapper
         pub enum ElementWrapper<'a> {
             $( $enum($type), )*
             Unknown($crate::webdynpro::element::unknown::Unknown<'a>)
@@ -153,6 +154,7 @@ macro_rules! register_elements {
         }
 
         impl<'a> ElementWrapper<'a> {
+        	/// 알 수 없는 종류의 엘리먼트를 가리키는 `scraper::ElementRef`를 [`ElementWrapper`]로 반환합니다.
             pub fn dyn_elem(element: scraper::ElementRef<'a>) -> Result<ElementWrapper, WebDynproError> {
                 let value = element.value();
                 let id = value.id().ok_or(BodyError::NoSuchAttribute("id".to_owned()))?.to_owned();
