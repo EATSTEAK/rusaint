@@ -4,10 +4,14 @@ use std::{borrow::Cow, cell::OnceCell};
 use scraper::Selector;
 use serde::Deserialize;
 
-use crate::webdynpro::{element::{Element, ElementWrapper, SubElement, SubElementDef}, error::WebDynproError};
+use crate::webdynpro::{
+    element::{Element, ElementWrapper, SubElement, SubElementDef},
+    error::WebDynproError,
+};
 
 use super::{SapTableCell, SapTableCellWrapper};
 
+/// 계층적 테이블의 셀
 #[derive(custom_debug_derive::Debug)]
 pub struct SapTableHierarchicalCell<'a> {
     id: Cow<'static, str>,
@@ -101,6 +105,7 @@ impl<'a> SapTableHierarchicalCell<'a> {
         }
     }
 
+    /// 셀을 [`SapTableCellWrapper`]로 감쌉니다.
     pub fn wrap(self) -> SapTableCellWrapper<'a> {
         SapTableCellWrapper::Hierarchical(self)
     }

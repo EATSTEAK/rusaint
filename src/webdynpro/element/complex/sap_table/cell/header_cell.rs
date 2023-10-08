@@ -11,6 +11,7 @@ use crate::webdynpro::{
 
 use super::{SapTableCell, SapTableCellWrapper};
 
+/// 테이블의 헤더 셀
 #[derive(custom_debug_derive::Debug)]
 pub struct SapTableHeaderCell<'a> {
     id: Cow<'static, str>,
@@ -123,6 +124,7 @@ impl<'a> SapTableHeaderCell<'a> {
         }
     }
 
+    /// 셀을 [`SapTableCellWrapper`]로 감쌉니다.
     pub fn wrap(self) -> SapTableCellWrapper<'a> {
         SapTableCellWrapper::Header(self)
     }

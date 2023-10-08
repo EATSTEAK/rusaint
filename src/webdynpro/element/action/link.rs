@@ -7,6 +7,7 @@ use crate::webdynpro::{
 };
 
 define_element_interactable! {
+    #[doc = "하이퍼링크"]
     Link<"LN", "Link"> {},
     LinkLSData {
         tooltip: String => "0",
@@ -35,6 +36,7 @@ impl<'a> Link<'a> {
         }
     }
 
+    /// 링크 활성화 이벤트를 반환합니다. `ctrl` 이나 `shift` 가 참일 경우 각 버튼을 누른 채로 클릭한 것으로 간주합니다.
     pub fn activate(&self, ctrl: bool, shift: bool) -> Result<Event, WebDynproError> {
         let mut parameters: HashMap<String, String> = HashMap::new();
         parameters.insert("Id".to_string(), self.id.clone().to_string());

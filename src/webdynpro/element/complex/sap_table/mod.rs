@@ -14,9 +14,11 @@ use self::cell::{
     SapTableSelectionCell, SapTableCellWrapper,
 };
 
+/// 테이블 내부 데이터
 pub type SapTableBody<'a> = Vec<Vec<SapTableCellWrapper<'a>>>;
 
 define_element_interactable! {
+    #[doc = "테이블"]
     SapTable<"ST", "SapTable"> {
         table: OnceCell<Option<SapTableBody<'a>>>,
     },
@@ -28,6 +30,7 @@ define_element_interactable! {
     }
 }
 
+/// 테이블 내의 셀 접근 방식
 pub enum AccessType {
     Invalid,
     Standard,
@@ -62,6 +65,7 @@ impl<'a> SapTable<'a> {
         }
     }
 
+    /// 테이블 내부 컨텐츠를 반환합니다.
     pub fn table(&self) -> Option<&SapTableBody<'a>> {
         self.table.get_or_init(|| self.parse_table().ok()).as_ref()
     }
@@ -157,6 +161,7 @@ impl<'a> SapTable<'a> {
             .collect())
     }
 
+    /// 테이블의 행을 선택하는 이벤트를 반환합니다.
     pub fn row_select(
         &self,
         row_index: i32,
@@ -176,6 +181,7 @@ impl<'a> SapTable<'a> {
         self.fire_event("RowSelect".to_string(), parameters)
     }
 
+    /// 테이블의 내부 셀을 선택하는 이벤트를 반환합니다.
     pub fn cell_select(
         &self,
         cell_id: &str,
