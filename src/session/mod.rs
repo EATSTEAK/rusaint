@@ -132,8 +132,6 @@ impl USaintSession {
     }
 }
 
-/// 숭실대학교 SSO 로그인을 통해 통합 로그인 토큰을 가져오는 함수
-/// 
 /// 학번과 비밀번호를 이용해 SSO 토큰을 발급받습니다.
 pub async fn obtain_ssu_sso_token(id: &str, password: &str) -> Result<String, SsuSsoError> {
     let jar: Arc<Jar> = Arc::new(Jar::default());
