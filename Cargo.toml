@@ -39,4 +39,5 @@ members = ["macro"]
 [dev-dependencies]
 anyhow = "1.0.75"
 dotenv = "0.15.0"
+futures = "0.3.28"
 serial_test = "*"
