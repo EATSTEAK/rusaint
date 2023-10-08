@@ -107,11 +107,11 @@ impl<'a> BasicApplication {
         Ok(())
     }
 
-    /// WebDynpro 애플리케이션의 페이지 문서 구조체를 반환합니다.
+    /// WebDynpro 애플리케이션의 페이지 문서를 반환합니다.
     pub fn body(&self) -> &Body {
         &self.client.body
     }
 }
 
-/// WebDynpro 요청 및 문서 처리를 담당하는 클라이언트 모듈
+/// WebDynpro 요청 및 문서 처리를 담당하는 클라이언트
 pub mod client;
