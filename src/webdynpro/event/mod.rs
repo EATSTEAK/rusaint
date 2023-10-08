@@ -85,7 +85,7 @@ pub fn unescape_str<'a>(text: &'a str) -> Result<Cow<'a, str>, EventStrUnescapeE
     }
 }
 
-/// 엘리먼트에서 전송하는 이벤트의 구조체
+/// 엘리먼트에서 전송하는 이벤트
 #[derive(Builder, Clone)]
 pub struct Event {
     event: String,
@@ -147,7 +147,7 @@ impl Event {
 }
 
 pub(crate) mod event_queue;
-/// 이벤트의 특성을 정의하는 [`UcfParameters`]의 모듈
+/// 이벤트의 특성을 정의하는 [`UcfParameters`]
 pub mod ucf_parameters;
 
 #[cfg(test)]
