@@ -9,9 +9,9 @@ use crate::webdynpro::{
 };
 
 use self::cell::{
-    header_cell::SapTableHeaderCell, hierarchical_cell::SapTableHierarchicalCell,
-    matrix_cell::SapTableMatrixCell, normal_cell::SapTableNormalCell,
-    selection_cell::SapTableSelectionCell, SapTableCellWrapper,
+    SapTableHeaderCell, SapTableHierarchicalCell,
+    SapTableMatrixCell, SapTableNormalCell,
+    SapTableSelectionCell, SapTableCellWrapper,
 };
 
 pub type SapTableBody<'a> = Vec<Vec<SapTableCellWrapper<'a>>>;

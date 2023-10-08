@@ -1,11 +1,5 @@
 use crate::webdynpro::element::ElementWrapper;
 
-use self::{
-    header_cell::SapTableHeaderCell, hierarchical_cell::SapTableHierarchicalCell,
-    matrix_cell::SapTableMatrixCell, normal_cell::SapTableNormalCell,
-    selection_cell::SapTableSelectionCell,
-};
-
 #[derive(Debug)]
 pub enum SapTableCellWrapper<'a> {
     Normal(SapTableNormalCell<'a>),
@@ -31,8 +25,14 @@ pub trait SapTableCell<'a> {
     fn content(&self) -> Option<&ElementWrapper<'a>>;
 }
 
-pub mod header_cell;
-pub mod hierarchical_cell;
-pub mod matrix_cell;
-pub mod normal_cell;
-pub mod selection_cell;
+mod header_cell;
+mod hierarchical_cell;
+mod matrix_cell;
+mod normal_cell;
+mod selection_cell;
+
+pub use self::header_cell::{SapTableHeaderCell, SapTableHeaderCellLSData};
+pub use self::hierarchical_cell::{SapTableHierarchicalCell, SapTableHierarchicalCellLSData};
+pub use self::matrix_cell::{SapTableMatrixCell, SapTableMatrixCellLSData};
+pub use self::normal_cell::{SapTableNormalCell, SapTableNormalCellLSData};
+pub use self::selection_cell::{SapTableSelectionCell, SapTableSelectionCellLSData};

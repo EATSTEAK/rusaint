@@ -2,6 +2,12 @@ use std::{borrow::Cow, cell::OnceCell};
 
 use crate::webdynpro::element::define_element_base;
 
+#[derive(Debug)]
+pub enum ListBoxItemWrapper<'a> {
+    Item(ListBoxItem<'a>),
+    ActionItem(ListBoxActionItem<'a>),
+}
+
 define_element_base! {
     ListBoxItem<"LIB_I", "ListBoxItem"> {
         index: OnceCell<Option<&'a str>>,
@@ -131,3 +137,7 @@ impl<'a> ListBoxItem<'a> {
             .get_or_init(|| self.element_ref.value().attr("title").unwrap_or(""))
     }
 }
+
+mod action_item;
+
+pub use self::action_item::{ListBoxActionItem, ListBoxActionItemLSData};

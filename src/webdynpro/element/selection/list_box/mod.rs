@@ -2,9 +2,9 @@ use std::{borrow::Cow, cell::OnceCell, ops::DerefMut};
 
 use serde::Deserialize;
 
-use crate::webdynpro::element::{Element, ElementDef, ElementWrapper, EventParameterMap};
+use crate::webdynpro::element::{ElementDef, ElementWrapper, EventParameterMap};
 
-use self::{action_item::ListBoxActionItem, item::ListBoxItem};
+use self::item::ListBoxItemWrapper;
 
 macro_rules! def_listbox_subset {
     [$($name:ident = $id:literal),+ $(,)?] => {$(
@@ -119,12 +119,6 @@ def_listbox_subset![
     ListBoxSingle = "LIB_S"
 ];
 
-#[derive(Debug)]
-pub enum ListBoxItemWrapper<'a> {
-    Item(ListBoxItem<'a>),
-    ActionItem(ListBoxActionItem<'a>),
-}
-
 #[derive(Deserialize, Debug, Default)]
 #[allow(unused)]
 pub struct ListBoxLSData {
@@ -219,5 +213,4 @@ impl<'a> ListBox<'a> {
     }
 }
 
-pub mod action_item;
 pub mod item;

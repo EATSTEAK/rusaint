@@ -5,8 +5,8 @@ use crate::{
     model::SemesterType,
     webdynpro::{
         element::{
-            action::button::Button, complex::sap_table::SapTable, layout::tab_strip::TabStrip,
-            selection::combo_box::ComboBox,
+            action::Button, complex::SapTable, layout::TabStrip,
+            selection::ComboBox,
         },
         error::WebDynproError,
     },
@@ -120,7 +120,7 @@ mod test {
         application::course_schedule::CourseSchedule,
         webdynpro::element::{
             complex::sap_table::cell::{SapTableCell, SapTableCellWrapper},
-            selection::list_box::{ListBoxItemWrapper, ListBoxWrapper},
+            selection::list_box::{item::ListBoxItemWrapper, ListBoxWrapper},
             ElementWrapper,
         },
     };

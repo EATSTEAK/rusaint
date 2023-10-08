@@ -1,8 +1,6 @@
 use std::{borrow::Cow, cell::OnceCell};
 
-use crate::webdynpro::element::define_element_base;
-
-use super::Element;
+use crate::webdynpro::element::{define_element_base, Element};
 
 define_element_base! {
     ListBoxActionItem<"LIB_AI", "ListBoxActionItem"> {
