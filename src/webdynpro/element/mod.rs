@@ -353,7 +353,7 @@ fn normalize_lsjson(lsjson: &str) -> String {
     ret
 }
 
-/// 엘리먼트의 기본 동작 정의
+/// 엘리먼트의 기본 동작
 pub trait Element<'a>: Sized {
 	/// WebDynpro 상에서 사용하는 엘리먼트의 Id
     const CONTROL_ID: &'static str;
@@ -471,7 +471,7 @@ pub trait Interactable<'a>: Element<'a> {
     fn lsevents(&self) -> Option<&EventParameterMap>;
 }
 
-/// [`SapTable`]등에서 사용하는 [`SubElement`]의 정의
+/// [`SapTable`]등에서 사용하는 [`SubElement`]
 #[derive(Debug)]
 pub struct SubElementDef<'a, Parent, T>
     where Parent: Element<'a>, T: SubElement<'a> {
@@ -527,7 +527,7 @@ where Parent: Element<'a>, T: SubElement<'a>
     }
 }
 
-/// 서브 엘리먼트의 기능 정의
+/// 서브 엘리먼트의 기능
 pub trait SubElement<'a>: Sized {
 	/// WebDynpro 내부에서 사용하는 서브 엘리먼트의 Id
     const SUBCONTROL_ID: &'static str;
