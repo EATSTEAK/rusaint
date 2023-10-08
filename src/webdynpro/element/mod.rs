@@ -273,6 +273,7 @@ where T: Element<'a>
     }
 }
 
+/// 애플리케이션에서 쉽게 엘리먼트를 미리 정의할 수 있는 매크로
 #[macro_export]
 macro_rules! define_elements {
     ($($name:ident : $eltype:tt<$lt:lifetime> = $id:literal),+ $(,)?) => {
@@ -280,7 +281,6 @@ macro_rules! define_elements {
     }
 }
 
-/// 애플리케이션에서 쉽게 엘리먼트를 미리 정의할 수 있는 매크로
 pub use define_elements;
 
 // TODO: Do multiple replacements without owning
