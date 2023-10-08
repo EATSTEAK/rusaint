@@ -30,12 +30,20 @@ pub mod unknown;
 pub type EventParameterMap = HashMap<String, (UcfParameters, HashMap<String, String>)>;
 
 macro_rules! define_element_base {
-    {$name:ident<$controlid:literal, $element_name:literal> {
-        $($sfield:ident : $stype:ty),* $(,)?
-    },
-    $lsdata:ident {
-        $($field:ident: $ftype:ty => $encoded:literal),* $(,)?
-    }} => {
+    {   $(#[$outer:meta])*
+        $name:ident<$controlid:literal, $element_name:literal> {
+            $($sfield:ident : $stype:ty),* $(,)?
+        },
+        $(#[$lsdata_outer:meta])*
+        $lsdata:ident {
+            $(
+                $(#[$lsdata_inner:meta])*
+                $field:ident: $ftype:ty => $encoded:literal
+            ),* $(,)?
+        }
+    } => {
+
+        $(#[$outer])*
         #[derive(custom_debug_derive::Debug)]
         #[allow(unused)]
         pub struct $name<'a> {
@@ -45,6 +53,7 @@ macro_rules! define_element_base {
             lsdata: std::cell::OnceCell<Option<$lsdata>>,
             $($sfield: $stype, )*
         }
+
         impl<'a> $crate::webdynpro::element::Element<'a> for $name<'a> {
             const CONTROL_ID: &'static str = $controlid;
 
@@ -84,12 +93,13 @@ macro_rules! define_element_base {
                 Self::children_elem(self.element_ref().clone())
             }
         }
-
+        $(#[$lsdata_outer])*
         #[derive(getset::Getters, serde::Deserialize, Debug, Default)]
         #[allow(unused)]
         #[get = "pub"]
         pub struct $lsdata {
             $(
+                $(#[$lsdata_inner])*
                 #[serde(rename = $encoded)]
                 $field: Option<$ftype>,
             )*
@@ -98,19 +108,31 @@ macro_rules! define_element_base {
 }
 
 macro_rules! define_element_interactable {
-    {$name:ident<$controlid:literal, $element_name:literal> {
-        $($sfield:ident : $stype:ty),* $(,)?
-    },
-    $lsdata:ident {
-        $($field:ident: $ftype:ty => $encoded:literal),* $(,)?
-    }} => {
+    {
+        $(#[$outer:meta])*
+        $name:ident<$controlid:literal, $element_name:literal> {
+            $($sfield:ident : $stype:ty),* $(,)?
+        },
+        $(#[$lsdata_outer:meta])*
+        $lsdata:ident {
+            $(
+                $(#[$lsdata_inner:meta])*
+                $field:ident: $ftype:ty => $encoded:literal
+            ),* $(,)?
+        }
+    } => {
         $crate::webdynpro::element::define_element_base!{
+            $(#[$outer])*
             $name<$controlid, $element_name> {
                 lsevents: std::cell::OnceCell<Option<$crate::webdynpro::element::EventParameterMap>>,
                 $($sfield : $stype, )*
             },
+            $(#[$lsdata_outer])*
             $lsdata {
-                $($field: $ftype => $encoded, )*
+                $(
+                    $(#[$lsdata_inner])*
+                    $field: $ftype => $encoded, 
+                )*
             }
         }
 
