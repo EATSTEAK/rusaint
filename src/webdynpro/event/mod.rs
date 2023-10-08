@@ -11,6 +11,7 @@ const EVENT_DATA_END: &str = "~E003";
 const EVENT_DATA_COLON: &str = "~E004";
 const EVENT_DATA_COMMA: &str = "~E005";
 
+/// 일반 문자열을 이벤트 큐에서 전송하는 형태로 변환합니다.
 pub fn escape_str<'a>(text: &'a str) -> String {
     let chars = text.chars();
 
@@ -43,6 +44,7 @@ fn decode_hex(s: &str) -> Result<Vec<u16>, ParseIntError> {
         .collect()
 }
 
+/// 이벤트 큐의 문자열을 일반 문자열으로 변환합니다.
 pub fn unescape_str<'a>(text: &'a str) -> Result<Cow<'a, str>, EventStrUnescapeError> {
     let bytes = text.as_bytes();
 
