@@ -53,10 +53,9 @@ pub use error::SsuSsoError;
 mod session;
 
 #[cfg(feature = "application")]
-/// 숭실대학교 SSO 로그인을 통해 통합 로그인 토큰을 가져오는 함수
 pub use session::obtain_ssu_sso_token;
+
 #[cfg(feature = "application")]
-/// u-saint 로그인이 필요한 애플리케이션 사용 시 애플리케이션에 제공하는 세션
 pub use session::USaintSession;
 
 #[cfg(feature = "model")]

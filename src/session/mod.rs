@@ -18,6 +18,7 @@ const SSU_USAINT_SSO_URL: &str = "https://saint.ssu.ac.kr/webSSO/sso.jsp";
 const SMARTID_LOGIN_URL: &str = "https://smartid.ssu.ac.kr/Symtra_sso/smln.asp";
 const SMARTID_LOGIN_FORM_REQUEST_URL: &str = "https://smartid.ssu.ac.kr/Symtra_sso/smln_pcs.asp";
 
+/// u-saint 로그인이 필요한 애플리케이션 사용 시 애플리케이션에 제공하는 세션
 #[derive(Debug, Default)]
 pub struct USaintSession(Jar);
 
@@ -131,6 +132,8 @@ impl USaintSession {
     }
 }
 
+/// 숭실대학교 SSO 로그인을 통해 통합 로그인 토큰을 가져오는 함수
+/// 
 /// 학번과 비밀번호를 이용해 SSO 토큰을 발급받습니다.
 pub async fn obtain_ssu_sso_token(id: &str, password: &str) -> Result<String, SsuSsoError> {
     let jar: Arc<Jar> = Arc::new(Jar::default());
