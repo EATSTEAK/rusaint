@@ -11,11 +11,11 @@ use crate::{
     webdynpro::{
         application::client::body::Body,
         element::{
-            action::button::Button,
+            action::Button,
             complex::sap_table::{cell::SapTableCellWrapper, SapTable},
-            layout::popup_window::PopupWindow,
-            selection::combo_box::ComboBox,
-            text::input_field::InputField,
+            layout::PopupWindow,
+            selection::ComboBox,
+            text::InputField,
             Element, ElementDef, ElementWrapper, SubElement,
         },
         error::{BodyError, ElementError, WebDynproError},
@@ -515,7 +515,7 @@ mod test {
     use crate::{
         application::course_grades::CourseGrades,
         session::USaintSession,
-        webdynpro::element::{layout::popup_window::PopupWindow, Element},
+        webdynpro::element::{layout::PopupWindow, Element},
     };
     use dotenv::dotenv;
 

@@ -12,9 +12,10 @@ use crate::{
         element::{
             define_elements,
             system::{
-                client_inspector::ClientInspector,
-                custom::{Custom, CustomClientInfo},
-                loading_placeholder::LoadingPlaceholder,
+                ClientInspector,
+                Custom,
+                CustomClientInfo,
+                LoadingPlaceholder,
             },
         },
         error::{ClientError, WebDynproError},

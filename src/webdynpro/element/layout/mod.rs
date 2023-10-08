@@ -43,11 +43,24 @@ impl<'a> Container<'a> {
     }
 }
 
-pub mod button_row;
-pub mod form;
 pub mod grid_layout;
-pub mod popup_window;
-pub mod scroll_container;
-pub mod scrollbar;
 pub mod tab_strip;
-pub mod tray;
+
+#[doc(inline)]
+pub use self::grid_layout::{GridLayout, GridLayoutLSData};
+#[doc(inline)]
+pub use self::tab_strip::{TabStrip, TabStripLSData};
+
+mod button_row;
+mod form;
+mod popup_window;
+mod scroll_container;
+mod scrollbar;
+mod tray;
+
+pub use self::button_row::{ButtonRow, ButtonRowLSData};
+pub use self::form::{Form, FormData, FormLSData};
+pub use self::popup_window::{PopupWindow, PopupWindowLSData};
+pub use self::scroll_container::{ScrollContainer, ScrollContainerLSData};
+pub use self::scrollbar::{Scrollbar, ScrollbarLSData};
+pub use self::tray::{Tray, TrayLSData};

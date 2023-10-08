@@ -2,7 +2,7 @@ use self::client::{body::Body, Client};
 use url::Url;
 
 use super::{
-    element::{define_elements, layout::form::Form},
+    element::{define_elements, layout::Form},
     error::{ClientError, WebDynproError},
     event::Event,
 };
