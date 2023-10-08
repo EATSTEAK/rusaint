@@ -9,15 +9,24 @@ use self::{action::{button::Button, link::Link}, layout::{button_row::ButtonRow,
 
 use super::{event::{ucf_parameters::UcfParameters, Event, EventBuilder}, error::{ElementError, BodyError, WebDynproError}, application::client::body::Body};
 
+/// 버튼 등 기본적인 액션에 이용되는 엘리먼트의 모듈
 pub mod action;
+/// 복잡한 데이터를 표현하는 엘리먼트의 모듈
 pub mod complex;
+/// 이미지 등 그래픽 데이터를 처리하는 엘리먼트의 모듈
 pub mod graphic;
+/// 레이아웃을 정의하는 엘리먼트의 모듈
 pub mod layout;
+/// 사용자 선택을 수행하는 엘리먼트의 모듈
 pub mod selection;
+/// WebDynpro 시스템에서 사용하는 엘리먼트의 모듈
 pub mod system;
+/// 텍스트를 표현하는 모듈
 pub mod text;
+/// rusaint에서 구현되지 않는 엘리먼트의 모듈
 pub mod unknown;
 
+/// 엘리먼트에서 발생시킬 수 있는 이벤트의 기본 파라메터 맵
 pub type EventParameterMap = HashMap<String, (UcfParameters, HashMap<String, String>)>;
 
 macro_rules! define_element_base {
@@ -206,6 +215,7 @@ register_elements![
     Caption: Caption<'a>,
 ];
 
+/// 컴파일 타임에서도 정의할 수 있는 [`Element`] 정의 구조체
 #[derive(Debug)]
 pub struct ElementDef<'a, T>
     where T: Element<'a> {
@@ -226,7 +236,8 @@ impl<'a, T: Element<'a>> Clone for ElementDef<'a, T> {
 impl<'a, T> ElementDef<'a, T>
 where T: Element<'a>
 {
-
+	
+    /// 엘리먼트 정의를 생성합니다. 이 함수를 직접 실행하기보다는 [`define_elements`]매크로 사용을 추천합니다.
     pub const fn new(id: &'static str) -> ElementDef<'a, T> {
         ElementDef {
             id: Cow::Borrowed(id),
@@ -234,24 +245,29 @@ where T: Element<'a>
         }
     }
 
+	/// 런타임에서 엘리먼트 정의를 생성합니다. 엘리먼트의 Id 등을 컴파일 타임에서 미리 알 수 없는 경우 유용합니다.
     pub fn new_dynamic(id: String) -> ElementDef<'a, T> {
         ElementDef {
             id: id.into(), _marker: std::marker::PhantomData
         }
     }
 
+	/// 엘리먼트의 Id를 반환합니다.
     pub fn id(&self) -> &str {
         &self.id
     }
 
+	/// `scraper`에서 이 엘리먼트를 선택할 수 있는 CSS Selector를 반환합니다.
     pub fn selector(&self) -> Result<Selector, WebDynproError> {
         Ok(std::result::Result::or(Selector::parse(format!(r#"[id="{}"]"#, &self.id).as_str()), Err(BodyError::InvalidSelector))?)
     }
 
+	/// [`Body`]에서 엘리먼트를 불러옵니다.
     pub fn from_body(self, body: &'a Body) -> Result<T, WebDynproError> {
         T::from_body(self, body)
     }
-
+	
+    /// `scraper::ElementRef`에서 엘리먼트를 불러옵니다.
     pub fn from_elem(self, element: scraper::ElementRef<'a>) -> Result<T, WebDynproError> {
         T::from_elem(self, element)
     }
@@ -264,6 +280,7 @@ macro_rules! define_elements {
     }
 }
 
+/// 애플리케이션에서 쉽게 엘리먼트를 미리 정의할 수 있는 매크로
 pub use define_elements;
 
 // TODO: Do multiple replacements without owning
@@ -277,17 +294,23 @@ fn normalize_lsjson(lsjson: &str) -> String {
     ret
 }
 
+/// 엘리먼트의 기본 동작을 정의하는 트레이트
 pub trait Element<'a>: Sized {
+	/// WebDynpro 상에서 사용하는 엘리먼트의 Id
     const CONTROL_ID: &'static str;
+    /// WebDynpro 상에서 사용하는 엘리먼트의 이름
     const ELEMENT_NAME: &'static str;
+    /// 엘리먼트의 LSData 타입
     type ElementLSData;
-
+	
+    /// 엘리먼트의 JSON 객체 형태의 LSData를 반환합니다.
     fn lsdata_elem(element: scraper::ElementRef) -> Result<Value, WebDynproError> {
         let raw_data = element.value().attr("lsdata").ok_or(ElementError::InvalidLSData(element.value().id().unwrap().to_string()))?;
         let normalized = normalize_lsjson(raw_data);
         return Ok(serde_json::from_str(&normalized).or(Err(ElementError::InvalidLSData(element.value().id().unwrap().to_string())))?);
     }
 
+	/// 엘리먼트 정의와 [`Body`]에서 엘리먼트를 가져옵니다.
     fn from_body(elem_def: ElementDef<'a, Self>, body: &'a Body) -> Result<Self, WebDynproError> {
         let selector = &elem_def.selector().or(Err(BodyError::InvalidSelector))?;
         let element = body
@@ -298,8 +321,10 @@ pub trait Element<'a>: Sized {
         Self::from_elem(elem_def, element)
     }
 
+	/// 엘리먼트 정의와 `scraper::ElementRef`에서 엘리먼트를 가져옵니다.
     fn from_elem(elem_def: ElementDef<'a, Self>, element: scraper::ElementRef<'a>) -> Result<Self, WebDynproError>;
 
+	/// 엘리먼트의 자식 엘리먼트를 가져옵니다.
     fn children_elem(root: scraper::ElementRef<'a>) -> Vec<ElementWrapper<'a>> {
         let mut next_refs = vec![root];
         let mut cts: Vec<ElementRef<'_>> = vec![];
@@ -319,19 +344,27 @@ pub trait Element<'a>: Sized {
         cts.into_iter().rev().filter_map(|eref| ElementWrapper::dyn_elem(eref).ok()).collect()
     }
 
+	/// 엘리먼트의 자식 엘리먼트를 가져옵니다.
     fn children(&self) -> Vec<ElementWrapper<'a>>;
 
+	/// 엘리먼트의 LSData를 가져옵니다.
     fn lsdata(&self) -> Option<&Self::ElementLSData>;
 
+	/// 엘리먼트의 Id를 가져옵니다.
     fn id(&self) -> &str;
-
+	
+    /// 엘리먼트의 `scraper::ElementRef`를 가져옵니다.
     fn element_ref(&self) -> &ElementRef<'a>;
 
+	/// 엘리먼트를 [`ElementWrapper`]로 감쌉니다.
     fn wrap(self) -> ElementWrapper<'a>;
 }
 
+/// 이벤트를 통해 상호작용 할 수 있는 [`Element`]의 트레이트
 pub trait Interactable<'a>: Element<'a> {
 
+	/// 엘리먼트가 이벤트를 발생시킬 수 있는가와 관계 없이 이벤트를 발생시킵니다.
+    /// | **주의** | 엘리먼트가 이벤트를 발생시킬 수 있는지 여부를 확인하지 않으므로 예상치 않은 오류가 발생할 수 있습니다.
     unsafe fn fire_event_unchecked(event: String, parameters: HashMap<String, String>, ucf_params: UcfParameters, custom_params: HashMap<String, String>) -> Event {
         EventBuilder::default()
         .control(Self::ELEMENT_NAME.to_owned())
@@ -343,6 +376,7 @@ pub trait Interactable<'a>: Element<'a> {
         .unwrap()
     }
 
+	/// 엘리먼트가 발생시킬 수 있는 이벤트와 파라메터를 가져옵니다.
     fn lsevents_elem(element: scraper::ElementRef) -> Result<EventParameterMap, WebDynproError> {
         let raw_data = element.value().attr("lsevents").ok_or(BodyError::Invalid)?;
         let normalized = normalize_lsjson(raw_data);
@@ -359,6 +393,7 @@ pub trait Interactable<'a>: Element<'a> {
                 }).collect::<EventParameterMap>())
     }
 
+	/// 엘리먼트의 주어진 이벤트에 대한 파라메터들을 가져옵니다.
     fn event_parameter(&self, event: &str) -> Result<&(UcfParameters, HashMap<String, String>), ElementError> {
         if let Some(lsevents) = self.lsevents() {
             lsevents.get(event).ok_or(ElementError::NoSuchEvent { element: self.id().to_string(), event: event.to_string() })
@@ -367,14 +402,17 @@ pub trait Interactable<'a>: Element<'a> {
         }
     }
 
+	/// 엘리먼트의 주어진 이벤트를 발생시킵니다.
     fn fire_event(&self, event: String, parameters: HashMap<String, String>) -> Result<Event, WebDynproError> {
         let (ucf_params, custom_params) = self.event_parameter(&event)?;
         Ok(unsafe { Self::fire_event_unchecked(event, parameters, ucf_params.to_owned(), custom_params.to_owned()) })
     }
 
+	/// 주어진 엘리먼트의 이벤트 데이터를 반환합니다.
     fn lsevents(&self) -> Option<&EventParameterMap>;
 }
 
+/// [`SapTable`]등에서 사용하는 [`SubElement`]의 정의
 #[derive(Debug)]
 pub struct SubElementDef<'a, Parent, T>
     where Parent: Element<'a>, T: SubElement<'a> {
@@ -397,6 +435,7 @@ impl<'a, Parent, T> SubElementDef<'a, Parent, T>
 where Parent: Element<'a>, T: SubElement<'a>
 {
 
+	/// 새로운 서브 엘리먼트의 정의를 만듭니다.
     pub const fn new(parent: ElementDef<'a, Parent>, id: &'static str) -> SubElementDef<'a, Parent, T> {
         SubElementDef {
             id: Cow::Borrowed(id),
@@ -404,37 +443,48 @@ where Parent: Element<'a>, T: SubElement<'a>
             _marker: std::marker::PhantomData
         }
     }
-
+	
+    /// 런타임에서 서브 엘리먼트의 정의를 만듭니다.
     pub fn new_dynamic(parent: ElementDef<'a, Parent>, id: String) -> SubElementDef<'a, Parent, T> {
         SubElementDef {
             id: id.into(), parent, _marker: std::marker::PhantomData
         }
     }
 
+	/// 서브 엘리먼트의 CSS Selector를 반환합니다.
     pub fn selector(&self) -> Result<Selector, WebDynproError> {
         Selector::parse(format!(r#"[id="{}"] [id="{}"]"#, self.parent.id, self.id).as_str())
         .or(Err(ElementError::InvalidId(format!("{}, {}", self.parent.id, self.id)))?)
     }
+    
+    /// [`Body`]에서 서브 엘리먼트를 가져옵니다.
     pub fn from_body(self, body: &'a Body) -> Result<T, WebDynproError> {
         T::from_body(self, body)
     }
 
+	/// `scraper::ElementRef`에서 서브 엘리먼트를 가져옵니다.
     pub fn from_elem(self, element: scraper::ElementRef<'a>) -> Result<T, WebDynproError> {
         T::from_elem(self, element)
     }
 }
 
+/// 서브 엘리먼트의 트레이트
 pub trait SubElement<'a>: Sized {
+	/// WebDynpro 내부에서 사용하는 서브 엘리먼트의 Id
     const SUBCONTROL_ID: &'static str;
+    /// WebDynpro 내부에서 사용하는 서브 엘리먼트의 이름
     const ELEMENT_NAME: &'static str;
+    /// 서브 엘리먼트의 LSData
     type SubElementLSData;
 
+	/// 서브 엘리먼트의 LSData를 JSON 객체 형태로 반환합니다.
     fn lsdata_elem(element: scraper::ElementRef) -> Result<Value, WebDynproError> {
         let raw_data = element.value().attr("lsdata").ok_or(ElementError::InvalidLSData(element.value().id().unwrap().to_string()))?;
         let normalized = normalize_lsjson(raw_data);
         return Ok(serde_json::from_str(&normalized).or(Err(ElementError::InvalidLSData(element.value().id().unwrap().to_string())))?);
     }
 
+	/// 서브 엘리먼트의 정의와 [`Body`]로부터 서브 엘리먼트를 가져옵니다.
     fn from_body<Parent: Element<'a>>(
         elem_def: SubElementDef<'a, Parent, Self>,
         body: &'a Body,
@@ -448,14 +498,18 @@ pub trait SubElement<'a>: Sized {
         Self::from_elem(elem_def, element)
     }
 
+	/// 서브 엘리먼트 정의와 `scraper::ElementRef`로부터 서브 엘리먼트를 가져옵니다.
     fn from_elem<Parent: Element<'a>>(
         elem_def: SubElementDef<'a, Parent, Self>,
         element: scraper::ElementRef<'a>
     ) -> Result<Self, WebDynproError>;
 
+	/// 서브 엘리먼트의 LSData를 가져옵니다.
     fn lsdata(&self) -> Option<&Self::SubElementLSData>;
 
+	/// 서브 엘리먼트의 Id를 가져옵니다.
     fn id(&self) -> &str;
 
+	/// 서브 엘리먼트의 `scraper::ElementRef`를 가져옵니다.
     fn element_ref(&self) -> &ElementRef<'a>;
 }
