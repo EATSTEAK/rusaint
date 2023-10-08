@@ -60,9 +60,9 @@ pub use session::obtain_ssu_sso_token;
 pub use session::USaintSession;
 
 #[cfg(feature = "model")]
-/// u-saint 애플리케이션에서 공통으로 사용하는 데이터 구조체
+/// u-saint 애플리케이션에서 공통으로 사용하는 데이터
 pub mod model;
 
 mod utils;
-/// SAP WebDynpro 클라이언트를 파싱, 모방하는 엔진 모듈
+/// SAP WebDynpro 클라이언트를 파싱, 모방하는 클라이언트 엔진
 pub mod webdynpro;
