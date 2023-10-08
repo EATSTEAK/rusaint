@@ -10,6 +10,7 @@ use reqwest::{cookie::Jar, header::*, RequestBuilder};
 use std::sync::Arc;
 use url::Url;
 
+/// WebDynpro 애플리케이션의 웹 요청 및 페이지 문서 처리를 담당하는 클라이언트
 pub struct Client {
     client: reqwest::Client,
     ssr_client: SapSsrClient,
@@ -41,6 +42,7 @@ pub(super) fn wd_xhr_header() -> HeaderMap {
 }
 
 impl Client {
+    /// 새로운 클라이언트를 생성합니다.
     pub async fn new(base_url: &Url, app_name: &str) -> Result<Client, ClientError> {
         let jar: Arc<Jar> = Arc::new(Jar::default());
         let client = reqwest::Client::builder()
@@ -52,6 +54,7 @@ impl Client {
         Self::with_client(client, base_url, app_name).await
     }
 
+    /// 임의의 reqwest::Client 와 함께 클라이언트를 생성합니다.
     pub async fn with_client(
         client: reqwest::Client,
         base_url: &Url,
@@ -163,6 +166,7 @@ impl Requests for reqwest::Client {
     }
 }
 
+/// WebDynpro의 페이지를 관리하는 [`Body`]모듈
 pub mod body;
 
 #[cfg(test)]
