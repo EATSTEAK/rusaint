@@ -11,12 +11,7 @@ use crate::{
         application::{client::Client, BasicApplication},
         element::{
             define_elements,
-            system::{
-                ClientInspector,
-                Custom,
-                CustomClientInfo,
-                LoadingPlaceholder,
-            },
+            system::{ClientInspector, Custom, CustomClientInfo, LoadingPlaceholder},
         },
         error::{ClientError, WebDynproError},
     },
@@ -117,7 +112,7 @@ impl<'a> USaintApplication {
         self.send_events(events).await
     }
 }
-/// [`CourseGrades`](course_grades::CourseGrades) 애플리케이션 모듈
+/// 학생 성적 조회: [`CourseGrades`](course_grades::CourseGrades)
 pub mod course_grades;
 mod course_schedule;
 mod student_information;
