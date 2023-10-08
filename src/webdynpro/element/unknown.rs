@@ -7,6 +7,7 @@ use crate::webdynpro::error::WebDynproError;
 use super::{Element, ElementDef, EventParameterMap, Interactable};
 
 // Type for unimplemented elements
+/// rusaint에 구현되지 않은 엘리먼트를 위한 구조체
 #[derive(Debug)]
 pub struct Unknown<'a> {
     id: Cow<'static, str>,
@@ -17,8 +18,9 @@ pub struct Unknown<'a> {
 }
 
 impl<'a> Element<'a> for Unknown<'a> {
+    /// 실제로 사용하지 않는 가상의 Id
     const CONTROL_ID: &'static str = "_UNKNOWN";
-
+	/// 실제로 사용하지 않는 가상의 이름
     const ELEMENT_NAME: &'static str = "Unknown";
 
     type ElementLSData = Value;
@@ -65,6 +67,7 @@ impl<'a> Interactable<'a> for Unknown<'a> {
 }
 
 impl<'a> Unknown<'a> {
+    /// 엘리먼트를 생성합니다.
     pub fn new(id: Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {
         Self {
             id,
@@ -74,7 +77,8 @@ impl<'a> Unknown<'a> {
             lsevents: OnceCell::new(),
         }
     }
-
+	
+    /// 이 엘리먼트의 내부 Id를 반환합니다.
     pub fn ct(&self) -> Option<&String> {
         self.ct
             .get_or_init(|| {
