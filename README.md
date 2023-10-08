@@ -28,26 +28,23 @@ _추가 예정_
 ## 예시
 
 ```rust
-use rusaint::application::course_grades::{CourseGrades, data::GradeSummary};
+use rusaint::application::course_grades::{CourseGrades, model::SemesterSummary};
 use rusaint::session::USaintSession;
 use futures::executor::block_on;
 
 // 성적 정보를 출력하는 애플리케이션
 fn main() {
     block_on(print_grades());
-    /* GradeSummary { year: 2023, semester: "여름학기", attempt_credits: 2.0, earn_credits: 2.0, pf_credits: 2.0, grade_points_avarage: 0.0, grade_points_sum: 0.0, arithmetic_mean: 0.0, semester_rank: (0, 0), general_rank: (0, 0), academic_probation: false, consult: false, flunked: false }
-     * GradeSummary { year: 2022, semester: "2 학기", attempt_credits: 17.5, earn_credits: 17.5, pf_credits: 0.5, grade_points_avarage: 4.5, grade_points_sum: 100.0, arithmetic_mean: 100.0, semester_rank: (1, 99), general_rank: (1, 99), academic_probation: false, consult: false, flunked: false }
-     * GradeSummary { year: 2022, semester: "1 학기", attempt_credits: 19.5, earn_credits: 19.5, pf_credits: 0.5, grade_points_avarage: 4.5, grade_points_sum: 100.0, arithmetic_mean: 100.0, semester_rank: (1, 100), general_rank: (1, 100), academic_probation: false, consult: false, flunked: false }
-     * GradeSummary { year: 2021, semester: "2 학기", attempt_credits: 19.5, earn_credits: 19.5, pf_credits: 0.5, grade_points_avarage: 4.5, grade_points_sum: 100.0, arithmetic_mean: 100.0, semester_rank: (1, 99), general_rank: (1, 99), academic_probation: false, consult: false, flunked: false }
-     * GradeSummary { year: 2021, semester: "1 학기", attempt_credits: 20.5, earn_credits: 20.5, pf_credits: 2.5, grade_points_avarage: 4.5, grade_points_sum: 100.0, arithmetic_mean: 100.0, semester_rank: (1, 103), general_rank: (1, 103), academic_probation: false, consult: false, flunked: false }
+    /* SemesterSummary { year: 2022, semester: "2 학기", attempted_credits: 17.5, earned_credits: 17.5, pf_earned_credits: 0.5, grade_points_avarage: 4.5, grade_points_sum: 100.0, arithmetic_mean: 100.0, semester_rank: (1, 99), general_rank: (1, 99), academic_probation: false, consult: false, flunked: false }
+     * ...
      */
 }
 
-async fn print_grades() -> Result<()> {
+async fn print_grades() -> Result<(), RusaintError> {
     // USaintSession::from_token(id: &str, token: &str) 을 이용하여 비밀번호 없이 SSO 토큰으로 로그인 할 수 있음
     let session = USaintSession::from_password("20211561", "password").await?;
     let app = CourseGrades::new(session).await?;
-    let grades: Vec<GradeSummary> = app.grade_summary().await?;
+    let grades: Vec<SemesterSummary> = app.semesters().await?;
     for grade in grades {
         println!("{:?}", grade);
     }

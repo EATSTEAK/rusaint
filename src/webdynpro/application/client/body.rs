@@ -124,13 +124,14 @@ impl BodyUpdate {
     }
 }
 
+/// WebDynpro 페이지의 상태를 관리하는 구조체
 pub struct Body {
     raw_body: String,
     document: Html,
 }
 
 impl Body {
-    pub fn new(body: String) -> Body {
+    pub(crate) fn new(body: String) -> Body {
         let document = Html::parse_document(&body);
         Body {
             raw_body: body,
@@ -138,10 +139,12 @@ impl Body {
         }
     }
 
+    /// 페이지 도큐먼트의 HTML 텍스트를 반환합니다.
     pub fn raw_body(&self) -> &str {
         &self.raw_body
     }
 
+    /// 도큐먼트 파싱을 위한 `scraper::Html` 구조체를 반환합니다.
     pub fn document(&self) -> &Html {
         &self.document
     }

@@ -24,6 +24,7 @@ use crate::{
 const SSU_WEBDYNPRO_BASE_URL: &str = "https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/";
 const INITIAL_CLIENT_DATA_WD01: &str = "ClientWidth:1920px;ClientHeight:1000px;ScreenWidth:1920px;ScreenHeight:1080px;ScreenOrientation:landscape;ThemedTableRowHeight:33px;ThemedFormLayoutRowHeight:32px;ThemedSvgLibUrls:{\"SAPGUI-icons\":\"https://ecc.ssu.ac.kr:8443/sap/public/bc/ur/nw5/themes/~cache-20210223121230/Base/baseLib/sap_fiori_3/svg/libs/SAPGUI-icons.svg\",\"SAPWeb-icons\":\"https://ecc.ssu.ac.kr:8443/sap/public/bc/ur/nw5/themes/~cache-20210223121230/Base/baseLib/sap_fiori_3/svg/libs/SAPWeb-icons.svg\"};ThemeTags:Fiori_3,Touch;ThemeID:sap_fiori_3;SapThemeID:sap_fiori_3;DeviceType:DESKTOP";
 const INITIAL_CLIENT_DATA_WD02: &str = "ThemedTableRowHeight:25px";
+/// u-saint에 접속하기 위한 기본 애플리케이션
 pub struct USaintApplication(BasicApplication);
 
 impl Deref for USaintApplication {
@@ -46,8 +47,19 @@ impl<'a> USaintApplication {
         LOADING_PLACEHOLDER: LoadingPlaceholder<'a> = "_loadingPlaceholder_"
     }
 
-    pub const CUSTOM: Custom = Custom::new(std::borrow::Cow::Borrowed("WD01"));
+    const CUSTOM: Custom = Custom::new(std::borrow::Cow::Borrowed("WD01"));
 
+    /// 새로운 u-saint 애플리케이션을 만듭니다. 이렇게 만들어진 애플리케이션은 익명 세션을 갖습니다.
+    /// ### 예시
+    /// ```
+    /// // 학기시간표 애플리케이션(로그인 없이 접근 가능)
+    /// let app = USaintApplication::new("ZCMW2100").await.unwrap();
+    /// ```
+    /// ```should_panic
+    /// // 학적정보 애플리케이션(세션이 없으므로 접속 불가)
+    /// let app = USaintApplication::new("ZCMW1001n").await.unwrap();
+    /// ```
+    /// 로그인된 세션이 필요한 애플리케이션에선 이용해서는 안됩니다.
     pub async fn new(app_name: &str) -> Result<USaintApplication, WebDynproError> {
         let mut app =
             USaintApplication(BasicApplication::new(SSU_WEBDYNPRO_BASE_URL, app_name).await?);
@@ -55,6 +67,16 @@ impl<'a> USaintApplication {
         Ok(app)
     }
 
+    /// 세션이 포함된 u-saint 애플리케이션을 만듭니다.
+    /// ### 예시
+    /// ```no_run
+    /// # use std::sync::Arc;
+    /// # use rusaint::USaintSession;
+    /// // 사용자 학번, 비밀번호로부터 세션 생성
+    /// let session = Arc::new(USaintSession::with_password("20212345", "password!").await.unwrap());
+    /// // 애플리케이션 생성(로그인 되었으므로 접속 가능)
+    /// let app = USaintApplication::with_session("ZCMW1001n", session).await.unwrap();
+    /// ```
     pub async fn with_session(
         app_name: &str,
         session: Arc<USaintSession>,
@@ -94,7 +116,7 @@ impl<'a> USaintApplication {
         self.send_events(events).await
     }
 }
-
+/// [`CourseGrades`](course_grades::CourseGrades) 애플리케이션 모듈
 pub mod course_grades;
 mod course_schedule;
 mod student_information;

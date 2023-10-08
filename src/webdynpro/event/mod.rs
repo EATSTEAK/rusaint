@@ -11,6 +11,7 @@ const EVENT_DATA_END: &str = "~E003";
 const EVENT_DATA_COLON: &str = "~E004";
 const EVENT_DATA_COMMA: &str = "~E005";
 
+/// 일반 문자열을 이벤트 큐에서 전송하는 형태로 변환합니다.
 pub fn escape_str<'a>(text: &'a str) -> String {
     let chars = text.chars();
 
@@ -43,6 +44,7 @@ fn decode_hex(s: &str) -> Result<Vec<u16>, ParseIntError> {
         .collect()
 }
 
+/// 이벤트 큐의 문자열을 일반 문자열으로 변환합니다.
 pub fn unescape_str<'a>(text: &'a str) -> Result<Cow<'a, str>, EventStrUnescapeError> {
     let bytes = text.as_bytes();
 
@@ -83,6 +85,7 @@ pub fn unescape_str<'a>(text: &'a str) -> Result<Cow<'a, str>, EventStrUnescapeE
     }
 }
 
+/// 엘리먼트에서 전송하는 이벤트의 구조체
 #[derive(Builder, Clone)]
 pub struct Event {
     event: String,
@@ -96,6 +99,7 @@ pub struct Event {
 }
 
 impl ToString for Event {
+    /// 이벤트를 웹 리퀘스트에서 전송할 수 있는 형태의 문자열로 변환합니다.
     fn to_string(&self) -> String {
         let mut owned = format!("{}_{}", &self.control, &self.event).to_owned();
         owned.push_str(EVENT_DATA_START);
@@ -126,20 +130,24 @@ impl ToString for Event {
 }
 
 impl Event {
+    /// 이벤트를 웹 리퀘스트에서 전송할 수 있는 형태의 문자열로 변환합니다.
     pub fn serialize(&self) -> String {
         self.to_string()
     }
 
+    /// 이 이벤트를 큐에 저장할 수 있다면 참을 반환합니다.
     pub fn is_enqueable(&self) -> bool {
         self.ucf_parameters.is_enqueable()
     }
 
+    /// 이 이벤트를 큐에 저장했을 때 바로 전송할 수 있다면 참을 반환합니다.
     pub fn is_submitable(&self) -> bool {
         self.ucf_parameters.is_submitable()
     }
 }
 
 pub(crate) mod event_queue;
+/// 이벤트의 특성을 정의하는 [`UcfParameters`]의 모듈
 pub mod ucf_parameters;
 
 #[cfg(test)]
