@@ -53,7 +53,7 @@ macro_rules! define_element_base {
             id: std::borrow::Cow<'static, str>,
             #[debug(skip)]
             element_ref: scraper::ElementRef<'a>,
-            lsdata: std::cell::OnceCell<Option<$lsdata>>,
+            lsdata: std::cell::OnceCell<$lsdata>,
             $($sfield: $stype, )*
         }
 
@@ -64,13 +64,14 @@ macro_rules! define_element_base {
 
             type ElementLSData = $lsdata;
 
-            fn lsdata(&self) -> Option<&Self::ElementLSData> {
+            fn lsdata(&self) -> &Self::ElementLSData {
                 self.lsdata
                     .get_or_init(|| {
-                        let lsdata_obj = Self::lsdata_elem(self.element_ref).ok()?;
-                        serde_json::from_value::<Self::ElementLSData>(lsdata_obj).ok()
+                        let Ok(lsdata_obj) = Self::lsdata_elem(self.element_ref) else {
+                            return $lsdata::default();
+                        };
+                        serde_json::from_value::<Self::ElementLSData>(lsdata_obj).ok().unwrap_or($lsdata::default())
                     })
-                    .as_ref()
             }
 
             fn from_elem(
@@ -410,7 +411,7 @@ pub trait Element<'a>: Sized {
     fn children(&self) -> Vec<ElementWrapper<'a>>;
 
 	/// 엘리먼트의 LSData를 가져옵니다.
-    fn lsdata(&self) -> Option<&Self::ElementLSData>;
+    fn lsdata(&self) -> &Self::ElementLSData;
 
 	/// 엘리먼트의 Id를 가져옵니다.
     fn id(&self) -> &str;

@@ -70,8 +70,8 @@ impl<'a> Element<'a> for Custom {
 
     type ElementLSData = ();
 
-    fn lsdata(&self) -> Option<&Self::ElementLSData> {
-        None
+    fn lsdata(&self) -> &Self::ElementLSData {
+        &()
     }
 
     fn from_elem(
