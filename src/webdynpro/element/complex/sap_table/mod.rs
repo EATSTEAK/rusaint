@@ -48,11 +48,10 @@ impl<'a> SapTable<'a> {
             }
         };
         let element = self.element_ref;
-        let elem_value = element.value();
         let tbody_selector = Selector::parse(
             format!(
                 r#"[id="{}-contentTBody"]"#,
-                elem_value.id().ok_or(ElementError::NoSuchData {
+                element.value().id().ok_or(ElementError::NoSuchData {
                     element: self.id.clone().into_owned(),
                     field: "id".to_string()
                 })?
