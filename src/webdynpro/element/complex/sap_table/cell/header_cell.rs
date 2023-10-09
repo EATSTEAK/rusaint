@@ -5,7 +5,14 @@ use scraper::Selector;
 use serde::Deserialize;
 
 use crate::webdynpro::{
-    element::{Element, ElementWrapper, SubElement, SubElementDef, property::SortState, complex::sap_table::property::{SapTableHeaderCellDesign, SapTableHeaderCellType, SapTableSelectionColumnAction, SapTableRowSelectionMassState}},
+    element::{
+        complex::sap_table::property::{
+            SapTableHeaderCellDesign, SapTableHeaderCellType, SapTableRowSelectionMassState,
+            SapTableSelectionColumnAction,
+        },
+        property::SortState,
+        Element, ElementWrapper, SubElement, SubElementDef,
+    },
     error::{BodyError, WebDynproError},
 };
 
@@ -17,7 +24,7 @@ pub struct SapTableHeaderCell<'a> {
     id: Cow<'static, str>,
     #[debug(skip)]
     element_ref: scraper::ElementRef<'a>,
-    lsdata: OnceCell<Option<SapTableHeaderCellLSData>>,
+    lsdata: OnceCell<SapTableHeaderCellLSData>,
     content: OnceCell<Option<ElementWrapper<'a>>>,
 }
 
@@ -69,13 +76,15 @@ impl<'a> SubElement<'a> for SapTableHeaderCell<'a> {
 
     type SubElementLSData = SapTableHeaderCellLSData;
 
-    fn lsdata(&self) -> Option<&Self::SubElementLSData> {
+    fn lsdata(&self) -> &Self::SubElementLSData {
         self.lsdata
             .get_or_init(|| {
-                let lsdata_obj = Self::lsdata_elem(self.element_ref).ok()?;
-                serde_json::from_value::<Self::SubElementLSData>(lsdata_obj).ok()
+                let Ok(lsdata_obj) = Self::lsdata_elem(self.element_ref) else {
+                    return Self::SubElementLSData::default();
+                };
+                serde_json::from_value::<Self::SubElementLSData>(lsdata_obj)
+                    .unwrap_or(Self::SubElementLSData::default())
             })
-            .as_ref()
     }
 
     fn from_elem<Parent: Element<'a>>(

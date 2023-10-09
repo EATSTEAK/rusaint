@@ -576,7 +576,7 @@ pub trait SubElement<'a>: Sized {
     ) -> Result<Self, WebDynproError>;
 
 	/// 서브 엘리먼트의 LSData를 가져옵니다.
-    fn lsdata(&self) -> Option<&Self::SubElementLSData>;
+    fn lsdata(&self) -> &Self::SubElementLSData;
 
 	/// 서브 엘리먼트의 Id를 가져옵니다.
     fn id(&self) -> &str;

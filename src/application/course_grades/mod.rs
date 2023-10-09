@@ -490,17 +490,17 @@ impl<'a> CourseGrades {
 impl<'a> SapTableCellWrapper<'a> {
     fn is_empty_row(&self) -> bool {
         match self {
-            SapTableCellWrapper::Normal(cell) => cell.lsdata().is_some_and(|data| {
-                data.cell_type()
-                    .as_ref()
-                    .is_some_and(|s| matches!(s, SapTableCellType::EmptyRow))
-            }),
+            SapTableCellWrapper::Normal(cell) => cell
+                .lsdata()
+                .cell_type()
+                .as_ref()
+                .is_some_and(|s| matches!(s, SapTableCellType::EmptyRow)),
             SapTableCellWrapper::Header(_cell) => false,
-            SapTableCellWrapper::Selection(cell) => cell.lsdata().is_some_and(|data| {
-                data.cell_type()
-                    .as_ref()
-                    .is_some_and(|s| matches!(s, SapTableCellType::EmptyRow))
-            }),
+            SapTableCellWrapper::Selection(cell) => cell
+                .lsdata()
+                .cell_type()
+                .as_ref()
+                .is_some_and(|s| matches!(s, SapTableCellType::EmptyRow)),
             _ => false,
         }
     }
