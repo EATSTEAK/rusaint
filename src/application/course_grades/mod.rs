@@ -12,7 +12,9 @@ use crate::{
         application::client::body::Body,
         element::{
             action::Button,
-            complex::sap_table::{cell::SapTableCellWrapper, property::SapTableCellType, SapTable},
+            complex::sap_table::{
+                cell::SapTableCellWrapper, property::SapTableCellType, row::SapTableRow, SapTable,
+            },
             layout::PopupWindow,
             selection::ComboBox,
             text::InputField,
@@ -159,7 +161,7 @@ impl<'a> CourseGrades {
         }
     }
 
-    fn row_to_string(row: &Vec<SapTableCellWrapper>) -> Option<Vec<String>> {
+    fn row_to_string(row: &SapTableRow) -> Option<Vec<String>> {
         if row.len() == 0 || row[0].is_empty_row() {
             return None;
         };
@@ -277,7 +279,6 @@ impl<'a> CourseGrades {
         })?;
         let ret = table
             .iter()
-            .skip(1)
             .filter_map(Self::row_to_string)
             .filter_map(|values| {
                 Some(SemesterGrade::new(
@@ -311,12 +312,12 @@ impl<'a> CourseGrades {
                 .next()
                 .ok_or(BodyError::NoSuchElement("Table in popup".to_string()))?;
             let table_elem: SapTable<'_> = ElementWrapper::dyn_elem(table_ref)?.try_into()?;
-            let zip = (|| {
-                let mut iter = table_elem.table()?.iter();
-                let head_str = CourseGrades::row_to_string(iter.next()?)?;
-                let row_str = CourseGrades::row_to_string(iter.next()?)?;
-                Some(head_str.into_iter().zip(row_str.into_iter()))
-            })()
+            let zip = (|| Some(table_elem.table()?.zip_header().next()?))()
+                .and_then(|(header, row)| {
+                    let header = CourseGrades::row_to_string(header)?;
+                    let row = CourseGrades::row_to_string(row)?;
+                    Some(header.into_iter().zip(row.into_iter()))
+                })
             .ok_or(ElementError::InvalidContent {
                 element: table_elem.id().to_string(),
                 content: "header and first row".to_string(),
@@ -389,8 +390,7 @@ impl<'a> CourseGrades {
                     element: grade_table_elem.id().to_string(),
                     content: "Table body".to_string(),
                 })?
-                .iter()
-                .skip(1);
+                .iter();
             iter.map(|row| {
                 let btn_cell = &row[10];
                 let btn_id = if let Some(ElementWrapper::Button(btn)) = btn_cell.content() {
