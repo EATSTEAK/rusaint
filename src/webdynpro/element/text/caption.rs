@@ -39,11 +39,11 @@ impl<'a> Caption<'a> {
 
     pub fn text(&self) -> &str {
         self.text.get_or_init(|| {
-            if let Some(lsdata) = self.lsdata() {
-                lsdata.text().as_ref().unwrap_or(&"".to_string()).to_owned()
-            } else {
-                "".to_string()
-            }
+            self.lsdata()
+                .text()
+                .as_ref()
+                .unwrap_or(&"".to_string())
+                .to_owned()
         })
     }
 }

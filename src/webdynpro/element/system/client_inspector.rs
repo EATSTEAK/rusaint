@@ -13,7 +13,7 @@ use crate::webdynpro::element::{
 pub struct ClientInspector<'a> {
     id: Cow<'static, str>,
     element_ref: scraper::ElementRef<'a>,
-    lsdata: OnceCell<Option<ClientInspectorLSData>>,
+    lsdata: OnceCell<ClientInspectorLSData>,
     lsevents: OnceCell<Option<EventParameterMap>>,
 }
 #[derive(Serialize, Deserialize, Debug, Default)]
@@ -119,16 +119,20 @@ impl<'a> Element<'a> for ClientInspector<'a> {
 
     type ElementLSData = ClientInspectorLSData;
 
-    fn lsdata(&self) -> Option<&Self::ElementLSData> {
-        self.lsdata
-            .get_or_init(|| {
-                let lsdata_obj = Self::lsdata_elem(self.element_ref).ok()?;
-                serde_json::from_value::<Self::ElementLSData>(lsdata_obj).ok()
-            })
-            .as_ref()
+    fn lsdata(&self) -> &Self::ElementLSData {
+        self.lsdata.get_or_init(|| {
+            let Ok(lsdata_obj) = Self::lsdata_elem(self.element_ref) else {
+                    return ClientInspectorLSData::default();
+                };
+            serde_json::from_value::<Self::ElementLSData>(lsdata_obj)
+                .unwrap_or(ClientInspectorLSData::default())
+        })
     }
 
-    fn from_elem(elem_def: ElementDef<'a, Self>, element: scraper::ElementRef<'a>) -> Result<Self, WebDynproError> {
+    fn from_elem(
+        elem_def: ElementDef<'a, Self>,
+        element: scraper::ElementRef<'a>,
+    ) -> Result<Self, WebDynproError> {
         Ok(Self::new(elem_def.id.to_owned(), element))
     }
 

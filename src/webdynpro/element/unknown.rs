@@ -13,25 +13,21 @@ pub struct Unknown<'a> {
     id: Cow<'static, str>,
     element_ref: scraper::ElementRef<'a>,
     ct: OnceCell<Option<String>>,
-    lsdata: OnceCell<Option<Value>>,
+    lsdata: OnceCell<Value>,
     lsevents: OnceCell<Option<EventParameterMap>>,
 }
 
 impl<'a> Element<'a> for Unknown<'a> {
     /// 실제로 사용하지 않는 가상의 Id
     const CONTROL_ID: &'static str = "_UNKNOWN";
-	/// 실제로 사용하지 않는 가상의 이름
+    /// 실제로 사용하지 않는 가상의 이름
     const ELEMENT_NAME: &'static str = "Unknown";
 
     type ElementLSData = Value;
 
-    fn lsdata(&self) -> Option<&Self::ElementLSData> {
+    fn lsdata(&self) -> &Self::ElementLSData {
         self.lsdata
-            .get_or_init(|| {
-                let lsdata_obj = Self::lsdata_elem(self.element_ref).ok()?;
-                serde_json::from_value::<Self::ElementLSData>(lsdata_obj).ok()
-            })
-            .as_ref()
+            .get_or_init(|| Self::lsdata_elem(self.element_ref).unwrap_or(Value::default()))
     }
 
     fn from_elem(
@@ -77,7 +73,7 @@ impl<'a> Unknown<'a> {
             lsevents: OnceCell::new(),
         }
     }
-	
+
     /// 이 엘리먼트의 실제 엘리먼트 Id를 반환합니다.
     pub fn ct(&self) -> Option<&String> {
         self.ct

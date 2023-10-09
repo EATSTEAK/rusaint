@@ -145,11 +145,11 @@ impl<'a> CourseGrades {
             let semester = Self::semester_to_key(semester);
             let mut vec = Vec::with_capacity(2);
             let year_combobox = Self::PERIOD_YEAR.from_body(self.body())?;
-            if (|| Some(year_combobox.lsdata()?.key().as_ref()?.as_str()))() != Some(year) {
+            if (|| Some(year_combobox.lsdata().key().as_ref()?.as_str()))() != Some(year) {
                 vec.push(year_combobox.select(&year.to_string(), false)?);
             }
             let semester_combobox = Self::PERIOD_SEMESTER.from_body(self.body())?;
-            if (|| Some(semester_combobox.lsdata()?.key().as_ref()?.as_str()))() != Some(semester) {
+            if (|| Some(semester_combobox.lsdata().key().as_ref()?.as_str()))() != Some(semester) {
                 vec.push(semester_combobox.select(semester, false)?);
             }
             Result::<Vec<Event>, WebDynproError>::Ok(vec)
@@ -180,7 +180,7 @@ impl<'a> CourseGrades {
     }
 
     fn value_as_f32(field: InputField<'_>) -> Result<f32, WebDynproError> {
-        let Some(value) = field.lsdata().and_then(|lsdata| lsdata.value().as_ref()) else {
+        let Some(value) = field.lsdata().value().as_ref() else {
             return Err(ElementError::NoSuchData { element: field.id().to_string(), field: "value1".to_string() })?;
         };
         Ok(value.parse::<f32>().or(Err(ElementError::InvalidContent {

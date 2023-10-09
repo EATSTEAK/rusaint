@@ -30,13 +30,14 @@ macro_rules! def_listbox_subset {
 
             type ElementLSData = ListBoxLSData;
 
-            fn lsdata(&self) -> Option<&Self::ElementLSData> {
+            fn lsdata(&self) -> &Self::ElementLSData {
                 self.lsdata
                     .get_or_init(|| {
-                        let lsdata_obj = Self::lsdata_elem(self.element_ref).ok()?;
-                        serde_json::from_value::<Self::ElementLSData>(lsdata_obj).ok()
+                        let Ok(lsdata_obj) = Self::lsdata_elem(self.element_ref) else {
+                            return ListBoxLSData::default();
+                        };
+                        serde_json::from_value::<Self::ElementLSData>(lsdata_obj).unwrap_or(ListBoxLSData::default())
                     })
-                    .as_ref()
             }
 
             fn from_elem(elem_def: ElementDef<'a, Self>, element: scraper::ElementRef<'a>) -> Result<Self, $crate::webdynpro::error::WebDynproError> {
@@ -105,7 +106,7 @@ macro_rules! def_listbox_subset {
 pub struct ListBox<'a> {
     id: Cow<'static, str>,
     element_ref: scraper::ElementRef<'a>,
-    lsdata: OnceCell<Option<ListBoxLSData>>,
+    lsdata: OnceCell<ListBoxLSData>,
     lsevents: OnceCell<Option<EventParameterMap>>,
     items: OnceCell<Vec<ListBoxItemWrapper<'a>>>,
 }
