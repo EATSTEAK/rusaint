@@ -313,7 +313,7 @@ pub enum SapTableHierarchicalCellStatus {
     Icon,
 }
 
-#[derive(Deserialize, Debug, Default)]
+#[derive(Deserialize, Debug, Default, Clone, Copy)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum SapTableSelectionState {
     NotSelectable,
@@ -321,7 +321,7 @@ pub enum SapTableSelectionState {
     Selected,
     PrimarySelected,
     #[default]
-    None
+    None,
 }
 
 #[derive(Deserialize, Debug)]
@@ -331,7 +331,7 @@ pub enum SapTableRowSelectionMassState {
     Indeterminate,
     All,
 }
-#[derive(Deserialize, Debug, Default)]
+#[derive(Deserialize, Debug, Default, Clone, Copy)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum SapTableRowType {
     #[default]
@@ -341,7 +341,7 @@ pub enum SapTableRowType {
     Filter,
     TopFixed,
     BottomFixed,
-    Pivot
+    Pivot,
 }
 
 #[derive(Deserialize, Debug)]
