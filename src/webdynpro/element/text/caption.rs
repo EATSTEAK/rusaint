@@ -1,10 +1,9 @@
 use std::{borrow::Cow, cell::OnceCell};
 
-use crate::webdynpro::element::{define_element_interactable, Element};
+use crate::webdynpro::element::define_element_interactable;
 
 define_element_interactable! {
     Caption<"CP", "Caption"> {
-        text: OnceCell<String>
     },
     CaptionLSData {
         tooltip: String=> "0",
@@ -33,17 +32,6 @@ impl<'a> Caption<'a> {
             element_ref,
             lsdata: OnceCell::new(),
             lsevents: OnceCell::new(),
-            text: OnceCell::new(),
         }
-    }
-
-    pub fn text(&self) -> &str {
-        self.text.get_or_init(|| {
-            self.lsdata()
-                .text()
-                .as_ref()
-                .unwrap_or(&"".to_string())
-                .to_owned()
-        })
     }
 }
