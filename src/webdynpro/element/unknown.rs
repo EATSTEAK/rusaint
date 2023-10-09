@@ -7,7 +7,7 @@ use crate::webdynpro::error::WebDynproError;
 use super::{Element, ElementDef, EventParameterMap, Interactable};
 
 // Type for unimplemented elements
-/// rusaint에 구현되지 않은 엘리먼트를 위한 구조체
+/// rusaint에 구현되지 않은 엘리먼트를 위한 가상 엘리먼트
 #[derive(Debug)]
 pub struct Unknown<'a> {
     id: Cow<'static, str>,
@@ -78,7 +78,7 @@ impl<'a> Unknown<'a> {
         }
     }
 	
-    /// 이 엘리먼트의 내부 Id를 반환합니다.
+    /// 이 엘리먼트의 실제 엘리먼트 Id를 반환합니다.
     pub fn ct(&self) -> Option<&String> {
         self.ct
             .get_or_init(|| {

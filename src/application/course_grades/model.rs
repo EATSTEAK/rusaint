@@ -2,7 +2,7 @@ use std::{collections::HashMap, num::ParseIntError, str::FromStr};
 
 use getset::Getters;
 
-/// 총 성적(학적부, 증명)
+/// 전체 성적(학적부, 증명)
 #[derive(Getters, Debug)]
 #[allow(unused)]
 #[get = "pub"]

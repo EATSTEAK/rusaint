@@ -4,6 +4,7 @@ use crate::webdynpro::element::define_element_interactable;
 
 // TODO: Implement additional events and data
 define_element_interactable! {
+    #[doc = "이미지"]
     Image<"IMG", "Image"> {},
     ImageLSData {
         tooltip: String => "0",

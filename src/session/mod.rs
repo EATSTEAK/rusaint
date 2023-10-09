@@ -18,6 +18,7 @@ const SSU_USAINT_SSO_URL: &str = "https://saint.ssu.ac.kr/webSSO/sso.jsp";
 const SMARTID_LOGIN_URL: &str = "https://smartid.ssu.ac.kr/Symtra_sso/smln.asp";
 const SMARTID_LOGIN_FORM_REQUEST_URL: &str = "https://smartid.ssu.ac.kr/Symtra_sso/smln_pcs.asp";
 
+/// u-saint 로그인이 필요한 애플리케이션 사용 시 애플리케이션에 제공하는 세션
 #[derive(Debug, Default)]
 pub struct USaintSession(Jar);
 

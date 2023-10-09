@@ -22,6 +22,7 @@ impl<'a> SapTableCellWrapper<'a> {
 }
 
 pub trait SapTableCell<'a> {
+    /// 셀 내부 컨텐츠 엘리먼트를 반환합니다.
     fn content(&self) -> Option<&ElementWrapper<'a>>;
 }
 

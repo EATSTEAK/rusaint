@@ -3,7 +3,7 @@ use serde::Deserialize;
 
 use super::{EVENT_DATA_COLON, EVENT_DATA_COMMA, EVENT_DATA_END, EVENT_DATA_START};
 
-/// 이벤트의 특성을 정의하는 파라메터의 구조체
+/// 이벤트의 특성을 정의하는 파라메터
 #[derive(Builder, Clone, Default, Debug, Deserialize)]
 #[builder(default)]
 pub struct UcfParameters {
@@ -129,7 +129,7 @@ impl UcfParameters {
     }
 }
 
-/// 이벤트가 큐에 저장될지 바로 전송될지 표현하는 이늄
+/// 이벤트가 큐에 저장될지 바로 전송될지 여부
 #[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum UcfAction {
@@ -154,7 +154,7 @@ impl ToString for UcfAction {
     }
 }
 
-/// 동일한 종류의 이벤트가 큐에 동시에 들어갈 수 있는지 표현하는 이늄
+/// 동일한 종류의 이벤트가 큐에 동시에 들어갈 수 있는지 여부
 #[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum UcfCardinality {
@@ -176,7 +176,7 @@ impl ToString for UcfCardinality {
     }
 }
 
-/// 이벤트의 응답 방법을 표현하는 이늄
+/// 이벤트의 응답 방법을 표현할 수 있는지 여부
 #[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum UcfResponseData {
@@ -216,7 +216,7 @@ impl ToString for UcfTransportMethod {
     }
 }
 
-/// 이벤트의 반영 딜레이를 표현하는 이늄
+/// 이벤트의 반영 딜레이 여부
 #[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum UcfDelay {

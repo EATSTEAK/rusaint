@@ -11,6 +11,7 @@ use crate::webdynpro::{
 
 use super::{SapTableCell, SapTableCellWrapper};
 
+/// 일반 테이블 셀
 #[derive(custom_debug_derive::Debug)]
 pub struct SapTableNormalCell<'a> {
     id: Cow<'static, str>,
@@ -100,6 +101,7 @@ impl<'a> SapTableNormalCell<'a> {
         }
     }
 
+    /// 셀을 [`SapTableCellWrapper`]로 감쌉니다.
     pub fn wrap(self) -> SapTableCellWrapper<'a> {
         SapTableCellWrapper::Normal(self)
     }

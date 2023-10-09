@@ -11,6 +11,7 @@ use crate::webdynpro::{
 
 use super::{SapTableCell, SapTableCellWrapper};
 
+/// 매트릭스 테이블의 셀
 #[derive(custom_debug_derive::Debug)]
 pub struct SapTableMatrixCell<'a> {
     id: Cow<'static, str>,
@@ -92,6 +93,7 @@ impl<'a> SapTableMatrixCell<'a> {
         }
     }
 
+    /// 셀을 [`SapTableCellWrapper`]로 감쌉니다.
     pub fn wrap(self) -> SapTableCellWrapper<'a> {
         SapTableCellWrapper::Matrix(self)
     }

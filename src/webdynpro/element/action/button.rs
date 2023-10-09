@@ -2,10 +2,12 @@ use std::{borrow::Cow, cell::OnceCell, collections::HashMap};
 
 use crate::webdynpro::{
     element::{define_element_interactable, Interactable},
-    event::Event, error::WebDynproError,
+    error::WebDynproError,
+    event::Event,
 };
 
 define_element_interactable! {
+    #[doc = "버튼"]
     Button<"B", "Button"> {},
     ButtonLSData {
         text: String => "0",
@@ -53,6 +55,7 @@ impl<'a> Button<'a> {
         }
     }
 
+    /// 버튼 누름 이벤트를 반환합니다.
     pub fn press(&self) -> Result<Event, WebDynproError> {
         let mut parameters: HashMap<String, String> = HashMap::new();
         parameters.insert("Id".to_string(), self.id.clone().to_string());

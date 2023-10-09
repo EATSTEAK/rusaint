@@ -27,7 +27,7 @@ use self::model::{ClassGrade, GradeSummary, SemesterGrade};
 
 use super::USaintApplication;
 
-/// 학기별 성적 조회 애플리케이션
+/// [학생 성적 조회](https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/ZCMB3W0017)
 pub struct CourseGrades(USaintApplication);
 
 impl Deref for CourseGrades {
@@ -342,7 +342,7 @@ impl<'a> CourseGrades {
         Ok(HashMap::from_iter(table))
     }
 
-    /// 주어진 학기의 수업별 성적을 가져옵니다. `include_details`가 참인 경우 수업의 상세 성적도 가져옵니다.
+    /// 주어진 학기의 수업별 성적을 가져옵니다. `include_details`가 `true`인 경우 수업의 상세 성적도 가져옵니다.
     /// 수업의 상세 성적까지 가져올 경우 상세 성적이 있는 수업의 수 만큼 서버에 요청을 보내므로 반드시 상세 성적도 한번에 가져와야 할 때에만 사용하십시오.
     ///
     /// 수업 성적을 가져온 이후 상세 성적 또한 가져오려면 `[class_detail()]`함수를 이용하십시오.
@@ -504,7 +504,7 @@ impl<'a> SapTableCellWrapper<'a> {
     }
 }
 
-/// [`CourseGrades`](CourseGrades)에서 사용하는 데이터 모델
+/// [`CourseGrades`](CourseGrades)에서 사용하는 데이터
 pub mod model;
 
 #[cfg(test)]

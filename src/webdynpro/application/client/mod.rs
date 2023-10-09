@@ -166,7 +166,7 @@ impl Requests for reqwest::Client {
     }
 }
 
-/// WebDynpro의 페이지를 관리하는 [`Body`]모듈
+/// WebDynpro의 페이지를 파싱, 업데이트하는 [`Body`] 구현
 pub mod body;
 
 #[cfg(test)]
