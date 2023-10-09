@@ -1,7 +1,11 @@
 use std::{borrow::Cow, cell::OnceCell, collections::HashMap};
 
 use crate::webdynpro::{
-    element::{define_element_interactable, Interactable},
+    element::{
+        define_element_interactable,
+        property::{HotkeyValue, Visibility},
+        Interactable,
+    },
     error::WebDynproError,
     event::Event,
 };
@@ -15,11 +19,11 @@ define_element_interactable! {
         has_reference: bool => "2",
         enabled: bool => "3",
         has_link_caption: bool => "4",
-        visibility: String => "5",
+        visibility: Visibility => "5",
         label_text: String => "6",
         emphasized: bool => "7",
         access_key: String => "8",
-        hotkey: String => "9",
+        hotkey: HotkeyValue => "9",
         custom_data: String => "10",
         custom_style: String => "11",
         labelled_by: String => "12",
