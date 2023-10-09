@@ -45,7 +45,6 @@ macro_rules! define_element_base {
             ),* $(,)?
         }
     } => {
-
         $(#[$outer])*
         #[derive(custom_debug_derive::Debug)]
         #[allow(unused)]
@@ -107,6 +106,15 @@ macro_rules! define_element_base {
                 #[serde(rename = $encoded)]
                 $field: Option<$ftype>,
             )*
+        }
+
+        impl<'a> std::ops::Deref for $name<'a> {
+            type Target = $lsdata;
+
+            fn deref(&self) -> &Self::Target {
+                use $crate::webdynpro::element::Element;
+                self.lsdata()
+            }
         }
     };
 }
