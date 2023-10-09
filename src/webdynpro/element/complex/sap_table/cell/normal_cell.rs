@@ -5,7 +5,10 @@ use scraper::Selector;
 use serde::Deserialize;
 
 use crate::webdynpro::{
-    element::{Element, ElementWrapper, SubElement, SubElementDef},
+    element::{
+        complex::sap_table::property::{SapTableCellDesign, SapTableCellType},
+        Element, ElementWrapper, SubElement, SubElementDef,
+    },
     error::WebDynproError,
 };
 
@@ -30,9 +33,9 @@ pub struct SapTableNormalCellLSData {
     #[serde(rename = "1")]
     is_secondary_selected: Option<bool>,
     #[serde(rename = "2")]
-    cell_type: Option<String>,
+    cell_type: Option<SapTableCellType>,
     #[serde(rename = "3")]
-    cell_design: Option<String>,
+    cell_design: Option<SapTableCellDesign>,
     #[serde(rename = "4")]
     header_cell_ids: Option<String>,
     #[serde(rename = "5")]

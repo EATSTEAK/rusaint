@@ -8,10 +8,12 @@ use crate::webdynpro::{
     event::Event,
 };
 
-use self::cell::{
-    SapTableHeaderCell, SapTableHierarchicalCell,
-    SapTableMatrixCell, SapTableNormalCell,
-    SapTableSelectionCell, SapTableCellWrapper,
+use self::{
+    cell::{
+        SapTableCellWrapper, SapTableHeaderCell, SapTableHierarchicalCell, SapTableMatrixCell,
+        SapTableNormalCell, SapTableSelectionCell,
+    },
+    property::AccessType,
 };
 
 /// 테이블 내부 데이터
@@ -27,30 +29,6 @@ define_element_interactable! {
         accessibility_description: String => "1",
         row_count: u32 => "2",
         col_count: u32 => "3",
-    }
-}
-
-/// 테이블 내의 셀 접근 방식
-pub enum AccessType {
-    Invalid,
-    Standard,
-    Range,
-    Toggle,
-    SelectAll,
-    DeselectAll,
-}
-
-impl ToString for AccessType {
-    fn to_string(&self) -> String {
-        match self {
-            AccessType::Invalid => "INVALID",
-            AccessType::Standard => "STANDARD",
-            AccessType::Range => "RANGE",
-            AccessType::Toggle => "TOGGLE",
-            AccessType::SelectAll => "SELECT_ALL",
-            AccessType::DeselectAll => "DESELECT_ALL",
-        }
-        .to_owned()
     }
 }
 
@@ -207,3 +185,4 @@ impl<'a> SapTable<'a> {
 }
 
 pub mod cell;
+pub mod property;

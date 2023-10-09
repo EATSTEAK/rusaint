@@ -5,7 +5,7 @@ use scraper::Selector;
 use serde::Deserialize;
 
 use crate::webdynpro::{
-    element::{Element, ElementWrapper, SubElement, SubElementDef},
+    element::{Element, ElementWrapper, SubElement, SubElementDef, complex::sap_table::property::SapTableCellType},
     error::WebDynproError,
 };
 
@@ -32,7 +32,7 @@ pub struct SapTableSelectionCellLSData {
     #[serde(rename = "2")]
     enabled: Option<bool>,
     #[serde(rename = "3")]
-    cell_type: Option<String>,
+    cell_type: Option<SapTableCellType>,
     #[serde(rename = "4")]
     row_description: Option<String>,
     #[serde(rename = "5")]
