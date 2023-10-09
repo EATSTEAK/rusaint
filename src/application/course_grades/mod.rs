@@ -170,7 +170,9 @@ impl<'a> CourseGrades {
                 .map(|val| {
                     match val.content() {
                         Some(ElementWrapper::TextView(tv)) => Some(tv.text().to_owned()),
-                        Some(ElementWrapper::Caption(cap)) => Some(cap.text().to_owned()),
+                        Some(ElementWrapper::Caption(cap)) => {
+                            Some(cap.text().as_ref().unwrap_or(&String::default()).to_owned())
+                        }
                         _ => None,
                     }
                     .unwrap_or("".to_string())
@@ -318,10 +320,10 @@ impl<'a> CourseGrades {
                     let row = CourseGrades::row_to_string(row)?;
                     Some(header.into_iter().zip(row.into_iter()))
                 })
-            .ok_or(ElementError::InvalidContent {
-                element: table_elem.id().to_string(),
-                content: "header and first row".to_string(),
-            })?;
+                .ok_or(ElementError::InvalidContent {
+                    element: table_elem.id().to_string(),
+                    content: "header and first row".to_string(),
+                })?;
             zip.skip(4)
                 .map(|(key, val)| {
                     Ok((
