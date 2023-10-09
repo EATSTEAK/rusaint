@@ -5,7 +5,7 @@ use scraper::Selector;
 use serde::Deserialize;
 
 use crate::webdynpro::{
-    element::{Element, ElementWrapper, SubElement, SubElementDef},
+    element::{Element, ElementWrapper, SubElement, SubElementDef, property::SortState, complex::sap_table::property::{SapTableHeaderCellDesign, SapTableHeaderCellType, SapTableSelectionColumnAction, SapTableRowSelectionMassState}},
     error::{BodyError, WebDynproError},
 };
 
@@ -26,17 +26,17 @@ pub struct SapTableHeaderCell<'a> {
 #[get = "pub"]
 pub struct SapTableHeaderCellLSData {
     #[serde(rename = "0")]
-    sort_state: Option<String>,
+    sort_state: Option<SortState>,
     #[serde(rename = "1")]
-    header_cell_design: Option<String>,
+    header_cell_design: Option<SapTableHeaderCellDesign>,
     #[serde(rename = "2")]
-    header_cell_type: Option<String>,
+    header_cell_type: Option<SapTableHeaderCellType>,
     #[serde(rename = "3")]
-    selection_column_action: Option<String>,
+    selection_column_action: Option<SapTableSelectionColumnAction>,
     #[serde(rename = "4")]
     selection_menu_id: Option<String>,
     #[serde(rename = "5")]
-    row_selection_mass_state: Option<String>,
+    row_selection_mass_state: Option<SapTableRowSelectionMassState>,
     #[serde(rename = "6")]
     required: Option<bool>,
     #[serde(rename = "7")]

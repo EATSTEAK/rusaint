@@ -5,7 +5,10 @@ use scraper::Selector;
 use serde::Deserialize;
 
 use crate::webdynpro::{
-    element::{Element, ElementWrapper, SubElement, SubElementDef},
+    element::{
+        complex::sap_table::property::{SapTableCellDesign, SapTableHierarchicalCellStatus},
+        Element, ElementWrapper, SubElement, SubElementDef,
+    },
     error::WebDynproError,
 };
 
@@ -30,13 +33,13 @@ pub struct SapTableHierarchicalCellLSData {
     #[serde(rename = "1")]
     is_secondary_selected: Option<bool>,
     #[serde(rename = "2")]
-    cell_design: Option<String>,
+    cell_design: Option<SapTableCellDesign>,
     #[serde(rename = "3")]
     header_cell_ids: Option<String>,
     #[serde(rename = "4")]
     level: Option<i32>,
     #[serde(rename = "5")]
-    status: Option<String>,
+    status: Option<SapTableHierarchicalCellStatus>,
     #[serde(rename = "6")]
     status_enabled: Option<bool>,
     #[serde(rename = "7")]

@@ -5,7 +5,10 @@ use scraper::Selector;
 use serde::Deserialize;
 
 use crate::webdynpro::{
-    element::{Element, ElementWrapper, SubElement, SubElementDef},
+    element::{
+        complex::sap_table::property::SapTableCellDesign, Element, ElementWrapper, SubElement,
+        SubElementDef,
+    },
     error::WebDynproError,
 };
 
@@ -26,7 +29,7 @@ pub struct SapTableMatrixCell<'a> {
 #[get = "pub"]
 pub struct SapTableMatrixCellLSData {
     #[serde(rename = "0")]
-    cell_background_design: Option<String>,
+    cell_background_design: Option<SapTableCellDesign>,
     #[serde(rename = "1")]
     header_cell_ids: Option<String>,
     #[serde(rename = "2")]
