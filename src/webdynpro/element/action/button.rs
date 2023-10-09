@@ -1,23 +1,77 @@
 use std::{borrow::Cow, cell::OnceCell, collections::HashMap};
 
 use crate::webdynpro::{
-    element::{define_element_interactable, Interactable},
+    element::{
+        define_element_interactable,
+        property::{ContentVisibility, HotkeyValue, SemanticColor, TextDesign, Visibility},
+        Interactable,
+    },
     error::WebDynproError,
     event::Event,
 };
+
+use super::{ButtonType, ButtonInteractionBehaviour, ButtonDesign};
+
+pub mod property {
+    use serde::Deserialize;
+
+    #[derive(Deserialize, Debug)]
+    #[serde(rename_all = "UPPERCASE")]
+    pub enum ButtonDesign {
+        Emphasized,
+        Standard,
+        Previous,
+        Next,
+        Transparent,
+        Accept,
+        Reject,
+        Toggle,
+    }
+
+    #[derive(Deserialize, Debug)]
+    #[serde(rename_all = "UPPERCASE")]
+    pub enum ButtonType {
+        None,
+        Menu,
+        Help,
+        Personalize,
+        Close,
+        ExpandAll,
+        CollapseAll,
+        ScrollTop,
+        Minimize,
+        Maximize,
+        Restore,
+        CollapseBegin,
+        CollapseEnd,
+        ExpandBegin,
+        ExpandEnd,
+        Back,
+        Forward,
+        VariantManagement,
+        Rte,
+    }
+
+    #[derive(Deserialize, Debug)]
+    #[serde(rename_all = "UPPERCASE")]
+    pub enum ButtonInteractionBehaviour {
+        Push,
+        Toggle,
+    }
+}
 
 define_element_interactable! {
     #[doc = "버튼"]
     Button<"B", "Button"> {},
     ButtonLSData {
         text: String => "0",
-        text_design: String => "1",
-        design: String => "2",
+        text_design: TextDesign => "1",
+        design: ButtonDesign => "2",
         width: String => "3",
         tooltip: String => "4",
         enabled: bool => "5",
         has_button_caption: bool => "6",
-        visibility: String => "7",
+        visibility: Visibility => "7",
         show_help: bool => "8",
         down: bool => "9",
         has_icon: bool => "10",
@@ -29,19 +83,19 @@ define_element_interactable! {
         has_popup_menu_section: bool => "16",
         image_first: bool => "17",
         access_key: String => "18",
-        hotkey: String => "19",
+        hotkey: HotkeyValue => "19",
         up: bool => "20",
         text_overflow: bool => "21",
         fixed_height: bool => "22",
-        button_type: String => "23", // This field originally named as "type"
+        button_type: ButtonType => "23", // This field originally named as "type"
         drag_source_info: String => "24",
-        semantic_color: String => "25",
-        interaction_behaviour: String => "26",
+        semantic_color: SemanticColor => "25",
+        interaction_behaviour: ButtonInteractionBehaviour => "26",
         custom_style: String => "27",
         custom_data: String => "28",
         wrapping: bool => "29",
         height: String => "30",
-        content_visibility: String => "31"
+        content_visibility: ContentVisibility => "31"
     }
 }
 
