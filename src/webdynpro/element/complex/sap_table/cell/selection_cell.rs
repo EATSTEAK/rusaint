@@ -1,5 +1,5 @@
 use getset::Getters;
-use std::{borrow::Cow, cell::OnceCell};
+use std::{borrow::Cow, cell::OnceCell, ops::Deref};
 
 use scraper::Selector;
 use serde::Deserialize;
@@ -17,7 +17,7 @@ pub struct SapTableSelectionCell<'a> {
     id: Cow<'static, str>,
     #[debug(skip)]
     element_ref: scraper::ElementRef<'a>,
-    lsdata: OnceCell<Option<SapTableSelectionCellLSData>>,
+    lsdata: OnceCell<SapTableSelectionCellLSData>,
     content: OnceCell<Option<ElementWrapper<'a>>>,
 }
 
@@ -66,13 +66,15 @@ impl<'a> SubElement<'a> for SapTableSelectionCell<'a> {
 
     type SubElementLSData = SapTableSelectionCellLSData;
 
-    fn lsdata(&self) -> Option<&Self::SubElementLSData> {
+    fn lsdata(&self) -> &Self::SubElementLSData {
         self.lsdata
             .get_or_init(|| {
-                let lsdata_obj = Self::lsdata_elem(self.element_ref).ok()?;
-                serde_json::from_value::<Self::SubElementLSData>(lsdata_obj).ok()
+                let Ok(lsdata_obj) = Self::lsdata_elem(self.element_ref) else {
+                    return Self::SubElementLSData::default();
+                };
+                serde_json::from_value::<Self::SubElementLSData>(lsdata_obj)
+                    .unwrap_or(Self::SubElementLSData::default())
             })
-            .as_ref()
     }
 
     fn from_elem<Parent: Element<'a>>(
@@ -104,5 +106,13 @@ impl<'a> SapTableSelectionCell<'a> {
     /// 셀을 [`SapTableCellWrapper`]로 감쌉니다.
     pub fn wrap(self) -> SapTableCellWrapper<'a> {
         SapTableCellWrapper::Selection(self)
+    }
+}
+
+impl<'a> Deref for SapTableSelectionCell<'a> {
+    type Target = SapTableSelectionCellLSData;
+
+    fn deref(&self) -> &Self::Target {
+        self.lsdata()
     }
 }

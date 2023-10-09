@@ -45,7 +45,6 @@ macro_rules! define_element_base {
             ),* $(,)?
         }
     } => {
-
         $(#[$outer])*
         #[derive(custom_debug_derive::Debug)]
         #[allow(unused)]
@@ -107,6 +106,15 @@ macro_rules! define_element_base {
                 #[serde(rename = $encoded)]
                 $field: Option<$ftype>,
             )*
+        }
+
+        impl<'a> std::ops::Deref for $name<'a> {
+            type Target = $lsdata;
+
+            fn deref(&self) -> &Self::Target {
+                use $crate::webdynpro::element::Element;
+                self.lsdata()
+            }
         }
     };
 }
@@ -568,7 +576,7 @@ pub trait SubElement<'a>: Sized {
     ) -> Result<Self, WebDynproError>;
 
 	/// 서브 엘리먼트의 LSData를 가져옵니다.
-    fn lsdata(&self) -> Option<&Self::SubElementLSData>;
+    fn lsdata(&self) -> &Self::SubElementLSData;
 
 	/// 서브 엘리먼트의 Id를 가져옵니다.
     fn id(&self) -> &str;

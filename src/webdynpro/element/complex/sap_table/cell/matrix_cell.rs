@@ -1,5 +1,5 @@
 use getset::Getters;
-use std::{borrow::Cow, cell::OnceCell};
+use std::{borrow::Cow, cell::OnceCell, ops::Deref};
 
 use scraper::Selector;
 use serde::Deserialize;
@@ -20,7 +20,7 @@ pub struct SapTableMatrixCell<'a> {
     id: Cow<'static, str>,
     #[debug(skip)]
     element_ref: scraper::ElementRef<'a>,
-    lsdata: OnceCell<Option<SapTableMatrixCellLSData>>,
+    lsdata: OnceCell<SapTableMatrixCellLSData>,
     content: OnceCell<Option<ElementWrapper<'a>>>,
 }
 
@@ -61,13 +61,14 @@ impl<'a> SubElement<'a> for SapTableMatrixCell<'a> {
 
     type SubElementLSData = SapTableMatrixCellLSData;
 
-    fn lsdata(&self) -> Option<&Self::SubElementLSData> {
-        self.lsdata
-            .get_or_init(|| {
-                let lsdata_obj = Self::lsdata_elem(self.element_ref).ok()?;
-                serde_json::from_value::<Self::SubElementLSData>(lsdata_obj).ok()
-            })
-            .as_ref()
+    fn lsdata(&self) -> &Self::SubElementLSData {
+        self.lsdata.get_or_init(|| {
+            let Ok(lsdata_obj) = Self::lsdata_elem(self.element_ref) else {
+                    return Self::SubElementLSData::default();
+                };
+            serde_json::from_value::<Self::SubElementLSData>(lsdata_obj)
+                .unwrap_or(Self::SubElementLSData::default())
+        })
     }
 
     fn from_elem<Parent: Element<'a>>(
@@ -99,5 +100,13 @@ impl<'a> SapTableMatrixCell<'a> {
     /// 셀을 [`SapTableCellWrapper`]로 감쌉니다.
     pub fn wrap(self) -> SapTableCellWrapper<'a> {
         SapTableCellWrapper::Matrix(self)
+    }
+}
+
+impl<'a> Deref for SapTableMatrixCell<'a> {
+    type Target = SapTableMatrixCellLSData;
+
+    fn deref(&self) -> &Self::Target {
+        self.lsdata()
     }
 }
