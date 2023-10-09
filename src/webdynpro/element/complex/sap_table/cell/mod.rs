@@ -18,7 +18,7 @@ impl<'a> SapTableCellWrapper<'a> {
         match subct_value.attr("subct") {
             Some(SapTableNormalCell::SUBCONTROL_ID) => Some(
                 SubElementDef::<_, SapTableNormalCell>::new_dynamic(
-                    table_def.clone(),
+                    table_def,
                     subct_value.id()?.to_owned(),
                 )
                 .from_elem(elem_ref)
@@ -27,7 +27,7 @@ impl<'a> SapTableCellWrapper<'a> {
             ),
             Some(SapTableHeaderCell::SUBCONTROL_ID) => Some(
                 SubElementDef::<_, SapTableHeaderCell>::new_dynamic(
-                    table_def.clone(),
+                    table_def,
                     subct_value.id()?.to_owned(),
                 )
                 .from_elem(elem_ref)
@@ -36,7 +36,7 @@ impl<'a> SapTableCellWrapper<'a> {
             ),
             Some(SapTableHierarchicalCell::SUBCONTROL_ID) => Some(
                 SubElementDef::<_, SapTableHierarchicalCell>::new_dynamic(
-                    table_def.clone(),
+                    table_def,
                     subct_value.id()?.to_owned(),
                 )
                 .from_elem(elem_ref)
@@ -45,7 +45,7 @@ impl<'a> SapTableCellWrapper<'a> {
             ),
             Some(SapTableMatrixCell::SUBCONTROL_ID) => Some(
                 SubElementDef::<_, SapTableMatrixCell>::new_dynamic(
-                    table_def.clone(),
+                    table_def,
                     subct_value.id()?.to_owned(),
                 )
                 .from_elem(elem_ref)
@@ -54,7 +54,7 @@ impl<'a> SapTableCellWrapper<'a> {
             ),
             Some(SapTableSelectionCell::SUBCONTROL_ID) => Some(
                 SubElementDef::<_, SapTableSelectionCell>::new_dynamic(
-                    table_def.clone(),
+                    table_def,
                     subct_value.id()?.to_owned(),
                 )
                 .from_elem(elem_ref)
