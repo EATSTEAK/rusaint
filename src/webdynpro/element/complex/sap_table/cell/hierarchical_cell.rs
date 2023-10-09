@@ -1,5 +1,5 @@
 use getset::Getters;
-use std::{borrow::Cow, cell::OnceCell};
+use std::{borrow::Cow, cell::OnceCell, ops::Deref};
 
 use scraper::Selector;
 use serde::Deserialize;
@@ -74,14 +74,13 @@ impl<'a> SubElement<'a> for SapTableHierarchicalCell<'a> {
     type SubElementLSData = SapTableHierarchicalCellLSData;
 
     fn lsdata(&self) -> &Self::SubElementLSData {
-        self.lsdata
-            .get_or_init(|| {
-                let Ok(lsdata_obj) = Self::lsdata_elem(self.element_ref) else {
+        self.lsdata.get_or_init(|| {
+            let Ok(lsdata_obj) = Self::lsdata_elem(self.element_ref) else {
                     return Self::SubElementLSData::default();
                 };
-                serde_json::from_value::<Self::SubElementLSData>(lsdata_obj)
-                    .unwrap_or(Self::SubElementLSData::default())
-            })
+            serde_json::from_value::<Self::SubElementLSData>(lsdata_obj)
+                .unwrap_or(Self::SubElementLSData::default())
+        })
     }
 
     fn from_elem<Parent: Element<'a>>(
@@ -113,5 +112,13 @@ impl<'a> SapTableHierarchicalCell<'a> {
     /// 셀을 [`SapTableCellWrapper`]로 감쌉니다.
     pub fn wrap(self) -> SapTableCellWrapper<'a> {
         SapTableCellWrapper::Hierarchical(self)
+    }
+}
+
+impl<'a> Deref for SapTableHierarchicalCell<'a> {
+    type Target = SapTableHierarchicalCellLSData;
+
+    fn deref(&self) -> &Self::Target {
+        self.lsdata()
     }
 }

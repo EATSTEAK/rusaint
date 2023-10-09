@@ -1,5 +1,5 @@
 use getset::Getters;
-use std::{borrow::Cow, cell::OnceCell};
+use std::{borrow::Cow, cell::OnceCell, ops::Deref};
 
 use scraper::Selector;
 use serde::Deserialize;
@@ -136,5 +136,13 @@ impl<'a> SapTableHeaderCell<'a> {
     /// 셀을 [`SapTableCellWrapper`]로 감쌉니다.
     pub fn wrap(self) -> SapTableCellWrapper<'a> {
         SapTableCellWrapper::Header(self)
+    }
+}
+
+impl<'a> Deref for SapTableHeaderCell<'a> {
+    type Target = SapTableHeaderCellLSData;
+
+    fn deref(&self) -> &Self::Target {
+        self.lsdata()
     }
 }

@@ -491,13 +491,11 @@ impl<'a> SapTableCellWrapper<'a> {
     fn is_empty_row(&self) -> bool {
         match self {
             SapTableCellWrapper::Normal(cell) => cell
-                .lsdata()
                 .cell_type()
                 .as_ref()
                 .is_some_and(|s| matches!(s, SapTableCellType::EmptyRow)),
             SapTableCellWrapper::Header(_cell) => false,
             SapTableCellWrapper::Selection(cell) => cell
-                .lsdata()
                 .cell_type()
                 .as_ref()
                 .is_some_and(|s| matches!(s, SapTableCellType::EmptyRow)),
