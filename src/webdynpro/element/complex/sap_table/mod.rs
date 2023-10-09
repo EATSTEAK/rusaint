@@ -8,9 +8,7 @@ use crate::webdynpro::{
     event::Event,
 };
 
-use self::{
-    property::AccessType, body::SapTableBody,
-};
+use self::{body::SapTableBody, property::AccessType};
 
 define_element_interactable! {
     #[doc = "테이블"]
@@ -62,13 +60,12 @@ impl<'a> SapTable<'a> {
             .as_str(),
         )
         .or(Err(BodyError::InvalidSelector))?;
-        let tbody = element
-            .select(&tbody_selector)
-            .next()
-            .ok_or(ElementError::NoSuchContent {
-                element: self.id.clone().into_owned(),
-                content: "Table body".to_string(),
-            })?;
+        let Some(tbody) = element.select(&tbody_selector).next() else {
+                return Err(ElementError::NoSuchContent {
+                    element: self.id.clone().into_owned(),
+                    content: "Table body".to_string(),
+                })?;
+            };
         Ok(SapTableBody::new(def, tbody)?)
     }
 
