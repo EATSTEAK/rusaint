@@ -1,14 +1,14 @@
 use scraper::Selector;
 use std::{borrow::Cow, cell::OnceCell};
 
-use crate::webdynpro::element::{action::Button, define_element_base, ElementWrapper};
+use crate::webdynpro::element::{action::Button, define_element_base, ElementWrapper, property::Visibility};
 
 define_element_base! {
     ButtonRow<"BR", "ButtonRow"> {
         buttons: OnceCell<Vec<Button<'a>>>
     },
     ButtonRowLSData {
-        visibility: String => "0",
+        visibility: Visibility => "0",
         custom_data: String => "1"
     }
 }
