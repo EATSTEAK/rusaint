@@ -18,7 +18,7 @@ use crate::{
             layout::PopupWindow,
             selection::ComboBox,
             text::InputField,
-            Element, ElementDef, ElementWrapper, SubElement,
+            Element, ElementDef, ElementWrapper,
         },
         error::{BodyError, ElementError, WebDynproError},
         event::Event,
