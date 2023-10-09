@@ -3,21 +3,12 @@ use std::{borrow::Cow, cell::OnceCell, collections::HashMap};
 use scraper::Selector;
 
 use crate::webdynpro::{
-    element::{define_element_interactable, ElementDef, Interactable, SubElement, SubElementDef},
+    element::{define_element_interactable, ElementDef, Interactable},
     error::{BodyError, ElementError, WebDynproError},
     event::Event,
 };
 
-use self::{
-    cell::{
-        SapTableCellWrapper, SapTableHeaderCell, SapTableHierarchicalCell, SapTableMatrixCell,
-        SapTableNormalCell, SapTableSelectionCell,
-    },
-    property::AccessType,
-};
-
-/// 테이블 내부 데이터
-pub type SapTableBody<'a> = Vec<Vec<SapTableCellWrapper<'a>>>;
+use self::{body::SapTableBody, property::AccessType};
 
 define_element_interactable! {
     #[doc = "테이블"]
@@ -57,11 +48,10 @@ impl<'a> SapTable<'a> {
             }
         };
         let element = self.element_ref;
-        let elem_value = element.value();
         let tbody_selector = Selector::parse(
             format!(
                 r#"[id="{}-contentTBody"]"#,
-                elem_value.id().ok_or(ElementError::NoSuchData {
+                element.value().id().ok_or(ElementError::NoSuchData {
                     element: self.id.clone().into_owned(),
                     field: "id".to_string()
                 })?
@@ -69,74 +59,13 @@ impl<'a> SapTable<'a> {
             .as_str(),
         )
         .or(Err(BodyError::InvalidSelector))?;
-        let tbody = element
-            .select(&tbody_selector)
-            .next()
-            .ok_or(ElementError::NoSuchContent {
-                element: self.id.clone().into_owned(),
-                content: "Table content".to_string(),
-            })?;
-        Ok(tbody
-            .children()
-            .filter_map(|node| scraper::ElementRef::wrap(node))
-            .map(|row_ref| -> Vec<SapTableCellWrapper<'a>> {
-                let subct_selector = Selector::parse("[subct]").unwrap();
-                let subcts = row_ref.select(&subct_selector);
-                subcts
-                    .filter_map(|subct_ref| -> Option<SapTableCellWrapper<'a>> {
-                        let subct_value = subct_ref.value();
-                        match subct_value.attr("subct") {
-                            Some(SapTableNormalCell::SUBCONTROL_ID) => Some(
-                                SubElementDef::<_, SapTableNormalCell>::new_dynamic(
-                                    def.clone(),
-                                    subct_value.id()?.to_owned(),
-                                )
-                                .from_elem(subct_ref)
-                                .ok()?
-                                .wrap(),
-                            ),
-                            Some(SapTableHeaderCell::SUBCONTROL_ID) => Some(
-                                SubElementDef::<_, SapTableHeaderCell>::new_dynamic(
-                                    def.clone(),
-                                    subct_value.id()?.to_owned(),
-                                )
-                                .from_elem(subct_ref)
-                                .ok()?
-                                .wrap(),
-                            ),
-                            Some(SapTableHierarchicalCell::SUBCONTROL_ID) => Some(
-                                SubElementDef::<_, SapTableHierarchicalCell>::new_dynamic(
-                                    def.clone(),
-                                    subct_value.id()?.to_owned(),
-                                )
-                                .from_elem(subct_ref)
-                                .ok()?
-                                .wrap(),
-                            ),
-                            Some(SapTableMatrixCell::SUBCONTROL_ID) => Some(
-                                SubElementDef::<_, SapTableMatrixCell>::new_dynamic(
-                                    def.clone(),
-                                    subct_value.id()?.to_owned(),
-                                )
-                                .from_elem(subct_ref)
-                                .ok()?
-                                .wrap(),
-                            ),
-                            Some(SapTableSelectionCell::SUBCONTROL_ID) => Some(
-                                SubElementDef::<_, SapTableSelectionCell>::new_dynamic(
-                                    def.clone(),
-                                    subct_value.id()?.to_owned(),
-                                )
-                                .from_elem(subct_ref)
-                                .ok()?
-                                .wrap(),
-                            ),
-                            _ => None,
-                        }
-                    })
-                    .collect::<Vec<SapTableCellWrapper<'a>>>()
-            })
-            .collect())
+        let Some(tbody) = element.select(&tbody_selector).next() else {
+                return Err(ElementError::NoSuchContent {
+                    element: self.id.clone().into_owned(),
+                    content: "Table body".to_string(),
+                })?;
+            };
+        Ok(SapTableBody::new(def, tbody)?)
     }
 
     /// 테이블의 행을 선택하는 이벤트를 반환합니다.
@@ -184,5 +113,7 @@ impl<'a> SapTable<'a> {
     }
 }
 
+pub mod body;
 pub mod cell;
 pub mod property;
+pub mod row;

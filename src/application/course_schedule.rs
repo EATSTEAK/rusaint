@@ -4,10 +4,7 @@ use crate::{
     define_elements,
     model::SemesterType,
     webdynpro::{
-        element::{
-            action::Button, complex::SapTable, layout::TabStrip,
-            selection::ComboBox,
-        },
+        element::{action::Button, complex::SapTable, layout::TabStrip, selection::ComboBox},
         error::WebDynproError,
     },
 };
@@ -168,9 +165,9 @@ mod test {
         app.load_edu().await.unwrap();
         let table = app.read_edu_raw().unwrap();
         if let Some(table) = table.table() {
-            for row in table {
+            for row in table.with_header() {
                 print!("row: ");
-                for col in row {
+                for col in row.iter() {
                     match col {
                         SapTableCellWrapper::Header(cell) => {
                             let content = cell.content();
