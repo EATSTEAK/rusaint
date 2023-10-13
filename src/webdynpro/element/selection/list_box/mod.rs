@@ -24,9 +24,9 @@ macro_rules! def_listbox_subset {
             type ElementLSData = ListBoxLSData;
 
             fn lsdata(&self) -> &Self::ElementLSData {
-                self.lsdata
+                self.list_box().lsdata
                     .get_or_init(|| {
-                        let Ok(lsdata_obj) = Self::lsdata_elem(self.element_ref) else {
+                        let Ok(lsdata_obj) = Self::lsdata_elem(self.list_box().element_ref) else {
                             return ListBoxLSData::default();
                         };
                         serde_json::from_value::<Self::ElementLSData>(lsdata_obj).unwrap_or(ListBoxLSData::default())

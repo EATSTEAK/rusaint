@@ -71,7 +71,7 @@ impl USaintSession {
                 .borrow_mut(),
             portal.url(),
         );
-        session_store.add_cookie_str(
+        session_store.0.add_cookie_str(
             &waf_cookie_str,
             &Url::parse("https://saint.ssu.ac.kr").unwrap(),
         );
@@ -122,6 +122,8 @@ impl USaintSession {
             .await
             .or_else(|e| Err(WebDynproError::Client(e)))?)
     }
+
+    pub fn jar(&self) -> &Jar { &self.0 }
 }
 
 /// 학번과 비밀번호를 이용해 SSO 토큰을 발급받습니다.

@@ -17,17 +17,17 @@ impl EventQueue {
                 owned.push_str(EVENT_SPECTATOR);
             }
         }
-        let _ = &self.clear();
+        let _ = &self.0.clear();
         owned
     }
 
     pub fn add(&mut self, evt: Event) {
-        self.push_back(evt)
+        self.0.push_back(evt)
     }
 
     #[allow(unused)]
     pub fn remove(&mut self) -> Option<Event> {
-        self.pop_front()
+        self.0.pop_front()
     }
 }
 
