@@ -1,4 +1,4 @@
-use std::{iter, ops::Deref};
+use std::{iter};
 
 use scraper::ElementRef;
 
@@ -66,13 +66,5 @@ impl<'a> SapTableBody<'a> {
 
     pub fn header(&self) -> &SapTableRow<'a> {
         &self.header
-    }
-}
-
-impl<'a> Deref for SapTableBody<'a> {
-    type Target = Vec<SapTableRow<'a>>;
-
-    fn deref(&self) -> &Self::Target {
-        &self.rows
     }
 }

@@ -1,5 +1,3 @@
-use std::ops::Deref;
-
 use scraper::ElementRef;
 
 use crate::webdynpro::{element::ElementDef, error::ElementError};
@@ -87,14 +85,6 @@ impl<'a> SapTableRow<'a> {
 
     pub fn row_type(&self) -> SapTableRowType {
         self.row_type
-    }
-}
-
-impl<'a> Deref for SapTableRow<'a> {
-    type Target = Vec<SapTableCellWrapper<'a>>;
-
-    fn deref(&self) -> &Self::Target {
-        &self.cells
     }
 }
 

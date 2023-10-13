@@ -136,15 +136,6 @@ macro_rules! define_element_base {
                 )+
             }
         }
-
-        impl<'a> std::ops::Deref for $name<'a> {
-            type Target = $lsdata;
-
-            fn deref(&self) -> &Self::Target {
-                use $crate::webdynpro::element::Element;
-                self.lsdata()
-            }
-        }
     };
 }
 
@@ -416,7 +407,7 @@ pub trait Element<'a>: Sized {
     const CONTROL_ID: &'static str;
     /// WebDynpro 상에서 사용하는 엘리먼트의 이름
     const ELEMENT_NAME: &'static str;
-    /// 엘리먼트의 LSData
+/// 엘리먼트의 LSData
     type ElementLSData;
 	
     /// 엘리먼트의 JSON 객체 형태의 LSData를 반환합니다.
@@ -463,7 +454,7 @@ pub trait Element<'a>: Sized {
 	/// 엘리먼트의 자식 엘리먼트를 가져옵니다.
     fn children(&self) -> Vec<ElementWrapper<'a>>;
 
-	/// 엘리먼트의 LSData를 가져옵니다.
+/// 엘리먼트의 LSData를 가져옵니다.
     fn lsdata(&self) -> &Self::ElementLSData;
 
 	/// 엘리먼트의 Id를 가져옵니다.

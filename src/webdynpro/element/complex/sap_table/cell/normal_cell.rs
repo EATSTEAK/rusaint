@@ -1,4 +1,4 @@
-use std::{borrow::Cow, cell::OnceCell, ops::Deref};
+use std::{borrow::Cow, cell::OnceCell};
 
 use scraper::Selector;
 
@@ -97,13 +97,5 @@ impl<'a> SapTableNormalCell<'a> {
     /// 셀을 [`SapTableCellWrapper`]로 감쌉니다.
     pub fn wrap(self) -> SapTableCellWrapper<'a> {
         SapTableCellWrapper::Normal(self)
-    }
-}
-
-impl<'a> Deref for SapTableNormalCell<'a> {
-    type Target = SapTableNormalCellLSData;
-
-    fn deref(&self) -> &Self::Target {
-        self.lsdata()
     }
 }

@@ -1,4 +1,4 @@
-use std::{borrow::Cow, cell::OnceCell, ops::Deref};
+use std::{borrow::Cow, cell::OnceCell};
 
 use scraper::Selector;
 
@@ -93,13 +93,5 @@ impl<'a> SapTableMatrixCell<'a> {
     /// 셀을 [`SapTableCellWrapper`]로 감쌉니다.
     pub fn wrap(self) -> SapTableCellWrapper<'a> {
         SapTableCellWrapper::Matrix(self)
-    }
-}
-
-impl<'a> Deref for SapTableMatrixCell<'a> {
-    type Target = SapTableMatrixCellLSData;
-
-    fn deref(&self) -> &Self::Target {
-        self.lsdata()
     }
 }

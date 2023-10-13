@@ -1,4 +1,4 @@
-use std::{borrow::BorrowMut, ops::Deref, sync::Arc};
+use std::{borrow::BorrowMut, sync::Arc};
 
 use reqwest::{
     cookie::{CookieStore, Jar},
@@ -21,14 +21,6 @@ const SMARTID_LOGIN_FORM_REQUEST_URL: &str = "https://smartid.ssu.ac.kr/Symtra_s
 /// u-saint 로그인이 필요한 애플리케이션 사용 시 애플리케이션에 제공하는 세션
 #[derive(Debug, Default)]
 pub struct USaintSession(Jar);
-
-impl Deref for USaintSession {
-    type Target = Jar;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
 
 impl CookieStore for USaintSession {
     fn set_cookies(&self, cookie_headers: &mut dyn Iterator<Item = &HeaderValue>, url: &url::Url) {

@@ -1,5 +1,4 @@
 use std::{
-    ops::{Deref, DerefMut},
     sync::Arc,
 };
 
@@ -8,19 +7,6 @@ use crate::{session::USaintSession, webdynpro::error::WebDynproError};
 use super::USaintApplication;
 
 pub struct StudentInformation(USaintApplication);
-
-impl Deref for StudentInformation {
-    type Target = USaintApplication;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl<'a> DerefMut for StudentInformation {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
 
 #[allow(unused)]
 impl StudentInformation {

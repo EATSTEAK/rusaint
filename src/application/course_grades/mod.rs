@@ -1,6 +1,5 @@
 use std::{
     collections::HashMap,
-    ops::{Deref, DerefMut},
     sync::Arc,
 };
 
@@ -31,19 +30,6 @@ use super::USaintApplication;
 
 /// [학생 성적 조회](https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/ZCMB3W0017)
 pub struct CourseGrades(USaintApplication);
-
-impl Deref for CourseGrades {
-    type Target = USaintApplication;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl<'a> DerefMut for CourseGrades {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
 
 #[allow(unused)]
 impl<'a> CourseGrades {

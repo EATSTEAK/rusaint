@@ -1,4 +1,4 @@
-use std::{borrow::Cow, cell::OnceCell, ops::Deref};
+use std::{borrow::Cow, cell::OnceCell};
 
 use scraper::Selector;
 
@@ -98,13 +98,5 @@ impl<'a> SapTableHierarchicalCell<'a> {
     /// 셀을 [`SapTableCellWrapper`]로 감쌉니다.
     pub fn wrap(self) -> SapTableCellWrapper<'a> {
         SapTableCellWrapper::Hierarchical(self)
-    }
-}
-
-impl<'a> Deref for SapTableHierarchicalCell<'a> {
-    type Target = SapTableHierarchicalCellLSData;
-
-    fn deref(&self) -> &Self::Target {
-        self.lsdata()
     }
 }

@@ -1,24 +1,9 @@
 use super::{Event, EVENT_SPECTATOR};
 use std::{
     collections::LinkedList,
-    ops::{Deref, DerefMut},
 };
 
 pub(crate) struct EventQueue(LinkedList<Event>);
-
-impl Deref for EventQueue {
-    type Target = LinkedList<Event>;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl DerefMut for EventQueue {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
 
 impl EventQueue {
     pub fn new() -> EventQueue {

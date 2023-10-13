@@ -1,5 +1,3 @@
-use std::ops::{Deref, DerefMut};
-
 use crate::{
     define_elements,
     model::SemesterType,
@@ -12,19 +10,6 @@ use crate::{
 use super::USaintApplication;
 
 pub struct CourseSchedule(USaintApplication);
-
-impl Deref for CourseSchedule {
-    type Target = USaintApplication;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl<'a> DerefMut for CourseSchedule {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
 
 #[allow(unused)]
 impl<'a> CourseSchedule {

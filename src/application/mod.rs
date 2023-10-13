@@ -1,5 +1,4 @@
 use std::{
-    ops::{Deref, DerefMut},
     sync::Arc,
 };
 use url::Url;
@@ -22,19 +21,6 @@ const INITIAL_CLIENT_DATA_WD01: &str = "ClientWidth:1920px;ClientHeight:1000px;S
 const INITIAL_CLIENT_DATA_WD02: &str = "ThemedTableRowHeight:25px";
 /// u-saint에 접속하기 위한 기본 애플리케이션
 pub struct USaintApplication(BasicApplication);
-
-impl Deref for USaintApplication {
-    type Target = BasicApplication;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl<'a> DerefMut for USaintApplication {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
 
 impl<'a> USaintApplication {
     define_elements! {
