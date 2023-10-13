@@ -1,4 +1,4 @@
-use std::{iter};
+use std::iter;
 
 use scraper::ElementRef;
 
