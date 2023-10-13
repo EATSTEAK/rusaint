@@ -4,7 +4,7 @@ use lol_html::{element, html_content::ContentType, rewrite_str, RewriteStrSettin
 use roxmltree::Node;
 use scraper::{Html, Selector};
 
-use crate::webdynpro::error::{BodyError, BodyUpdateError};
+use crate::webdynpro::error::{BodyError, UpdateBodyError};
 
 use super::SapSsrClient;
 
@@ -29,13 +29,13 @@ pub(super) struct BodyUpdate {
 }
 
 impl BodyUpdate {
-    pub(super) fn new(response: &str) -> Result<BodyUpdate, BodyUpdateError> {
+    pub(super) fn new(response: &str) -> Result<BodyUpdate, UpdateBodyError> {
         let response_xml = roxmltree::Document::parse(response)?;
         let updates = response_xml
             .root()
             .first_child()
-            .ok_or(BodyUpdateError::NoSuchNode("<updates>".to_string()))?;
-        let update = updates.first_child().ok_or(BodyUpdateError::NoSuchNode(
+            .ok_or(UpdateBodyError::NoSuchNode("<updates>".to_string()))?;
+        let update = updates.first_child().ok_or(UpdateBodyError::NoSuchNode(
             "<full-update> or <delta-update>".to_string(),
         ))?;
         let update_type: Option<BodyUpdateType>;
@@ -43,21 +43,21 @@ impl BodyUpdate {
             let windowid =
                 update
                     .attribute("windowid")
-                    .ok_or(BodyUpdateError::NoSuchAttribute {
+                    .ok_or(UpdateBodyError::NoSuchAttribute {
                         node: "full-update".to_string(),
                         attribute: "windowid".to_string(),
                     })?;
             let content = update
                 .first_child()
-                .ok_or(BodyUpdateError::NoSuchContent("full-update".to_string()))?;
+                .ok_or(UpdateBodyError::NoSuchContent("full-update".to_string()))?;
             let contentid = content
                 .attribute("id")
-                .ok_or(BodyUpdateError::NoSuchAttribute {
+                .ok_or(UpdateBodyError::NoSuchAttribute {
                     node: "content-update".to_string(),
                     attribute: "id".to_string(),
                 })?;
             if content.tag_name().name() != "content-update" {
-                return Err(BodyUpdateError::UnknownElement(
+                return Err(UpdateBodyError::UnknownElement(
                     content.tag_name().name().to_owned(),
                 ))?;
             }
@@ -66,14 +66,14 @@ impl BodyUpdate {
                 contentid.to_owned(),
                 content
                     .text()
-                    .ok_or(BodyUpdateError::NoSuchContent("full-content".to_string()))?
+                    .ok_or(UpdateBodyError::NoSuchContent("full-content".to_string()))?
                     .to_owned(),
             ));
         } else if update.tag_name().name() == "delta-update" {
             let windowid =
                 update
                     .attribute("windowid")
-                    .ok_or(BodyUpdateError::NoSuchAttribute {
+                    .ok_or(UpdateBodyError::NoSuchAttribute {
                         node: "delta-update".to_string(),
                         attribute: "windowid".to_string(),
                     })?;
@@ -87,18 +87,18 @@ impl BodyUpdate {
                         let control_id =
                             children
                                 .attribute("id")
-                                .ok_or(BodyUpdateError::NoSuchAttribute {
+                                .ok_or(UpdateBodyError::NoSuchAttribute {
                                     node: "control-update".to_string(),
                                     attribute: "id".to_string(),
                                 })?;
                         let content = children
                             .first_child()
-                            .ok_or(BodyUpdateError::NoSuchContent("control-update".to_string()))?;
+                            .ok_or(UpdateBodyError::NoSuchContent("control-update".to_string()))?;
                         update_map.insert(
                             control_id.to_owned(),
                             content
                                 .text()
-                                .ok_or(BodyUpdateError::NoSuchContent("content".to_string()))?
+                                .ok_or(UpdateBodyError::NoSuchContent("content".to_string()))?
                                 .to_owned(),
                         );
                     }
@@ -109,7 +109,7 @@ impl BodyUpdate {
             }
             update_type = Some(BodyUpdateType::Delta(windowid.to_owned(), update_map));
         } else {
-            return Err(BodyUpdateError::UnknownElement(
+            return Err(UpdateBodyError::UnknownElement(
                 update.tag_name().name().to_owned(),
             ))?;
         }
@@ -204,7 +204,7 @@ impl Body {
         })
     }
 
-    pub(super) fn apply(&mut self, updates: BodyUpdate) -> Result<(), BodyUpdateError> {
+    pub(super) fn apply(&mut self, updates: BodyUpdate) -> Result<(), UpdateBodyError> {
         if let Some(update) = updates.update {
             let output: String = match update {
                 BodyUpdateType::Full(_, contentid, content) => {

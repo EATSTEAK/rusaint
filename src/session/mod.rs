@@ -128,7 +128,7 @@ impl USaintSession {
         let token = obtain_ssu_sso_token(id, password).await?;
         Ok(Self::with_token(id, &token)
             .await
-            .or_else(|e| Err(WebDynproError::ClientError(e)))?)
+            .or_else(|e| Err(WebDynproError::Client(e)))?)
     }
 }
 

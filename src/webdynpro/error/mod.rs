@@ -5,16 +5,16 @@ use thiserror::Error;
 pub enum WebDynproError {
     /// 클라이언트 요청/응답 오류
     #[error("Error in client request/response: {0}")]
-    ClientError(#[from] ClientError),
+    Client(#[from] ClientError),
     /// WebDynpro 페이지 파싱 오류
     #[error("Error in parsing document body: {0}")]
-    BodyError(#[from] BodyError),
+    Body(#[from] BodyError),
     /// WebDynpro 페이지 업데이트 오류
     #[error("Error in updating document body from server response: {0}")]
-    BodyUpdateError(#[from] BodyUpdateError),
+    UpdateBody(#[from] UpdateBodyError),
     /// WebDynpro 엘리먼트 조작 오류
     #[error("Error in parse or construct event of element: {0}")]
-    ElementError(#[from] ElementError),
+    Element(#[from] ElementError),
 }
 
 /// 클라이언트 요청/응답 과정에서 발생하는 오류의 이늄
@@ -22,19 +22,19 @@ pub enum WebDynproError {
 pub enum ClientError {
     /// 웹 리퀘스트에 실패
     #[error("Failed to request from web")]
-    RequestError(#[from] reqwest::Error),
+    FailedRequest(#[from] reqwest::Error),
     /// HTML 문서를 파싱하지 못함
     #[error("Failed to parse HTML body")]
     Parse(#[from] BodyError),
     /// 웹 리퀘스트는 성공하였으나, 응답이 올바르지 않음
     #[error("Request is made, but failed")]
-    RequestFailed(reqwest::Response),
+    InvalidResponse(reqwest::Response),
     /// 클라이언트에서 사용하는 Base URL 파싱 실패
     #[error("Failed to parse base url")]
-    BaseUrlParse(#[from] url::ParseError),
+    ParseBaseUrl(#[from] url::ParseError),
     /// WebDynpro 문서 업데이트 응답이 올바르지 않음
     #[error("Server's update response is invalid")]
-    InvalidUpdate(#[from] BodyUpdateError),
+    InvalidUpdate(#[from] UpdateBodyError),
     /// Base URL이 올바르지 않음
     #[error("Given base url is not valid: {0}")]
     InvalidBaseUrl(String),
@@ -51,7 +51,7 @@ pub enum ClientError {
 
 /// WebDynpro 문서 업데이트 중 발생하는 오류의 이늄
 #[derive(Error, Debug)]
-pub enum BodyUpdateError {
+pub enum UpdateBodyError {
     /// 업데이트 응답 XML을 파싱할 수 없음
     #[error("Failed to parse update document: {0}")]
     Parse(#[from] roxmltree::Error),
@@ -69,7 +69,7 @@ pub enum BodyUpdateError {
     UnknownElement(String),
     /// 업데이트 응답에 따라 도큐먼트를 재작성하는 데 실패함
     #[error("Failed to rewrite body document: {0}")]
-    Rewrite(#[from] lol_html::errors::RewritingError),
+    RewriteBody(#[from] lol_html::errors::RewritingError),
 }
 
 /// WebDynpro 문서를 파싱할 때 발생하는 오류의 이늄
@@ -95,7 +95,7 @@ pub enum BodyError {
     NoSuchAttribute(String),
     /// 이벤트 문자열을 일반 문자열로 변환하지 못함
     #[error("Cannot parse event str: {0}")]
-    CannotParseEvents(#[from] EventStrUnescapeError)
+    ParseEvents(#[from] EventStrUnescapeError),
 }
 
 /// 엘리먼트 조작 중 발생하는 오류의 이늄
@@ -121,7 +121,7 @@ pub enum ElementError {
     InvalidLSData(String),
     /// LSData 오브젝트를 파싱할 수 없음
     #[error("Failed parse lsdata json-like object")]
-    ParseLSDataFailed(#[from] serde_json::Error),
+    ParseLSData(#[from] serde_json::Error),
 }
 
 /// 이벤트 문자열을 일반 문자열로 변환할 떄 발생하는 오류의 이늄
@@ -129,10 +129,10 @@ pub enum ElementError {
 pub enum EventStrUnescapeError {
     /// 이벤트 문자열의 HEX 문자열 파싱 실패
     #[error("Failed read hex string")]
-    Int(#[from] std::num::ParseIntError),
+    ParseInt(#[from] std::num::ParseIntError),
     /// 이벤트 문자열의 HEX 문자열이 올바르지 않음
     #[error("hex string is not valid")]
-    Parse(#[from] std::string::FromUtf16Error),
+    ParseHex(#[from] std::string::FromUtf16Error),
     /// 주어진 애플리케이션에서 폼을 찾을 수 없음
     #[error("No form found in desired application")]
     NoForm,

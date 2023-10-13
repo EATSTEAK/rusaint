@@ -93,7 +93,7 @@ impl Client {
             .send()
             .await?;
         if !res.status().is_success() {
-            return Err(ClientError::RequestFailed(res))?;
+            return Err(ClientError::InvalidResponse(res))?;
         }
         Ok(res.text().await?)
     }
