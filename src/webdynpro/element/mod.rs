@@ -201,11 +201,11 @@ macro_rules! register_elements {
         }
 
         $(
-            impl<'a> std::convert::TryInto<$type> for ElementWrapper<'a> {
+            impl<'a> std::convert::TryFrom<ElementWrapper<'a>> for $type {
                 type Error = $crate::webdynpro::error::BodyError;
     
-                fn try_into(self) -> Result<$type, Self::Error> {
-                    match self {
+                fn try_from(wrapper: ElementWrapper<'a>) -> Result<$type, Self::Error> {
+                    match wrapper {
                         ElementWrapper::$enum(res) => Ok(res),
                         _ => Err(Self::Error::InvalidElement)
                     }
