@@ -58,7 +58,6 @@ impl<'a> ComboBox<'a> {
     pub fn item_list_box(&self, body: &'a Body) -> Result<ListBoxWrapper<'a>, WebDynproError> {
         let listbox_id =
             self.item_list_box_id()
-                .as_ref()
                 .ok_or(ElementError::NoSuchData {
                     element: self.id().to_string(),
                     field: "item_list_box_id".to_string(),

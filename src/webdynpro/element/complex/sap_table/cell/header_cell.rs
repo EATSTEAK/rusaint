@@ -1,8 +1,6 @@
-use getset::Getters;
 use std::{borrow::Cow, cell::OnceCell, ops::Deref};
 
 use scraper::Selector;
-use serde::Deserialize;
 
 use crate::webdynpro::{
     element::{
@@ -10,6 +8,7 @@ use crate::webdynpro::{
             SapTableHeaderCellDesign, SapTableHeaderCellType, SapTableRowSelectionMassState,
             SapTableSelectionColumnAction,
         },
+        define_lsdata,
         property::SortState,
         Element, ElementWrapper, SubElement, SubElementDef,
     },
@@ -28,46 +27,27 @@ pub struct SapTableHeaderCell<'a> {
     content: OnceCell<Option<ElementWrapper<'a>>>,
 }
 
-#[derive(Getters, Deserialize, Debug, Default)]
-#[allow(unused)]
-#[get = "pub"]
-pub struct SapTableHeaderCellLSData {
-    #[serde(rename = "0")]
-    sort_state: Option<SortState>,
-    #[serde(rename = "1")]
-    header_cell_design: Option<SapTableHeaderCellDesign>,
-    #[serde(rename = "2")]
-    header_cell_type: Option<SapTableHeaderCellType>,
-    #[serde(rename = "3")]
-    selection_column_action: Option<SapTableSelectionColumnAction>,
-    #[serde(rename = "4")]
-    selection_menu_id: Option<String>,
-    #[serde(rename = "5")]
-    row_selection_mass_state: Option<SapTableRowSelectionMassState>,
-    #[serde(rename = "6")]
-    required: Option<bool>,
-    #[serde(rename = "7")]
-    tooltip: Option<String>,
-    #[serde(rename = "8")]
-    column_selected: Option<bool>,
-    #[serde(rename = "9")]
-    column_selectable: Option<bool>,
-    #[serde(rename = "10")]
-    filtered: Option<bool>,
-    #[serde(rename = "11")]
-    mark_totals: Option<bool>,
-    #[serde(rename = "12")]
-    accessibility_description: Option<String>,
-    #[serde(rename = "13")]
-    icon_tooltip: Option<String>,
-    #[serde(rename = "14")]
-    icon_first: Option<bool>,
-    #[serde(rename = "15")]
-    icon_enabled: Option<bool>,
-    #[serde(rename = "16")]
-    custom_style: Option<String>,
-    #[serde(rename = "17")]
-    custom_data: Option<String>,
+define_lsdata! {
+    SapTableHeaderCellLSData {
+        sort_state: SortState => "0",
+        header_cell_design: SapTableHeaderCellDesign => "1",
+        header_cell_type: SapTableHeaderCellType => "2",
+        selection_column_action: SapTableSelectionColumnAction => "3",
+        selection_menu_id: String => "4",
+        row_selection_mass_state: SapTableRowSelectionMassState => "5",
+        required: bool => "6",
+        tooltip: String => "7",
+        column_selected: bool => "8",
+        column_selectable: bool => "9",
+        filtered: bool => "10",
+        mark_totals: bool => "11",
+        accessibility_description: String => "12",
+        icon_tooltip: String => "13",
+        icon_first: bool => "14",
+        icon_enabled: bool => "15",
+        custom_style: String => "16",
+        custom_data: String => "17",
+    }
 }
 
 impl<'a> SubElement<'a> for SapTableHeaderCell<'a> {
@@ -77,14 +57,13 @@ impl<'a> SubElement<'a> for SapTableHeaderCell<'a> {
     type SubElementLSData = SapTableHeaderCellLSData;
 
     fn lsdata(&self) -> &Self::SubElementLSData {
-        self.lsdata
-            .get_or_init(|| {
-                let Ok(lsdata_obj) = Self::lsdata_elem(self.element_ref) else {
+        self.lsdata.get_or_init(|| {
+            let Ok(lsdata_obj) = Self::lsdata_elem(self.element_ref) else {
                     return Self::SubElementLSData::default();
                 };
-                serde_json::from_value::<Self::SubElementLSData>(lsdata_obj)
-                    .unwrap_or(Self::SubElementLSData::default())
-            })
+            serde_json::from_value::<Self::SubElementLSData>(lsdata_obj)
+                .unwrap_or(Self::SubElementLSData::default())
+        })
     }
 
     fn from_elem<Parent: Element<'a>>(

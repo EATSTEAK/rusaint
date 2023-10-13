@@ -1,13 +1,11 @@
-use getset::Getters;
 use std::{borrow::Cow, cell::OnceCell, ops::Deref};
 
 use scraper::Selector;
-use serde::Deserialize;
 
 use crate::webdynpro::{
     element::{
         complex::sap_table::property::{SapTableCellDesign, SapTableCellType},
-        Element, ElementWrapper, SubElement, SubElementDef,
+        define_lsdata, Element, ElementWrapper, SubElement, SubElementDef,
     },
     error::WebDynproError,
 };
@@ -24,26 +22,17 @@ pub struct SapTableNormalCell<'a> {
     content: OnceCell<Option<ElementWrapper<'a>>>,
 }
 
-#[derive(Getters, Deserialize, Debug, Default)]
-#[allow(unused)]
-#[get = "pub"]
-pub struct SapTableNormalCellLSData {
-    #[serde(rename = "0")]
-    is_selected: Option<bool>,
-    #[serde(rename = "1")]
-    is_secondary_selected: Option<bool>,
-    #[serde(rename = "2")]
-    cell_type: Option<SapTableCellType>,
-    #[serde(rename = "3")]
-    cell_design: Option<SapTableCellDesign>,
-    #[serde(rename = "4")]
-    header_cell_ids: Option<String>,
-    #[serde(rename = "5")]
-    row_header_cell_ids: Option<String>,
-    #[serde(rename = "6")]
-    custom_style: Option<String>,
-    #[serde(rename = "7")]
-    custom_data: Option<String>,
+define_lsdata! {
+    SapTableNormalCellLSData {
+        is_selected: bool => "0",
+        is_secondary_selected: bool => "1",
+        cell_type: SapTableCellType => "2",
+        cell_design: SapTableCellDesign => "3",
+        header_cell_ids: String => "4",
+        row_header_cell_ids: String => "5",
+        custom_style: String => "6",
+        custom_data: String => "7",
+    }
 }
 
 impl<'a> SapTableCell<'a> for SapTableNormalCell<'a> {
@@ -70,14 +59,13 @@ impl<'a> SubElement<'a> for SapTableNormalCell<'a> {
     type SubElementLSData = SapTableNormalCellLSData;
 
     fn lsdata(&self) -> &Self::SubElementLSData {
-        self.lsdata
-            .get_or_init(|| {
-                let Ok(lsdata_obj) = Self::lsdata_elem(self.element_ref) else {
+        self.lsdata.get_or_init(|| {
+            let Ok(lsdata_obj) = Self::lsdata_elem(self.element_ref) else {
                     return Self::SubElementLSData::default();
                 };
-                serde_json::from_value::<Self::SubElementLSData>(lsdata_obj)
-                    .unwrap_or(Self::SubElementLSData::default())
-            })
+            serde_json::from_value::<Self::SubElementLSData>(lsdata_obj)
+                .unwrap_or(Self::SubElementLSData::default())
+        })
     }
 
     fn from_elem<Parent: Element<'a>>(

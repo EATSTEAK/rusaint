@@ -171,7 +171,7 @@ impl<'a> CourseGrades {
                     match val.content() {
                         Some(ElementWrapper::TextView(tv)) => Some(tv.text().to_owned()),
                         Some(ElementWrapper::Caption(cap)) => {
-                            Some(cap.text().as_ref().unwrap_or(&String::default()).to_owned())
+                            Some(cap.text().unwrap_or(&String::default()).to_owned())
                         }
                         _ => None,
                     }
@@ -182,7 +182,7 @@ impl<'a> CourseGrades {
     }
 
     fn value_as_f32(field: InputField<'_>) -> Result<f32, WebDynproError> {
-        let Some(value) = field.value().as_ref() else {
+        let Some(value) = field.value() else {
             return Err(ElementError::NoSuchData { element: field.id().to_string(), field: "value1".to_string() })?;
         };
         Ok(value.parse::<f32>().or(Err(ElementError::InvalidContent {
