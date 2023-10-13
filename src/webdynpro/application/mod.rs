@@ -16,7 +16,7 @@ pub struct BasicApplication {
 
 impl<'a> BasicApplication {
     define_elements! {
-        SSR_FORM: Form<'a> = "sap.client.SsrClient.form"
+        SSR_FORM: Form<'a> = "sap.client.SsrClient.form";
     }
 
     /// WebDynpro 애플리케이션이 제공되는 Base URL과 애플리케이션 이름을 제공하여 새로운 애플리케이션을 생성합니다.

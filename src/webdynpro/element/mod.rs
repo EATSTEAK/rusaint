@@ -339,16 +339,31 @@ where T: Element<'a>
 /// impl<'a> USaintApplication {
 ///     define_elements!{
 ///         // const TEST_BUTTON: ElementDef<'a, Button<'a>> = ElementDef::new("TEST.BUTTON1"); 과 같음
-///         TEST_BUTTON: Button<'a> = "TEST.BUTTON1",
+///         TEST_BUTTON: Button<'a> = "TEST.BUTTON1";
 ///         // const TEST_COMBOBOX: ElementDef<'a, ComboBox<'a>> = ElementDef::new("TEST.COMBOBOX1"); 과 같음
-///         TEST_COMBOBOX: ComboBox<'a> = "TEST.COMBOBOX1",
+///         TEST_COMBOBOX: ComboBox<'a> = "TEST.COMBOBOX1";
 ///     }
 /// }
 /// ```
 #[macro_export]
 macro_rules! define_elements {
-    ($($name:ident : $eltype:tt<$lt:lifetime> = $id:literal),+ $(,)?) => {
-        $(const $name: $crate::webdynpro::element::ElementDef<$lt, $eltype<$lt>> = $crate::webdynpro::element::ElementDef::new($id);)*
+    ($(
+        $(#[$attr:meta])*
+        $v:vis $name:ident : $eltype:tt<$lt:lifetime> = $id:literal
+    ;)+) => {
+        $(
+            $(#[$attr])*
+            $v const $name: $crate::webdynpro::element::ElementDef<$lt, $eltype<$lt>> = $crate::webdynpro::element::ElementDef::new($id);
+        )*
+    };
+    ($(
+        $(#[$attr:meta])*
+        $name:ident : $eltype:tt<$lt:lifetime> = $id:literal
+    ;)+) => {
+        $(
+            $(#[$attr])*
+            const $name: $crate::webdynpro::element::ElementDef<$lt, $eltype<$lt>> = $crate::webdynpro::element::ElementDef::new($id);
+        )*
     }
 }
 

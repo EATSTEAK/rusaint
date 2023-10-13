@@ -38,9 +38,9 @@ impl<'a> DerefMut for USaintApplication {
 
 impl<'a> USaintApplication {
     define_elements! {
-        CLIENT_INSPECTOR_WD01: ClientInspector<'a> = "WD01",
-        CLIENT_INSPECTOR_WD02: ClientInspector<'a> = "WD02",
-        LOADING_PLACEHOLDER: LoadingPlaceholder<'a> = "_loadingPlaceholder_"
+        CLIENT_INSPECTOR_WD01: ClientInspector<'a> = "WD01";
+        CLIENT_INSPECTOR_WD02: ClientInspector<'a> = "WD02";
+        LOADING_PLACEHOLDER: LoadingPlaceholder<'a> = "_loadingPlaceholder_";
     }
 
     const CUSTOM: Custom = Custom::new(std::borrow::Cow::Borrowed("WD01"));
