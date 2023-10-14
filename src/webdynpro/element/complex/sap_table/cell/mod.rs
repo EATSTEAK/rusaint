@@ -64,8 +64,16 @@ impl<'a> SapTableCellWrapper<'a> {
             _ => None,
         }
     }
+}
 
-    pub fn content(&self) -> Option<&ElementWrapper<'a>> {
+/// [`SapTable`]의 공통된 셀 기능
+pub trait SapTableCell<'a> {
+    /// 셀 내부 컨텐츠 엘리먼트를 반환합니다.
+    fn content(&self) -> Option<&ElementWrapper<'a>>;
+}
+
+impl<'a> SapTableCell<'a> for SapTableCellWrapper<'a> {
+    fn content(&self) -> Option<&ElementWrapper<'a>> {
         match self {
             SapTableCellWrapper::Normal(elem) => elem.content(),
             SapTableCellWrapper::Header(elem) => elem.content(),
@@ -74,11 +82,6 @@ impl<'a> SapTableCellWrapper<'a> {
             SapTableCellWrapper::Selection(elem) => elem.content(),
         }
     }
-}
-
-pub trait SapTableCell<'a> {
-    /// 셀 내부 컨텐츠 엘리먼트를 반환합니다.
-    fn content(&self) -> Option<&ElementWrapper<'a>>;
 }
 
 mod header_cell;
