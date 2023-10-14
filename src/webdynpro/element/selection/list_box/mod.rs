@@ -177,7 +177,7 @@ impl<'a> ListBox<'a> {
         }
     }
 
-    pub fn items(&self) -> &Vec<ListBoxItemWrapper<'a>> {
+    pub fn items(&self) -> impl Iterator<Item = &ListBoxItemWrapper<'a>> {
         self.items.get_or_init(|| {
             let items_selector = scraper::Selector::parse("[ct]").unwrap();
             self.element_ref
@@ -193,7 +193,7 @@ impl<'a> ListBox<'a> {
                     }
                 })
                 .collect()
-        })
+        }).iter()
     }
 }
 
