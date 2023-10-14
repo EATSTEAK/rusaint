@@ -10,11 +10,13 @@ use crate::webdynpro::{
     event::Event,
 };
 
-use super::{ButtonType, ButtonInteractionBehaviour, ButtonDesign};
+use super::{ButtonDesign, ButtonInteractionBehaviour, ButtonType};
 
 pub mod property {
     use serde::Deserialize;
 
+    /// 버튼의 외형 종류
+    #[allow(missing_docs)]
     #[derive(Deserialize, Debug)]
     #[serde(rename_all = "UPPERCASE")]
     pub enum ButtonDesign {
@@ -28,6 +30,8 @@ pub mod property {
         Toggle,
     }
 
+    /// 버튼의 동작 분류
+    #[allow(missing_docs)]
     #[derive(Deserialize, Debug)]
     #[serde(rename_all = "UPPERCASE")]
     pub enum ButtonType {
@@ -52,6 +56,8 @@ pub mod property {
         Rte,
     }
 
+    /// 버튼의 상호작용 동작
+    #[allow(missing_docs)]
     #[derive(Deserialize, Debug)]
     #[serde(rename_all = "UPPERCASE")]
     pub enum ButtonInteractionBehaviour {
@@ -61,8 +67,9 @@ pub mod property {
 }
 
 define_element_interactable! {
-    #[doc = "버튼"]
+    #[doc = "누를 수 있는 버튼"]
     Button<"B", "Button"> {},
+    #[doc = "[`Button`]의 내부 데이터"]
     ButtonLSData {
         text: String => "0",
         text_design: TextDesign => "1",
@@ -100,6 +107,7 @@ define_element_interactable! {
 }
 
 impl<'a> Button<'a> {
+    /// HTML 엘리먼트로부터 새로운 [`Button`] 엘리먼트를 생성합니다.
     pub fn new(id: Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {
         Self {
             id,

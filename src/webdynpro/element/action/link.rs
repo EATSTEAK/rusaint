@@ -11,8 +11,9 @@ use crate::webdynpro::{
 };
 
 define_element_interactable! {
-    #[doc = "하이퍼링크"]
+    #[doc = "액션을 수행하거나 링크로 이동하는 하이퍼링크"]
     Link<"LN", "Link"> {},
+    #[doc ="[`Link`] 내부 데이터"]
     LinkLSData {
         tooltip: String => "0",
         text: String => "1",
@@ -31,6 +32,8 @@ define_element_interactable! {
 }
 
 impl<'a> Link<'a> {
+
+    /// HTML 엘리먼트로부터 [`Link`] 엘리먼트를 생성합니다.
     pub fn new(id: Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {
         Self {
             id,
@@ -49,6 +52,7 @@ impl<'a> Link<'a> {
         self.fire_event("Activate".to_string(), parameters)
     }
 
+    /// 더블 클릭 이벤트를 반환합니다.
     pub fn double_click(&self) -> Result<Event, WebDynproError> {
         let mut parameters: HashMap<String, String> = HashMap::new();
         parameters.insert("Id".to_string(), self.id.clone().to_string());
