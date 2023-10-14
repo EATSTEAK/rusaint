@@ -1,14 +1,11 @@
-use std::{
-    collections::HashMap,
-    sync::Arc,
-};
+use std::{collections::HashMap, sync::Arc};
 
 use crate::{
     define_elements,
     model::SemesterType,
     session::USaintSession,
     webdynpro::{
-        application::client::body::Body,
+        application::{client::body::Body, Application},
         element::{
             action::Button,
             complex::sap_table::{
@@ -28,8 +25,10 @@ use self::model::{ClassGrade, GradeSummary, SemesterGrade};
 
 use super::USaintApplication;
 
-/// [학생 성적 조회](https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/ZCMB3W0017)
-pub struct CourseGrades(USaintApplication);
+define_usaint_application!(
+    #[doc = "[학생 성적 조회](https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/ZCMB3W0017)"]
+    pub struct CourseGrades
+);
 
 #[allow(unused)]
 impl<'a> CourseGrades {
@@ -501,7 +500,7 @@ mod test {
     use crate::{
         application::course_grades::CourseGrades,
         session::USaintSession,
-        webdynpro::element::{layout::PopupWindow, Element},
+        webdynpro::{element::{layout::PopupWindow, Element}, application::Application},
     };
     use dotenv::dotenv;
 

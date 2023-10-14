@@ -1,8 +1,11 @@
 use std::sync::Arc;
 
-use rusaint::{application::USaintApplication, webdynpro::error::WebDynproError, USaintSession};
+use rusaint::{
+    application::USaintApplication, define_usaint_application, webdynpro::error::WebDynproError,
+    USaintSession,
+};
 
-pub(crate) struct EventTestSuite(USaintApplication);
+define_usaint_application!(pub(crate) struct EventTestSuite);
 
 impl<'a> EventTestSuite {
     const APP_NAME: &str = "WDR_TEST_EVENTS";

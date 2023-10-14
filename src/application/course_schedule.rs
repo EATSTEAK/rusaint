@@ -3,13 +3,13 @@ use crate::{
     model::SemesterType,
     webdynpro::{
         element::{action::Button, complex::SapTable, layout::TabStrip, selection::ComboBox},
-        error::WebDynproError,
+        error::WebDynproError, application::Application,
     },
 };
 
 use super::USaintApplication;
 
-pub struct CourseSchedule(USaintApplication);
+define_usaint_application!(pub struct CourseSchedule);
 
 #[allow(unused)]
 impl<'a> CourseSchedule {
@@ -100,11 +100,11 @@ impl<'a> CourseSchedule {
 mod test {
     use crate::{
         application::course_schedule::CourseSchedule,
-        webdynpro::element::{
+        webdynpro::{element::{
             complex::sap_table::cell::{SapTableCell, SapTableCellWrapper},
             selection::list_box::{item::ListBoxItemWrapper, ListBoxWrapper},
             ElementWrapper,
-        },
+        }, application::Application},
     };
 
     #[tokio::test]

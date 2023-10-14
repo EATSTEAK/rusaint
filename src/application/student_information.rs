@@ -4,7 +4,7 @@ use crate::{session::USaintSession, webdynpro::error::WebDynproError};
 
 use super::USaintApplication;
 
-pub struct StudentInformation(USaintApplication);
+define_usaint_application!(pub struct StudentInformation);
 
 #[allow(unused)]
 impl StudentInformation {
@@ -23,8 +23,8 @@ mod test {
     use std::sync::{Arc, OnceLock};
 
     use crate::{
-        application::student_information::StudentInformation, session::USaintSession,
-        webdynpro::element::ElementWrapper,
+        session::USaintSession,
+        webdynpro::{application::Application, element::ElementWrapper},
     };
     use dotenv::dotenv;
 

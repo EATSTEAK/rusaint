@@ -5,7 +5,7 @@ use rusaint::{
             action::{Button, Link},
             text::TextView,
         },
-        error::WebDynproError,
+        error::WebDynproError, application::Application,
     },
 };
 
