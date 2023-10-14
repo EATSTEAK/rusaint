@@ -33,7 +33,7 @@ pub enum ContentVisibility {
     Text,
     Icon,
 }
-
+#[allow(missing_docs)]
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum HotkeyValue {
