@@ -9,6 +9,13 @@ use crate::webdynpro::element::{
     Element, ElementDef, ElementWrapper, EventParameterMap, Interactable,
 };
 
+/// 클라이언트의 변경 사항을 감시
+/// 
+/// 이 엘리먼트는 사용자와 직접 상호작용하지 않는 특별한 엘리먼트로, 브라우저의 여러 값(윈도우 높이 등)을 감시하고 변경 사항이 있다면
+/// 이를 서버에 알려주어 서버가 해당 값을 토대로 SSR을 할 수 있도록 도와줍니다.
+/// rusaint에서는 서버에 가상의 기본 값을 알려주어 이를 토대로 SSR를 수행하도록 [`USaintApplication`]에서 구현하고 있습니다.
+/// 3개 정도의 `ClientInspector`가 최초에 초기화되며, 초기화 된 후에 [`LoadingPlaceholder`]를 통한 실제 페이지 로드를 수행합니다.
+/// [`ClientInspectorLSData`]의 `notification_trigger` 값을 확인하면 해당 엘리먼트가 변경 사항이 있을 때마다 감시하는지, 혹은 최초 한번만 서버에 알리는지 확인할 수 있습니다.
 #[derive(Debug)]
 pub struct ClientInspector<'a> {
     id: Cow<'static, str>,
@@ -16,6 +23,8 @@ pub struct ClientInspector<'a> {
     lsdata: OnceCell<ClientInspectorLSData>,
     lsevents: OnceCell<Option<EventParameterMap>>,
 }
+
+/// [`ClientInspector`]의 내부 데이터
 #[derive(Serialize, Deserialize, Debug, Default)]
 #[serde(rename_all(serialize = "PascalCase"))]
 #[allow(unused)]
@@ -162,6 +171,7 @@ impl<'a> Interactable<'a> for ClientInspector<'a> {
 }
 
 impl<'a> ClientInspector<'a> {
+    /// HTML 엘리먼트로 [`ClientInspector`] 엘리먼트를 생성합니다.
     pub const fn new(id: Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {
         Self {
             id,
@@ -171,6 +181,8 @@ impl<'a> ClientInspector<'a> {
         }
     }
 
+    /// 서버에 이 엘리먼트가 감시하는 클라이언트 값을 알리는 이벤트를 반환합니다.
+    /// 데이터는 특수한 형태의 JSON-like 값으로, 현재는 rusaint에서 Serialization/Deserialization 을 지원하지 않습니다.
     pub fn notify(&self, data: &str) -> Result<Event, WebDynproError> {
         let mut parameters: HashMap<String, String> = HashMap::new();
 

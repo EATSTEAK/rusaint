@@ -6,7 +6,15 @@ use crate::webdynpro::event::Event;
 use crate::webdynpro::element::{define_element_interactable, Interactable};
 
 define_element_interactable! {
+    #[doc = r###"페이지가 로드되기 전 내부 컨텐츠가 로드될 위치의 자리 표시자
+
+    이 엘리먼트는 최초 로드 전 컨텐츠가 로드될 위치를 표시하기 위한 엘리먼트입니다.
+    `LoadingPlaceholder.Load` 이벤트가 전송되면 사라지고, 이 엘리먼트가 있는 위치에 실제 페이지가 렌더링됩니다.
+    
+    로드 이벤트가 전송되어 페이지가 렌더링되기 위해서는 [`Custom`] 및 [`ClientInspector`] 엘리먼트의 클라이언트 데이터가 전송되어야 합니다.
+    "###]
     LoadingPlaceholder<"LP", "LoadingPlaceHolder"> {},
+    #[doc = "[`LoadingPlaceholder`]의 내부 데이터"]
     LoadingPlaceholderLSData {
         id: String => "0",
         custom_data: String => "1",
@@ -14,6 +22,7 @@ define_element_interactable! {
 }
 
 impl<'a> LoadingPlaceholder<'a> {
+    /// HTML 엘리먼트로부터 새로운 [`LoadingPlaceholder`]를 생성합니다.
     pub const fn new(id: Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {
         Self {
             id,
@@ -23,6 +32,7 @@ impl<'a> LoadingPlaceholder<'a> {
         }
     }
 
+    /// 페이지를 로드하기 위한 이벤트를 반환합니다.
     pub fn load(&self) -> Result<Event, WebDynproError> {
         let mut parameters: HashMap<String, String> = HashMap::new();
         parameters.insert("Id".to_string(), self.id.clone().to_string());
