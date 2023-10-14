@@ -4,11 +4,7 @@ use scraper::ElementRef;
 
 use crate::webdynpro::{element::ElementDef, error::ElementError};
 
-use super::{
-    property::SapTableRowType,
-    row::SapTableRow,
-    SapTable,
-};
+use super::{property::SapTableRowType, row::SapTableRow, SapTable};
 
 #[derive(custom_debug_derive::Debug)]
 #[allow(unused)]
@@ -50,14 +46,22 @@ impl<'a> SapTableBody<'a> {
         })
     }
 
-    pub fn zip_header(&'a self) -> impl Iterator<Item = (&SapTableRow, &SapTableRow)> {
-        let header_iter = iter::repeat(self.header());
-        header_iter
-            .zip(self.rows.iter())
+    pub fn len(&self) -> usize {
+        self.rows.len()
+    }
+
+    pub fn iter(&'a self) -> impl Iterator<Item = &SapTableRow> + ExactSizeIterator {
+        self.rows.iter()
+    }
+
+    pub fn zip_header(
+        &'a self,
+    ) -> impl Iterator<Item = (&SapTableRow, &SapTableRow)> + ExactSizeIterator {
+        self.rows.iter().map(|row| (self.header(), row))
     }
 
     pub fn with_header(&'a self) -> impl Iterator<Item = &SapTableRow> {
-        [self.header()].into_iter().chain(self.rows.iter())
+        iter::once(self.header()).chain(self.rows.iter())
     }
 
     pub fn table_def(&self) -> ElementDef<'a, SapTable<'a>> {
