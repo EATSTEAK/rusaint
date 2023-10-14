@@ -123,7 +123,10 @@ impl USaintSession {
             .or_else(|e| Err(WebDynproError::Client(e)))?)
     }
 
-    pub fn jar(&self) -> &Jar { &self.0 }
+    /// 세션의 내부 [`reqwest::cookie::Jar`]의 레퍼런스를 반환합니다.
+    pub fn jar(&self) -> &Jar {
+        &self.0
+    }
 }
 
 /// 학번과 비밀번호를 이용해 SSO 토큰을 발급받습니다.

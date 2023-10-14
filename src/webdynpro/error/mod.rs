@@ -60,6 +60,7 @@ pub enum UpdateBodyError {
     NoSuchNode(String),
     /// 업데이트 응답의 노드에서 어트리뷰트를 찾을 수 없음
     #[error("Cannot find an attribute {attribute:?} from a node {node:?}")]
+    #[allow(missing_docs)]
     NoSuchAttribute { node: String, attribute: String },
     /// 업데이트 응답에서 필요한 콘텐츠를 찾을 수 없음
     #[error("{0} has no content")]
@@ -99,6 +100,7 @@ pub enum BodyError {
 }
 
 /// 엘리먼트 조작 중 발생하는 오류의 이늄
+#[allow(missing_docs)]
 #[derive(Error, Debug)]
 pub enum ElementError {
     /// 엘리먼트에서 데이터를 찾을 수 없음

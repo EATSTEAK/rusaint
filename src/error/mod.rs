@@ -2,6 +2,7 @@ use thiserror::Error;
 
 use crate::webdynpro::error::WebDynproError;
 
+/// Rusaint 애플리케이션에서 반환하는 오류
 #[derive(Error, Debug)]
 pub enum RusaintError {
     /// 내부 WebDynpro 엔진 오류
@@ -12,6 +13,7 @@ pub enum RusaintError {
     SsoLoginError(#[from] SsuSsoError),
 }
 
+/// 숭실대학교 SSO 로그인 실패 시 반환하는 오류
 #[derive(Error, Debug)]
 pub enum SsuSsoError {
     /// 웹 요청, 응답 오류

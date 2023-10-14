@@ -109,7 +109,7 @@ impl<'a> BasicApplication {
     ///     elem.select("2022").unwrap()
     /// };
     /// // app: BasicApplication
-    /// app.send_events(&[select_event]).await.unwrap();
+    /// app.send_events(vec![select_event]).await.unwrap();
     /// # })
     pub async fn send_events(
         &mut self,
