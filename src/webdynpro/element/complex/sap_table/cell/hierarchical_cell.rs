@@ -86,6 +86,7 @@ impl<'a> SubElement<'a> for SapTableHierarchicalCell<'a> {
 }
 
 impl<'a> SapTableHierarchicalCell<'a> {
+    /// HTML 엘리먼트로부터 [`SapTableHierarchicalCell`]을 생성합니다.
     pub const fn new(id: Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {
         Self {
             id,

@@ -6,6 +6,7 @@ use crate::webdynpro::{element::ElementDef, error::ElementError};
 
 use super::{property::SapTableRowType, row::SapTableRow, SapTable};
 
+/// [`SapTable`] 내부 테이블
 #[derive(custom_debug_derive::Debug)]
 #[allow(unused)]
 pub struct SapTableBody<'a> {
@@ -46,28 +47,34 @@ impl<'a> SapTableBody<'a> {
         })
     }
 
+    /// 헤더 행을 제외한 행의 갯수를 반환합니다.
     pub fn len(&self) -> usize {
         self.rows.len()
     }
 
+    /// 내부 행의 Iterator를 반환합니다.
     pub fn iter(&'a self) -> impl Iterator<Item = &SapTableRow> + ExactSizeIterator {
         self.rows.iter()
     }
 
+    /// 내부 행에 헤더 행을 포함한 튜플의 Iterator를 반환합니다.
     pub fn zip_header(
         &'a self,
     ) -> impl Iterator<Item = (&SapTableRow, &SapTableRow)> + ExactSizeIterator {
         self.rows.iter().map(|row| (self.header(), row))
     }
 
+    /// 헤더 행을 포함하여 모든 행의 Iterator를 반환합니다.
     pub fn with_header(&'a self) -> impl Iterator<Item = &SapTableRow> {
         iter::once(self.header()).chain(self.rows.iter())
     }
 
+    /// 이 테이블의 원본 [`ElementDef`]를 반환합니다.
     pub fn table_def(&self) -> ElementDef<'a, SapTable<'a>> {
         self.table_def.clone()
     }
 
+    /// 헤더 행을 반환합니다.
     pub fn header(&self) -> &SapTableRow<'a> {
         &self.header
     }

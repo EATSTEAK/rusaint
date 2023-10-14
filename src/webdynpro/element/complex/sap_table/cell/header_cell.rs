@@ -103,6 +103,7 @@ impl<'a> SapTableCell<'a> for SapTableHeaderCell<'a> {
 }
 
 impl<'a> SapTableHeaderCell<'a> {
+    /// HTML 엘리먼트로부터 [`SapTableHeaderCell`]을 생성합니다.
     pub const fn new(id: Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {
         Self {
             id,

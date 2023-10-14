@@ -1,15 +1,22 @@
 use crate::webdynpro::element::{ElementDef, ElementWrapper, SubElement, SubElementDef};
 
+/// [`SapTable`] 셀의 Wrapper
 #[derive(Debug)]
 pub enum SapTableCellWrapper<'a> {
+    /// 일반적인 셀
     Normal(SapTableNormalCell<'a>),
+    /// 헤더 셀
     Header(SapTableHeaderCell<'a>),
+    /// 순차형 셀
     Hierarchical(SapTableHierarchicalCell<'a>),
+    /// Matrix 레이아웃용 셀
     Matrix(SapTableMatrixCell<'a>),
+    /// 선택을 위한 셀
     Selection(SapTableSelectionCell<'a>),
 }
 
 impl<'a> SapTableCellWrapper<'a> {
+    /// 셀을 표현하는 HTML 엘리먼트로부터 [`SapTableCellWrapper`]를 생성합니다.
     pub fn dyn_cell(
         table_def: ElementDef<'a, SapTable<'a>>,
         elem_ref: scraper::ElementRef<'a>,
