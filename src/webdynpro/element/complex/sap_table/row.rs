@@ -61,7 +61,7 @@ impl<'a> SapTableRow<'a> {
         self.cells.len()
     }
 
-    pub fn iter(&self) -> impl Iterator<Item = &SapTableCellWrapper<'a>> {
+    pub fn iter(&self) -> impl Iterator<Item = &SapTableCellWrapper<'a>> + ExactSizeIterator {
         self.cells.iter()
     }
 
