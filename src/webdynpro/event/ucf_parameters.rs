@@ -4,6 +4,7 @@ use serde::Deserialize;
 use super::{EVENT_DATA_COLON, EVENT_DATA_COMMA, EVENT_DATA_END, EVENT_DATA_START};
 
 /// 이벤트의 특성을 정의하는 파라메터
+#[allow(missing_docs)]
 #[derive(Builder, Clone, Default, Debug, Deserialize)]
 #[builder(default)]
 pub struct UcfParameters {
@@ -139,6 +140,7 @@ pub enum UcfAction {
     SubmitAsync,
     /// 이벤트가 큐에 저장되어야 함
     Enqueue,
+    /// 없음
     None,
 }
 
@@ -162,6 +164,7 @@ pub enum UcfCardinality {
     Multiple,
     /// 동일한 이벤트가 큐에 한번만 들어갈 수 있음
     Single,
+    /// 없음
     None,
 }
 
@@ -199,6 +202,7 @@ impl ToString for UcfResponseData {
     }
 }
 
+#[allow(missing_docs)]
 #[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum UcfTransportMethod {
@@ -217,6 +221,7 @@ impl ToString for UcfTransportMethod {
 }
 
 /// 이벤트의 반영 딜레이 여부
+#[allow(missing_docs)]
 #[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum UcfDelay {

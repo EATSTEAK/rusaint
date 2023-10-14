@@ -45,10 +45,8 @@ pub mod application;
 #[cfg(feature = "application")]
 mod error;
 #[cfg(feature = "application")]
-/// Rusaint 애플리케이션에서 반환하는 오류
 pub use error::RusaintError;
 #[cfg(feature = "application")]
-/// 숭실대학교 SSO 로그인 실패 시 반환하는 오류
 pub use error::SsuSsoError;
 #[cfg(feature = "application")]
 mod session;

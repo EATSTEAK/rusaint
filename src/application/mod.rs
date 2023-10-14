@@ -18,6 +18,39 @@ use crate::{
     },
 };
 
+/// 새로운 u-saint 애플리케이션을 만듭니다.
+///
+/// ### 예시
+/// ```no_run
+/// # use std::sync::Arc;
+/// # use rusaint::define_usaint_application;
+/// define_usaint_application(pub struct ExampleApplication);
+///
+/// impl<'a> ExampleApplication {
+///     const APP_NAME: &str = "ZCMW1001n";
+///
+///     // 엘리먼트를 정의하는 매크로
+///     define_elements! {
+///         // 담당자문의 정보에 해당하는 캡션의 ID 정의
+///         CAPTION: Caption<'a> = "ZCMW_DEVINFO_RE.ID_D080C16F227F4D68751326DC40BB6BE0:MAIN.CAPTION"
+///     }
+///
+///     pub async fn new(session: Arc<USaintSession>) -> Result<ExampleApplication, WebDynproError> {
+///         Ok(ExampleApplication(
+///             USaintApplication::with_session(Self::APP_NAME, session).await?,
+///        ))
+///     }
+/// }
+///
+/// async fn test() -> Result<(), dyn Error> {
+///     let session = Arc::new(USaintSession::with_password("20212345", "password").await?);
+///     let app = ExampleApplication::new(session).await?;
+///     let caption = ExampleApplication::CAPTION.from_body(app.body())?;
+///     // Some("담당자문의 정보");
+///     println!("{:?}", caption.text());
+///     
+/// }
+/// ```
 #[macro_export]
 macro_rules! define_usaint_application {
     (
@@ -129,7 +162,9 @@ impl<'a> USaintApplication {
         app.load_placeholder().await?;
         Ok(app)
     }
-
+    /// 이벤트를 서버에 전송합니다. [`send_events`] 를 참조하세요.
+    ///
+    /// [`send_events`] : webdynpro::application::BasicApplication::send_events
     pub async fn send_events(
         &mut self,
         events: impl IntoIterator<Item = Event>,
