@@ -7,11 +7,16 @@ use crate::webdynpro::element::{ElementDef, ElementWrapper, EventParameterMap};
 use self::item::ListBoxItemWrapper;
 
 macro_rules! def_listbox_subset {
-    [$($name:ident = $id:literal),+ $(,)?] => {$(
+    [$(
+        $(#[$attr:meta])*
+        $name:ident = $id:literal
+    ),+ $(,)?] => {$(
+        $(#[$attr])*
         #[derive(Debug)]
         pub struct $name<'a>($crate::webdynpro::element::selection::list_box::ListBox<'a>);
 
         impl<'a> $name<'a> {
+            /// 이 엘리먼트의 원본 [`ListBox`]를 반환합니다.
             pub fn list_box(&self) -> &$crate::webdynpro::element::selection::list_box::ListBox<'a> {
                 &self.0
             }
@@ -63,18 +68,25 @@ macro_rules! def_listbox_subset {
         }
 
         impl<'a> $name<'a> {
+            #[doc = concat!("새로운 [`", stringify!($name), "`] 을 반환합니다.")]
             pub const fn new(id: std::borrow::Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {
                 Self($crate::webdynpro::element::selection::list_box::ListBox::new(id, element_ref))
             }
         }
     )+
 
+    /// [`ListBox`] 분류의 엘리먼트를 위한 공통된 Wrapper
     #[derive(Debug)]
     pub enum ListBoxWrapper<'a> {
-        $($name($name<'a>),)+
+        $(
+            $(#[$attr])*
+            $name($name<'a>),
+        )+
     }
 
     impl<'a> ListBoxWrapper<'a> {
+
+        /// [`ElementWrapper`]에서 [`ListBoxWrapper`]로 변환을 시도합니다.
         pub fn from_elements(elements: $crate::webdynpro::element::ElementWrapper<'a>) -> Option<ListBoxWrapper<'a>> {
             match elements {
                 $($crate::webdynpro::element::ElementWrapper::$name(elem) => Some(ListBoxWrapper::$name(elem)),)+
@@ -85,6 +97,7 @@ macro_rules! def_listbox_subset {
 };
 }
 
+/// 선택할 수 있는 목록
 #[derive(Debug)]
 pub struct ListBox<'a> {
     id: Cow<'static, str>,
@@ -95,14 +108,21 @@ pub struct ListBox<'a> {
 }
 
 def_listbox_subset![
+    #[doc = "팝업 형태로 표시되는 [`ListBox`]"]
     ListBoxPopup = "LIB_P",
+    #[doc = "팝업 형태로 표시되며 데이터 구조가 있는 [`ListBox`]"]
     ListBoxPopupJson = "LIB_PJ",
+    #[doc = "팝업 형태로 표시되며 필터 입력 상자가 있는 [`ListBox`]"]
     ListBoxPopupFiltered = "LIB_PS",
+    #[doc = "팝업 형태로 표시되며 데이터 구조가 있고 필터 입력 상자가 있는 [`ListBox`]"]
     ListBoxPopupJsonFiltered = "LIB_PJS",
+    #[doc = "여러 선택지를 선택할 수 있는 [`ListBox`]"]
     ListBoxMultiple = "LIB_M",
+    #[doc = "하나의 선택지만 선택할 수 있는 [`ListBox`]"]
     ListBoxSingle = "LIB_S"
 ];
 
+/// [`ListBox`]의 내부 데이터
 #[derive(Deserialize, Debug, Default)]
 #[allow(unused)]
 pub struct ListBoxLSData {
@@ -167,6 +187,8 @@ pub struct ListBoxLSData {
 }
 
 impl<'a> ListBox<'a> {
+
+    /// HTML 엘리먼트로부터 새로운 [`ListBox`]를 생성합니다.
     pub const fn new(id: Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {
         Self {
             id,
@@ -177,6 +199,7 @@ impl<'a> ListBox<'a> {
         }
     }
 
+    /// [`ListBoxItem`]의 목록을 반환합니다.
     pub fn items(&self) -> impl Iterator<Item = &ListBoxItemWrapper<'a>> {
         self.items.get_or_init(|| {
             let items_selector = scraper::Selector::parse("[ct]").unwrap();
@@ -197,4 +220,5 @@ impl<'a> ListBox<'a> {
     }
 }
 
+/// [`ListBoxItem`]과 [`ListBoxActionItem`]이 포함된 모듈
 pub mod item;
