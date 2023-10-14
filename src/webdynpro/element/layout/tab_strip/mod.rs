@@ -14,9 +14,13 @@ type TabItems<'a> = Vec<ElementDef<'a, TabStripItem<'a>>>;
 
 define_element_interactable! {
     // Note: This element renders as "TS_ie6" if >= IE6
+    #[doc = r###"상단 버튼으로 선택할 수 있는 탭 레이아웃
+    
+    > |**참고**| 이 엘리먼트는 실제 구현에서 >= IE6 용 구현과 기본 구현으로 나누어져 있지만, rusaint에서는 최신의 브라우저를 기준으로 하므로 전자의 구현은 구현되어있지 않습니다."###]
     TabStrip<"TS_standards", "TabStrip"> {
         tab_items: OnceCell<Option<TabItems<'a>>>,
     },
+    #[doc = "[`TabStrip`] 내부 데이터"]
     TabStripLSData {
         current_index: i32 => "0",
         height: String => "1",
@@ -38,6 +42,7 @@ define_element_interactable! {
 }
 
 impl<'a> TabStrip<'a> {
+    /// HTML 엘리먼트로부터 새로운 [`TabStrip`] 엘리먼트를 생성합니다.
     pub const fn new(id: Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {
         Self {
             id,
@@ -48,6 +53,8 @@ impl<'a> TabStrip<'a> {
         }
     }
 
+    /// 탭 내부 [`TabItem`]을 반환합니다.
+    // TODO: Change return type to iterator
     pub fn tab_items(&self) -> Option<&TabItems<'a>> {
         self.tab_items
             .get_or_init(|| {
@@ -68,6 +75,7 @@ impl<'a> TabStrip<'a> {
             .as_ref()
     }
 
+    /// 특정 탭을 선택하는 이벤트를 반환합니다.
     pub fn tab_select(
         &self,
         item_id: &str,
@@ -86,4 +94,5 @@ impl<'a> TabStrip<'a> {
     }
 }
 
+/// [`TabStrip`] 내부 아이템
 pub mod item;

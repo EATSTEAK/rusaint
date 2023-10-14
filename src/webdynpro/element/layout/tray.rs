@@ -20,7 +20,9 @@ pub mod property {
 
 // TODO: Implement additional events and data
 define_element_interactable! {
+    #[doc = "열고 닫을 수 있는 트레이"]
     Tray<"TY", "Tray"> {},
+    #[doc = "[`Tray`] 내부 데이터"]
     TrayLSData {
         title: String => "0",
         design: TrayDesign => "1",
@@ -51,6 +53,7 @@ define_element_interactable! {
 }
 
 impl<'a> Tray<'a> {
+    /// HTML 엘리먼트로부터 새로운 [`Tray`] 엘리먼트를 생성합니다.
     pub const fn new(id: Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {
         Self {
             id,
