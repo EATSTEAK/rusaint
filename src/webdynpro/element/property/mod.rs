@@ -2,13 +2,16 @@ use serde::Deserialize;
 
 use super::complex::sap_table::property::SapTableCellDesign;
 
+/// 텍스트 형태 종류
+#[allow(missing_docs)]
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "UPPERCASE")]
 pub enum TextDesign {
     Standard,
     Monospace,
 }
-
+/// 텍스트 방향
+#[allow(missing_docs)]
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "UPPERCASE")]
 pub enum TextDirection {
@@ -16,7 +19,8 @@ pub enum TextDirection {
     Rtl,
     Inherit,
 }
-
+/// 엘리먼트의 가시성
+#[allow(missing_docs)]
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum Visibility {
@@ -25,7 +29,8 @@ pub enum Visibility {
     None,
     OnDemand,
 }
-
+/// 컨텐츠 가시성
+#[allow(missing_docs)]
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "UPPERCASE")]
 pub enum ContentVisibility {
@@ -33,6 +38,8 @@ pub enum ContentVisibility {
     Text,
     Icon,
 }
+
+/// 단축키 값
 #[allow(missing_docs)]
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
@@ -191,6 +198,8 @@ pub enum HotkeyValue {
     ShiftF12,
 }
 
+/// 수평 텍스트 정렬
+#[allow(missing_docs)]
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "UPPERCASE")]
 pub enum HorizontalTextAlign {
@@ -200,6 +209,8 @@ pub enum HorizontalTextAlign {
     Justify,
 }
 
+/// 엘리먼트가 잠겼을 때의 형태
+#[allow(missing_docs)]
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum LockedDesign {
@@ -213,6 +224,8 @@ pub enum LockedDesign {
     SemiBorderLoading,
 }
 
+/// 윈도우 모드
+#[allow(missing_docs)]
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "UPPERCASE")]
 pub enum Mode {
@@ -221,6 +234,8 @@ pub enum Mode {
     Floating,
 }
 
+/// 스크롤 모드
+#[allow(missing_docs)]
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum ScrollingMode {
@@ -234,8 +249,11 @@ pub enum ScrollingMode {
     VerticalAuto,
 }
 
+/// 테마 정의를 이용한 엘리먼트 색상
 pub type SemanticColor = SapTableCellDesign;
 
+/// 정렬 상태
+#[allow(missing_docs)]
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum SortState {
@@ -245,6 +263,8 @@ pub enum SortState {
     Descending,
 }
 
+/// 수직 텍스트 정렬
+#[allow(missing_docs)]
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "UPPERCASE")]
 pub enum VerticalTextAlign {
@@ -254,6 +274,8 @@ pub enum VerticalTextAlign {
     Bottom,
 }
 
+/// 퀵뷰 윈도우 디자인
+#[allow(missing_docs)]
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "UPPERCASE")]
 pub enum QuickViewDesign {
