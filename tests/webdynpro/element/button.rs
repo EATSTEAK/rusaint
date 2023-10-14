@@ -1,9 +1,12 @@
 use rusaint::{
     define_elements,
-    webdynpro::{element::{
-        action::{Button, Link},
-        text::TextView,
-    }, error::WebDynproError},
+    webdynpro::{
+        element::{
+            action::{Button, Link},
+            text::TextView,
+        },
+        error::WebDynproError, application::Application,
+    },
 };
 
 use crate::get_session;
@@ -13,9 +16,9 @@ use super::EventTestSuite;
 impl<'a> EventTestSuite {
     define_elements! {
         /* Button Test */
-        LINK_TO_BUTTON: Link<'a> = "WDR_TEST_EVENTS.ID_0001:MAIN.TOBUTTON",
-        TEST_BUTTON: Button<'a> = "WDR_TEST_EVENTS.ID_0001:BUTTON.BUTTON1",
-        TEST_BUTTON_TEXTVIEW: TextView<'a> = "WDR_TEST_EVENTS.ID_0001:BUTTON.TEXTVIEW",
+        LINK_TO_BUTTON: Link<'a> = "WDR_TEST_EVENTS.ID_0001:MAIN.TOBUTTON";
+        TEST_BUTTON: Button<'a> = "WDR_TEST_EVENTS.ID_0001:BUTTON.BUTTON1";
+        TEST_BUTTON_TEXTVIEW: TextView<'a> = "WDR_TEST_EVENTS.ID_0001:BUTTON.TEXTVIEW";
     }
 
     async fn test_button(&mut self) -> Result<(), WebDynproError> {

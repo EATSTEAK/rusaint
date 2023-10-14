@@ -1,21 +1,59 @@
-use std::{
-    ops::{Deref, DerefMut},
-    sync::Arc,
-};
+use std::sync::Arc;
 use url::Url;
 
 use crate::{
     session::USaintSession,
     utils::DEFAULT_USER_AGENT,
     webdynpro::{
-        application::{client::Client, BasicApplication},
+        application::{
+            client::{body::Body, Client},
+            Application, BasicApplication,
+        },
         element::{
             define_elements,
             system::{ClientInspector, Custom, CustomClientInfo, LoadingPlaceholder},
         },
         error::{ClientError, WebDynproError},
+        event::Event,
     },
 };
+
+#[macro_export]
+macro_rules! define_usaint_application {
+    (
+        $(#[$attr:meta])*
+        $vis:vis struct $name:ident
+    ) => {
+        $(#[$attr])*
+        $vis struct $name($crate::application::USaintApplication);
+
+        impl $crate::webdynpro::application::Application for $name {
+            fn name(&self) -> &str {
+                self.0.name()
+            }
+
+            fn base_url(&self) -> &url::Url {
+                self.0.base_url()
+            }
+
+            fn body(&self) -> &$crate::webdynpro::application::client::body::Body {
+                self.0.body()
+            }
+        }
+
+        impl $name {
+            #[allow(unused)]
+            async fn send_events(
+                &mut self,
+                events: impl IntoIterator<Item = $crate::webdynpro::event::Event>,
+            ) -> Result<(), WebDynproError> {
+                self.0.send_events(events).await
+            }
+        }
+    };
+}
+
+pub use define_usaint_application;
 
 const SSU_WEBDYNPRO_BASE_URL: &str = "https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/";
 const INITIAL_CLIENT_DATA_WD01: &str = "ClientWidth:1920px;ClientHeight:1000px;ScreenWidth:1920px;ScreenHeight:1080px;ScreenOrientation:landscape;ThemedTableRowHeight:33px;ThemedFormLayoutRowHeight:32px;ThemedSvgLibUrls:{\"SAPGUI-icons\":\"https://ecc.ssu.ac.kr:8443/sap/public/bc/ur/nw5/themes/~cache-20210223121230/Base/baseLib/sap_fiori_3/svg/libs/SAPGUI-icons.svg\",\"SAPWeb-icons\":\"https://ecc.ssu.ac.kr:8443/sap/public/bc/ur/nw5/themes/~cache-20210223121230/Base/baseLib/sap_fiori_3/svg/libs/SAPWeb-icons.svg\"};ThemeTags:Fiori_3,Touch;ThemeID:sap_fiori_3;SapThemeID:sap_fiori_3;DeviceType:DESKTOP";
@@ -23,24 +61,25 @@ const INITIAL_CLIENT_DATA_WD02: &str = "ThemedTableRowHeight:25px";
 /// u-saint에 접속하기 위한 기본 애플리케이션
 pub struct USaintApplication(BasicApplication);
 
-impl Deref for USaintApplication {
-    type Target = BasicApplication;
-    fn deref(&self) -> &Self::Target {
-        &self.0
+impl Application for USaintApplication {
+    fn name(&self) -> &str {
+        self.0.name()
     }
-}
 
-impl<'a> DerefMut for USaintApplication {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
+    fn base_url(&self) -> &Url {
+        self.0.base_url()
+    }
+
+    fn body(&self) -> &Body {
+        self.0.body()
     }
 }
 
 impl<'a> USaintApplication {
     define_elements! {
-        CLIENT_INSPECTOR_WD01: ClientInspector<'a> = "WD01",
-        CLIENT_INSPECTOR_WD02: ClientInspector<'a> = "WD02",
-        LOADING_PLACEHOLDER: LoadingPlaceholder<'a> = "_loadingPlaceholder_"
+        CLIENT_INSPECTOR_WD01: ClientInspector<'a> = "WD01";
+        CLIENT_INSPECTOR_WD02: ClientInspector<'a> = "WD02";
+        LOADING_PLACEHOLDER: LoadingPlaceholder<'a> = "_loadingPlaceholder_";
     }
 
     const CUSTOM: Custom = Custom::new(std::borrow::Cow::Borrowed("WD01"));
@@ -89,6 +128,13 @@ impl<'a> USaintApplication {
         let mut app = USaintApplication(BasicApplication::with_client(base_url, app_name, client)?);
         app.load_placeholder().await?;
         Ok(app)
+    }
+
+    pub async fn send_events(
+        &mut self,
+        events: impl IntoIterator<Item = Event>,
+    ) -> Result<(), WebDynproError> {
+        self.0.send_events(events).await
     }
 
     async fn load_placeholder(&mut self) -> Result<(), WebDynproError> {

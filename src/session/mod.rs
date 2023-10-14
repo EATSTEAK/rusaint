@@ -1,4 +1,4 @@
-use std::{borrow::BorrowMut, ops::Deref, sync::Arc};
+use std::{borrow::BorrowMut, sync::Arc};
 
 use reqwest::{
     cookie::{CookieStore, Jar},
@@ -21,14 +21,6 @@ const SMARTID_LOGIN_FORM_REQUEST_URL: &str = "https://smartid.ssu.ac.kr/Symtra_s
 /// u-saint 로그인이 필요한 애플리케이션 사용 시 애플리케이션에 제공하는 세션
 #[derive(Debug, Default)]
 pub struct USaintSession(Jar);
-
-impl Deref for USaintSession {
-    type Target = Jar;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
 
 impl CookieStore for USaintSession {
     fn set_cookies(&self, cookie_headers: &mut dyn Iterator<Item = &HeaderValue>, url: &url::Url) {
@@ -79,7 +71,7 @@ impl USaintSession {
                 .borrow_mut(),
             portal.url(),
         );
-        session_store.add_cookie_str(
+        session_store.0.add_cookie_str(
             &waf_cookie_str,
             &Url::parse("https://saint.ssu.ac.kr").unwrap(),
         );
@@ -128,8 +120,10 @@ impl USaintSession {
         let token = obtain_ssu_sso_token(id, password).await?;
         Ok(Self::with_token(id, &token)
             .await
-            .or_else(|e| Err(WebDynproError::ClientError(e)))?)
+            .or_else(|e| Err(WebDynproError::Client(e)))?)
     }
+
+    pub fn jar(&self) -> &Jar { &self.0 }
 }
 
 /// 학번과 비밀번호를 이용해 SSO 토큰을 발급받습니다.

@@ -1,4 +1,4 @@
-use std::{borrow::Cow, cell::OnceCell, ops::DerefMut};
+use std::{borrow::Cow, cell::OnceCell};
 
 use serde::Deserialize;
 
@@ -11,16 +11,9 @@ macro_rules! def_listbox_subset {
         #[derive(Debug)]
         pub struct $name<'a>($crate::webdynpro::element::selection::list_box::ListBox<'a>);
 
-        impl<'a> std::ops::Deref for $name<'a> {
-            type Target = $crate::webdynpro::element::selection::list_box::ListBox<'a>;
-            fn deref(&self) -> &Self::Target {
+        impl<'a> $name<'a> {
+            pub fn list_box(&self) -> &$crate::webdynpro::element::selection::list_box::ListBox<'a> {
                 &self.0
-            }
-        }
-
-        impl<'a> DerefMut for $name<'a> {
-            fn deref_mut(&mut self) -> &mut Self::Target {
-                &mut self.0
             }
         }
 
@@ -31,9 +24,9 @@ macro_rules! def_listbox_subset {
             type ElementLSData = ListBoxLSData;
 
             fn lsdata(&self) -> &Self::ElementLSData {
-                self.lsdata
+                self.list_box().lsdata
                     .get_or_init(|| {
-                        let Ok(lsdata_obj) = Self::lsdata_elem(self.element_ref) else {
+                        let Ok(lsdata_obj) = Self::lsdata_elem(self.list_box().element_ref) else {
                             return ListBoxLSData::default();
                         };
                         serde_json::from_value::<Self::ElementLSData>(lsdata_obj).unwrap_or(ListBoxLSData::default())
@@ -45,11 +38,11 @@ macro_rules! def_listbox_subset {
             }
 
             fn id(&self) -> &str {
-                &self.id
+                &self.list_box().id
             }
 
             fn element_ref(&self) -> &scraper::ElementRef<'a> {
-                &self.element_ref
+                &self.list_box().element_ref
             }
 
             fn wrap(self) -> $crate::webdynpro::element::ElementWrapper<'a> {
@@ -63,8 +56,8 @@ macro_rules! def_listbox_subset {
 
         impl<'a> $crate::webdynpro::element::Interactable<'a> for $name<'a> {
             fn lsevents(&self) -> Option<&EventParameterMap> {
-                self.lsevents
-                    .get_or_init(|| Self::lsevents_elem(self.element_ref).ok())
+                self.list_box().lsevents
+                    .get_or_init(|| Self::lsevents_elem(self.list_box().element_ref).ok())
                     .as_ref()
             }
         }
@@ -79,16 +72,6 @@ macro_rules! def_listbox_subset {
     #[derive(Debug)]
     pub enum ListBoxWrapper<'a> {
         $($name($name<'a>),)+
-    }
-
-    impl<'a> core::ops::Deref for ListBoxWrapper<'a> {
-        type Target = ListBox<'a>;
-
-        fn deref(&self) -> &Self::Target {
-            match self {
-                $( Self::$name(elem) => { &elem.0 }, )+
-            }
-        }
     }
 
     impl<'a> ListBoxWrapper<'a> {

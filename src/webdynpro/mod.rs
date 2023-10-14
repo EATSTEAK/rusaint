@@ -31,25 +31,11 @@
 //! use rusaint::define_elements;
 //! use rusaint::webdynpro::element::text::Caption;
 //! use rusaint::RusaintError;
-//! use std::ops::{Deref, DerefMut};
 //!
 //! // USaintApplication을 Wrap한 애플리케이션 struct를 새로 정의합니다.
 //! // BasicApplication 등의 기본 애플리케이션 정의를 사용하면 u-saint 가 아닌 다른 사이트에 적용할 수 있으나, 기본 로딩과 같은 추가 작업이 필요할 수 있습니다.
 //! pub struct ExampleApplication(USaintApplication);
 //!
-//! // USaintApplication, BasicApplication에서 제공하는 기능을 편리하게 사용하기 위해 `Deref` 와 `DerefMut` 트레이트를 구현합니다.
-//! impl Deref for ExampleApplication {
-//!     type Target = USaintApplication;
-//!     fn deref(&self) -> &Self::Target {
-//!         &self.0
-//!     }
-//! }
-//!
-//! impl DerefMut for ExampleApplication {
-//!     fn deref_mut(&mut self) -> &mut Self::Target {
-//!         &mut self.0
-//!     }
-//! }
 //!
 //! impl<'a> ExampleApplication {
 //!     // 엘리먼트를 정의하는 매크로

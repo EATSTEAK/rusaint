@@ -1,15 +1,11 @@
-use std::{
-    collections::HashMap,
-    ops::{Deref, DerefMut},
-    sync::Arc,
-};
+use std::{collections::HashMap, sync::Arc};
 
 use crate::{
     define_elements,
     model::SemesterType,
     session::USaintSession,
     webdynpro::{
-        application::client::body::Body,
+        application::{client::body::Body, Application},
         element::{
             action::Button,
             complex::sap_table::{
@@ -18,7 +14,7 @@ use crate::{
             layout::PopupWindow,
             selection::ComboBox,
             text::InputField,
-            Element, ElementDef, ElementWrapper,
+            Element, ElementDef, ElementWrapper, SubElement,
         },
         error::{BodyError, ElementError, WebDynproError},
         event::Event,
@@ -29,21 +25,10 @@ use self::model::{ClassGrade, GradeSummary, SemesterGrade};
 
 use super::USaintApplication;
 
-/// [학생 성적 조회](https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/ZCMB3W0017)
-pub struct CourseGrades(USaintApplication);
-
-impl Deref for CourseGrades {
-    type Target = USaintApplication;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl<'a> DerefMut for CourseGrades {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
+define_usaint_application!(
+    #[doc = "[학생 성적 조회](https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/ZCMB3W0017)"]
+    pub struct CourseGrades
+);
 
 #[allow(unused)]
 impl<'a> CourseGrades {
@@ -52,40 +37,40 @@ impl<'a> CourseGrades {
     // Elements for Grade Summaries
     define_elements!(
         // Grade summaries by semester
-        GRADES_SUMMARY_TABLE: SapTable<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.TABLE",
+        GRADES_SUMMARY_TABLE: SapTable<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.TABLE";
         // Progress type
-        PROGRESS_TYPE: ComboBox<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.PROGC_VAR",
+        PROGRESS_TYPE: ComboBox<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.PROGC_VAR";
         // Attempted Credits in Record
-        ATTM_CRD1: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.ATTM_CRD1",
+        ATTM_CRD1: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.ATTM_CRD1";
         // Earned Credits in Record
-        EARN_CRD1: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.EARN_CRD1",
+        EARN_CRD1: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.EARN_CRD1";
         // GPA in Record
-        GT_GPA1: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.GT_GPA1",
+        GT_GPA1: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.GT_GPA1";
         // Class GPA in Record
-        CGPA1: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.CGPA1",
+        CGPA1: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.CGPA1";
         // Average Points in Record
-        AVG1: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.AVG1",
+        AVG1: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.AVG1";
         // Credits earned in P/F Classes in Record
-        PF_EARN_CRD: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.PF_EARN_CRD",
+        PF_EARN_CRD: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.PF_EARN_CRD";
         // Attempted Credits in Certificate
-        ATTM_CRD2: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.ATTM_CRD2",
+        ATTM_CRD2: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.ATTM_CRD2";
         // Earned Credits in Certificate
-        EARN_CRD2: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.EARN_CRD2",
+        EARN_CRD2: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.EARN_CRD2";
         // GPA in Certificate
-        GT_GPA2: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.GT_GPA2",
+        GT_GPA2: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.GT_GPA2";
         // Class GPA in Certificate
-        CGPA2: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.CGPA2",
+        CGPA2: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.CGPA2";
         // Average Points in Certificate
-        AVG2: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.AVG2",
+        AVG2: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.AVG2";
         // Credits earned in P/F Classes in Certificate
-        PF_EARN_CRD1: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.T_PF_EARN_CRD1",
+        PF_EARN_CRD1: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.T_PF_EARN_CRD1";
     );
 
     // Elements for Class Grades
     define_elements!(
-        PERIOD_YEAR: ComboBox<'a> = "ZCMW_PERIOD_RE.ID_0DC742680F42DA9747594D1AE51A0C69:VIW_MAIN.PERYR",
-        PERIOD_SEMESTER: ComboBox<'a> = "ZCMW_PERIOD_RE.ID_0DC742680F42DA9747594D1AE51A0C69:VIW_MAIN.PERID",
-        GRADE_BY_CLASSES_TABLE: SapTable<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.TABLE_1",
+        PERIOD_YEAR: ComboBox<'a> = "ZCMW_PERIOD_RE.ID_0DC742680F42DA9747594D1AE51A0C69:VIW_MAIN.PERYR";
+        PERIOD_SEMESTER: ComboBox<'a> = "ZCMW_PERIOD_RE.ID_0DC742680F42DA9747594D1AE51A0C69:VIW_MAIN.PERID";
+        GRADE_BY_CLASSES_TABLE: SapTable<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.TABLE_1";
     );
 
     /// 새로운 학기별 성적 조회 애플리케이션을 만듭니다.
@@ -145,11 +130,11 @@ impl<'a> CourseGrades {
             let semester = Self::semester_to_key(semester);
             let mut vec = Vec::with_capacity(2);
             let year_combobox = Self::PERIOD_YEAR.from_body(self.body())?;
-            if (|| Some(year_combobox.key().as_ref()?.as_str()))() != Some(year) {
+            if (|| Some(year_combobox.lsdata().key()?.as_str()))() != Some(year) {
                 vec.push(year_combobox.select(&year.to_string(), false)?);
             }
             let semester_combobox = Self::PERIOD_SEMESTER.from_body(self.body())?;
-            if (|| Some(semester_combobox.key().as_ref()?.as_str()))() != Some(semester) {
+            if (|| Some(semester_combobox.lsdata().key()?.as_str()))() != Some(semester) {
                 vec.push(semester_combobox.select(semester, false)?);
             }
             Result::<Vec<Event>, WebDynproError>::Ok(vec)
@@ -171,7 +156,7 @@ impl<'a> CourseGrades {
                     match val.content() {
                         Some(ElementWrapper::TextView(tv)) => Some(tv.text().to_owned()),
                         Some(ElementWrapper::Caption(cap)) => {
-                            Some(cap.text().as_ref().unwrap_or(&String::default()).to_owned())
+                            Some(cap.lsdata().text().unwrap_or(&String::default()).to_owned())
                         }
                         _ => None,
                     }
@@ -182,7 +167,7 @@ impl<'a> CourseGrades {
     }
 
     fn value_as_f32(field: InputField<'_>) -> Result<f32, WebDynproError> {
-        let Some(value) = field.value().as_ref() else {
+        let Some(value) = field.lsdata().value() else {
             return Err(ElementError::NoSuchData { element: field.id().to_string(), field: "value1".to_string() })?;
         };
         Ok(value.parse::<f32>().or(Err(ElementError::InvalidContent {
@@ -491,13 +476,13 @@ impl<'a> SapTableCellWrapper<'a> {
     fn is_empty_row(&self) -> bool {
         match self {
             SapTableCellWrapper::Normal(cell) => cell
+                .lsdata()
                 .cell_type()
-                .as_ref()
                 .is_some_and(|s| matches!(s, SapTableCellType::EmptyRow)),
             SapTableCellWrapper::Header(_cell) => false,
             SapTableCellWrapper::Selection(cell) => cell
+                .lsdata()
                 .cell_type()
-                .as_ref()
                 .is_some_and(|s| matches!(s, SapTableCellType::EmptyRow)),
             _ => false,
         }
@@ -515,7 +500,7 @@ mod test {
     use crate::{
         application::course_grades::CourseGrades,
         session::USaintSession,
-        webdynpro::element::{layout::PopupWindow, Element},
+        webdynpro::{element::{layout::PopupWindow, Element}, application::Application},
     };
     use dotenv::dotenv;
 

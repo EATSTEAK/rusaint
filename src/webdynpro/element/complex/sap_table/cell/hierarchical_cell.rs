@@ -1,13 +1,11 @@
-use getset::Getters;
-use std::{borrow::Cow, cell::OnceCell, ops::Deref};
+use std::{borrow::Cow, cell::OnceCell};
 
 use scraper::Selector;
-use serde::Deserialize;
 
 use crate::webdynpro::{
     element::{
         complex::sap_table::property::{SapTableCellDesign, SapTableHierarchicalCellStatus},
-        Element, ElementWrapper, SubElement, SubElementDef,
+        define_lsdata, Element, ElementWrapper, SubElement, SubElementDef,
     },
     error::WebDynproError,
 };
@@ -23,31 +21,19 @@ pub struct SapTableHierarchicalCell<'a> {
     lsdata: OnceCell<SapTableHierarchicalCellLSData>,
     content: OnceCell<Option<ElementWrapper<'a>>>,
 }
-
-#[derive(Getters, Deserialize, Debug, Default)]
-#[allow(unused)]
-#[get = "pub"]
-pub struct SapTableHierarchicalCellLSData {
-    #[serde(rename = "0")]
-    is_selected: Option<bool>,
-    #[serde(rename = "1")]
-    is_secondary_selected: Option<bool>,
-    #[serde(rename = "2")]
-    cell_design: Option<SapTableCellDesign>,
-    #[serde(rename = "3")]
-    header_cell_ids: Option<String>,
-    #[serde(rename = "4")]
-    level: Option<i32>,
-    #[serde(rename = "5")]
-    status: Option<SapTableHierarchicalCellStatus>,
-    #[serde(rename = "6")]
-    status_enabled: Option<bool>,
-    #[serde(rename = "7")]
-    content_type_tooltip: Option<String>,
-    #[serde(rename = "8")]
-    custom_style: Option<String>,
-    #[serde(rename = "9")]
-    custom_data: Option<String>,
+define_lsdata! {
+    SapTableHierarchicalCellLSData {
+        is_selected: bool => "0",
+        is_secondary_selected: bool => "1",
+        cell_design: SapTableCellDesign => "2",
+        header_cell_ids: String => "3",
+        level: i32 => "4",
+        status: SapTableHierarchicalCellStatus => "5",
+        status_enabled: bool => "6",
+        content_type_tooltip: String => "7",
+        custom_style: String => "8",
+        custom_data: String => "9",
+    }
 }
 
 impl<'a> SapTableCell<'a> for SapTableHierarchicalCell<'a> {
@@ -112,13 +98,5 @@ impl<'a> SapTableHierarchicalCell<'a> {
     /// 셀을 [`SapTableCellWrapper`]로 감쌉니다.
     pub fn wrap(self) -> SapTableCellWrapper<'a> {
         SapTableCellWrapper::Hierarchical(self)
-    }
-}
-
-impl<'a> Deref for SapTableHierarchicalCell<'a> {
-    type Target = SapTableHierarchicalCellLSData;
-
-    fn deref(&self) -> &Self::Target {
-        self.lsdata()
     }
 }

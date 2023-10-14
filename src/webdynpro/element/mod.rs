@@ -32,6 +32,36 @@ pub mod property;
 /// 엘리먼트에서 발생시킬 수 있는 이벤트의 기본 파라메터
 pub type EventParameterMap = HashMap<String, (UcfParameters, HashMap<String, String>)>;
 
+macro_rules! define_lsdata {
+    {   $(#[$lsdata_outer:meta])*
+        $lsdata:ident {
+            $(
+                $(#[$lsdata_inner:meta])*
+                $field:ident: $ftype:ty => $encoded:literal
+            ),* $(,)?
+        }
+    } => {
+        $(#[$lsdata_outer])*
+        #[derive(serde::Deserialize, Debug, Default)]
+        #[allow(unused)]
+        pub struct $lsdata {
+            $(
+                $(#[$lsdata_inner])*
+                #[serde(rename = $encoded)]
+                $field: Option<$ftype>,
+            )*
+        }
+
+        impl $lsdata {
+            $(
+                pub fn $field(&self) -> Option<&$ftype> {
+                    (&self.$field).as_ref()
+                }
+            )*
+        }
+    }
+}
+
 macro_rules! define_element_base {
     {   $(#[$outer:meta])*
         $name:ident<$controlid:literal, $element_name:literal> {
@@ -96,24 +126,14 @@ macro_rules! define_element_base {
                 Self::children_elem(self.element_ref().clone())
             }
         }
-        $(#[$lsdata_outer])*
-        #[derive(getset::Getters, serde::Deserialize, Debug, Default)]
-        #[allow(unused)]
-        #[get = "pub"]
-        pub struct $lsdata {
-            $(
-                $(#[$lsdata_inner])*
-                #[serde(rename = $encoded)]
-                $field: Option<$ftype>,
-            )*
-        }
-
-        impl<'a> std::ops::Deref for $name<'a> {
-            type Target = $lsdata;
-
-            fn deref(&self) -> &Self::Target {
-                use $crate::webdynpro::element::Element;
-                self.lsdata()
+        
+        $crate::webdynpro::element::define_lsdata! {
+            $(#[$lsdata_outer])*
+            $lsdata {
+                $(
+                    $(#[$lsdata_inner])*
+                    $field : $ftype => $encoded,
+                )+
             }
         }
     };
@@ -158,6 +178,7 @@ macro_rules! define_element_interactable {
     }
 }
 
+pub(crate) use define_lsdata;
 pub(crate) use define_element_base;
 pub(crate) use define_element_interactable;
 
@@ -201,11 +222,11 @@ macro_rules! register_elements {
         }
 
         $(
-            impl<'a> std::convert::TryInto<$type> for ElementWrapper<'a> {
+            impl<'a> std::convert::TryFrom<ElementWrapper<'a>> for $type {
                 type Error = $crate::webdynpro::error::BodyError;
     
-                fn try_into(self) -> Result<$type, Self::Error> {
-                    match self {
+                fn try_from(wrapper: ElementWrapper<'a>) -> Result<$type, Self::Error> {
+                    match wrapper {
                         ElementWrapper::$enum(res) => Ok(res),
                         _ => Err(Self::Error::InvalidElement)
                     }
@@ -339,16 +360,31 @@ where T: Element<'a>
 /// impl<'a> USaintApplication {
 ///     define_elements!{
 ///         // const TEST_BUTTON: ElementDef<'a, Button<'a>> = ElementDef::new("TEST.BUTTON1"); 과 같음
-///         TEST_BUTTON: Button<'a> = "TEST.BUTTON1",
+///         TEST_BUTTON: Button<'a> = "TEST.BUTTON1";
 ///         // const TEST_COMBOBOX: ElementDef<'a, ComboBox<'a>> = ElementDef::new("TEST.COMBOBOX1"); 과 같음
-///         TEST_COMBOBOX: ComboBox<'a> = "TEST.COMBOBOX1",
+///         TEST_COMBOBOX: ComboBox<'a> = "TEST.COMBOBOX1";
 ///     }
 /// }
 /// ```
 #[macro_export]
 macro_rules! define_elements {
-    ($($name:ident : $eltype:tt<$lt:lifetime> = $id:literal),+ $(,)?) => {
-        $(const $name: $crate::webdynpro::element::ElementDef<$lt, $eltype<$lt>> = $crate::webdynpro::element::ElementDef::new($id);)*
+    ($(
+        $(#[$attr:meta])*
+        $v:vis $name:ident : $eltype:tt<$lt:lifetime> = $id:literal
+    ;)+) => {
+        $(
+            $(#[$attr])*
+            $v const $name: $crate::webdynpro::element::ElementDef<$lt, $eltype<$lt>> = $crate::webdynpro::element::ElementDef::new($id);
+        )*
+    };
+    ($(
+        $(#[$attr:meta])*
+        $name:ident : $eltype:tt<$lt:lifetime> = $id:literal
+    ;)+) => {
+        $(
+            $(#[$attr])*
+            const $name: $crate::webdynpro::element::ElementDef<$lt, $eltype<$lt>> = $crate::webdynpro::element::ElementDef::new($id);
+        )*
     }
 }
 
@@ -371,7 +407,7 @@ pub trait Element<'a>: Sized {
     const CONTROL_ID: &'static str;
     /// WebDynpro 상에서 사용하는 엘리먼트의 이름
     const ELEMENT_NAME: &'static str;
-    /// 엘리먼트의 LSData
+/// 엘리먼트의 LSData
     type ElementLSData;
 	
     /// 엘리먼트의 JSON 객체 형태의 LSData를 반환합니다.
@@ -418,7 +454,7 @@ pub trait Element<'a>: Sized {
 	/// 엘리먼트의 자식 엘리먼트를 가져옵니다.
     fn children(&self) -> Vec<ElementWrapper<'a>>;
 
-	/// 엘리먼트의 LSData를 가져옵니다.
+/// 엘리먼트의 LSData를 가져옵니다.
     fn lsdata(&self) -> &Self::ElementLSData;
 
 	/// 엘리먼트의 Id를 가져옵니다.

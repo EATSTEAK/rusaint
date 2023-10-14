@@ -1,24 +1,11 @@
-use std::{
-    ops::{Deref, DerefMut},
-    sync::Arc,
+use std::sync::Arc;
+
+use rusaint::{
+    application::USaintApplication, define_usaint_application, webdynpro::error::WebDynproError,
+    USaintSession,
 };
 
-use rusaint::{application::USaintApplication, webdynpro::error::WebDynproError, USaintSession};
-
-pub(crate) struct EventTestSuite(USaintApplication);
-
-impl Deref for EventTestSuite {
-    type Target = USaintApplication;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl<'a> DerefMut for EventTestSuite {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
+define_usaint_application!(pub(crate) struct EventTestSuite);
 
 impl<'a> EventTestSuite {
     const APP_NAME: &str = "WDR_TEST_EVENTS";

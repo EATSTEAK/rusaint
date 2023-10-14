@@ -1,4 +1,4 @@
-use std::ops::Deref;
+use std::ops::Index;
 
 use scraper::ElementRef;
 
@@ -57,6 +57,14 @@ impl<'a> SapTableRow<'a> {
         })
     }
 
+    pub fn len(&self) -> usize {
+        self.cells.len()
+    }
+
+    pub fn iter(&self) -> impl Iterator<Item = &SapTableCellWrapper<'a>> + ExactSizeIterator {
+        self.cells.iter()
+    }
+
     pub fn table_def(&self) -> ElementDef<'a, SapTable<'a>> {
         self.table_def.clone()
     }
@@ -90,11 +98,11 @@ impl<'a> SapTableRow<'a> {
     }
 }
 
-impl<'a> Deref for SapTableRow<'a> {
-    type Target = Vec<SapTableCellWrapper<'a>>;
+impl<'a> Index<usize> for SapTableRow<'a> {
+    type Output = SapTableCellWrapper<'a>;
 
-    fn deref(&self) -> &Self::Target {
-        &self.cells
+    fn index(&self, index: usize) -> &Self::Output {
+        &self.cells[index]
     }
 }
 
