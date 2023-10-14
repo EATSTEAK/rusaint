@@ -4,7 +4,9 @@ use crate::webdynpro::element::define_element_interactable;
 
 // TODO: Implement additional events and data
 define_element_interactable! {
+    #[doc = "입력 필드"]
     InputField<"I", "InputField"> {},
+    #[doc = "[`InputField`]의 내부 데이터"]
     InputFieldLSData {
         value: String => "0",
         show_help_button: bool => "1",
@@ -42,6 +44,7 @@ define_element_interactable! {
 }
 
 impl<'a> InputField<'a> {
+    /// HTML 엘리먼트로부터 새로운 [`InputField`]를 생성합니다.
     pub const fn new(id: Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {
         Self {
             id,
