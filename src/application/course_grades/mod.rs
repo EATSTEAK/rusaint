@@ -14,7 +14,7 @@ use crate::{
             layout::PopupWindow,
             selection::ComboBox,
             text::InputField,
-            Element, ElementDef, ElementWrapper,
+            Element, ElementDef, ElementWrapper, SubElement,
         },
         error::{BodyError, ElementError, WebDynproError},
         event::Event,
@@ -130,11 +130,11 @@ impl<'a> CourseGrades {
             let semester = Self::semester_to_key(semester);
             let mut vec = Vec::with_capacity(2);
             let year_combobox = Self::PERIOD_YEAR.from_body(self.body())?;
-            if (|| Some(year_combobox.key().as_ref()?.as_str()))() != Some(year) {
+            if (|| Some(year_combobox.lsdata().key()?.as_str()))() != Some(year) {
                 vec.push(year_combobox.select(&year.to_string(), false)?);
             }
             let semester_combobox = Self::PERIOD_SEMESTER.from_body(self.body())?;
-            if (|| Some(semester_combobox.key().as_ref()?.as_str()))() != Some(semester) {
+            if (|| Some(semester_combobox.lsdata().key()?.as_str()))() != Some(semester) {
                 vec.push(semester_combobox.select(semester, false)?);
             }
             Result::<Vec<Event>, WebDynproError>::Ok(vec)
@@ -156,7 +156,7 @@ impl<'a> CourseGrades {
                     match val.content() {
                         Some(ElementWrapper::TextView(tv)) => Some(tv.text().to_owned()),
                         Some(ElementWrapper::Caption(cap)) => {
-                            Some(cap.text().unwrap_or(&String::default()).to_owned())
+                            Some(cap.lsdata().text().unwrap_or(&String::default()).to_owned())
                         }
                         _ => None,
                     }
@@ -167,7 +167,7 @@ impl<'a> CourseGrades {
     }
 
     fn value_as_f32(field: InputField<'_>) -> Result<f32, WebDynproError> {
-        let Some(value) = field.value() else {
+        let Some(value) = field.lsdata().value() else {
             return Err(ElementError::NoSuchData { element: field.id().to_string(), field: "value1".to_string() })?;
         };
         Ok(value.parse::<f32>().or(Err(ElementError::InvalidContent {
@@ -476,13 +476,13 @@ impl<'a> SapTableCellWrapper<'a> {
     fn is_empty_row(&self) -> bool {
         match self {
             SapTableCellWrapper::Normal(cell) => cell
+                .lsdata()
                 .cell_type()
-                .as_ref()
                 .is_some_and(|s| matches!(s, SapTableCellType::EmptyRow)),
             SapTableCellWrapper::Header(_cell) => false,
             SapTableCellWrapper::Selection(cell) => cell
+                .lsdata()
                 .cell_type()
-                .as_ref()
                 .is_some_and(|s| matches!(s, SapTableCellType::EmptyRow)),
             _ => false,
         }

@@ -23,6 +23,7 @@ mod test {
     use std::sync::{Arc, OnceLock};
 
     use crate::{
+        application::student_information::StudentInformation,
         session::USaintSession,
         webdynpro::{application::Application, element::ElementWrapper},
     };

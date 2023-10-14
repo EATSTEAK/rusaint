@@ -126,7 +126,7 @@ mod test {
         let listbox = period_id_combobox.item_list_box(app.body()).unwrap();
         match listbox {
             ListBoxWrapper::ListBoxPopup(listbox) => {
-                for item in listbox.items() {
+                for item in listbox.list_box().items() {
                     match item {
                         ListBoxItemWrapper::Item(item) => {
                             println!("value: {:?}, key: {:?}", item.value1(), item.key());
