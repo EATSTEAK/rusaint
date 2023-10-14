@@ -10,6 +10,7 @@ use super::{
     SapTable,
 };
 
+/// [`SapTable`]의 행
 #[derive(custom_debug_derive::Debug)]
 #[allow(unused)]
 pub struct SapTableRow<'a> {
@@ -57,42 +58,52 @@ impl<'a> SapTableRow<'a> {
         })
     }
 
+    /// 행 내부 셀의 개수를 반환합니다.
     pub fn len(&self) -> usize {
         self.cells.len()
     }
 
+    /// 행 내부 셀의 [`Iterator`]를 반환합니다.
     pub fn iter(&self) -> impl Iterator<Item = &SapTableCellWrapper<'a>> + ExactSizeIterator {
         self.cells.iter()
     }
 
+    /// 원본 [`SapTable`]의 [`ElementDef`]를 반환합니다.
     pub fn table_def(&self) -> ElementDef<'a, SapTable<'a>> {
         self.table_def.clone()
     }
 
+    /// 인덱스를 반환합니다.
     pub fn row_index(&self) -> Option<u32> {
         self.row_index
     }
 
+    /// 유저 데이터를 반환합니다.
     pub fn user_data(&self) -> Option<&str> {
         self.user_data.as_ref().map(|x| x.as_str())
     }
 
+    /// 드레그 데이터를 반환합니다.
     pub fn drag_data(&self) -> Option<&str> {
         self.drag_data.as_ref().map(|x| x.as_str())
     }
 
+    /// 드롭 타겟 정보를 반환합니다.
     pub fn drop_target_info(&self) -> Option<&str> {
         self.drop_target_info.as_ref().map(|x| x.as_str())
     }
 
+    /// 부모의 드롭 타겟 정보를 반환합니다.
     pub fn parent_drop_target_info(&self) -> Option<&str> {
         self.parent_drop_target_info.as_ref().map(|x| x.as_str())
     }
 
+    /// 선택 상태를 반환합니다.
     pub fn selection_state(&self) -> SapTableSelectionState {
         self.selection_state
     }
 
+    /// 행 종류를 반환합니다.
     pub fn row_type(&self) -> SapTableRowType {
         self.row_type
     }

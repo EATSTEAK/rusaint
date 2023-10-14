@@ -6,9 +6,11 @@ use crate::webdynpro::event::Event;
 use crate::webdynpro::element::{define_element_interactable, Interactable};
 
 define_element_interactable! {
+    #[doc = "서버에 전송하기 위한 HTML Form"]
     Form<"FOR", "Form"> {
         data: OnceCell<FormData>
     },
+    #[doc = "[`Form`] 내부 데이터"]
     FormLSData {
         has_event_queue: bool => "0",
         response_data: String => "1",
@@ -16,6 +18,7 @@ define_element_interactable! {
     }
 }
 
+/// 서버 전송과 연관된 [`Form`] 데이터
 #[derive(Debug, Default)]
 #[allow(unused)]
 pub struct FormData {
@@ -30,6 +33,7 @@ pub struct FormData {
 }
 
 impl<'a> Form<'a> {
+    /// HTML 엘리먼트로부터 새로운 [`Form`] 엘리먼트를 생성합니다.
     pub fn new(id: Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {
         Self {
             id,
@@ -40,6 +44,7 @@ impl<'a> Form<'a> {
         }
     }
 
+    /// 폼 `submit`을 요청하는 이벤트를 반환합니다.
     pub fn request(
         &self,
         is_async: bool,

@@ -23,6 +23,7 @@ pub struct SapTableMatrixCell<'a> {
 }
 
 define_lsdata! {
+    #[doc = "[`SapTableMatrixCell`] 내부 데이터"]
     SapTableMatrixCellLSData {
         cell_background_design: SapTableCellDesign => "0",
         header_cell_ids: String => "1",
@@ -81,6 +82,7 @@ impl<'a> SubElement<'a> for SapTableMatrixCell<'a> {
 }
 
 impl<'a> SapTableMatrixCell<'a> {
+    /// HTML 엘리먼트로부터 [`SapTableMatrixCell`]을 생성합니다.
     pub const fn new(id: Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {
         Self {
             id,

@@ -23,6 +23,7 @@ pub struct SapTableSelectionCell<'a> {
 }
 
 define_lsdata! {
+    #[doc = "[`SapTableSelectionCell`] 내부 데이터"]
     SapTableSelectionCellLSData {
         is_selected: bool => "0",
         is_secondary_selected: bool => "1",
@@ -85,6 +86,7 @@ impl<'a> SubElement<'a> for SapTableSelectionCell<'a> {
 }
 
 impl<'a> SapTableSelectionCell<'a> {
+    /// HTML 엘리먼트로부터 [`SapTableSelectionCell`]을 생성합니다.
     pub const fn new(id: Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {
         Self {
             id,

@@ -8,13 +8,14 @@ use crate::webdynpro::{
     event::Event,
 };
 
-use self::{body::SapTableBody, property::AccessType};
+use self::property::AccessType;
 
 define_element_interactable! {
     #[doc = "테이블"]
     SapTable<"ST", "SapTable"> {
         table: OnceCell<Option<SapTableBody<'a>>>,
     },
+    #[doc = "[`SapTable`] 내부 데이터"]
     SapTableLSData {
         title_text: String => "0",
         accessibility_description: String => "1",
@@ -24,6 +25,7 @@ define_element_interactable! {
 }
 
 impl<'a> SapTable<'a> {
+    /// HTML 엘리먼트로부터 새로운 [`SapTable`] 엘리먼트를 생성합니다.
     pub const fn new(id: Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {
         Self {
             id,
@@ -113,7 +115,13 @@ impl<'a> SapTable<'a> {
     }
 }
 
-pub mod body;
+mod body;
+mod row;
+
+/// [`SapTable`] 내부 셀
 pub mod cell;
+/// [`SapTable`] 내부 데이터 프로퍼티
 pub mod property;
-pub mod row;
+
+pub use self::body::SapTableBody;
+pub use self::row::SapTableRow;

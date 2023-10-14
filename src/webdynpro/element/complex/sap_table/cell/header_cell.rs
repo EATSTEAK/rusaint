@@ -28,6 +28,7 @@ pub struct SapTableHeaderCell<'a> {
 }
 
 define_lsdata! {
+    #[doc = "[`SapTableHeaderCell`] 내부 데이터"]
     SapTableHeaderCellLSData {
         sort_state: SortState => "0",
         header_cell_design: SapTableHeaderCellDesign => "1",
@@ -103,6 +104,7 @@ impl<'a> SapTableCell<'a> for SapTableHeaderCell<'a> {
 }
 
 impl<'a> SapTableHeaderCell<'a> {
+    /// HTML 엘리먼트로부터 [`SapTableHeaderCell`]을 생성합니다.
     pub const fn new(id: Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {
         Self {
             id,

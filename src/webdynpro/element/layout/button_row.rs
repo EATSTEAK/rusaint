@@ -4,9 +4,11 @@ use std::{borrow::Cow, cell::OnceCell};
 use crate::webdynpro::element::{action::Button, define_element_base, ElementWrapper, property::Visibility};
 
 define_element_base! {
+    #[doc = "[`Button`]의 나열"]
     ButtonRow<"BR", "ButtonRow"> {
         buttons: OnceCell<Vec<Button<'a>>>
     },
+    #[doc = "[`ButtonRow`] 내부 데이터"]
     ButtonRowLSData {
         visibility: Visibility => "0",
         custom_data: String => "1"
@@ -14,6 +16,7 @@ define_element_base! {
 }
 
 impl<'a> ButtonRow<'a> {
+    /// HTML 엘리먼트로부터 새로운 [`ButtonRow`] 엘리먼트를 생성합니다.
     pub fn new(id: Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {
         Self {
             id,
@@ -23,6 +26,8 @@ impl<'a> ButtonRow<'a> {
         }
     }
 
+    /// 내부 [`Button`]을 반환합니다.
+    // TODO: Return iterator
     pub fn buttons(&'a self) -> &'a Vec<Button<'a>> {
         self.buttons.get_or_init(|| {
             let button_selector = &Selector::parse(r#":root [ct="B"]"#).unwrap();

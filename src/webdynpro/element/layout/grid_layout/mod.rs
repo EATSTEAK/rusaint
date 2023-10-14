@@ -4,7 +4,9 @@ use crate::webdynpro::element::define_element_interactable;
 
 // TODO: Implement additional events and data
 define_element_interactable! {
+    #[doc = "HTML `grid` 레이아웃"]
     GridLayout<"GL", "GridLayout"> {},
+    #[doc = "[`GridLayout`] 내부 데이터"]
     GridLayoutLSData {
         height: String => "0",
         visibility: String => "1",
@@ -17,6 +19,7 @@ define_element_interactable! {
 }
 
 impl<'a> GridLayout<'a> {
+    /// HTML 엘리먼트로부터 새로운 [`GridLayout`] 엘리먼트를 생성합니다.
     pub const fn new(id: Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {
         Self {
             id,
@@ -27,4 +30,5 @@ impl<'a> GridLayout<'a> {
     }
 }
 
+/// [`GridLayout`] 내부 셀
 pub mod cell;

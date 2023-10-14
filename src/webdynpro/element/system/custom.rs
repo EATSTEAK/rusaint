@@ -11,6 +11,9 @@ use crate::webdynpro::{
 
 use crate::webdynpro::element::{Element, ElementDef};
 
+/// 페이지 최초 로드시 서버에 전송하는 클라이언트 정보 값입니다.
+#[allow(missing_docs)]
+#[derive(Debug)]
 pub struct CustomClientInfo {
     pub window_opener_exists: bool,
     pub client_url: String,
@@ -36,6 +39,8 @@ impl Default for CustomClientInfo {
 }
 
 impl CustomClientInfo {
+
+    /// 주어진 값을 토대로 [`Custom`] 엘리먼트를 만듭니다.
     pub fn new(
         window_opener_exists: bool,
         client_url: &str,
@@ -57,6 +62,10 @@ impl CustomClientInfo {
     }
 }
 
+/// 클라이언트의 정보를 알리기 위해 사용하는 가상 엘리먼트
+/// 
+/// 이 엘리먼트는 실제로 페이지에 존재하지 않으며, 최초 페이지 로드 및 초기화 시 서버에 기본 렌더링을 위한 클라이언트 정보를 보내기 위한 가상 엘리먼트입니다.
+/// 최초 한번 `Custom.ClientInfos` 이벤트를 전송하고 사용되지 않습니다.
 #[derive(Debug)]
 pub struct Custom {
     id: Cow<'static, str>,
@@ -99,10 +108,13 @@ impl<'a> Element<'a> for Custom {
 }
 
 impl Custom {
+
+    /// 식별자를 바탕으로 새로운 [`Custom`] 엘리먼트를 생성합니다.
     pub const fn new(id: Cow<'static, str>) -> Self {
         Self { id }
     }
 
+    /// 서버에 클라이언트 정보를 보내는 이벤트를 반환합니다.
     pub fn client_infos(&self, infos: CustomClientInfo) -> Event {
         let mut parameters: HashMap<String, String> = HashMap::new();
         let ucf_params = UcfParametersBuilder::default()

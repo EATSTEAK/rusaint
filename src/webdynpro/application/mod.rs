@@ -14,6 +14,7 @@ pub struct BasicApplication {
     client: Client,
 }
 
+/// WebDynpro 애플리케이션의 기본 기능
 pub trait Application {
     /// WebDynpro 애플리케이션의 이름을 반환합니다.
     fn name(&self) -> &str;

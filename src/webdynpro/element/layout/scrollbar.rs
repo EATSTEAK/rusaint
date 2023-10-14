@@ -16,7 +16,9 @@ pub mod property {
 }
 // TODO: Implement additional events and data
 define_element_interactable! {
+    #[doc = "스크롤을 수행하는 스크롤 바"]
     Scrollbar<"SCB", "Scrollbar"> {},
+    #[doc = "[`Scrollbar`] 내부 데이터"]
     ScrollbarLSData {
         value: i32 => "0",
         maximum: i32 => "1",
@@ -35,6 +37,7 @@ define_element_interactable! {
 }
 
 impl<'a> Scrollbar<'a> {
+    /// HTML 엘리먼트로부터 새로운 [`Scrollbar`] 엘리먼트를 생성합니다.
     pub const fn new(id: Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {
         Self {
             id,

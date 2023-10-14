@@ -5,7 +5,9 @@ use crate::webdynpro::element::define_element_interactable;
 
 // TODO: Implement additional events and data
 define_element_interactable! {
+    #[doc = "버튼 등의 엘리먼트를 부연하는 라벨"]
     Label<"L", "Label"> {},
+    #[doc = "[`Label`] 내부 데이터"]
     LabelLSData {
         tooltip: String => "0",
         label_for: String => "1",
@@ -34,6 +36,7 @@ define_element_interactable! {
 }
 
 impl<'a> Label<'a> {
+    /// HTML 엘리먼트로부터 새로운 [`Label`] 엘리먼트를 반환합니다.
     pub const fn new(id: Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {
         Self {
             id,

@@ -10,7 +10,9 @@ use crate::webdynpro::element::{
 use super::list_box::ListBoxWrapper;
 
 define_element_interactable! {
+    #[doc = "목록 혹은 직접 입력하여 선택할 수 있는 콤보 박스"]
     ComboBox<"CB", "ComboBox"> {},
+    #[doc = "[`ComboBox`] 내부 데이터"]
     ComboBoxLSData {
         behavior: String => "0",
         allow_virtual_typing: String => "1",
@@ -46,6 +48,7 @@ define_element_interactable! {
 }
 
 impl<'a> ComboBox<'a> {
+    /// HTML 엘리먼트로부터 새로운 [`ComboBox`] 엘리먼트를 생성합니다.
     pub const fn new(id: Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {
         Self {
             id,
@@ -55,6 +58,7 @@ impl<'a> ComboBox<'a> {
         }
     }
 
+    /// [`ComboBox`]의 선택지 역할을 하는 [`ListBox`] 엘리먼트를 가져옵니다.
     pub fn item_list_box(&self, body: &'a Body) -> Result<ListBoxWrapper<'a>, WebDynproError> {
         let listbox_id =
             self.lsdata().item_list_box_id()
@@ -75,6 +79,7 @@ impl<'a> ComboBox<'a> {
         )
     }
 
+    /// 선택지를 선택하는 이벤트를 반환합니다. `by_enter`가 참일 경우 엔터를 눌러 선택한 것으로 취급합니다.
     pub fn select(&self, key: &str, by_enter: bool) -> Result<Event, WebDynproError> {
         let mut parameters: HashMap<String, String> = HashMap::new();
         parameters.insert("Id".to_string(), self.id.clone().to_string());

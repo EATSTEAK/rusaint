@@ -10,6 +10,8 @@ use self::property::ItsDisplayMode;
 pub mod property {
     use serde::Deserialize;
 
+    /// 이미지 표시 모드
+    #[allow(missing_docs)]
     #[derive(Deserialize, Debug)]
     #[serde(rename_all = "UPPERCASE")]
     pub enum ItsDisplayMode {
@@ -23,8 +25,9 @@ pub mod property {
 }
 // TODO: Implement additional events and data
 define_element_interactable! {
-    #[doc = "이미지"]
+    #[doc = "HTML 이미지"]
     Image<"IMG", "Image"> {},
+    #[doc = "[`Image`] 내부 데이터"]
     ImageLSData {
         tooltip: String => "0",
         width: String => "1",
@@ -53,6 +56,7 @@ define_element_interactable! {
 }
 
 impl<'a> Image<'a> {
+    /// HTML 엘리먼트로부터 이미지 엘리먼트를 생성합니다.
     pub const fn new(id: Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {
         Self {
             id,

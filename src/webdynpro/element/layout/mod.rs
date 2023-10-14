@@ -4,7 +4,9 @@ use super::define_element_base;
 use super::property::{Visibility, LockedDesign};
 
 define_element_base! {
+    #[doc = "HTML `flow` 레이아웃"]
     FlowLayout<"FL", "FlowLayout"> {},
+    #[doc = "[`FlowLayout`] 내부 데이터"]
     FlowLayoutLSData {
         visibility: Visibility => "0",
         custom_data: String => "1"
@@ -12,6 +14,7 @@ define_element_base! {
 }
 
 impl<'a> FlowLayout<'a> {
+    /// HTML 엘리먼트로부터 새로운 [`FlowLayout`] 엘리먼트를 생성합니다.
     pub const fn new(id: Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {
         Self {
             id,
@@ -22,7 +25,9 @@ impl<'a> FlowLayout<'a> {
 }
 
 define_element_base! {
+    #[doc = "가상 컨테이너"]
     Container<"CO", "Container"> {},
+    #[doc = "[`Container`] 내부 데이터"]
     ContainerLSData {
         locked: bool => "0",
         printable: bool => "1",
@@ -35,6 +40,7 @@ define_element_base! {
 }
 
 impl<'a> Container<'a> {
+    /// HTML 엘리먼트로부터 새로운 [`Container`] 엘리먼트를 생성합니다.
     pub const fn new(id: Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {
         Self {
             id,
@@ -44,7 +50,9 @@ impl<'a> Container<'a> {
     }
 }
 
+/// [`GridLayout`] 엘리먼트 모듈
 pub mod grid_layout;
+/// [`TabStrip`] 엘리먼트 모듈
 pub mod tab_strip;
 
 #[doc(inline)]

@@ -22,6 +22,7 @@ pub struct SapTableHierarchicalCell<'a> {
     content: OnceCell<Option<ElementWrapper<'a>>>,
 }
 define_lsdata! {
+    #[doc = "[`SapTableHierarchicalCell`] 내부 데이터"]
     SapTableHierarchicalCellLSData {
         is_selected: bool => "0",
         is_secondary_selected: bool => "1",
@@ -86,6 +87,7 @@ impl<'a> SubElement<'a> for SapTableHierarchicalCell<'a> {
 }
 
 impl<'a> SapTableHierarchicalCell<'a> {
+    /// HTML 엘리먼트로부터 [`SapTableHierarchicalCell`]을 생성합니다.
     pub const fn new(id: Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {
         Self {
             id,

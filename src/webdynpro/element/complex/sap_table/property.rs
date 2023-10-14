@@ -1,6 +1,7 @@
 use serde::Deserialize;
 
 /// 테이블 내의 셀 접근 방식
+#[allow(missing_docs)]
 pub enum AccessType {
     Invalid,
     Standard,
@@ -24,6 +25,8 @@ impl ToString for AccessType {
     }
 }
 
+/// 테이블 셀의 형태 종류
+#[allow(missing_docs)]
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum SapTableCellDesign {
@@ -271,6 +274,8 @@ pub enum SapTableCellDesign {
     Calendar8,
 }
 
+/// 테이블 셀의 종류
+#[allow(missing_docs)]
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "UPPERCASE")]
 pub enum SapTableCellType {
@@ -283,6 +288,8 @@ pub enum SapTableCellType {
     Info,
 }
 
+/// [`SapTableHeaderCell`]의 형태 종류
+#[allow(missing_docs)]
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "UPPERCASE")]
 pub enum SapTableHeaderCellDesign {
@@ -291,6 +298,8 @@ pub enum SapTableHeaderCellDesign {
     Level3Header,
 }
 
+/// [`SapTableHeaderCell`]의 종류
+#[allow(missing_docs)]
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "UPPERCASE")]
 pub enum SapTableHeaderCellType {
@@ -298,6 +307,8 @@ pub enum SapTableHeaderCellType {
     SelectionColumn,
 }
 
+/// [`SapTableHierarchicalCell`]의 상태
+#[allow(missing_docs)]
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "UPPERCASE")]
 pub enum SapTableHierarchicalCellStatus {
@@ -313,6 +324,8 @@ pub enum SapTableHierarchicalCellStatus {
     Icon,
 }
 
+/// 테이블의 선택 상태
+#[allow(missing_docs)]
 #[derive(Deserialize, Debug, Default, Clone, Copy)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum SapTableSelectionState {
@@ -324,6 +337,8 @@ pub enum SapTableSelectionState {
     None,
 }
 
+/// 테이블 내부 행의 전체적인 선택 상태
+#[allow(missing_docs)]
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "UPPERCASE")]
 pub enum SapTableRowSelectionMassState {
@@ -331,6 +346,9 @@ pub enum SapTableRowSelectionMassState {
     Indeterminate,
     All,
 }
+
+/// 테이블 행의 종류
+#[allow(missing_docs)]
 #[derive(Deserialize, Debug, Default, Clone, Copy)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum SapTableRowType {
@@ -344,6 +362,8 @@ pub enum SapTableRowType {
     Pivot,
 }
 
+/// 테이블 열 선택시의 액션
+#[allow(missing_docs)]
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum SapTableSelectionColumnAction {

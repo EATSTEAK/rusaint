@@ -4,7 +4,9 @@ use crate::webdynpro::element::define_element_base;
 
 define_element_base! {
     // Note: This element renders as "TSITM_ie6" if >= IE6
+    #[doc = "[`TabStrip`] 내부 아이템"]
     TabStripItem<"TSITM_standards", "TabStripTab"> {},
+    #[doc = "[`TabStripItem`] 내부 데이터"]
     TabStripItemLSData {
         id: String => "0",
         index: i32 => "1",
@@ -30,6 +32,7 @@ define_element_base! {
 }
 
 impl<'a> TabStripItem<'a> {
+    /// HTML 엘리먼트로부터 새로운 [`TabStripItem`] 엘리먼트를 생성합니다.
     pub const fn new(id: Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {
         Self {
             id,

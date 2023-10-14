@@ -3,8 +3,12 @@ use std::{borrow::Cow, cell::OnceCell};
 use crate::webdynpro::element::define_element_interactable;
 
 define_element_interactable! {
+    #[doc = r###"엘리먼트 제목 부분 등에서 사용되는 캡션
+    
+    이 엘리먼트는 단독 엘리먼트로 존재하지 않고, [`SapTableHeaderCell`]이나 [`Tray`]같은 엘리먼트의 제목 부분에 활용됩니다."###]
     Caption<"CP", "Caption"> {
     },
+    #[doc = "[`Caption`] 내부 데이터"]
     CaptionLSData {
         tooltip: String=> "0",
         text: String => "1",
@@ -26,6 +30,7 @@ define_element_interactable! {
 }
 
 impl<'a> Caption<'a> {
+    /// HTML 엘리먼트로부터 [`Caption`] 엘리먼트를 생성합니다.
     pub fn new(id: Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {
         Self {
             id,

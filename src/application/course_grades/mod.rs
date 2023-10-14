@@ -9,7 +9,7 @@ use crate::{
         element::{
             action::Button,
             complex::sap_table::{
-                cell::SapTableCellWrapper, property::SapTableCellType, row::SapTableRow, SapTable,
+                cell::{SapTableCellWrapper, SapTableCell}, property::SapTableCellType, SapTable, SapTableRow,
             },
             layout::PopupWindow,
             selection::ComboBox,
@@ -500,7 +500,10 @@ mod test {
     use crate::{
         application::course_grades::CourseGrades,
         session::USaintSession,
-        webdynpro::{element::{layout::PopupWindow, Element}, application::Application},
+        webdynpro::{
+            application::Application,
+            element::{layout::PopupWindow, Element},
+        },
     };
     use dotenv::dotenv;
 

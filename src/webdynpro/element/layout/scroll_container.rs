@@ -7,7 +7,9 @@ use crate::webdynpro::element::{
 
 // TODO: Implement additional events and data
 define_element_interactable! {
+    #[doc = "스크롤을 처리하는 컨테이너"]
     ScrollContainer<"SC", "ScrollContainer"> {},
+    #[doc = "[`ScrollContainer`] 내부 데이터"]
     ScrollContainerLSData {
         scrolling_mode: ScrollingMode => "0",
         visibility: Visibility => "1",
@@ -25,6 +27,7 @@ define_element_interactable! {
 }
 
 impl<'a> ScrollContainer<'a> {
+    /// HTML 엘리먼트로부터 새로운 [`ScrollContainer`] 엘리먼트를 생성합니다.
     pub const fn new(id: Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {
         Self {
             id,
