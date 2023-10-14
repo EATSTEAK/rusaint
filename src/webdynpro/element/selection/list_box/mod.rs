@@ -122,7 +122,7 @@ def_listbox_subset![
     ListBoxSingle = "LIB_S"
 ];
 
-/// [`ListBox`]의 내부 데이터
+/// [`ListBox`] 내부 데이터
 #[derive(Deserialize, Debug, Default)]
 #[allow(unused)]
 pub struct ListBoxLSData {

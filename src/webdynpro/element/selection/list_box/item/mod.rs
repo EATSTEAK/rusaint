@@ -25,7 +25,7 @@ define_element_base! {
         group_title: OnceCell<Option<&'a str>>,
         title: OnceCell<&'a str>,
     },
-    #[doc = "[`ListBoxItem`]의 내부 데이터"]
+    #[doc = "[`ListBoxItem`] 내부 데이터"]
     ListBoxItemLSData {
         icon_src: String => "0",
         disabled_icon_src: String => "1",

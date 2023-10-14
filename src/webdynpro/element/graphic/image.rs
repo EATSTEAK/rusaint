@@ -27,7 +27,7 @@ pub mod property {
 define_element_interactable! {
     #[doc = "HTML 이미지"]
     Image<"IMG", "Image"> {},
-    #[doc = "이미지 내부 데이터"]
+    #[doc = "[`Image`] 내부 데이터"]
     ImageLSData {
         tooltip: String => "0",
         width: String => "1",

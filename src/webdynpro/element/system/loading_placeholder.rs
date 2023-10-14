@@ -14,7 +14,7 @@ define_element_interactable! {
     로드 이벤트가 전송되어 페이지가 렌더링되기 위해서는 [`Custom`] 및 [`ClientInspector`] 엘리먼트의 클라이언트 데이터가 전송되어야 합니다.
     "###]
     LoadingPlaceholder<"LP", "LoadingPlaceHolder"> {},
-    #[doc = "[`LoadingPlaceholder`]의 내부 데이터"]
+    #[doc = "[`LoadingPlaceholder`] 내부 데이터"]
     LoadingPlaceholderLSData {
         id: String => "0",
         custom_data: String => "1",

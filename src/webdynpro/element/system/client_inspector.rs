@@ -24,7 +24,7 @@ pub struct ClientInspector<'a> {
     lsevents: OnceCell<Option<EventParameterMap>>,
 }
 
-/// [`ClientInspector`]의 내부 데이터
+/// [`ClientInspector`] 내부 데이터
 #[derive(Serialize, Deserialize, Debug, Default)]
 #[serde(rename_all(serialize = "PascalCase"))]
 #[allow(unused)]

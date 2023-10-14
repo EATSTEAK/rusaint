@@ -8,7 +8,7 @@ define_element_interactable! {
     이 엘리먼트는 단독 엘리먼트로 존재하지 않고, [`SapTableHeaderCell`]이나 [`Tray`]같은 엘리먼트의 제목 부분에 활용됩니다."###]
     Caption<"CP", "Caption"> {
     },
-    #[doc = "[`Caption`] 엘리먼트의 내부 데이터"]
+    #[doc = "[`Caption`] 내부 데이터"]
     CaptionLSData {
         tooltip: String=> "0",
         text: String => "1",

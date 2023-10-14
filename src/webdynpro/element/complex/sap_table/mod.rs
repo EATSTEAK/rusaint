@@ -15,6 +15,7 @@ define_element_interactable! {
     SapTable<"ST", "SapTable"> {
         table: OnceCell<Option<SapTableBody<'a>>>,
     },
+    #[doc = "[`SapTable`] 내부 데이터"]
     SapTableLSData {
         title_text: String => "0",
         accessibility_description: String => "1",

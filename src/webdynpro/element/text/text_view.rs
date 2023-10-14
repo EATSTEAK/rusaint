@@ -7,7 +7,7 @@ define_element_interactable! {
     TextView<"TV", "TextView"> {
         text: OnceCell<String>
     },
-    #[doc = "[`TextView`]의 내부 데이터"]
+    #[doc = "[`TextView`] 내부 데이터"]
     TextViewLSData {
         tooltip: String => "0",
         required: bool => "1",
