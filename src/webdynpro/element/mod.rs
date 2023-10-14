@@ -52,6 +52,7 @@ macro_rules! define_lsdata {
             )*
         }
 
+        #[allow(missing_docs)]
         impl $lsdata {
             $(
                 pub fn $field(&self) -> Option<&$ftype> {
@@ -185,6 +186,7 @@ pub(crate) use define_element_interactable;
 macro_rules! register_elements {
     [$( $enum:ident : $type: ty ),+ $(,)?] => {
     	/// 도큐먼트에서 파싱한 [`Element`]를 공통의 타입으로 취급할 수 있게 하는 Wrapper
+        #[allow(missing_docs)]
         pub enum ElementWrapper<'a> {
             $( $enum($type), )*
             Unknown($crate::webdynpro::element::unknown::Unknown<'a>)
