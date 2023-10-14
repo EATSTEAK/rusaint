@@ -1,4 +1,4 @@
-use std::iter;
+use std::{iter, ops::Index};
 
 use scraper::ElementRef;
 
@@ -70,5 +70,13 @@ impl<'a> SapTableBody<'a> {
 
     pub fn header(&self) -> &SapTableRow<'a> {
         &self.header
+    }
+}
+
+impl<'a> Index<usize> for SapTableBody<'a> {
+    type Output = SapTableRow<'a>;
+
+    fn index(&self, index: usize) -> &Self::Output {
+        &self.rows[index]
     }
 }
