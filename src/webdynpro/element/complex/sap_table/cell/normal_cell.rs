@@ -23,6 +23,7 @@ pub struct SapTableNormalCell<'a> {
 }
 
 define_lsdata! {
+    #[doc = "[`SapTableNormalCell`] 내부 데이터"]
     SapTableNormalCellLSData {
         is_selected: bool => "0",
         is_secondary_selected: bool => "1",

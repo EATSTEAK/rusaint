@@ -28,6 +28,7 @@ pub struct SapTableHeaderCell<'a> {
 }
 
 define_lsdata! {
+    #[doc = "[`SapTableHeaderCell`] 내부 데이터"]
     SapTableHeaderCellLSData {
         sort_state: SortState => "0",
         header_cell_design: SapTableHeaderCellDesign => "1",

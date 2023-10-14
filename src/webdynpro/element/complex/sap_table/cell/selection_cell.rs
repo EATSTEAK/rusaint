@@ -23,6 +23,7 @@ pub struct SapTableSelectionCell<'a> {
 }
 
 define_lsdata! {
+    #[doc = "[`SapTableSelectionCell`] 내부 데이터"]
     SapTableSelectionCellLSData {
         is_selected: bool => "0",
         is_secondary_selected: bool => "1",

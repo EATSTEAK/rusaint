@@ -23,6 +23,7 @@ pub struct SapTableMatrixCell<'a> {
 }
 
 define_lsdata! {
+    #[doc = "[`SapTableMatrixCell`] 내부 데이터"]
     SapTableMatrixCellLSData {
         cell_background_design: SapTableCellDesign => "0",
         header_cell_ids: String => "1",

@@ -22,6 +22,7 @@ pub struct SapTableHierarchicalCell<'a> {
     content: OnceCell<Option<ElementWrapper<'a>>>,
 }
 define_lsdata! {
+    #[doc = "[`SapTableHierarchicalCell`] 내부 데이터"]
     SapTableHierarchicalCellLSData {
         is_selected: bool => "0",
         is_secondary_selected: bool => "1",
