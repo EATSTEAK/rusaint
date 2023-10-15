@@ -1,59 +1,62 @@
-use anyhow::Result;
-use std::ops::{Deref, DerefMut};
-
-use crate::webdynpro::element::{
-    button::Button, combo_box::ComboBox, element_ref, sap_table::SapTable, tab_strip::TabStrip,
+use crate::{
+    define_elements,
+    model::SemesterType,
+    webdynpro::{
+        element::{action::Button, complex::SapTable, layout::TabStrip, selection::ComboBox},
+        error::WebDynproError, application::Application,
+    },
 };
 
 use super::USaintApplication;
 
-pub struct CourseSchedule(USaintApplication);
+define_usaint_application!(pub struct CourseSchedule);
 
-impl Deref for CourseSchedule {
-    type Target = USaintApplication;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl<'a> DerefMut for CourseSchedule {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-
+#[allow(unused)]
 impl<'a> CourseSchedule {
     const APP_NAME: &str = "ZCMW2100";
 
-    element_ref! {
-        PERIOD_YEAR: ComboBox<'a> = "ZCMW_PERIOD_RE.ID_A61C4ED604A2BFC2A8F6C6038DE6AF18:VIW_MAIN.PERYR",
-        PERIOD_ID: ComboBox<'a> = "ZCMW_PERIOD_RE.ID_A61C4ED604A2BFC2A8F6C6038DE6AF18:VIW_MAIN.PERID",
-        TABLE_ROWS: ComboBox<'a> = "ZCMW2100.ID_0001:VIW_MODULES.ROWS",
-        TABSTRIP: TabStrip<'a> = "ZCMW2100.ID_0001:VIW_MAIN.MODULE_TABSTRIP",
-        BUTTON_EDU: Button<'a> = "ZCMW2100.ID_0001:VIW_MAIN.BUTTON_EDU",
-        MAIN_TABLE: SapTable<'a> = "SALV_WD_TABLE.ID_DE0D9128A4327646C94670E2A892C99C:VIEW_TABLE.SALV_WD_UIE_TABLE"
+    define_elements! {
+        PERIOD_YEAR: ComboBox<'a> = "ZCMW_PERIOD_RE.ID_A61C4ED604A2BFC2A8F6C6038DE6AF18:VIW_MAIN.PERYR";
+        PERIOD_ID: ComboBox<'a> = "ZCMW_PERIOD_RE.ID_A61C4ED604A2BFC2A8F6C6038DE6AF18:VIW_MAIN.PERID";
+        TABLE_ROWS: ComboBox<'a> = "ZCMW2100.ID_0001:VIW_MODULES.ROWS";
+        TABSTRIP: TabStrip<'a> = "ZCMW2100.ID_0001:VIW_MAIN.MODULE_TABSTRIP";
+        BUTTON_EDU: Button<'a> = "ZCMW2100.ID_0001:VIW_MAIN.BUTTON_EDU";
+        MAIN_TABLE: SapTable<'a> = "SALV_WD_TABLE.ID_DE0D9128A4327646C94670E2A892C99C:VIEW_TABLE.SALV_WD_UIE_TABLE";
     }
 
-    pub async fn new() -> Result<CourseSchedule> {
+    pub async fn new() -> Result<CourseSchedule, WebDynproError> {
         Ok(CourseSchedule(
             USaintApplication::new(Self::APP_NAME).await?,
         ))
     }
 
-    pub async fn select_period(&mut self, year: u32, period: PeriodType) -> Result<()> {
+    fn semester_to_key(period: SemesterType) -> &'static str {
+        match period {
+            SemesterType::One => "090",
+            SemesterType::Summer => "091",
+            SemesterType::Two => "092",
+            SemesterType::Winter => "093",
+        }
+    }
+
+    pub async fn select_period(
+        &mut self,
+        year: &str,
+        period: SemesterType,
+    ) -> Result<(), WebDynproError> {
         let events = {
             let body = self.body();
             let period_year = Self::PERIOD_YEAR.from_body(body)?;
             let period_id = Self::PERIOD_ID.from_body(body)?;
             vec![
-                period_year.select(year.to_string().as_str(), false)?,
-                period_id.select(period.to_string().as_str(), false)?,
+                period_year.select(year, false)?,
+                period_id.select(Self::semester_to_key(period), false)?,
             ]
         };
         self.send_events(events).await
     }
 
-    pub async fn select_rows(&mut self, row: u32) -> Result<()> {
+    pub async fn select_rows(&mut self, row: u32) -> Result<(), WebDynproError> {
         let events = {
             let body = self.body();
             let table_rows = Self::TABLE_ROWS.from_body(body)?;
@@ -62,7 +65,7 @@ impl<'a> CourseSchedule {
         self.send_events(events).await
     }
 
-    pub async fn select_edu(&mut self) -> Result<()> {
+    pub async fn select_edu(&mut self) -> Result<(), WebDynproError> {
         let events = {
             let body = self.body();
             let tab_strip = Self::TABSTRIP.from_body(body)?;
@@ -71,7 +74,7 @@ impl<'a> CourseSchedule {
         self.send_events(events).await
     }
 
-    async fn search_edu(&mut self) -> Result<()> {
+    async fn search_edu(&mut self) -> Result<(), WebDynproError> {
         let events = {
             let body = self.body();
             let button_edu = Self::BUTTON_EDU.from_body(body)?;
@@ -80,35 +83,16 @@ impl<'a> CourseSchedule {
         self.send_events(events).await
     }
 
-    pub async fn load_edu(&mut self) -> Result<()> {
+    pub async fn load_edu(&mut self) -> Result<(), WebDynproError> {
         self.select_edu().await?;
         self.search_edu().await?;
         Ok(())
     }
 
-    pub fn read_edu_raw(&self) -> Result<SapTable> {
+    pub fn read_edu_raw(&self) -> Result<SapTable, WebDynproError> {
         let body = self.body();
         let main_table = Self::MAIN_TABLE.from_body(body)?;
         Ok(main_table)
-    }
-}
-
-pub enum PeriodType {
-    One,
-    Summer,
-    Two,
-    Winter,
-}
-
-impl ToString for PeriodType {
-    fn to_string(&self) -> String {
-        match self {
-            PeriodType::One => "090",
-            PeriodType::Summer => "091",
-            PeriodType::Two => "092",
-            PeriodType::Winter => "093",
-        }
-        .to_owned()
     }
 }
 
@@ -116,11 +100,11 @@ impl ToString for PeriodType {
 mod test {
     use crate::{
         application::course_schedule::CourseSchedule,
-        webdynpro::element::{
-            list_box::{ListBoxItemWrapper, ListBoxWrapper},
-            sap_table::cell::{SapTableCell, SapTableCellWrapper},
+        webdynpro::{element::{
+            complex::sap_table::cell::{SapTableCell, SapTableCellWrapper},
+            selection::list_box::{item::ListBoxItemWrapper, ListBoxWrapper},
             ElementWrapper,
-        },
+        }, application::Application},
     };
 
     #[tokio::test]
@@ -142,13 +126,13 @@ mod test {
         let listbox = period_id_combobox.item_list_box(app.body()).unwrap();
         match listbox {
             ListBoxWrapper::ListBoxPopup(listbox) => {
-                for item in listbox.items() {
+                for item in listbox.list_box().items() {
                     match item {
                         ListBoxItemWrapper::Item(item) => {
-                            println!("{:?}", item);
+                            println!("value: {:?}, key: {:?}", item.value1(), item.key());
                         }
                         ListBoxItemWrapper::ActionItem(item) => {
-                            println!("{:?}", item);
+                            println!("title: {:?}, text: {:?}", item.title(), item.text());
                         }
                     }
                 }
@@ -166,9 +150,9 @@ mod test {
         app.load_edu().await.unwrap();
         let table = app.read_edu_raw().unwrap();
         if let Some(table) = table.table() {
-            for row in table {
+            for row in table.with_header() {
                 print!("row: ");
-                for col in row {
+                for col in row.iter() {
                     match col {
                         SapTableCellWrapper::Header(cell) => {
                             let content = cell.content();

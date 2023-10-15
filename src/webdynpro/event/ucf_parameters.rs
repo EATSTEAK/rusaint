@@ -3,6 +3,8 @@ use serde::Deserialize;
 
 use super::{EVENT_DATA_COLON, EVENT_DATA_COMMA, EVENT_DATA_END, EVENT_DATA_START};
 
+/// 이벤트의 특성을 정의하는 파라메터
+#[allow(missing_docs)]
 #[derive(Builder, Clone, Default, Debug, Deserialize)]
 #[builder(default)]
 pub struct UcfParameters {
@@ -27,6 +29,7 @@ pub struct UcfParameters {
 }
 
 impl ToString for UcfParameters {
+    /// [`UcfParameters`]값을 이벤트 웹 리퀘스트에 전송할 수 있는 형태의 문자열으로 변환합니다.
     fn to_string(&self) -> String {
         let mut owned = "".to_owned();
         owned.push_str(EVENT_DATA_START);
@@ -94,10 +97,13 @@ impl ToString for UcfParameters {
 
 // TODO: Cleanup code
 impl UcfParameters {
+    /// [`UcfParameters`]값을 이벤트 웹 리퀘스트에 전송할 수 있는 형태의 문자열으로 변환합니다.
     pub fn serialize(&self) -> String {
         self.to_string()
     }
 
+    /// 이 파라메터를 가진 이벤트를 큐에 저장할 수 있다면 참을 반환합니다.
+    /// [`UcfAction`]값이 `Enqueue`이면 참입니다.
     pub fn is_enqueable(&self) -> bool {
         if let Some(action) = &self.action {
             match action {
@@ -109,6 +115,8 @@ impl UcfParameters {
         }
     }
 
+    /// 이 파라메터를 가진 이벤트를 큐에 저장했을 때 바로 전송할 수 있다면 참을 반환합니다.
+    /// [`UcfAction`]값이 `Submit`이거나 `SubmitAsync`일 경우 참을 반환합니다.
     pub fn is_submitable(&self) -> bool {
         if let Some(action) = &self.action {
             match action {
@@ -121,16 +129,18 @@ impl UcfParameters {
         }
     }
 }
-/**
- * UCFAction
- * This enum means should event is fired with form request
- */
+
+/// 이벤트가 큐에 저장될지 바로 전송될지 여부
 #[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum UcfAction {
+    /// 이벤트가 바로 전송되어야 함
     Submit,
+    /// 이벤트가 비동기로 바로 전송되어야 함
     SubmitAsync,
+    /// 이벤트가 큐에 저장되어야 함
     Enqueue,
+    /// 없음
     None,
 }
 
@@ -146,11 +156,15 @@ impl ToString for UcfAction {
     }
 }
 
+/// 동일한 종류의 이벤트가 큐에 동시에 들어갈 수 있는지 여부
 #[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum UcfCardinality {
+    /// 동일한 이벤트가 큐에 여러번 들어갈 수 있음
     Multiple,
+    /// 동일한 이벤트가 큐에 한번만 들어갈 수 있음
     Single,
+    /// 없음
     None,
 }
 
@@ -165,11 +179,15 @@ impl ToString for UcfCardinality {
     }
 }
 
+/// 이벤트의 응답 방법을 표현할 수 있는지 여부
 #[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum UcfResponseData {
+    /// 이벤트로 인해 변경된 부분을 포함한 전체 컨텐츠를 응답
     Full,
+    /// 응답으로 인해 변경된 부분만 응답
     Delta,
+    /// 기본 응답 방식을 따름
     Inherit,
 }
 
@@ -184,6 +202,7 @@ impl ToString for UcfResponseData {
     }
 }
 
+#[allow(missing_docs)]
 #[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum UcfTransportMethod {
@@ -201,6 +220,8 @@ impl ToString for UcfTransportMethod {
     }
 }
 
+/// 이벤트의 반영 딜레이 여부
+#[allow(missing_docs)]
 #[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum UcfDelay {

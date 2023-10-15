@@ -1,32 +1,16 @@
-use anyhow::Result;
-use std::{
-    ops::{Deref, DerefMut},
-    sync::Arc,
-};
+use std::sync::Arc;
 
-use crate::session::USaintSession;
+use crate::{session::USaintSession, webdynpro::error::WebDynproError};
 
 use super::USaintApplication;
 
-pub struct StudentInformation(USaintApplication);
+define_usaint_application!(pub struct StudentInformation);
 
-impl Deref for StudentInformation {
-    type Target = USaintApplication;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl<'a> DerefMut for StudentInformation {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-
+#[allow(unused)]
 impl StudentInformation {
     const APP_NAME: &str = "ZCMW1001n";
 
-    pub async fn new(session: Arc<USaintSession>) -> Result<StudentInformation> {
+    pub async fn new(session: Arc<USaintSession>) -> Result<StudentInformation, WebDynproError> {
         Ok(StudentInformation(
             USaintApplication::with_session(Self::APP_NAME, session).await?,
         ))
@@ -39,8 +23,9 @@ mod test {
     use std::sync::{Arc, OnceLock};
 
     use crate::{
-        application::student_information::StudentInformation, session::USaintSession,
-        webdynpro::element::ElementWrapper,
+        application::student_information::StudentInformation,
+        session::USaintSession,
+        webdynpro::{application::Application, element::ElementWrapper},
     };
     use dotenv::dotenv;
 

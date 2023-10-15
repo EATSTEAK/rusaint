@@ -1,11 +1,10 @@
-use anyhow::Result;
 use std::collections::HashMap;
 
 use lol_html::{element, html_content::ContentType, rewrite_str, RewriteStrSettings};
 use roxmltree::Node;
 use scraper::{Html, Selector};
 
-use crate::webdynpro::error::{BodyError, BodyUpdateError};
+use crate::webdynpro::error::{BodyError, UpdateBodyError};
 
 use super::SapSsrClient;
 
@@ -14,14 +13,14 @@ type BodyUpdateContentId = String;
 type BodyUpdateControlId = String;
 
 #[derive(Debug)]
-pub enum BodyUpdateType {
+pub(super) enum BodyUpdateType {
     Full(BodyUpdateWindowId, BodyUpdateContentId, String),
     Delta(BodyUpdateWindowId, HashMap<BodyUpdateControlId, String>),
 }
 
 #[derive(Debug)]
 #[allow(unused)]
-pub struct BodyUpdate {
+pub(super) struct BodyUpdate {
     update: Option<BodyUpdateType>,
     initialize_ids: Option<String>,
     script_calls: Option<Vec<String>>,
@@ -30,38 +29,35 @@ pub struct BodyUpdate {
 }
 
 impl BodyUpdate {
-    pub fn new(response: &str) -> Result<BodyUpdate> {
+    pub(super) fn new(response: &str) -> Result<BodyUpdate, UpdateBodyError> {
         let response_xml = roxmltree::Document::parse(response)?;
         let updates = response_xml
             .root()
             .first_child()
-            .ok_or(BodyUpdateError::CannotFindNode("<updates>".to_string()))?;
-        let update = updates
-            .first_child()
-            .ok_or(BodyUpdateError::CannotFindNode(
-                "<full-update> or <delta-update>".to_string(),
-            ))?;
+            .ok_or(UpdateBodyError::NoSuchNode("<updates>".to_string()))?;
+        let update = updates.first_child().ok_or(UpdateBodyError::NoSuchNode(
+            "<full-update> or <delta-update>".to_string(),
+        ))?;
         let update_type: Option<BodyUpdateType>;
         if update.tag_name().name() == "full-update" {
             let windowid =
                 update
                     .attribute("windowid")
-                    .ok_or(BodyUpdateError::CannotFindAttribute {
+                    .ok_or(UpdateBodyError::NoSuchAttribute {
                         node: "full-update".to_string(),
                         attribute: "windowid".to_string(),
                     })?;
             let content = update
                 .first_child()
-                .ok_or(BodyUpdateError::NoContent("full-update".to_string()))?;
-            let contentid =
-                content
-                    .attribute("id")
-                    .ok_or(BodyUpdateError::CannotFindAttribute {
-                        node: "content-update".to_string(),
-                        attribute: "id".to_string(),
-                    })?;
+                .ok_or(UpdateBodyError::NoSuchContent("full-update".to_string()))?;
+            let contentid = content
+                .attribute("id")
+                .ok_or(UpdateBodyError::NoSuchAttribute {
+                    node: "content-update".to_string(),
+                    attribute: "id".to_string(),
+                })?;
             if content.tag_name().name() != "content-update" {
-                return Err(BodyUpdateError::UnknownElement(
+                return Err(UpdateBodyError::UnknownElement(
                     content.tag_name().name().to_owned(),
                 ))?;
             }
@@ -70,14 +66,14 @@ impl BodyUpdate {
                 contentid.to_owned(),
                 content
                     .text()
-                    .ok_or(BodyUpdateError::NoContent("full-content".to_string()))?
+                    .ok_or(UpdateBodyError::NoSuchContent("full-content".to_string()))?
                     .to_owned(),
             ));
         } else if update.tag_name().name() == "delta-update" {
             let windowid =
                 update
                     .attribute("windowid")
-                    .ok_or(BodyUpdateError::CannotFindAttribute {
+                    .ok_or(UpdateBodyError::NoSuchAttribute {
                         node: "delta-update".to_string(),
                         attribute: "windowid".to_string(),
                     })?;
@@ -88,20 +84,21 @@ impl BodyUpdate {
                 let tag_name = children.tag_name().name();
                 match tag_name {
                     "control-update" => {
-                        let control_id = children.attribute("id").ok_or(
-                            BodyUpdateError::CannotFindAttribute {
-                                node: "control-update".to_string(),
-                                attribute: "id".to_string(),
-                            },
-                        )?;
+                        let control_id =
+                            children
+                                .attribute("id")
+                                .ok_or(UpdateBodyError::NoSuchAttribute {
+                                    node: "control-update".to_string(),
+                                    attribute: "id".to_string(),
+                                })?;
                         let content = children
                             .first_child()
-                            .ok_or(BodyUpdateError::NoContent("control-update".to_string()))?;
+                            .ok_or(UpdateBodyError::NoSuchContent("control-update".to_string()))?;
                         update_map.insert(
                             control_id.to_owned(),
                             content
                                 .text()
-                                .ok_or(BodyUpdateError::NoContent("content".to_string()))?
+                                .ok_or(UpdateBodyError::NoSuchContent("content".to_string()))?
                                 .to_owned(),
                         );
                     }
@@ -112,7 +109,7 @@ impl BodyUpdate {
             }
             update_type = Some(BodyUpdateType::Delta(windowid.to_owned(), update_map));
         } else {
-            return Err(BodyUpdateError::UnknownElement(
+            return Err(UpdateBodyError::UnknownElement(
                 update.tag_name().name().to_owned(),
             ))?;
         }
@@ -127,13 +124,14 @@ impl BodyUpdate {
     }
 }
 
+/// WebDynpro 페이지의 상태를 관리하는 구조체
 pub struct Body {
     raw_body: String,
     document: Html,
 }
 
 impl Body {
-    pub fn new(body: String) -> Body {
+    pub(crate) fn new(body: String) -> Body {
         let document = Html::parse_document(&body);
         Body {
             raw_body: body,
@@ -141,15 +139,17 @@ impl Body {
         }
     }
 
+    /// 페이지 도큐먼트의 HTML 텍스트를 반환합니다.
     pub fn raw_body(&self) -> &str {
         &self.raw_body
     }
 
+    /// 도큐먼트 파싱을 위한 `scraper::Html` 구조체를 반환합니다.
     pub fn document(&self) -> &Html {
         &self.document
     }
 
-    pub fn parse_sap_ssr_client(&self) -> Result<SapSsrClient> {
+    pub(super) fn parse_sap_ssr_client(&self) -> Result<SapSsrClient, BodyError> {
         let document = &self.document;
         let selector = Selector::parse(r#"#sap\.client\.SsrClient\.form"#).unwrap();
         let client_form = document
@@ -204,7 +204,7 @@ impl Body {
         })
     }
 
-    pub fn apply(&mut self, updates: BodyUpdate) -> Result<()> {
+    pub(super) fn apply(&mut self, updates: BodyUpdate) -> Result<(), UpdateBodyError> {
         if let Some(update) = updates.update {
             let output: String = match update {
                 BodyUpdateType::Full(_, contentid, content) => {

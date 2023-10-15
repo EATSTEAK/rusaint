@@ -2,23 +2,23 @@ use self::body::{Body, BodyUpdate};
 use crate::{
     utils::{default_header, DEFAULT_USER_AGENT},
     webdynpro::{
-        error::ClientError,
+        error::{ClientError, WebDynproError},
         event::{event_queue::EventQueue, Event},
     },
 };
-use anyhow::Result;
 use reqwest::{cookie::Jar, header::*, RequestBuilder};
 use std::sync::Arc;
 use url::Url;
 
+/// WebDynpro 애플리케이션의 웹 요청 및 페이지 문서 처리를 담당하는 클라이언트
 pub struct Client {
     client: reqwest::Client,
-    pub ssr_client: SapSsrClient,
+    ssr_client: SapSsrClient,
     event_queue: EventQueue,
     pub(super) body: Body,
 }
 
-pub struct SapSsrClient {
+pub(super) struct SapSsrClient {
     action: String,
     charset: String,
     wd_secure_id: String,
@@ -26,7 +26,7 @@ pub struct SapSsrClient {
     use_beacon: bool,
 }
 
-pub fn wd_xhr_header() -> HeaderMap {
+pub(super) fn wd_xhr_header() -> HeaderMap {
     let mut headers = HeaderMap::new();
     headers.insert(ACCEPT, "*/*".parse().unwrap());
     headers.insert(ACCEPT_ENCODING, "gzip, deflate, br".parse().unwrap());
@@ -42,7 +42,8 @@ pub fn wd_xhr_header() -> HeaderMap {
 }
 
 impl Client {
-    pub async fn new(base_url: &Url, app_name: &str) -> Result<Client> {
+    /// 새로운 클라이언트를 생성합니다.
+    pub async fn new(base_url: &Url, app_name: &str) -> Result<Client, ClientError> {
         let jar: Arc<Jar> = Arc::new(Jar::default());
         let client = reqwest::Client::builder()
             .cookie_provider(jar)
@@ -53,11 +54,12 @@ impl Client {
         Self::with_client(client, base_url, app_name).await
     }
 
+    /// 임의의 reqwest::Client 와 함께 클라이언트를 생성합니다.
     pub async fn with_client(
         client: reqwest::Client,
         base_url: &Url,
         app_name: &str,
-    ) -> Result<Client> {
+    ) -> Result<Client, ClientError> {
         let raw_body = client
             .wd_navigate(base_url, app_name)
             .send()
@@ -75,28 +77,28 @@ impl Client {
         Ok(wd_client)
     }
 
-    pub fn add_event(&mut self, event: Event) {
+    pub(crate) fn add_event(&mut self, event: Event) {
         self.event_queue.add(event)
     }
 
-    pub async fn send_event(&mut self, base_url: &Url) -> Result<()> {
+    pub(crate) async fn send_event(&mut self, base_url: &Url) -> Result<(), WebDynproError> {
         let res = self.event_request(base_url).await?;
         self.mutate_body(res)
     }
 
-    async fn event_request(&mut self, base_url: &Url) -> Result<String> {
+    async fn event_request(&mut self, base_url: &Url) -> Result<String, ClientError> {
         let res = self
             .client
             .wd_xhr(base_url, &self.ssr_client, &mut self.event_queue)?
             .send()
             .await?;
         if !res.status().is_success() {
-            return Err(ClientError::RequestFailed(res))?;
+            return Err(ClientError::InvalidResponse(res))?;
         }
         Ok(res.text().await?)
     }
 
-    fn mutate_body(&mut self, response: String) -> Result<()> {
+    fn mutate_body(&mut self, response: String) -> Result<(), WebDynproError> {
         let body = &mut self.body;
         let update = BodyUpdate::new(&response)?;
         Ok(body.apply(update)?)
@@ -111,7 +113,7 @@ trait Requests {
         base_url: &Url,
         ssr_client: &SapSsrClient,
         event_queue: &mut EventQueue,
-    ) -> Result<RequestBuilder>;
+    ) -> Result<RequestBuilder, ClientError>;
 }
 
 impl Requests for reqwest::Client {
@@ -131,14 +133,14 @@ impl Requests for reqwest::Client {
         base_url: &Url,
         ssr_client: &SapSsrClient,
         event_queue: &mut EventQueue,
-    ) -> Result<RequestBuilder> {
+    ) -> Result<RequestBuilder, ClientError> {
         let mut url = "".to_owned();
         url.push_str(base_url.scheme());
         url.push_str("://");
         if let Some(host_str) = base_url.host_str() {
             url.push_str(host_str);
         } else {
-            return Err(ClientError::InvalidBaseUrl)?;
+            return Err(ClientError::InvalidBaseUrl(base_url.to_string()))?;
         }
         if let Some(port) = base_url.port() {
             url.push_str(":");
@@ -164,4 +166,22 @@ impl Requests for reqwest::Client {
     }
 }
 
+/// WebDynpro의 페이지를 파싱, 업데이트하는 [`Body`] 구현
 pub mod body;
+
+#[cfg(test)]
+mod test {
+    use url::Url;
+
+    use crate::webdynpro::application::client::Client;
+    #[tokio::test]
+    async fn initial_load() {
+        let client = Client::new(
+            &Url::parse("https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/").unwrap(),
+            "ZCMW2100",
+        )
+        .await
+        .unwrap();
+        assert_eq!(client.ssr_client.app_name, "ZCMW2100");
+    }
+}
