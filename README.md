@@ -2,7 +2,8 @@
 <p align="center" style="font-style: italic;">빠르고 간편하며 믿을 수 있는 숭실대학교 u-saint 클라이언트</p>
 <p align="center">
     <a href="https://github.com/EATSTEAK/rusaint"><img alt="GitHub Badge" src="https://img.shields.io/badge/github-eatsteak/rusaint-8da0cb?style=for-the-badge&labelColor=555555&logo=github"></a>
-    <a href="https://github.com/EATSTEAK/rusaint/releases"><img alt="Cargo version" src="https://img.shields.io/badge/dynamic/toml?url=https%3A%2F%2Fraw.githubusercontent.com%2FEATSTEAK%2Frusaint%2Fmain%2FCargo.toml&query=%24.package.version&prefix=v&style=for-the-badge&logo=rust&label=version"></a>
+    <a href="https://crates.io/crates/rusaint"><img alt="crates.io" src="https://img.shields.io/crates/v/rusaint.svg?style=for-the-badge&color=fc8d62&logo=rust"></a>
+    <a href="https://docs.rs/rusaint"><img alt="docs.rs" src="https://img.shields.io/badge/docs.rs-rusaint-66c2a5?style=for-the-badge&labelColor=555555&logo=docs.rs"></a>
    <a href="https://github.com/EATSTEAK/rusaint/LICENSE.md"><img alt="License" src="https://img.shields.io/github/license/EATSTEAK/rusaint?style=for-the-badge"></a>
 </p>
 
@@ -19,11 +20,14 @@ u-saint의 기반인 [SAP Web Dynpro](https://en.wikipedia.org/wiki/Web_Dynpro)�
 
 ## 설치
 
-rusaint는 현재 **미완성 버전**으로 공개된 저장소에서 설치할 수 없습니다. 직접 저장소를 복제하여 설치하세요.
+```bash
+cargo add rusaint
+```
 
 ## 문서
 
-_추가 예정_
+[docs.rs](https://docs.rs/rusaint)
+
 
 ## 예시
 
