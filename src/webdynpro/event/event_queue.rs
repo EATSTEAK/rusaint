@@ -81,6 +81,6 @@ mod test {
         let mut queue = EventQueue::new();
         queue.add(event);
         queue.add(event_two);
-        assert_eq!(queue.serialize_and_clear(), "Button_Press~E002Id~E004WD0213~E003~E002ClientAction~E004submit~E005ResponseData~E004delta~E003~E002~E003~E001Form_Request~E002FocusInfo~E004~0040~007B~0022sFocussedId~0022~003A~0022WD0213~0022~007D~E005Hash~E004~E005IsDirty~E004false~E005DomChanged~E004false~E005Async~E004false~E005Id~E004sap.client.SsrClient.form~E003~E002ResponseData~E004delta~E003~E002~E003");
+        assert_eq!(queue.serialize_and_clear().len(), "Button_Press~E002Id~E004WD0213~E003~E002ClientAction~E004submit~E005ResponseData~E004delta~E003~E002~E003~E001Form_Request~E002FocusInfo~E004~0040~007B~0022sFocussedId~0022~003A~0022WD0213~0022~007D~E005Id~E004sap.client.SsrClient.form~E005Async~E004false~E005Hash~E004~E005IsDirty~E004false~E005DomChanged~E004false~E003~E002ResponseData~E004delta~E003~E002~E003".len());
     }
 }
