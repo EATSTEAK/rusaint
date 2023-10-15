@@ -197,22 +197,3 @@ impl<'a> USaintApplication {
 pub mod course_grades;
 mod course_schedule;
 mod student_information;
-
-#[cfg(test)]
-mod test {
-    use std::sync::Arc;
-
-    use crate::{application::USaintApplication, session::USaintSession};
-    use dotenv::dotenv;
-
-    #[tokio::test]
-    async fn test_sso_login() {
-        dotenv().ok();
-        let id = std::env::var("SSO_ID").unwrap();
-        let password = std::env::var("SSO_PASSWORD").unwrap();
-        let session = Arc::new(USaintSession::with_password(&id, &password).await.unwrap());
-        USaintApplication::with_session("ZCMW1001n", session)
-            .await
-            .unwrap();
-    }
-}
