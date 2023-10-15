@@ -10,15 +10,13 @@ use crate::webdynpro::{
 
 use self::item::TabStripItem;
 
-type TabItems<'a> = Vec<ElementDef<'a, TabStripItem<'a>>>;
-
 define_element_interactable! {
     // Note: This element renders as "TS_ie6" if >= IE6
     #[doc = r###"상단 버튼으로 선택할 수 있는 탭 레이아웃
     
     > |**참고**| 이 엘리먼트는 실제 구현에서 >= IE6 용 구현과 기본 구현으로 나누어져 있지만, rusaint에서는 최신의 브라우저를 기준으로 하므로 전자의 구현은 구현되어있지 않습니다."###]
     TabStrip<"TS_standards", "TabStrip"> {
-        tab_items: OnceCell<Option<TabItems<'a>>>,
+        tab_items: OnceCell<Vec<ElementDef<'a, TabStripItem<'a>>>>,
     },
     #[doc = "[`TabStrip`] 내부 데이터"]
     TabStripLSData {
@@ -54,25 +52,25 @@ impl<'a> TabStrip<'a> {
     }
 
     /// 탭 내부 [`TabItem`]을 반환합니다.
-    // TODO: Change return type to iterator
-    pub fn tab_items(&self) -> Option<&TabItems<'a>> {
+    pub fn tab_items(
+        &self,
+    ) -> impl Iterator<Item = &ElementDef<'a, TabStripItem<'a>>> + ExactSizeIterator {
         self.tab_items
             .get_or_init(|| {
-                let items_selector =
+                let Ok(items_selector) =
                     Selector::parse(format!(r#"[ct="{}"]"#, TabStripItem::CONTROL_ID).as_str())
-                        .or(Err(BodyError::InvalidSelector))
-                        .ok()?;
-                Some(
-                    self.element_ref
-                        .select(&items_selector)
-                        .filter_map(|eref| {
-                            let id = eref.value().id()?;
-                            Some(ElementDef::<TabStripItem>::new_dynamic(id.to_owned()))
-                        })
-                        .collect(),
-                )
+                        .or(Err(BodyError::InvalidSelector)) else {
+                            return vec![];
+                        };
+                self.element_ref
+                    .select(&items_selector)
+                    .filter_map(|eref| {
+                        let id = eref.value().id()?;
+                        Some(ElementDef::<TabStripItem>::new_dynamic(id.to_owned()))
+                    })
+                    .collect()
             })
-            .as_ref()
+            .iter()
     }
 
     /// 특정 탭을 선택하는 이벤트를 반환합니다.
