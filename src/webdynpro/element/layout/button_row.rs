@@ -27,8 +27,7 @@ impl<'a> ButtonRow<'a> {
     }
 
     /// 내부 [`Button`]을 반환합니다.
-    // TODO: Return iterator
-    pub fn buttons(&'a self) -> &'a Vec<Button<'a>> {
+    pub fn buttons(&'a self) -> impl Iterator<Item = &Button<'a>> + ExactSizeIterator {
         self.buttons.get_or_init(|| {
             let button_selector = &Selector::parse(r#":root [ct="B"]"#).unwrap();
             self.element_ref
@@ -41,6 +40,6 @@ impl<'a> ButtonRow<'a> {
                     }
                 })
                 .collect::<Vec<Button<'a>>>()
-        })
+        }).iter()
     }
 }
