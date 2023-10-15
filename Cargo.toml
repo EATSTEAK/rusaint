@@ -1,6 +1,9 @@
 [package]
 name = "rusaint"
 version = "0.1.0"
+description = "Easy-to-use SSU u-saint client"
+keywords = ["ssu", "u-saint", "scraping", "parser"]
+categories = ["web-programming"]
 authors = ["Hyomin Koo <me@eatsteak.dev>"]
 license = "MIT"
 repository = "https://github.com/EATSTEAK/rusaint"
@@ -32,9 +35,6 @@ regex = "1.9.5"
 getset = "0.1.2"
 custom_debug_derive = "0.5.1"
 
-
-[workspace]
-members = ["macro"]
 
 [dev-dependencies]
 anyhow = "1.0.75"
