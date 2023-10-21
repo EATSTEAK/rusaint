@@ -1,11 +1,11 @@
 use std::{collections::HashMap, num::ParseIntError, str::FromStr};
 
-use getset::Getters;
+use getset::{CopyGetters, Getters};
 
 /// 전체 성적(학적부, 증명)
-#[derive(Getters, Debug)]
+#[derive(Getters, CopyGetters, Debug)]
 #[allow(unused)]
-#[get = "pub"]
+#[get_copy = "pub"]
 pub struct GradeSummary {
     /// 신청학점
     attempted_credits: f32,
@@ -18,30 +18,37 @@ pub struct GradeSummary {
     /// 산술평균
     arithmetic_mean: f32,
     /// P/F 학점계
-    pf_earned_credits: f32
+    pf_earned_credits: f32,
 }
 impl GradeSummary {
-    pub(crate) fn new(attempted_credits: f32, earned_credits: f32, gpa: f32, cgpa: f32, avg: f32, pf_earned_credits: f32) -> GradeSummary {
+    pub(crate) fn new(
+        attempted_credits: f32,
+        earned_credits: f32,
+        gpa: f32,
+        cgpa: f32,
+        avg: f32,
+        pf_earned_credits: f32,
+    ) -> GradeSummary {
         GradeSummary {
             attempted_credits,
             earned_credits,
             grade_points_sum: gpa,
             grade_points_avarage: cgpa,
             arithmetic_mean: avg,
-            pf_earned_credits
+            pf_earned_credits,
         }
     }
 }
 
-
 /// 학기별 성적
-#[derive(Debug, Getters)]
+#[derive(Debug, Getters, CopyGetters)]
 #[allow(unused)]
-#[get = "pub"]
+#[get_copy = "pub"]
 pub struct SemesterGrade {
     /// 학년도
     year: u32,
     /// 학기
+    #[getset(skip)]
     semester: String,
     /// 신청학점
     attempted_credits: f32,
@@ -99,12 +106,16 @@ impl SemesterGrade {
             flunked,
         }
     }
+
+    /// 학기
+    pub fn semester(&self) -> &str {
+        self.semester.as_ref()
+    }
 }
 
 /// 과목별 성적
-#[derive(Debug, Getters)]
+#[derive(Debug, CopyGetters)]
 #[allow(unused)]
-#[get = "pub"]
 pub struct ClassGrade {
     /// 이수학년도
     year: String,
@@ -115,8 +126,10 @@ pub struct ClassGrade {
     /// 과목명
     class_name: String,
     /// 과목학점
+    #[getset(get_copy = "pub")]
     grade_points: f32,
     /// 성적
+    #[get_copy = "pub"]
     score: ClassScore,
     /// 등급
     rank: String,
@@ -150,10 +163,45 @@ impl ClassGrade {
             detail,
         }
     }
+
+    /// 이수학년도
+    pub fn year(&self) -> &str {
+        self.year.as_ref()
+    }
+
+    /// 이수학기
+    pub fn semester(&self) -> &str {
+        self.semester.as_ref()
+    }
+
+    /// 과목코드
+    pub fn code(&self) -> &str {
+        self.code.as_ref()
+    }
+
+    /// 과목명
+    pub fn class_name(&self) -> &str {
+        self.class_name.as_ref()
+    }
+
+    /// 등급
+    pub fn rank(&self) -> &str {
+        self.rank.as_ref()
+    }
+
+    /// 교수명
+    pub fn professor(&self) -> &str {
+        self.professor.as_ref()
+    }
+
+    /// 상세성적
+    pub fn detail(&self) -> Option<&HashMap<String, f32>> {
+        self.detail.as_ref()
+    }
 }
 
 /// 과목 점수
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 #[allow(unused)]
 pub enum ClassScore {
     /// P/F 과목의 Pass
