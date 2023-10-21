@@ -2,7 +2,11 @@ use anyhow::{Error, Result};
 use std::sync::{Arc, OnceLock};
 
 use dotenv::dotenv;
-use rusaint::{application::course_grades::CourseGrades, model::SemesterType, USaintSession};
+use rusaint::{
+    application::course_grades::{model::CourseType, CourseGrades},
+    model::SemesterType,
+    USaintSession,
+};
 use serial_test::serial;
 
 static SESSION: OnceLock<Arc<USaintSession>> = OnceLock::new();
@@ -27,18 +31,18 @@ async fn get_session() -> Result<Arc<USaintSession>> {
 #[serial]
 async fn summaries() {
     let session = get_session().await.unwrap();
-    let app = CourseGrades::new(session).await.unwrap();
-    let recorded_summary = app.recorded_summary().unwrap();
+    let mut app = CourseGrades::new(session).await.unwrap();
+    let recorded_summary = app.recorded_summary(CourseType::Bachelor).await.unwrap();
     println!("Recorded: {:?}", recorded_summary);
-    let certificated_summary = app.certificated_summary().unwrap();
+    let certificated_summary = app.certificated_summary(CourseType::Bachelor).await.unwrap();
     println!("Certificated: {:?}", certificated_summary);
 }
 #[tokio::test]
 #[serial]
 async fn semesters() {
     let session = get_session().await.unwrap();
-    let app = CourseGrades::new(session).await.unwrap();
-    let semesters = app.semesters().unwrap();
+    let mut app = CourseGrades::new(session).await.unwrap();
+    let semesters = app.semesters(CourseType::Bachelor).await.unwrap();
     println!("{:?}", semesters);
     assert!(!semesters.is_empty());
 }
@@ -48,7 +52,10 @@ async fn semesters() {
 async fn classes_with_detail() {
     let session = get_session().await.unwrap();
     let mut app = CourseGrades::new(session).await.unwrap();
-    let details = app.classes("2022", SemesterType::Two, true).await.unwrap();
+    let details = app
+        .classes(CourseType::Bachelor, "2022", SemesterType::Two, true)
+        .await
+        .unwrap();
     println!("{:?}", details);
     assert!(!details.is_empty());
     println!("Try to obtain class's detail");
@@ -57,7 +64,12 @@ async fn classes_with_detail() {
         .find(|grade| grade.detail().is_some())
         .unwrap();
     let detail = app
-        .class_detail("2022", SemesterType::Two, detail_code.code())
+        .class_detail(
+            CourseType::Bachelor,
+            "2022",
+            SemesterType::Two,
+            detail_code.code(),
+        )
         .await
         .unwrap();
     println!("{:?}", detail);
