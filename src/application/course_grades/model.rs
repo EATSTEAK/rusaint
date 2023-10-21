@@ -200,6 +200,22 @@ impl ClassGrade {
     }
 }
 
+/// 학위과정
+#[derive(Debug, Clone, Copy)]
+#[allow(unused)]
+pub enum CourseType {
+    /// 박사과정
+    Phd, // DR
+    /// 석사과정
+    Master, // MA 
+    /// 석박과정
+    PhdIntergrated, // MP
+    /// 연구과정
+    Research, // RE
+    /// 학사과정
+    Bachelor, // UG
+}
+
 /// 과목 점수
 #[derive(Debug, Clone, Copy)]
 #[allow(unused)]
