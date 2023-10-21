@@ -162,9 +162,7 @@ impl<'a> USaintApplication {
         app.load_placeholder().await?;
         Ok(app)
     }
-    /// 이벤트를 서버에 전송합니다. [`send_events`] 를 참조하세요.
-    ///
-    /// [`send_events`] : webdynpro::application::BasicApplication::send_events
+    /// 이벤트를 서버에 전송합니다. [`send_events()`](crate::webdynpro::application::BasicApplication::send_events)를 참조하세요.
     pub async fn send_events(
         &mut self,
         events: impl IntoIterator<Item = Event>,

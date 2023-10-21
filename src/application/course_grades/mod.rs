@@ -9,7 +9,9 @@ use crate::{
         element::{
             action::Button,
             complex::sap_table::{
-                cell::{SapTableCellWrapper, SapTableCell}, property::SapTableCellType, SapTable, SapTableRow,
+                cell::{SapTableCell, SapTableCellWrapper},
+                property::SapTableCellType,
+                SapTable, SapTableRow,
             },
             layout::PopupWindow,
             selection::ComboBox,
@@ -21,7 +23,7 @@ use crate::{
     },
 };
 
-use self::model::{ClassGrade, GradeSummary, SemesterGrade};
+use self::model::{ClassGrade, CourseType, GradeSummary, SemesterGrade};
 
 use super::USaintApplication;
 
@@ -121,6 +123,33 @@ impl<'a> CourseGrades {
         }
     }
 
+    fn course_type_to_key(course_type: CourseType) -> &'static str {
+        match course_type {
+            CourseType::Phd => "DR",
+            CourseType::Master => "MA",
+            CourseType::PhdIntergrated => "MP",
+            CourseType::Research => "RE",
+            CourseType::Bachelor => "UG",
+        }
+    }
+
+    async fn select_course(&mut self, course: CourseType) -> Result<(), WebDynproError> {
+        let select = {
+            let course = Self::course_type_to_key(course);
+            let mut vec = Vec::with_capacity(1);
+            let course_combobox = Self::PROGRESS_TYPE.from_body(self.body())?;
+            if (|| Some(course_combobox.lsdata().key()?.as_str()))() != Some(course) {
+                vec.push(course_combobox.select(&course.to_string(), false)?);
+            }
+            Result::<Vec<Event>, WebDynproError>::Ok(vec)
+        }?;
+        if !select.is_empty() {
+            self.send_events(select).await
+        } else {
+            Ok(())
+        }
+    }
+
     async fn select_semester(
         &mut self,
         year: &str,
@@ -182,14 +211,17 @@ impl<'a> CourseGrades {
     /// # tokio_test::block_on(async {
     /// # use std::sync::Arc;
     /// # use rusaint::USaintSession;
+    /// # use self::model::CourseType;
     /// # let session = Arc::new(USaintSession::with_password("20212345", "password").await.unwrap());
     /// let app = CourseGrades::new(session).await.unwrap();
-    /// let summary = app.recorded_summary().unwrap();
+    /// let summary = app.recorded_summary(CourseType::Bachelor).unwrap();
     /// println!("{:?}", summary);
     /// // GradeSummary { ... }
     /// # })
     /// ```
-    pub fn recorded_summary(&self) -> Result<GradeSummary, WebDynproError> {
+    pub async fn recorded_summary(&mut self, course_type: CourseType) -> Result<GradeSummary, WebDynproError> {
+        self.close_popups().await?;
+        self.select_course(course_type).await?;
         let body = self.body();
         let attempted_credits = Self::value_as_f32(Self::ATTM_CRD1.from_body(body)?)?;
         let earned_credits = Self::value_as_f32(Self::EARN_CRD1.from_body(body)?)?;
@@ -213,14 +245,17 @@ impl<'a> CourseGrades {
     /// # tokio_test::block_on(async {
     /// # use std::sync::Arc;
     /// # use rusaint::USaintSession;
+    /// # use self::model::CourseType;
     /// # let session = Arc::new(USaintSession::with_password("20212345", "password").await.unwrap());
     /// let app = CourseGrades::new(session).await.unwrap();
-    /// let summary = app.certificated_summary().unwrap();
+    /// let summary = app.certificated_summary(CourseType::Bachelor).unwrap();
     /// println!("{:?}", summary);
     /// // GradeSummary { ... }
     /// # })
     /// ```
-    pub fn certificated_summary(&self) -> Result<GradeSummary, WebDynproError> {
+    pub async fn certificated_summary(&mut self, course_type: CourseType) -> Result<GradeSummary, WebDynproError> {
+        self.close_popups().await?;
+        self.select_course(course_type).await?;
         let body = self.body();
         let attempted_credits = Self::value_as_f32(Self::ATTM_CRD2.from_body(body)?)?;
         let earned_credits = Self::value_as_f32(Self::EARN_CRD2.from_body(body)?)?;
@@ -244,20 +279,23 @@ impl<'a> CourseGrades {
     /// # tokio_test::block_on(async {
     /// # use std::sync::Arc;
     /// # use rusaint::USaintSession;
+    /// # use self::model::CourseType;
     /// # let session = Arc::new(USaintSession::with_password("20212345", "password").await.unwrap());
     /// let app = CourseGrades::new(session).await.unwrap();
-    /// let semesters = app.semesters().unwrap();
+    /// let semesters = app.semesters(CourseType::Bachelor).unwrap();
     /// println!("{:?}", semesters);
     /// // [SemesterGrade { ... }, SemesterGrade { ... }]
     /// # })
     /// ```
-    pub fn semesters(&self) -> Result<Vec<SemesterGrade>, WebDynproError> {
+    pub async fn semesters(&mut self, course_type: CourseType) -> Result<Vec<SemesterGrade>, WebDynproError> {
         fn parse_rank(value: String) -> Option<(u32, u32)> {
             let mut spl = value.split("/");
             let first: u32 = spl.next()?.parse().ok()?;
             let second: u32 = spl.next()?.parse().ok()?;
             Some((first, second))
         }
+        self.close_popups().await?;
+        self.select_course(course_type).await?;
 
         let table_elem = Self::GRADES_SUMMARY_TABLE.from_body(self.body())?;
         let table = table_elem.table().ok_or(ElementError::NoSuchContent {
@@ -268,21 +306,39 @@ impl<'a> CourseGrades {
             .iter()
             .filter_map(Self::row_to_string)
             .filter_map(|values| {
-                Some(SemesterGrade::new(
-                    values[1].parse().ok()?,
-                    values[2].clone(),
-                    values[3].parse().ok()?,
-                    values[4].parse().ok()?,
-                    values[5].parse().ok()?,
-                    values[6].parse().ok()?,
-                    values[7].parse().ok()?,
-                    values[8].parse().ok()?,
-                    parse_rank(values[9].clone())?,
-                    parse_rank(values[10].clone())?,
-                    !values[11].trim().is_empty(),
-                    !values[12].trim().is_empty(),
-                    !values[13].trim().is_empty(),
-                ))
+                if values.len() == 14 {
+                    Some(SemesterGrade::new(
+                        values[1].parse().ok()?,
+                        values[2].clone(),
+                        values[3].parse().ok()?,
+                        values[4].parse().ok()?,
+                        values[5].parse().ok()?,
+                        values[6].parse().ok()?,
+                        values[7].parse().ok()?,
+                        values[8].parse().ok()?,
+                        parse_rank(values[9].clone())?,
+                        parse_rank(values[10].clone())?,
+                        !values[11].trim().is_empty(),
+                        !values[12].trim().is_empty(),
+                        !values[13].trim().is_empty(),
+                    ))
+                } else {
+                    Some(SemesterGrade::new(
+                        values[1].parse().ok()?,
+                        values[2].clone(),
+                        values[3].parse().ok()?,
+                        values[4].parse().ok()?,
+                        values[5].parse().ok()?,
+                        values[6].parse().ok()?,
+                        values[7].parse().ok()?,
+                        values[8].parse().ok()?,
+                        parse_rank(values[9].clone())?,
+                        parse_rank(values[10].clone())?,
+                        false,
+                        !values[11].trim().is_empty(),
+                        !values[12].trim().is_empty(),
+                    ))
+                }
             });
         Ok(ret.collect())
     }
@@ -340,10 +396,10 @@ impl<'a> CourseGrades {
     /// # tokio_test::block_on(async {
     /// # use std::sync::Arc;
     /// # use rusaint::USaintSession;
-    /// # use rusaint::model::SemesterType;
+    /// # use rusaint::model::{CourseType, SemesterType};
     /// # let session = Arc::new(USaintSession::with_password("20212345", "password").await.unwrap());
     /// let app = CourseGrades::new(session).await.unwrap();
-    /// let classes = app.classes("2022", SemesterType::Two, false).unwrap();
+    /// let classes = app.classes(CourseType::Bachelor, "2022", SemesterType::Two, false).unwrap();
     /// println!("{:?}", classes); // around 3s(depends on network environment)
     /// // [ClassGrade { ... }, ClassGrade { ... }]
     /// # })
@@ -353,7 +409,7 @@ impl<'a> CourseGrades {
     /// # tokio_test::block_on(async {
     /// # use std::sync::Arc;
     /// # use rusaint::USaintSession;
-    /// # use rusaint::model::SemesterType;
+    /// # use rusaint::model::{CourseType, SemesterType};
     /// # let session = Arc::new(USaintSession::with_password("20212345", "password").await.unwrap());
     /// let app = CourseGrades::new(session).await.unwrap();
     /// let classes = app.classes("2022", SemesterType::Two, true).unwrap();
@@ -363,11 +419,13 @@ impl<'a> CourseGrades {
     /// ```
     pub async fn classes(
         &mut self,
+        course_type: CourseType,
         year: &str,
         semester: SemesterType,
         include_details: bool,
     ) -> Result<Vec<ClassGrade>, WebDynproError> {
         self.close_popups().await?;
+        self.select_course(course_type).await?;
         self.select_semester(year, semester).await?;
         let class_grades: Vec<(Option<String>, Vec<String>)> = {
             let grade_table_elem = Self::GRADE_BY_CLASSES_TABLE.from_body(self.body())?;
@@ -430,9 +488,10 @@ impl<'a> CourseGrades {
     /// # tokio_test::block_on(async {
     /// # use std::sync::Arc;
     /// # use rusaint::USaintSession;
+    /// # use self::model::CourseType;
     /// # let session = Arc::new(USaintSession::with_password("20212345", "password").await.unwrap());
     /// let app = CourseGrades::new(session).await.unwrap();
-    /// let classes = app.classes("2022", SemesterType::Two, false).unwrap();
+    /// let classes = app.classes(CourseType::Bachelor, "2022", SemesterType::Two, false).unwrap();
     /// let class = classes.iter().first().unwrap();
     /// let class_detail = app.class_detail("2022", SemesterType::Two, class.code());
     /// println!("{:?}", class_detail);
@@ -441,10 +500,13 @@ impl<'a> CourseGrades {
     /// ```
     pub async fn class_detail(
         &mut self,
+        course_type: CourseType,
         year: &str,
         semester: SemesterType,
         code: &str,
     ) -> Result<HashMap<String, f32>, WebDynproError> {
+        self.close_popups().await?;
+        self.select_course(course_type).await?;
         self.select_semester(year, semester).await?;
         let table_elem = Self::GRADE_BY_CLASSES_TABLE.from_body(self.body())?;
         let Some(table) = table_elem.table()  else {

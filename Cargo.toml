@@ -1,6 +1,6 @@
 [package]
 name = "rusaint"
-version = "0.1.1"
+version = "0.1.2"
 description = "Easy-to-use SSU u-saint client"
 keywords = ["ssu", "u-saint", "scraping", "parser"]
 categories = ["web-programming"]

@@ -288,7 +288,7 @@ pub enum SapTableCellType {
     Info,
 }
 
-/// [`SapTableHeaderCell`]의 형태 종류
+/// [`SapTableHeaderCell`](super::cell::SapTableHeaderCell)의 형태 종류
 #[allow(missing_docs)]
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "UPPERCASE")]
@@ -298,7 +298,7 @@ pub enum SapTableHeaderCellDesign {
     Level3Header,
 }
 
-/// [`SapTableHeaderCell`]의 종류
+/// [`SapTableHeaderCell`](super::cell::SapTableHeaderCell)의 종류
 #[allow(missing_docs)]
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "UPPERCASE")]
@@ -307,7 +307,7 @@ pub enum SapTableHeaderCellType {
     SelectionColumn,
 }
 
-/// [`SapTableHierarchicalCell`]의 상태
+/// [`SapTableHierarchicalCell`](super::cell::SapTableHierarchicalCell)의 상태
 #[allow(missing_docs)]
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "UPPERCASE")]

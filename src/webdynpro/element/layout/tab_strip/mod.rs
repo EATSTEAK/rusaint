@@ -51,7 +51,7 @@ impl<'a> TabStrip<'a> {
         }
     }
 
-    /// 탭 내부 [`TabItem`]을 반환합니다.
+    /// 탭 내부 [`TabStripItem`]을 반환합니다.
     pub fn tab_items(
         &self,
     ) -> impl Iterator<Item = &ElementDef<'a, TabStripItem<'a>>> + ExactSizeIterator {

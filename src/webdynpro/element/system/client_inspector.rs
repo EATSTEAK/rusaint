@@ -10,12 +10,15 @@ use crate::webdynpro::element::{
 };
 
 /// 클라이언트의 변경 사항을 감시
-/// 
+///
 /// 이 엘리먼트는 사용자와 직접 상호작용하지 않는 특별한 엘리먼트로, 브라우저의 여러 값(윈도우 높이 등)을 감시하고 변경 사항이 있다면
 /// 이를 서버에 알려주어 서버가 해당 값을 토대로 SSR을 할 수 있도록 도와줍니다.
 /// rusaint에서는 서버에 가상의 기본 값을 알려주어 이를 토대로 SSR를 수행하도록 [`USaintApplication`]에서 구현하고 있습니다.
 /// 3개 정도의 `ClientInspector`가 최초에 초기화되며, 초기화 된 후에 [`LoadingPlaceholder`]를 통한 실제 페이지 로드를 수행합니다.
 /// [`ClientInspectorLSData`]의 `notification_trigger` 값을 확인하면 해당 엘리먼트가 변경 사항이 있을 때마다 감시하는지, 혹은 최초 한번만 서버에 알리는지 확인할 수 있습니다.
+///
+/// [`USaintApplication`]: crate::application::USaintApplication
+/// [`LoadingPlaceholder`]: super::LoadingPlaceholder
 #[derive(Debug)]
 pub struct ClientInspector<'a> {
     id: Cow<'static, str>,

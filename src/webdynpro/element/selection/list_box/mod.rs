@@ -187,7 +187,6 @@ pub struct ListBoxLSData {
 }
 
 impl<'a> ListBox<'a> {
-
     /// HTML 엘리먼트로부터 새로운 [`ListBox`]를 생성합니다.
     pub const fn new(id: Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {
         Self {
@@ -199,26 +198,30 @@ impl<'a> ListBox<'a> {
         }
     }
 
-    /// [`ListBoxItem`]의 목록을 반환합니다.
+    /// [`ListBoxItemWrapper`]의 목록을 반환합니다.
     pub fn items(&self) -> impl Iterator<Item = &ListBoxItemWrapper<'a>> {
-        self.items.get_or_init(|| {
-            let items_selector = scraper::Selector::parse("[ct]").unwrap();
-            self.element_ref
-                .select(&items_selector)
-                .filter_map(|elem_ref| {
-                    let element = ElementWrapper::dyn_elem(elem_ref).ok()?;
-                    match element {
-                        ElementWrapper::ListBoxItem(item) => Some(ListBoxItemWrapper::Item(item)),
-                        ElementWrapper::ListBoxActionItem(item) => {
-                            Some(ListBoxItemWrapper::ActionItem(item))
+        self.items
+            .get_or_init(|| {
+                let items_selector = scraper::Selector::parse("[ct]").unwrap();
+                self.element_ref
+                    .select(&items_selector)
+                    .filter_map(|elem_ref| {
+                        let element = ElementWrapper::dyn_elem(elem_ref).ok()?;
+                        match element {
+                            ElementWrapper::ListBoxItem(item) => {
+                                Some(ListBoxItemWrapper::Item(item))
+                            }
+                            ElementWrapper::ListBoxActionItem(item) => {
+                                Some(ListBoxItemWrapper::ActionItem(item))
+                            }
+                            _ => None,
                         }
-                        _ => None,
-                    }
-                })
-                .collect()
-        }).iter()
+                    })
+                    .collect()
+            })
+            .iter()
     }
 }
 
-/// [`ListBoxItem`]과 [`ListBoxActionItem`]이 포함된 모듈
+/// [`ListBoxItem`](self::item::ListBoxItem)과 [`ListBoxActionItem`](self::item::ListBoxActionItem)이 포함된 모듈
 pub mod item;

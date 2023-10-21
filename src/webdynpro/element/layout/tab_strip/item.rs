@@ -4,7 +4,7 @@ use crate::webdynpro::element::define_element_base;
 
 define_element_base! {
     // Note: This element renders as "TSITM_ie6" if >= IE6
-    #[doc = "[`TabStrip`] 내부 아이템"]
+    #[doc = "[`TabStrip`](crate::webdynpro::element::layout::TabStrip) 내부 아이템"]
     TabStripItem<"TSITM_standards", "TabStripTab"> {},
     #[doc = "[`TabStripItem`] 내부 데이터"]
     TabStripItemLSData {

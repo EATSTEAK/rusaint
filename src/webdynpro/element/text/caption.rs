@@ -3,9 +3,12 @@ use std::{borrow::Cow, cell::OnceCell};
 use crate::webdynpro::element::define_element_interactable;
 
 define_element_interactable! {
-    #[doc = r###"엘리먼트 제목 부분 등에서 사용되는 캡션
-    
-    이 엘리먼트는 단독 엘리먼트로 존재하지 않고, [`SapTableHeaderCell`]이나 [`Tray`]같은 엘리먼트의 제목 부분에 활용됩니다."###]
+    #[doc = "엘리먼트 제목 부분 등에서 사용되는 캡션"]
+    #[doc = ""]
+    #[doc = "이 엘리먼트는 단독 엘리먼트로 존재하지 않고, [`SapTableHeaderCell`]이나 [`Tray`]같은 엘리먼트의 제목 부분에 활용됩니다."]
+    #[doc = ""]
+    #[doc = "[`SapTableHeaderCell`]: crate::webdynpro::element::complex::sap_table::cell::SapTableHeaderCell"]
+    #[doc = "[`Tray`]: crate::webdynpro::element::layout::Tray"]
     Caption<"CP", "Caption"> {
     },
     #[doc = "[`Caption`] 내부 데이터"]
