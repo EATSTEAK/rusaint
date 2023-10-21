@@ -6,13 +6,15 @@ use crate::webdynpro::event::Event;
 use crate::webdynpro::element::{define_element_interactable, Interactable};
 
 define_element_interactable! {
-    #[doc = r###"페이지가 로드되기 전 내부 컨텐츠가 로드될 위치의 자리 표시자
-
-    이 엘리먼트는 최초 로드 전 컨텐츠가 로드될 위치를 표시하기 위한 엘리먼트입니다.
-    `LoadingPlaceholder.Load` 이벤트가 전송되면 사라지고, 이 엘리먼트가 있는 위치에 실제 페이지가 렌더링됩니다.
-    
-    로드 이벤트가 전송되어 페이지가 렌더링되기 위해서는 [`Custom`] 및 [`ClientInspector`] 엘리먼트의 클라이언트 데이터가 전송되어야 합니다.
-    "###]
+    #[doc = "페이지가 로드되기 전 내부 컨텐츠가 로드될 위치의 자리 표시자"]
+    #[doc = ""]
+    #[doc = "이 엘리먼트는 최초 로드 전 컨텐츠가 로드될 위치를 표시하기 위한 엘리먼트입니다."]
+    #[doc = "`LoadingPlaceholder.Load` 이벤트가 전송되면 사라지고, 이 엘리먼트가 있는 위치에 실제 페이지가 렌더링됩니다."]
+    #[doc = ""]
+    #[doc = "로드 이벤트가 전송되어 페이지가 렌더링되기 위해서는 [`Custom`] 및 [`ClientInspector`] 엘리먼트의 클라이언트 데이터가 전송되어야 합니다."]
+    #[doc = ""]
+    #[doc = "[`Custom`]: crate::webdynpro::element::system::Custom"]
+    #[doc = "[`ClientInspector`]: crate::webdynpro::element::system::ClientInspector"]
     LoadingPlaceholder<"LP", "LoadingPlaceHolder"> {},
     #[doc = "[`LoadingPlaceholder`] 내부 데이터"]
     LoadingPlaceholderLSData {

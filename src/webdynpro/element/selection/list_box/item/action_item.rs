@@ -3,12 +3,12 @@ use std::{borrow::Cow, cell::OnceCell};
 use crate::webdynpro::element::{define_element_base, Element};
 
 define_element_base! {
-    #[doc = "실행할 수 있는 액션이 포함된 [`ListBox`]의 아이템"]
+    #[doc = "실행할 수 있는 액션이 포함된 [`ListBox`](crate::webdynpro::element::selection::list_box::ListBox)의 아이템"]
     ListBoxActionItem<"LIB_AI", "ListBoxActionItem"> {
         title: OnceCell<String>,
         text: OnceCell<String>,
     },
-    #[doc = "[`ListBoxActionItem`]의 "]
+    #[doc = "[`ListBoxActionItem`]의 내부 데이터"]
     ListBoxActionItemLSData {
         custom_data: String => "0",
     }

@@ -2,17 +2,17 @@ use std::{borrow::Cow, cell::OnceCell};
 
 use crate::webdynpro::element::define_element_base;
 
-/// [`ListBox`]의 아이템을 위한 Wrapper
+/// [`ListBox`](crate::webdynpro::element::selection::list_box::ListBox)의 아이템을 위한 Wrapper
 #[derive(Debug)]
 pub enum ListBoxItemWrapper<'a> {
-    /// [`ListBox`]의 일반 아이템
+    /// [`ListBox`](crate::webdynpro::element::selection::list_box::ListBox)의 일반 아이템
     Item(ListBoxItem<'a>),
-    /// 수행할 수 있는 액션이 포함된 [`ListBox`] 아이템
+    /// 수행할 수 있는 액션이 포함된 [`ListBox`](crate::webdynpro::element::selection::list_box::ListBox) 아이템
     ActionItem(ListBoxActionItem<'a>),
 }
 
 define_element_base! {
-    #[doc = "[`Listbox`]의 일반 아이템"]
+    #[doc = "[`ListBox`](crate::webdynpro::element::selection::list_box::ListBox)의 일반 아이템"]
     ListBoxItem<"LIB_I", "ListBoxItem"> {
         index: OnceCell<Option<&'a str>>,
         key: OnceCell<Option<&'a str>>,

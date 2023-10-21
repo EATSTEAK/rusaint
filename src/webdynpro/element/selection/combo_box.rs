@@ -58,7 +58,7 @@ impl<'a> ComboBox<'a> {
         }
     }
 
-    /// [`ComboBox`]의 선택지 역할을 하는 [`ListBox`] 엘리먼트를 가져옵니다.
+    /// [`ComboBox`]의 선택지 역할을 하는 [`ListBox`](super::list_box::ListBox) 엘리먼트를 가져옵니다.
     pub fn item_list_box(&self, body: &'a Body) -> Result<ListBoxWrapper<'a>, WebDynproError> {
         let listbox_id =
             self.lsdata().item_list_box_id()
