@@ -4,7 +4,7 @@ use crate::webdynpro::element::define_element_interactable;
 
 // TODO: Implement additional events and data
 define_element_interactable! {
-    #[doc = "[`GridLayout`] 내부 셀"]
+    #[doc = "[`GridLayout`](crate::webdynpro::element::layout::GridLayout) 내부 셀"]
     GridLayoutCell<"GLC", "GridLayoutCell"> {},
     #[doc = "[`GridLayoutCell`] 내부 데이터"]
     GridLayoutCellLSData {
