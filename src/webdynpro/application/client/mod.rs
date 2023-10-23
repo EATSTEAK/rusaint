@@ -42,20 +42,7 @@ pub(super) fn wd_xhr_header() -> HeaderMap {
 }
 
 impl Client {
-    /// 새로운 클라이언트를 생성합니다.
-    pub async fn new(base_url: &Url, app_name: &str) -> Result<Client, ClientError> {
-        let jar: Arc<Jar> = Arc::new(Jar::default());
-        let client = reqwest::Client::builder()
-            .cookie_provider(jar)
-            .cookie_store(true)
-            .user_agent(DEFAULT_USER_AGENT)
-            .build()
-            .unwrap();
-        Self::with_client(client, base_url, app_name).await
-    }
-
-    /// 임의의 reqwest::Client 와 함께 클라이언트를 생성합니다.
-    pub async fn with_client(
+    async fn with_client(
         client: reqwest::Client,
         base_url: &Url,
         app_name: &str,
@@ -163,6 +150,43 @@ impl Requests for reqwest::Client {
             ("SAPEVENTQUEUE", &serialized),
         ];
         Ok(self.post(url).headers(wd_xhr_header()).form(&params))
+    }
+}
+
+struct ClientBuilder<'a> {
+    base_url: &'a Url,
+    name: &'a str,
+    client: Option<reqwest::Client>,
+}
+
+impl<'a> ClientBuilder<'a> {
+    pub fn new(base_url: &'a Url, name: &'a str) -> ClientBuilder<'a> {
+        ClientBuilder {
+            base_url,
+            name,
+            client: None,
+        }
+    }
+
+    pub fn client(&mut self, client: reqwest::Client) -> ClientBuilder<'a> {
+        self.client = Some(client);
+        self
+    }
+
+    pub async fn build(&self) -> Result<Client, WebDynproError> {
+        let client = match self.client {
+            Some(client) => client,
+            None => {
+                let jar: Arc<Jar> = Arc::new(Jar::default());
+                reqwest::Client::builder()
+                    .cookie_provider(jar)
+                    .cookie_store(true)
+                    .user_agent(DEFAULT_USER_AGENT)
+                    .build()
+                    .unwrap()
+            }
+        };
+        Client::with_client(client, self.base_url, self.name).await
     }
 }
 
