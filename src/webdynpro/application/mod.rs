@@ -1,4 +1,7 @@
-use self::client::{body::Body, Client};
+use self::{
+    body::Body,
+    client::{Client, ClientBuilder},
+};
 use url::Url;
 
 use super::{
@@ -67,7 +70,7 @@ impl<'a> BasicApplication {
     pub async fn new(base_url_str: &str, name: &str) -> Result<Self, WebDynproError> {
         let base_url = Url::parse(base_url_str)
             .or(Err(ClientError::InvalidBaseUrl(base_url_str.to_string())))?;
-        let client = Client::new(&base_url, name).await?;
+        let client = ClientBuilder::new(&base_url, name).build().await?;
         Ok(Self::with_client(base_url, name, client)?)
     }
 
@@ -138,5 +141,16 @@ impl<'a> BasicApplication {
     }
 }
 
+pub(super) struct SapSsrClient {
+    action: String,
+    charset: String,
+    wd_secure_id: String,
+    pub app_name: String,
+    use_beacon: bool,
+}
+
 /// WebDynpro 요청 및 문서 처리를 담당하는 클라이언트
 pub mod client;
+
+/// WebDynpro의 페이지를 파싱, 업데이트하는 [`Body`] 구현
+pub mod body;

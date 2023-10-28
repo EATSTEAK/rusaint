@@ -5,7 +5,7 @@ use crate::{
     model::SemesterType,
     session::USaintSession,
     webdynpro::{
-        application::{client::body::Body, Application},
+        application::{body::Body, Application},
         element::{
             action::Button,
             complex::sap_table::{
@@ -219,7 +219,10 @@ impl<'a> CourseGrades {
     /// // GradeSummary { ... }
     /// # })
     /// ```
-    pub async fn recorded_summary(&mut self, course_type: CourseType) -> Result<GradeSummary, WebDynproError> {
+    pub async fn recorded_summary(
+        &mut self,
+        course_type: CourseType,
+    ) -> Result<GradeSummary, WebDynproError> {
         self.close_popups().await?;
         self.select_course(course_type).await?;
         let body = self.body();
@@ -253,7 +256,10 @@ impl<'a> CourseGrades {
     /// // GradeSummary { ... }
     /// # })
     /// ```
-    pub async fn certificated_summary(&mut self, course_type: CourseType) -> Result<GradeSummary, WebDynproError> {
+    pub async fn certificated_summary(
+        &mut self,
+        course_type: CourseType,
+    ) -> Result<GradeSummary, WebDynproError> {
         self.close_popups().await?;
         self.select_course(course_type).await?;
         let body = self.body();
@@ -287,7 +293,10 @@ impl<'a> CourseGrades {
     /// // [SemesterGrade { ... }, SemesterGrade { ... }]
     /// # })
     /// ```
-    pub async fn semesters(&mut self, course_type: CourseType) -> Result<Vec<SemesterGrade>, WebDynproError> {
+    pub async fn semesters(
+        &mut self,
+        course_type: CourseType,
+    ) -> Result<Vec<SemesterGrade>, WebDynproError> {
         fn parse_rank(value: String) -> Option<(u32, u32)> {
             let mut spl = value.split("/");
             let first: u32 = spl.next()?.parse().ok()?;
