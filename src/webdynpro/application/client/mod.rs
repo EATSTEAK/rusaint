@@ -1,4 +1,7 @@
-use self::body::{Body, BodyUpdate};
+use super::{
+    body::{Body, BodyUpdate},
+    SapSsrClient,
+};
 use crate::{
     utils::{default_header, DEFAULT_USER_AGENT},
     webdynpro::{
@@ -16,14 +19,6 @@ pub struct Client {
     ssr_client: SapSsrClient,
     event_queue: EventQueue,
     pub(super) body: Body,
-}
-
-pub(super) struct SapSsrClient {
-    action: String,
-    charset: String,
-    wd_secure_id: String,
-    pub app_name: String,
-    use_beacon: bool,
 }
 
 pub(super) fn wd_xhr_header() -> HeaderMap {
@@ -153,13 +148,15 @@ impl Requests for reqwest::Client {
     }
 }
 
-struct ClientBuilder<'a> {
+/// [`Client`]를 생성합니다.
+pub struct ClientBuilder<'a> {
     base_url: &'a Url,
     name: &'a str,
     client: Option<reqwest::Client>,
 }
 
 impl<'a> ClientBuilder<'a> {
+    /// [`ClientBuilder`]를 만듭니다.
     pub fn new(base_url: &'a Url, name: &'a str) -> ClientBuilder<'a> {
         ClientBuilder {
             base_url,
@@ -168,12 +165,14 @@ impl<'a> ClientBuilder<'a> {
         }
     }
 
-    pub fn client(&mut self, client: reqwest::Client) -> ClientBuilder<'a> {
+    /// 임의의 [`reqwest::Client`]로 클라이언트를 만들도록 합니다.
+    pub fn client(mut self, client: reqwest::Client) -> ClientBuilder<'a> {
         self.client = Some(client);
         self
     }
 
-    pub async fn build(&self) -> Result<Client, WebDynproError> {
+    /// [`Client`]를 만듭니다.
+    pub async fn build(self) -> Result<Client, ClientError> {
         let client = match self.client {
             Some(client) => client,
             None => {
@@ -190,20 +189,18 @@ impl<'a> ClientBuilder<'a> {
     }
 }
 
-/// WebDynpro의 페이지를 파싱, 업데이트하는 [`Body`] 구현
-pub mod body;
-
 #[cfg(test)]
 mod test {
     use url::Url;
 
-    use crate::webdynpro::application::client::Client;
+    use crate::webdynpro::application::client::ClientBuilder;
     #[tokio::test]
     async fn initial_load() {
-        let client = Client::new(
+        let client = ClientBuilder::new(
             &Url::parse("https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/").unwrap(),
             "ZCMW2100",
         )
+        .build()
         .await
         .unwrap();
         assert_eq!(client.ssr_client.app_name, "ZCMW2100");

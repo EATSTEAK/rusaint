@@ -5,10 +5,7 @@ use crate::{
     session::USaintSession,
     utils::DEFAULT_USER_AGENT,
     webdynpro::{
-        application::{
-            client::{body::Body, Client},
-            Application, BasicApplication,
-        },
+        application::{body::Body, client::ClientBuilder, Application, BasicApplication},
         element::{
             define_elements,
             system::{ClientInspector, Custom, CustomClientInfo, LoadingPlaceholder},
@@ -69,7 +66,7 @@ macro_rules! define_usaint_application {
                 self.0.base_url()
             }
 
-            fn body(&self) -> &$crate::webdynpro::application::client::body::Body {
+            fn body(&self) -> &$crate::webdynpro::application::body::Body {
                 self.0.body()
             }
         }
@@ -157,7 +154,10 @@ impl<'a> USaintApplication {
             .user_agent(DEFAULT_USER_AGENT)
             .build()
             .unwrap();
-        let client = Client::with_client(r_client, &base_url, app_name).await?;
+        let client = ClientBuilder::new(&base_url, app_name)
+            .client(r_client)
+            .build()
+            .await?;
         let mut app = USaintApplication(BasicApplication::with_client(base_url, app_name, client)?);
         app.load_placeholder().await?;
         Ok(app)
