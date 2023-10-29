@@ -166,7 +166,9 @@ impl<'a> USaintApplication {
     }
 }
 
+/// 컴파일 타임에 정의하는 [`USaintApplication`]의 마커
 pub trait PredefinedUSaintApplication: From<USaintApplication> {
+    /// 정의된 애플리케이션의 이름
     const APP_NAME: &'static str;
 }
 
