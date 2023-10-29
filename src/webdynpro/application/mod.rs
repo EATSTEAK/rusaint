@@ -142,6 +142,7 @@ impl<'a> BasicApplication {
     }
 }
 
+/// [`BasicApplication`]을 생성하는 빌더
 pub struct BasicApplicationBuilder<'a> {
     base_url: &'a str,
     name: &'a str,
@@ -150,6 +151,7 @@ pub struct BasicApplicationBuilder<'a> {
 
 impl<'a> BasicApplicationBuilder<'a> {
 
+    /// 새로운 [`BasicApplicationBuilder`]를 만듭니다.
     pub fn new(base_url: &'a str, name: &'a str) -> BasicApplicationBuilder<'a> {
         BasicApplicationBuilder {
             base_url,
@@ -158,11 +160,13 @@ impl<'a> BasicApplicationBuilder<'a> {
         }
     }
 
+    /// 애플리케이션에 임의의 [`Client`]를 추가합니다.
     pub fn client(mut self, client: Client) -> BasicApplicationBuilder<'a> {
         self.client = Some(client);
         self
     }
 
+    /// 새로운 [`BasicApplication`]을 생성합니다.
     pub async fn build(self) -> Result<BasicApplication, WebDynproError> {
         let client = match self.client {
             Some(client) => { client },
