@@ -19,7 +19,7 @@
 //! ## 예시
 //!
 //! ```rust
-//! use rusaint::application::course_grades::{CourseGrades, data::GradeSummary};
+//! use rusaint::application::course_grades::{CourseGrades, CourseGradesBuilder, model::{CourseType, GradeSummary}};
 //! use rusaint::session::USaintSession;
 //! use futures::executor::block_on;
 //!
@@ -33,8 +33,8 @@
 //! async fn print_grades() -> Result<(), RusaintError> {
 //!     // USaintSession::from_token(id: &str, token: &str) 을 이용하여 비밀번호 없이 SSO 토큰으로 로그인 할 수 있음
 //!     let session = USaintSession::from_password("20211561", "password").await?;
-//!     let app = CourseGrades::new(session).await?;
-//!     let grades: Vec<GradeSummary> = app.grade_summary().await?;
+//!     let app = CourseGradesBuilder::new().session(session).build().await?;
+//!     let grades: Vec<GradeSummary> = app.semesters(CourseType::Bachelor).await?;
 //!     for grade in grades {
 //!         println!("{:?}", grade);
 //!     }
