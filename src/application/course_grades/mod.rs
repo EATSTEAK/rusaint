@@ -192,8 +192,9 @@ impl<'a> CourseGrades {
     /// # use std::sync::Arc;
     /// # use rusaint::USaintSession;
     /// # use self::model::CourseType;
+    /// # use rusaint::application::USaintApplicationBuilder;
     /// # let session = Arc::new(USaintSession::with_password("20212345", "password").await.unwrap());
-    /// let app = CourseGrades::new(session).await.unwrap();
+    /// let app = USaintApplicationBuilder::new().session(session).build_into::<CourseGrades>().await.unwrap();
     /// let summary = app.recorded_summary(CourseType::Bachelor).unwrap();
     /// println!("{:?}", summary);
     /// // GradeSummary { ... }
@@ -228,9 +229,10 @@ impl<'a> CourseGrades {
     /// # tokio_test::block_on(async {
     /// # use std::sync::Arc;
     /// # use rusaint::USaintSession;
+    /// # use rusaint::application::USaintApplicationBuilder;
     /// # use self::model::CourseType;
     /// # let session = Arc::new(USaintSession::with_password("20212345", "password").await.unwrap());
-    /// let app = CourseGrades::new(session).await.unwrap();
+    /// let app = USaintApplicationBuilder::new().session(session).build_into::<CourseGrades>().await.unwrap();
     /// let summary = app.certificated_summary(CourseType::Bachelor).unwrap();
     /// println!("{:?}", summary);
     /// // GradeSummary { ... }
@@ -266,8 +268,9 @@ impl<'a> CourseGrades {
     /// # use std::sync::Arc;
     /// # use rusaint::USaintSession;
     /// # use self::model::CourseType;
+    /// # use rusaint::application::USaintApplicationBuilder;
     /// # let session = Arc::new(USaintSession::with_password("20212345", "password").await.unwrap());
-    /// let app = CourseGrades::new(session).await.unwrap();
+    /// let app = USaintApplicationBuilder::new().session(session).build_into::<CourseGrades>().await.unwrap();
     /// let semesters = app.semesters(CourseType::Bachelor).unwrap();
     /// println!("{:?}", semesters);
     /// // [SemesterGrade { ... }, SemesterGrade { ... }]
@@ -385,9 +388,10 @@ impl<'a> CourseGrades {
     /// # tokio_test::block_on(async {
     /// # use std::sync::Arc;
     /// # use rusaint::USaintSession;
+    /// # use rusaint::application::USaintApplicationBuilder;
     /// # use rusaint::model::{CourseType, SemesterType};
     /// # let session = Arc::new(USaintSession::with_password("20212345", "password").await.unwrap());
-    /// let app = CourseGrades::new(session).await.unwrap();
+    /// let app = USaintApplicationBuilder::new().session(session).build_into::<CourseGrades>().await.unwrap();
     /// let classes = app.classes(CourseType::Bachelor, "2022", SemesterType::Two, false).unwrap();
     /// println!("{:?}", classes); // around 3s(depends on network environment)
     /// // [ClassGrade { ... }, ClassGrade { ... }]
@@ -399,8 +403,9 @@ impl<'a> CourseGrades {
     /// # use std::sync::Arc;
     /// # use rusaint::USaintSession;
     /// # use rusaint::model::{CourseType, SemesterType};
+    /// # use rusaint::application::USaintApplicationBuilder;
     /// # let session = Arc::new(USaintSession::with_password("20212345", "password").await.unwrap());
-    /// let app = CourseGrades::new(session).await.unwrap();
+    /// let app = USaintApplicationBuilder::new().session(session).build_into::<CourseGrades>().await.unwrap();
     /// let classes = app.classes("2022", SemesterType::Two, true).unwrap();
     /// println!("{:?}", classes); // around 10s(depends on network environment)
     /// // [ClassGrade { ... }, ClassGrade { ... }]
@@ -477,9 +482,10 @@ impl<'a> CourseGrades {
     /// # tokio_test::block_on(async {
     /// # use std::sync::Arc;
     /// # use rusaint::USaintSession;
+    /// # use rusaint::application::USaintApplicationBuilder;
     /// # use self::model::CourseType;
     /// # let session = Arc::new(USaintSession::with_password("20212345", "password").await.unwrap());
-    /// let app = CourseGrades::new(session).await.unwrap();
+    /// let app = USaintApplicationBuilder::new().session(session).build_into::<CourseGrades>().await.unwrap();
     /// let classes = app.classes(CourseType::Bachelor, "2022", SemesterType::Two, false).unwrap();
     /// let class = classes.iter().first().unwrap();
     /// let class_detail = app.class_detail("2022", SemesterType::Two, class.code());

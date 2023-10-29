@@ -23,27 +23,21 @@ use crate::{
 /// ```no_run
 /// # use std::sync::Arc;
 /// # use rusaint::define_usaint_application;
-/// define_usaint_application!(pub struct ExampleApplication);
+/// # use rusaint::application::USaintApplicationBuilder;
+/// define_usaint_application!(pub struct ExampleApplication<"ZCMW1001n">);
 ///
 /// impl<'a> ExampleApplication {
-///     const APP_NAME: &str = "ZCMW1001n";
 ///
 ///     // 엘리먼트를 정의하는 매크로
 ///     define_elements! {
 ///         // 담당자문의 정보에 해당하는 캡션의 ID 정의
 ///         CAPTION: Caption<'a> = "ZCMW_DEVINFO_RE.ID_D080C16F227F4D68751326DC40BB6BE0:MAIN.CAPTION"
 ///     }
-///
-///     pub async fn new(session: Arc<USaintSession>) -> Result<ExampleApplication, WebDynproError> {
-///         Ok(ExampleApplication(
-///             USaintApplication::with_session(Self::APP_NAME, session).await?,
-///        ))
-///     }
 /// }
 ///
 /// async fn test() -> Result<(), dyn Error> {
 ///     let session = Arc::new(USaintSession::with_password("20212345", "password").await?);
-///     let app = ExampleApplication::new(session).await?;
+///     let app = USaintApplicationBuilder::new().session(session).build_into::<ExampleApplication>().await?;
 ///     let caption = ExampleApplication::CAPTION.from_body(app.body())?;
 ///     // Some("담당자문의 정보");
 ///     println!("{:?}", caption.text());
