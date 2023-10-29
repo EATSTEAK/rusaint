@@ -16,9 +16,7 @@ use url::Url;
 /// WebDynpro 애플리케이션의 웹 요청 및 페이지 문서 처리를 담당하는 클라이언트
 pub struct Client {
     client: reqwest::Client,
-    ssr_client: SapSsrClient,
     event_queue: EventQueue,
-    pub(super) body: Body,
 }
 
 pub(super) fn wd_xhr_header() -> HeaderMap {
@@ -37,53 +35,69 @@ pub(super) fn wd_xhr_header() -> HeaderMap {
 }
 
 impl Client {
-    async fn with_client(
-        client: reqwest::Client,
+    
+    /// 새로운 클라이언트를 생성합니다.
+    pub fn new() -> Client {
+        let jar: Arc<Jar> = Arc::new(Jar::default());
+        let client = reqwest::Client::builder()
+            .cookie_provider(jar)
+            .cookie_store(true)
+            .user_agent(DEFAULT_USER_AGENT)
+            .build()
+            .unwrap();
+        Self::with_client(client)
+    }
+
+    /// 임의의 reqwest::Client 와 함께 클라이언트를 생성합니다.
+    pub fn with_client(client: reqwest::Client) -> Client {
+        Client {
+            client,
+            event_queue: EventQueue::new(),
+        }
+    }
+
+    pub(crate) async fn navigate(
+        &mut self,
         base_url: &Url,
         app_name: &str,
-    ) -> Result<Client, ClientError> {
-        let raw_body = client
+    ) -> Result<Body, ClientError> {
+        let raw_body = self
+            .client
             .wd_navigate(base_url, app_name)
             .send()
             .await?
             .text()
             .await?;
-        let body = Body::new(raw_body);
-        let ssr_client = body.parse_sap_ssr_client()?;
-        let wd_client = Client {
-            client,
-            ssr_client,
-            event_queue: EventQueue::new(),
-            body,
-        };
-        Ok(wd_client)
+        Ok(Body::new(raw_body)?)
     }
 
     pub(crate) fn add_event(&mut self, event: Event) {
         self.event_queue.add(event)
     }
 
-    pub(crate) async fn send_event(&mut self, base_url: &Url) -> Result<(), WebDynproError> {
-        let res = self.event_request(base_url).await?;
-        self.mutate_body(res)
+    pub(crate) async fn send_event(
+        &mut self,
+        base_url: &Url,
+        ssr_client: &SapSsrClient,
+    ) -> Result<BodyUpdate, WebDynproError> {
+        let res = self.event_request(base_url, ssr_client).await?;
+        Ok(BodyUpdate::new(&res)?)
     }
 
-    async fn event_request(&mut self, base_url: &Url) -> Result<String, ClientError> {
+    async fn event_request(
+        &mut self,
+        base_url: &Url,
+        ssr_client: &SapSsrClient,
+    ) -> Result<String, ClientError> {
         let res = self
             .client
-            .wd_xhr(base_url, &self.ssr_client, &mut self.event_queue)?
+            .wd_xhr(base_url, ssr_client, &mut self.event_queue)?
             .send()
             .await?;
         if !res.status().is_success() {
             return Err(ClientError::InvalidResponse(res))?;
         }
         Ok(res.text().await?)
-    }
-
-    fn mutate_body(&mut self, response: String) -> Result<(), WebDynproError> {
-        let body = &mut self.body;
-        let update = BodyUpdate::new(&response)?;
-        Ok(body.apply(update)?)
     }
 }
 
@@ -148,61 +162,22 @@ impl Requests for reqwest::Client {
     }
 }
 
-/// [`Client`]를 생성합니다.
-pub struct ClientBuilder<'a> {
-    base_url: &'a Url,
-    name: &'a str,
-    client: Option<reqwest::Client>,
-}
-
-impl<'a> ClientBuilder<'a> {
-    /// [`ClientBuilder`]를 만듭니다.
-    pub fn new(base_url: &'a Url, name: &'a str) -> ClientBuilder<'a> {
-        ClientBuilder {
-            base_url,
-            name,
-            client: None,
-        }
-    }
-
-    /// 임의의 [`reqwest::Client`]로 클라이언트를 만들도록 합니다.
-    pub fn client(mut self, client: reqwest::Client) -> ClientBuilder<'a> {
-        self.client = Some(client);
-        self
-    }
-
-    /// [`Client`]를 만듭니다.
-    pub async fn build(self) -> Result<Client, ClientError> {
-        let client = match self.client {
-            Some(client) => client,
-            None => {
-                let jar: Arc<Jar> = Arc::new(Jar::default());
-                reqwest::Client::builder()
-                    .cookie_provider(jar)
-                    .cookie_store(true)
-                    .user_agent(DEFAULT_USER_AGENT)
-                    .build()
-                    .unwrap()
-            }
-        };
-        Client::with_client(client, self.base_url, self.name).await
-    }
-}
-
 #[cfg(test)]
 mod test {
     use url::Url;
 
-    use crate::webdynpro::application::client::ClientBuilder;
+    use crate::webdynpro::application::client::Client;
+
     #[tokio::test]
     async fn initial_load() {
-        let client = ClientBuilder::new(
-            &Url::parse("https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/").unwrap(),
-            "ZCMW2100",
-        )
-        .build()
-        .await
-        .unwrap();
-        assert_eq!(client.ssr_client.app_name, "ZCMW2100");
+        let mut client = Client::new();
+        let body = client
+            .navigate(
+                &Url::parse("https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/").unwrap(),
+                "ZCMW2100",
+            )
+            .await
+            .unwrap();
+        assert_eq!(body.ssr_client().app_name, "ZCMW2100");
     }
 }

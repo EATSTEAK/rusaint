@@ -1,9 +1,8 @@
-use std::{collections::HashMap, sync::Arc};
+use std::collections::HashMap;
 
 use crate::{
     define_elements,
     model::SemesterType,
-    session::USaintSession,
     webdynpro::{
         application::{body::Body, Application},
         element::{
@@ -29,13 +28,11 @@ use super::USaintApplication;
 
 define_usaint_application!(
     #[doc = "[학생 성적 조회](https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/ZCMB3W0017)"]
-    pub struct CourseGrades
+    pub struct CourseGrades<"ZCMB3W0017">
 );
 
 #[allow(unused)]
 impl<'a> CourseGrades {
-    const APP_NAME: &str = "ZCMB3W0017";
-
     // Elements for Grade Summaries
     define_elements!(
         // Grade summaries by semester
@@ -74,23 +71,6 @@ impl<'a> CourseGrades {
         PERIOD_SEMESTER: ComboBox<'a> = "ZCMW_PERIOD_RE.ID_0DC742680F42DA9747594D1AE51A0C69:VIW_MAIN.PERID";
         GRADE_BY_CLASSES_TABLE: SapTable<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.TABLE_1";
     );
-
-    /// 새로운 학기별 성적 조회 애플리케이션을 만듭니다.
-    /// ### 예시
-    /// ```no_run
-    /// # tokio_test::block_on(async {
-    /// #use std::sync::Arc;
-    /// # use rusaint::USaintSession;
-    ///
-    /// let session = Arc::new(USaintSession::with_password("20212345", "password").await.unwrap());
-    /// let app = CourseGrades::new(session).await.unwrap();
-    /// # })
-    /// ```
-    pub async fn new(session: Arc<USaintSession>) -> Result<CourseGrades, WebDynproError> {
-        Ok(CourseGrades(
-            USaintApplication::with_session(Self::APP_NAME, session).await?,
-        ))
-    }
 
     async fn close_popups(&mut self) -> Result<(), WebDynproError> {
         fn make_close_event(app: &CourseGrades) -> Option<Event> {
@@ -569,12 +549,9 @@ mod test {
     use std::sync::{Arc, OnceLock};
 
     use crate::{
-        application::course_grades::CourseGrades,
+        application::{USaintApplicationBuilder, course_grades::CourseGrades},
         session::USaintSession,
-        webdynpro::{
-            application::Application,
-            element::{layout::PopupWindow, Element},
-        },
+        webdynpro::{element::{layout::PopupWindow, Element}, application::Application},
     };
     use dotenv::dotenv;
 
@@ -599,7 +576,11 @@ mod test {
     #[tokio::test]
     async fn close_popups() {
         let session = get_session().await.unwrap();
-        let mut app = CourseGrades::new(session).await.unwrap();
+        let mut app = USaintApplicationBuilder::new()
+            .session(session)
+            .build_into::<CourseGrades>()
+            .await
+            .unwrap();
         app.close_popups().await.unwrap();
         let body = app.body();
         let popup_selector =
