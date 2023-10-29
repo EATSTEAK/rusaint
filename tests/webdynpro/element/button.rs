@@ -1,15 +1,16 @@
 use rusaint::{
     define_elements,
     webdynpro::{
+        application::Application,
         element::{
             action::{Button, Link},
             text::TextView,
         },
-        error::WebDynproError, application::Application,
-    }, application::USaintApplicationBuilder,
+        error::WebDynproError,
+    },
 };
 
-use crate::get_session;
+use crate::{get_session, webdynpro::element::EventTestSuiteBuilder};
 
 use super::EventTestSuite;
 
@@ -45,6 +46,10 @@ impl<'a> EventTestSuite {
 #[tokio::test]
 async fn test_button_events() {
     let session = get_session().await.unwrap();
-    let mut suite = USaintApplicationBuilder::new().session(session).build_into::<EventTestSuite>().await.unwrap();
+    let mut suite = EventTestSuiteBuilder::new()
+        .session(session)
+        .build()
+        .await
+        .unwrap();
     suite.test_button().await.unwrap();
 }

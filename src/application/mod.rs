@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{marker::PhantomData, sync::Arc};
 use url::Url;
 
 use crate::{
@@ -24,7 +24,7 @@ use crate::{
 /// # use std::sync::Arc;
 /// # use rusaint::define_usaint_application;
 /// # use rusaint::application::USaintApplicationBuilder;
-/// define_usaint_application!(pub struct ExampleApplication<"ZCMW1001n">);
+/// define_usaint_application!(pub struct ExampleApplication<"ZCMW1001n">; pub type ExampleApplicationBuilder;);
 ///
 /// impl<'a> ExampleApplication {
 ///
@@ -37,7 +37,7 @@ use crate::{
 ///
 /// async fn test() -> Result<(), dyn Error> {
 ///     let session = Arc::new(USaintSession::with_password("20212345", "password").await?);
-///     let app = USaintApplicationBuilder::new().session(session).build_into::<ExampleApplication>().await?;
+///     let app = ExampleApplicationBuilder::new().session(session).build().await?;
 ///     let caption = ExampleApplication::CAPTION.from_body(app.body())?;
 ///     // Some("담당자문의 정보");
 ///     println!("{:?}", caption.text());
@@ -48,7 +48,8 @@ use crate::{
 macro_rules! define_usaint_application {
     (
         $(#[$attr:meta])*
-        $vis:vis struct $name:ident<$app_name:literal>
+        $vis:vis struct $name:ident<$app_name:literal>;
+        $b_vis:vis type $b_name:ident;
     ) => {
         $(#[$attr])*
         $vis struct $name($crate::application::USaintApplication);
@@ -67,11 +68,15 @@ macro_rules! define_usaint_application {
             }
         }
 
-        impl From<USaintApplication> for $name {
-            fn from(value: USaintApplication) -> Self {
+        impl From<$crate::application::USaintApplication> for $name {
+            fn from(value: $crate::application::USaintApplication) -> Self {
                 $name(value)
             }
         }
+
+        #[doc = concat!(stringify!($name), "의 빌더")]
+        #[allow(unused)]
+        $b_vis type $b_name = $crate::application::PredefinedUSaintApplicationBuilder::<$name>;
 
         impl $crate::application::PredefinedUSaintApplication for $name {
             const APP_NAME: &'static str = $app_name;
@@ -166,27 +171,21 @@ pub trait PredefinedUSaintApplication: From<USaintApplication> {
     const APP_NAME: &'static str;
 }
 
-/// 새로운 [`USaintApplication`] 혹은 [`PredefinedUSaintApplication`]을 구현하는 애플리케이션을 생성하는 빌더
+/// 새로운 [`USaintApplication`]을 생성하는 빌더
 pub struct USaintApplicationBuilder {
     session: Option<Arc<USaintSession>>,
 }
 
 impl USaintApplicationBuilder {
     /// 새로운 빌더를 만듭니다.
-    pub fn new() -> USaintApplicationBuilder {
-        USaintApplicationBuilder { session: None }
+    pub fn new() -> Self {
+        Self { session: None }
     }
 
     /// 빌더에 [`USaintSession`]을 추가합니다.
-    pub fn session(mut self, session: Arc<USaintSession>) -> USaintApplicationBuilder {
+    pub fn session(mut self, session: Arc<USaintSession>) -> Self {
         self.session = Some(session);
         self
-    }
-
-    /// 특정 [`PredefinedUSaintApplication`]을 만듭니다.
-    pub async fn build_into<T: PredefinedUSaintApplication>(self) -> Result<T, WebDynproError> {
-        let name = T::APP_NAME;
-        Ok(self.build(name).await?.into())
     }
 
     /// 애플리케이션 이름과 함께 [`USaintApplication`]을 생성합니다.
@@ -207,6 +206,38 @@ impl USaintApplicationBuilder {
         Ok(app)
     }
 }
+
+/// [`PredefinedUSaintApplication`]을 구현하는 애플리케이션을 생성하는 빌더
+pub struct PredefinedUSaintApplicationBuilder<T: PredefinedUSaintApplication> {
+    session: Option<Arc<USaintSession>>,
+    _marker: PhantomData<T>,
+}
+
+impl<T: PredefinedUSaintApplication> PredefinedUSaintApplicationBuilder<T> {
+    /// 새로운 빌더를 만듭니다.
+    pub fn new() -> Self {
+        Self {
+            session: None,
+            _marker: PhantomData {},
+        }
+    }
+
+    /// 빌더에 [`USaintSession`]을 추가합니다.
+    pub fn session(mut self, session: Arc<USaintSession>) -> Self {
+        self.session = Some(session);
+        self
+    }
+
+    /// 주어진 [`PredefinedUSaintApplication`]을 생성합니다.
+    pub async fn build(self) -> Result<T, WebDynproError> {
+        let mut builder = USaintApplicationBuilder::new();
+        if let Some(session) = self.session {
+            builder = builder.session(session);
+        }
+        Ok(builder.build(T::APP_NAME).await?.into())
+    }
+}
+
 /// 학생 성적 조회: [`CourseGrades`](course_grades::CourseGrades)
 pub mod course_grades;
 mod course_schedule;

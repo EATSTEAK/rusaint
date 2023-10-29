@@ -1,6 +1,4 @@
-use super::USaintApplication;
-
-define_usaint_application!(pub struct StudentInformation<"ZCMW1001n">);
+define_usaint_application!(pub struct StudentInformation<"ZCMW1001n">; pub type StudentInformationBuilder;);
 
 #[cfg(test)]
 mod test {
@@ -8,7 +6,7 @@ mod test {
     use std::sync::{Arc, OnceLock};
 
     use crate::{
-        application::{student_information::StudentInformation, USaintApplicationBuilder},
+        application::student_information::StudentInformationBuilder,
         session::USaintSession,
         webdynpro::{application::Application, element::ElementWrapper},
     };
@@ -35,9 +33,9 @@ mod test {
     #[tokio::test]
     async fn examine_elements() {
         let session = get_session().await.unwrap();
-        let app = USaintApplicationBuilder::new()
+        let app = StudentInformationBuilder::new()
             .session(session)
-            .build_into::<StudentInformation>()
+            .build()
             .await
             .unwrap();
         let ct_selector = scraper::Selector::parse("[ct]").unwrap();

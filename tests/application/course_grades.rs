@@ -3,10 +3,7 @@ use std::sync::{Arc, OnceLock};
 
 use dotenv::dotenv;
 use rusaint::{
-    application::{
-        course_grades::{model::CourseType, CourseGrades},
-        USaintApplicationBuilder,
-    },
+    application::course_grades::{model::CourseType, CourseGradesBuilder},
     model::SemesterType,
     USaintSession,
 };
@@ -34,9 +31,9 @@ async fn get_session() -> Result<Arc<USaintSession>> {
 #[serial]
 async fn summaries() {
     let session = get_session().await.unwrap();
-    let mut app = USaintApplicationBuilder::new()
+    let mut app = CourseGradesBuilder::new()
         .session(session)
-        .build_into::<CourseGrades>()
+        .build()
         .await
         .unwrap();
     let recorded_summary = app.recorded_summary(CourseType::Bachelor).await.unwrap();
@@ -51,9 +48,9 @@ async fn summaries() {
 #[serial]
 async fn semesters() {
     let session = get_session().await.unwrap();
-    let mut app = USaintApplicationBuilder::new()
+    let mut app = CourseGradesBuilder::new()
         .session(session)
-        .build_into::<CourseGrades>()
+        .build()
         .await
         .unwrap();
     let semesters = app.semesters(CourseType::Bachelor).await.unwrap();
@@ -65,9 +62,9 @@ async fn semesters() {
 #[serial]
 async fn classes_with_detail() {
     let session = get_session().await.unwrap();
-    let mut app = USaintApplicationBuilder::new()
+    let mut app = CourseGradesBuilder::new()
         .session(session)
-        .build_into::<CourseGrades>()
+        .build()
         .await
         .unwrap();
     let details = app

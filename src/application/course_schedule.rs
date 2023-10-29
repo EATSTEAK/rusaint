@@ -8,9 +8,7 @@ use crate::{
     },
 };
 
-use super::USaintApplication;
-
-define_usaint_application!(pub struct CourseSchedule<"ZCMW2100">);
+define_usaint_application!(pub struct CourseSchedule<"ZCMW2100">; pub type CourseScheduleBuilder;);
 
 #[allow(unused)]
 impl<'a> CourseSchedule {
@@ -91,7 +89,7 @@ impl<'a> CourseSchedule {
 #[cfg(test)]
 mod test {
     use crate::{
-        application::{course_schedule::CourseSchedule, USaintApplicationBuilder},
+        application::course_schedule::{CourseSchedule, CourseScheduleBuilder},
         webdynpro::{
             application::Application,
             element::{
@@ -104,10 +102,7 @@ mod test {
 
     #[tokio::test]
     async fn examine_elements() {
-        let app = USaintApplicationBuilder::new()
-            .build_into::<CourseSchedule>()
-            .await
-            .unwrap();
+        let app = CourseScheduleBuilder::new().build().await.unwrap();
         let ct_selector = scraper::Selector::parse("[ct]").unwrap();
         for elem_ref in app.body().document().select(&ct_selector) {
             let elem = ElementWrapper::dyn_elem(elem_ref);
@@ -119,10 +114,7 @@ mod test {
 
     #[tokio::test]
     async fn combobox_items() {
-        let app = USaintApplicationBuilder::new()
-            .build_into::<CourseSchedule>()
-            .await
-            .unwrap();
+        let app = CourseScheduleBuilder::new().build().await.unwrap();
         let period_id_combobox = CourseSchedule::PERIOD_ID.from_body(app.body()).unwrap();
         let listbox = period_id_combobox.item_list_box(app.body()).unwrap();
         match listbox {
@@ -147,10 +139,7 @@ mod test {
 
     #[tokio::test]
     async fn table_test() {
-        let mut app = USaintApplicationBuilder::new()
-            .build_into::<CourseSchedule>()
-            .await
-            .unwrap();
+        let mut app = CourseScheduleBuilder::new().build().await.unwrap();
         app.load_edu().await.unwrap();
         let table = app.read_edu_raw().unwrap();
         if let Some(table) = table.table() {
