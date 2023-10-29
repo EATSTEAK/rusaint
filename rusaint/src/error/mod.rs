@@ -14,7 +14,8 @@ pub enum RusaintError {
 }
 
 /// 숭실대학교 SSO 로그인 실패 시 반환하는 오류
-#[derive(Error, Debug)]
+#[derive(Error, uniffi::Error, Debug)]
+#[uniffi(flat_error)]
 pub enum SsuSsoError {
     /// 웹 요청, 응답 오류
     #[error("Request error: {0}")]

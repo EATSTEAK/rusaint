@@ -65,3 +65,5 @@ pub mod model;
 mod utils;
 /// SAP WebDynpro 클라이언트를 파싱, 모방하는 클라이언트 엔진
 pub mod webdynpro;
+
+uniffi::setup_scaffolding!();

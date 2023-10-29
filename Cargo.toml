@@ -1,5 +1,5 @@
 [workspace]
-members = ["rusaint", "uniffi_bindgen"]
+members = ["rusaint", "uniffi", "uniffi_bindgen"]
 default-members = ["rusaint"]
 resolver = "2"
 

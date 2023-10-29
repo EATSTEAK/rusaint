@@ -9,10 +9,6 @@ license = "MIT"
 repository = "https://github.com/EATSTEAK/rusaint"
 edition = "2021"
 
-[lib]
-crate-type = ["lib", "cdylib"]
-name = "rusaint"
-
 [features]
 default = ["application", "model"]
 application = []
