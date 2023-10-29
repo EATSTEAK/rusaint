@@ -1,21 +1,6 @@
-use std::sync::Arc;
-
-use crate::{session::USaintSession, webdynpro::error::WebDynproError};
-
 use super::USaintApplication;
 
-define_usaint_application!(pub struct StudentInformation);
-
-#[allow(unused)]
-impl StudentInformation {
-    const APP_NAME: &str = "ZCMW1001n";
-
-    pub async fn new(session: Arc<USaintSession>) -> Result<StudentInformation, WebDynproError> {
-        Ok(StudentInformation(
-            USaintApplication::with_session(Self::APP_NAME, session).await?,
-        ))
-    }
-}
+define_usaint_application!(pub struct StudentInformation<"ZCMW1001n">);
 
 #[cfg(test)]
 mod test {
@@ -23,7 +8,7 @@ mod test {
     use std::sync::{Arc, OnceLock};
 
     use crate::{
-        application::student_information::StudentInformation,
+        application::{student_information::StudentInformation, USaintApplicationBuilder},
         session::USaintSession,
         webdynpro::{application::Application, element::ElementWrapper},
     };
@@ -50,7 +35,11 @@ mod test {
     #[tokio::test]
     async fn examine_elements() {
         let session = get_session().await.unwrap();
-        let app = StudentInformation::new(session).await.unwrap();
+        let app = USaintApplicationBuilder::new()
+            .session(session)
+            .build_into::<StudentInformation>()
+            .await
+            .unwrap();
         let ct_selector = scraper::Selector::parse("[ct]").unwrap();
         for elem_ref in app.body().document().select(&ct_selector) {
             let elem = ElementWrapper::dyn_elem(elem_ref);

@@ -6,7 +6,7 @@ use rusaint::{
             text::TextView,
         },
         error::WebDynproError, application::Application,
-    },
+    }, application::USaintApplicationBuilder,
 };
 
 use crate::get_session;
@@ -45,6 +45,6 @@ impl<'a> EventTestSuite {
 #[tokio::test]
 async fn test_button_events() {
     let session = get_session().await.unwrap();
-    let mut suite = EventTestSuite::new(session).await.unwrap();
+    let mut suite = USaintApplicationBuilder::new().session(session).build_into::<EventTestSuite>().await.unwrap();
     suite.test_button().await.unwrap();
 }
