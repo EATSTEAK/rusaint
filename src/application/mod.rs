@@ -176,21 +176,26 @@ pub struct USaintApplicationBuilder {
     session: Option<Arc<USaintSession>>,
 }
 
+/// 새로운 [`USaintApplication`] 혹은 [`PredefinedUSaintApplication`]을 구현하는 애플리케이션을 생성하는 빌더
 impl USaintApplicationBuilder {
+    /// 새로운 빌더를 만듭니다.
     pub fn new() -> USaintApplicationBuilder {
         USaintApplicationBuilder { session: None }
     }
 
+    /// 빌더에 [`USaintSession`]을 추가합니다.
     pub fn session(mut self, session: Arc<USaintSession>) -> USaintApplicationBuilder {
         self.session = Some(session);
         self
     }
-
+    
+    /// 특정 [`PredefinedUSaintApplication`]을 만듭니다.
     pub async fn build_into<T: PredefinedUSaintApplication>(self) -> Result<T, WebDynproError> {
         let name = T::APP_NAME;
         Ok(self.build(name).await?.into())
     }
 
+    /// 애플리케이션 이름과 함께 [`USaintApplication`]을 생성합니다.
     pub async fn build(self, name: &str) -> Result<USaintApplication, WebDynproError> {
         let mut builder = BasicApplicationBuilder::new(SSU_WEBDYNPRO_BASE_URL, name);
         if let Some(session) = self.session {
