@@ -172,11 +172,11 @@ pub trait PredefinedUSaintApplication: From<USaintApplication> {
     const APP_NAME: &'static str;
 }
 
+/// 새로운 [`USaintApplication`] 혹은 [`PredefinedUSaintApplication`]을 구현하는 애플리케이션을 생성하는 빌더
 pub struct USaintApplicationBuilder {
     session: Option<Arc<USaintSession>>,
 }
 
-/// 새로운 [`USaintApplication`] 혹은 [`PredefinedUSaintApplication`]을 구현하는 애플리케이션을 생성하는 빌더
 impl USaintApplicationBuilder {
     /// 새로운 빌더를 만듭니다.
     pub fn new() -> USaintApplicationBuilder {
@@ -188,7 +188,7 @@ impl USaintApplicationBuilder {
         self.session = Some(session);
         self
     }
-    
+
     /// 특정 [`PredefinedUSaintApplication`]을 만듭니다.
     pub async fn build_into<T: PredefinedUSaintApplication>(self) -> Result<T, WebDynproError> {
         let name = T::APP_NAME;
