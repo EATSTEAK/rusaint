@@ -2,19 +2,18 @@ use crate::{
     define_elements,
     model::SemesterType,
     webdynpro::{
+        application::Application,
         element::{action::Button, complex::SapTable, layout::TabStrip, selection::ComboBox},
-        error::WebDynproError, application::Application,
+        error::WebDynproError,
     },
 };
 
 use super::USaintApplication;
 
-define_usaint_application!(pub struct CourseSchedule);
+define_usaint_application!(pub struct CourseSchedule<"ZCMW2100">);
 
 #[allow(unused)]
 impl<'a> CourseSchedule {
-    const APP_NAME: &str = "ZCMW2100";
-
     define_elements! {
         PERIOD_YEAR: ComboBox<'a> = "ZCMW_PERIOD_RE.ID_A61C4ED604A2BFC2A8F6C6038DE6AF18:VIW_MAIN.PERYR";
         PERIOD_ID: ComboBox<'a> = "ZCMW_PERIOD_RE.ID_A61C4ED604A2BFC2A8F6C6038DE6AF18:VIW_MAIN.PERID";
@@ -22,12 +21,6 @@ impl<'a> CourseSchedule {
         TABSTRIP: TabStrip<'a> = "ZCMW2100.ID_0001:VIW_MAIN.MODULE_TABSTRIP";
         BUTTON_EDU: Button<'a> = "ZCMW2100.ID_0001:VIW_MAIN.BUTTON_EDU";
         MAIN_TABLE: SapTable<'a> = "SALV_WD_TABLE.ID_DE0D9128A4327646C94670E2A892C99C:VIEW_TABLE.SALV_WD_UIE_TABLE";
-    }
-
-    pub async fn new() -> Result<CourseSchedule, WebDynproError> {
-        Ok(CourseSchedule(
-            USaintApplication::new(Self::APP_NAME).await?,
-        ))
     }
 
     fn semester_to_key(period: SemesterType) -> &'static str {
@@ -90,8 +83,7 @@ impl<'a> CourseSchedule {
     }
 
     pub fn read_edu_raw(&self) -> Result<SapTable, WebDynproError> {
-        let body = self.body();
-        let main_table = Self::MAIN_TABLE.from_body(body)?;
+        let main_table = Self::MAIN_TABLE.from_body(self.body())?;
         Ok(main_table)
     }
 }
@@ -99,17 +91,23 @@ impl<'a> CourseSchedule {
 #[cfg(test)]
 mod test {
     use crate::{
-        application::course_schedule::CourseSchedule,
-        webdynpro::{element::{
-            complex::sap_table::cell::{SapTableCell, SapTableCellWrapper},
-            selection::list_box::{item::ListBoxItemWrapper, ListBoxWrapper},
-            ElementWrapper,
-        }, application::Application},
+        application::{course_schedule::CourseSchedule, USaintApplicationBuilder},
+        webdynpro::{
+            application::Application,
+            element::{
+                complex::sap_table::cell::{SapTableCell, SapTableCellWrapper},
+                selection::list_box::{item::ListBoxItemWrapper, ListBoxWrapper},
+                ElementWrapper,
+            },
+        },
     };
 
     #[tokio::test]
     async fn examine_elements() {
-        let app = CourseSchedule::new().await.unwrap();
+        let app = USaintApplicationBuilder::new()
+            .build_into::<CourseSchedule>()
+            .await
+            .unwrap();
         let ct_selector = scraper::Selector::parse("[ct]").unwrap();
         for elem_ref in app.body().document().select(&ct_selector) {
             let elem = ElementWrapper::dyn_elem(elem_ref);
@@ -121,7 +119,10 @@ mod test {
 
     #[tokio::test]
     async fn combobox_items() {
-        let app = CourseSchedule::new().await.unwrap();
+        let app = USaintApplicationBuilder::new()
+            .build_into::<CourseSchedule>()
+            .await
+            .unwrap();
         let period_id_combobox = CourseSchedule::PERIOD_ID.from_body(app.body()).unwrap();
         let listbox = period_id_combobox.item_list_box(app.body()).unwrap();
         match listbox {
@@ -146,7 +147,10 @@ mod test {
 
     #[tokio::test]
     async fn table_test() {
-        let mut app = CourseSchedule::new().await.unwrap();
+        let mut app = USaintApplicationBuilder::new()
+            .build_into::<CourseSchedule>()
+            .await
+            .unwrap();
         app.load_edu().await.unwrap();
         let table = app.read_edu_raw().unwrap();
         if let Some(table) = table.table() {

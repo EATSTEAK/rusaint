@@ -1,4 +1,7 @@
-use self::client::{body::Body, Client};
+use self::{
+    body::{Body, BodyUpdate},
+    client::Client,
+};
 use url::Url;
 
 use super::{
@@ -12,6 +15,7 @@ pub struct BasicApplication {
     base_url: Url,
     name: String,
     client: Client,
+    body: Body,
 }
 
 /// WebDynpro 애플리케이션의 기본 기능
@@ -48,7 +52,7 @@ impl Application for BasicApplication {
     }
 
     fn body(&self) -> &Body {
-        &self.client.body
+        &self.body
     }
 }
 
@@ -57,36 +61,17 @@ impl<'a> BasicApplication {
         SSR_FORM: Form<'a> = "sap.client.SsrClient.form";
     }
 
-    /// WebDynpro 애플리케이션이 제공되는 Base URL과 애플리케이션 이름을 제공하여 새로운 애플리케이션을 생성합니다.
-    /// ### 예시
-    /// ```
-    /// # tokio_test::block_on(async {
-    /// BasicApplication::new("https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP", "ZCMW2100").await.unwrap();
-    /// # })
-    /// ```
-    pub async fn new(base_url_str: &str, name: &str) -> Result<Self, WebDynproError> {
-        let base_url = Url::parse(base_url_str)
-            .or(Err(ClientError::InvalidBaseUrl(base_url_str.to_string())))?;
-        let client = Client::new(&base_url, name).await?;
-        Ok(Self::with_client(base_url, name, client)?)
-    }
-
-    /// 임의의 WebDynpro [`Client`]와 함께 애플리케이션을 생성합니다.
-    /// ### 예시
-    /// ```
-    /// # tokio_test::block_on(async {
-    /// # use self::client::Client;
-    /// # use url::Url;
-    /// let url = Url::parse("https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP").unwrap();
-    /// let client = Client::new(url, "ZCMW2100").await.unwrap();
-    /// BasicApplication::with_client(url, "ZCMW2100", client).await.unwrap();
-    /// # })
-    /// ```
-    pub fn with_client(base_url: Url, name: &str, client: Client) -> Result<Self, WebDynproError> {
+    async fn with_client(
+        base_url: Url,
+        name: &str,
+        mut client: Client,
+    ) -> Result<Self, WebDynproError> {
+        let body = { client.navigate(&base_url, name).await? };
         Ok(BasicApplication {
             base_url,
             name: name.to_owned(),
             client,
+            body,
         })
     }
 
@@ -99,10 +84,10 @@ impl<'a> BasicApplication {
     /// ```
     /// # tokio_test::block_on(async {
     /// # use std::sync::Arc;
-    /// # use rusaint::application::USaintApplication;
+    /// # use rusaint::application::USaintApplicationBuilder;
     /// # use rusaint::webdynpro::element::{ElementDef, selection::combo_box::ComboBox};
     /// const PERIOD_YEAR: ElementDef<'_, ComboBox<'_>> = ElementDef::new("ZCMW_PERIOD_RE.ID_A61C4ED604A2BFC2A8F6C6038DE6AF18:VIW_MAIN.PERYR");
-    /// # let app = USaintApplication::new("ZCMW2100").await.unwrap();
+    /// # let app = USaintApplicationBuilder::new().name("ZCMW2100").await.unwrap();
     /// let select_event = {
     ///     // body를 참조하는 변수를 격리
     ///     let elem = PERIOD_YEAR.from_body(app.body());
@@ -115,8 +100,9 @@ impl<'a> BasicApplication {
         &mut self,
         events: impl IntoIterator<Item = Event>,
     ) -> Result<(), WebDynproError> {
+        let body = self.body();
         let form_req = Self::SSR_FORM
-            .from_body(&self.client.body)?
+            .from_body(body)?
             .request(false, "", "", false, false)
             .or(Err(ClientError::NoSuchForm(
                 Self::SSR_FORM.id().to_string(),
@@ -127,16 +113,70 @@ impl<'a> BasicApplication {
                     self.client.add_event(event);
                     self.client.add_event(form_req.to_owned());
                 }
-                {
-                    self.client.send_event(&self.base_url).await?;
-                }
+                let update = {
+                    self.client
+                        .send_event(&self.base_url, self.body.ssr_client())
+                        .await?
+                };
+                self.mutate_body(update)?
             } else {
                 self.client.add_event(event);
             }
         }
         Ok(())
     }
+
+    fn mutate_body(&mut self, update: BodyUpdate) -> Result<(), WebDynproError> {
+        Ok(self.body.apply(update)?)
+    }
+}
+
+/// [`BasicApplication`]을 생성하는 빌더
+pub struct BasicApplicationBuilder<'a> {
+    base_url: &'a str,
+    name: &'a str,
+    client: Option<Client>
+}
+
+impl<'a> BasicApplicationBuilder<'a> {
+
+    /// 새로운 [`BasicApplicationBuilder`]를 만듭니다.
+    pub fn new(base_url: &'a str, name: &'a str) -> BasicApplicationBuilder<'a> {
+        BasicApplicationBuilder {
+            base_url,
+            name,
+            client: None
+        }
+    }
+
+    /// 애플리케이션에 임의의 [`Client`]를 추가합니다.
+    pub fn client(mut self, client: Client) -> BasicApplicationBuilder<'a> {
+        self.client = Some(client);
+        self
+    }
+
+    /// 새로운 [`BasicApplication`]을 생성합니다.
+    pub async fn build(self) -> Result<BasicApplication, WebDynproError> {
+        let client = match self.client {
+            Some(client) => { client },
+            None => Client::new()
+        };
+        let base_url = Url::parse(self.base_url)
+            .or(Err(ClientError::InvalidBaseUrl(self.base_url.to_string())))?;
+        Ok(BasicApplication::with_client(base_url, self.name, client).await?)
+    }
+}
+
+pub(crate) struct SapSsrClient {
+    action: String,
+    charset: String,
+    wd_secure_id: String,
+    pub app_name: String,
+    use_beacon: bool,
 }
 
 /// WebDynpro 요청 및 문서 처리를 담당하는 클라이언트
 pub mod client;
+
+/// WebDynpro의 페이지를 파싱, 업데이트하는 [`Body`] 구현
+pub mod body;

@@ -1,7 +1,7 @@
 use std::{borrow::Cow, cell::OnceCell, collections::HashMap};
 
 use crate::webdynpro::error::{BodyError, WebDynproError};
-use crate::webdynpro::{application::client::body::Body, error::ElementError, event::Event};
+use crate::webdynpro::{application::body::Body, error::ElementError, event::Event};
 
 use crate::webdynpro::element::{
     define_element_interactable, Element, ElementWrapper, Interactable,
@@ -60,12 +60,13 @@ impl<'a> ComboBox<'a> {
 
     /// [`ComboBox`]의 선택지 역할을 하는 [`ListBox`](super::list_box::ListBox) 엘리먼트를 가져옵니다.
     pub fn item_list_box(&self, body: &'a Body) -> Result<ListBoxWrapper<'a>, WebDynproError> {
-        let listbox_id =
-            self.lsdata().item_list_box_id()
-                .ok_or(ElementError::NoSuchData {
-                    element: self.id().to_string(),
-                    field: "item_list_box_id".to_string(),
-                })?;
+        let listbox_id = self
+            .lsdata()
+            .item_list_box_id()
+            .ok_or(ElementError::NoSuchData {
+                element: self.id().to_string(),
+                field: "item_list_box_id".to_string(),
+            })?;
         let selector = scraper::Selector::parse(format!(r#"[id="{}"]"#, listbox_id).as_str())
             .or(Err(ElementError::InvalidId(listbox_id.to_owned())))?;
         let elem = body

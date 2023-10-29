@@ -20,7 +20,7 @@ pub(super) enum BodyUpdateType {
 
 #[derive(Debug)]
 #[allow(unused)]
-pub(super) struct BodyUpdate {
+pub(crate) struct BodyUpdate {
     update: Option<BodyUpdateType>,
     initialize_ids: Option<String>,
     script_calls: Option<Vec<String>>,
@@ -128,15 +128,18 @@ impl BodyUpdate {
 pub struct Body {
     raw_body: String,
     document: Html,
+    sap_ssr_client: SapSsrClient,
 }
 
 impl Body {
-    pub(crate) fn new(body: String) -> Body {
+    pub(crate) fn new(body: String) -> Result<Body, BodyError> {
         let document = Html::parse_document(&body);
-        Body {
+        let sap_ssr_client = Self::parse_sap_ssr_client(&document)?;
+        Ok(Body {
             raw_body: body,
             document,
-        }
+            sap_ssr_client,
+        })
     }
 
     /// 페이지 도큐먼트의 HTML 텍스트를 반환합니다.
@@ -149,8 +152,11 @@ impl Body {
         &self.document
     }
 
-    pub(super) fn parse_sap_ssr_client(&self) -> Result<SapSsrClient, BodyError> {
-        let document = &self.document;
+    pub(crate) fn ssr_client(&self) -> &SapSsrClient {
+        &self.sap_ssr_client
+    }
+
+    fn parse_sap_ssr_client(document: &Html) -> Result<SapSsrClient, BodyError> {
         let selector = Selector::parse(r#"#sap\.client\.SsrClient\.form"#).unwrap();
         let client_form = document
             .select(&selector)
