@@ -131,13 +131,17 @@ pub struct Body {
     sap_ssr_client: SapSsrClient,
 }
 
+// scraper::Html is read-only field, so Body can implement Send and Sync traits.
+unsafe impl Send for Body {}
+unsafe impl Sync for Body {}
+
 impl Body {
     pub(crate) fn new(body: String) -> Result<Body, BodyError> {
         let document = Html::parse_document(&body);
         let sap_ssr_client = Self::parse_sap_ssr_client(&document)?;
         Ok(Body {
             raw_body: body,
-            document,
+            document: document,
             sap_ssr_client,
         })
     }

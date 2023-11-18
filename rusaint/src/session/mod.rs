@@ -145,29 +145,33 @@ pub async fn obtain_ssu_sso_token(id: &str, password: &str) -> Result<String, Ss
         .await?
         .text()
         .await?;
-    let document = scraper::Html::parse_document(&body);
-    let in_tp_bit_selector = scraper::Selector::parse(r#"input[name="in_tp_bit"]"#).unwrap();
-    let rqst_caus_cd_selector = scraper::Selector::parse(r#"input[name="rqst_caus_cd"]"#).unwrap();
-    let in_tp_bit = document
-        .select(&in_tp_bit_selector)
-        .next()
-        .ok_or(SsuSsoError::CantLoadForm)?
-        .value()
-        .attr("value")
-        .ok_or(SsuSsoError::CantLoadForm)?;
-    let rqst_caus_cd = document
-        .select(&rqst_caus_cd_selector)
-        .next()
-        .ok_or(SsuSsoError::CantLoadForm)?
-        .value()
-        .attr("value")
-        .ok_or(SsuSsoError::CantLoadForm)?;
-    let params = [
-        ("in_tp_bit", in_tp_bit),
-        ("rqst_caus_cd", rqst_caus_cd),
-        ("userid", id),
-        ("pwd", password),
-    ];
+
+    let params = {
+        let document = scraper::Html::parse_document(&body);
+        let in_tp_bit_selector = scraper::Selector::parse(r#"input[name="in_tp_bit"]"#).unwrap();
+        let rqst_caus_cd_selector =
+            scraper::Selector::parse(r#"input[name="rqst_caus_cd"]"#).unwrap();
+        let in_tp_bit = document
+            .select(&in_tp_bit_selector)
+            .next()
+            .ok_or(SsuSsoError::CantLoadForm)?
+            .value()
+            .attr("value")
+            .ok_or(SsuSsoError::CantLoadForm)?;
+        let rqst_caus_cd = document
+            .select(&rqst_caus_cd_selector)
+            .next()
+            .ok_or(SsuSsoError::CantLoadForm)?
+            .value()
+            .attr("value")
+            .ok_or(SsuSsoError::CantLoadForm)?;
+        [
+            ("in_tp_bit", in_tp_bit.to_owned()),
+            ("rqst_caus_cd", rqst_caus_cd.to_owned()),
+            ("userid", id.to_owned()),
+            ("pwd", password.to_owned()),
+        ]
+    };
     let res = client
         .post(SMARTID_LOGIN_FORM_REQUEST_URL)
         .headers(default_header())
