@@ -22,7 +22,7 @@ reqwest = { version = "0.11.18", features = [
     "brotli",
     "deflate",
 ] }
-thiserror = "1.0.44"
+thiserror = { workspace = true }
 tokio = { version = "1.29.1", features = ["macros", "test-util"] }
 html-escape = "0.2.13"
 url = "2.4.1"

@@ -8,8 +8,10 @@ crate-type = ["lib", "cdylib"]
 name = "rusaintuniffi"
 
 [dependencies]
+thiserror = { workspace = true }
+tokio = { version = "1.29.1", features = ["time", "sync"] }
 rusaint = { path = "../rusaint" }
-uniffi = { workspace = true }
+uniffi = { workspace = true, features = ["tokio"] }
 
 [build-dependencies]
 uniffi = { workspace = true, features = ["build"] }

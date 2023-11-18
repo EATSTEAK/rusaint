@@ -4,5 +4,6 @@ default-members = ["rusaint"]
 resolver = "2"
 
 [workspace.dependencies]
+thiserror = "1.0.44"
 uniffi = "0.25"
 uniffi_bindgen = "0.25"
