@@ -22,8 +22,13 @@ use crate::{
 /// ### 예시
 /// ```no_run
 /// # use std::sync::Arc;
+/// # use rusaint::USaintSession;
+/// # use rusaint::define_elements;
 /// # use rusaint::define_usaint_application;
-/// # use rusaint::application::USaintApplicationBuilder;
+/// # use rusaint::application::{ USaintApplication, USaintApplicationBuilder };
+/// # use rusaint::webdynpro::element::{ Element, text::Caption };
+/// # use crate::rusaint::webdynpro::application::Application;
+///
 /// define_usaint_application!(pub struct ExampleApplication<"ZCMW1001n">);
 ///
 /// impl<'a> ExampleApplication {
@@ -31,18 +36,18 @@ use crate::{
 ///     // 엘리먼트를 정의하는 매크로
 ///     define_elements! {
 ///         // 담당자문의 정보에 해당하는 캡션의 ID 정의
-///         CAPTION: Caption<'a> = "ZCMW_DEVINFO_RE.ID_D080C16F227F4D68751326DC40BB6BE0:MAIN.CAPTION"
+///         CAPTION: Caption<'a> = "ZCMW_DEVINFO_RE.ID_D080C16F227F4D68751326DC40BB6BE0:MAIN.CAPTION";
+///     }
+///
+///     async fn test(&mut self) -> Result<(), anyhow::Error> {
+///         let session = Arc::new(USaintSession::with_password("20212345", "password").await?);
+///         let caption = ExampleApplication::CAPTION.from_body(self.body())?;
+///         // Some("담당자문의 정보");
+///         println!("{:?}", caption.lsdata().text());
+///         Ok(())
 ///     }
 /// }
 ///
-/// async fn test() -> Result<(), dyn Error> {
-///     let session = Arc::new(USaintSession::with_password("20212345", "password").await?);
-///     let app = USaintApplicationBuilder::new().session(session).build_into::<ExampleApplication>().await?;
-///     let caption = ExampleApplication::CAPTION.from_body(app.body())?;
-///     // Some("담당자문의 정보");
-///     println!("{:?}", caption.text());
-///     
-/// }
 /// ```
 #[macro_export]
 macro_rules! define_usaint_application {

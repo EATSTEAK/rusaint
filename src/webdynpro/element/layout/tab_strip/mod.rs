@@ -12,9 +12,9 @@ use self::item::TabStripItem;
 
 define_element_interactable! {
     // Note: This element renders as "TS_ie6" if >= IE6
-    #[doc = r###"상단 버튼으로 선택할 수 있는 탭 레이아웃
-    
-    > |**참고**| 이 엘리먼트는 실제 구현에서 >= IE6 용 구현과 기본 구현으로 나누어져 있지만, rusaint에서는 최신의 브라우저를 기준으로 하므로 전자의 구현은 구현되어있지 않습니다."###]
+    #[doc = "상단 버튼으로 선택할 수 있는 탭 레이아웃"]
+    #[doc = ""]
+    #[doc = "> |**참고**| 이 엘리먼트는 실제 구현에서 >= IE6 용 구현과 기본 구현으로 나누어져 있지만, rusaint에서는 최신의 브라우저를 기준으로 하므로 전자의 구현은 구현되어있지 않습니다."]
     TabStrip<"TS_standards", "TabStrip"> {
         tab_items: OnceCell<Vec<ElementDef<'a, TabStripItem<'a>>>>,
     },
@@ -59,9 +59,10 @@ impl<'a> TabStrip<'a> {
             .get_or_init(|| {
                 let Ok(items_selector) =
                     Selector::parse(format!(r#"[ct="{}"]"#, TabStripItem::CONTROL_ID).as_str())
-                        .or(Err(BodyError::InvalidSelector)) else {
-                            return vec![];
-                        };
+                        .or(Err(BodyError::InvalidSelector))
+                else {
+                    return vec![];
+                };
                 self.element_ref
                     .select(&items_selector)
                     .filter_map(|eref| {

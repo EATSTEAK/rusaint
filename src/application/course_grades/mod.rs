@@ -62,7 +62,7 @@ impl<'a> CourseGrades {
         // Average Points in Certificate
         AVG2: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.AVG2";
         // Credits earned in P/F Classes in Certificate
-        PF_EARN_CRD1: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.T_PF_EARN_CRD1";
+        PF_EARN_CRD1: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.T_PF_ERN_CRD1";
     );
 
     // Elements for Class Grades
@@ -177,7 +177,10 @@ impl<'a> CourseGrades {
 
     fn value_as_f32(field: InputField<'_>) -> Result<f32, WebDynproError> {
         let Some(value) = field.lsdata().value() else {
-            return Err(ElementError::NoSuchData { element: field.id().to_string(), field: "value1".to_string() })?;
+            return Err(ElementError::NoSuchData {
+                element: field.id().to_string(),
+                field: "value1".to_string(),
+            })?;
         };
         Ok(value.parse::<f32>().or(Err(ElementError::InvalidContent {
             element: field.id().to_string(),
@@ -191,11 +194,11 @@ impl<'a> CourseGrades {
     /// # tokio_test::block_on(async {
     /// # use std::sync::Arc;
     /// # use rusaint::USaintSession;
-    /// # use self::model::CourseType;
+    /// # use rusaint::application::course_grades::{ model::CourseType, CourseGrades };
     /// # use rusaint::application::USaintApplicationBuilder;
     /// # let session = Arc::new(USaintSession::with_password("20212345", "password").await.unwrap());
-    /// let app = USaintApplicationBuilder::new().session(session).build_into::<CourseGrades>().await.unwrap();
-    /// let summary = app.recorded_summary(CourseType::Bachelor).unwrap();
+    /// let mut app = USaintApplicationBuilder::new().session(session).build_into::<CourseGrades>().await.unwrap();
+    /// let summary = app.recorded_summary(CourseType::Bachelor).await.unwrap();
     /// println!("{:?}", summary);
     /// // GradeSummary { ... }
     /// # })
@@ -230,10 +233,10 @@ impl<'a> CourseGrades {
     /// # use std::sync::Arc;
     /// # use rusaint::USaintSession;
     /// # use rusaint::application::USaintApplicationBuilder;
-    /// # use self::model::CourseType;
+    /// # use rusaint::application::course_grades::{ model::CourseType, CourseGrades };
     /// # let session = Arc::new(USaintSession::with_password("20212345", "password").await.unwrap());
-    /// let app = USaintApplicationBuilder::new().session(session).build_into::<CourseGrades>().await.unwrap();
-    /// let summary = app.certificated_summary(CourseType::Bachelor).unwrap();
+    /// let mut app = USaintApplicationBuilder::new().session(session).build_into::<CourseGrades>().await.unwrap();
+    /// let summary = app.certificated_summary(CourseType::Bachelor).await.unwrap();
     /// println!("{:?}", summary);
     /// // GradeSummary { ... }
     /// # })
@@ -267,11 +270,11 @@ impl<'a> CourseGrades {
     /// # tokio_test::block_on(async {
     /// # use std::sync::Arc;
     /// # use rusaint::USaintSession;
-    /// # use self::model::CourseType;
+    /// # use rusaint::application::course_grades::{ model::CourseType, CourseGrades };
     /// # use rusaint::application::USaintApplicationBuilder;
     /// # let session = Arc::new(USaintSession::with_password("20212345", "password").await.unwrap());
-    /// let app = USaintApplicationBuilder::new().session(session).build_into::<CourseGrades>().await.unwrap();
-    /// let semesters = app.semesters(CourseType::Bachelor).unwrap();
+    /// let mut app = USaintApplicationBuilder::new().session(session).build_into::<CourseGrades>().await.unwrap();
+    /// let semesters = app.semesters(CourseType::Bachelor).await.unwrap();
     /// println!("{:?}", semesters);
     /// // [SemesterGrade { ... }, SemesterGrade { ... }]
     /// # })
@@ -388,11 +391,12 @@ impl<'a> CourseGrades {
     /// # tokio_test::block_on(async {
     /// # use std::sync::Arc;
     /// # use rusaint::USaintSession;
+    /// # use rusaint::application::course_grades::{ model::CourseType, CourseGrades };
     /// # use rusaint::application::USaintApplicationBuilder;
-    /// # use rusaint::model::{CourseType, SemesterType};
+    /// # use rusaint::model::SemesterType;
     /// # let session = Arc::new(USaintSession::with_password("20212345", "password").await.unwrap());
-    /// let app = USaintApplicationBuilder::new().session(session).build_into::<CourseGrades>().await.unwrap();
-    /// let classes = app.classes(CourseType::Bachelor, "2022", SemesterType::Two, false).unwrap();
+    /// let mut app = USaintApplicationBuilder::new().session(session).build_into::<CourseGrades>().await.unwrap();
+    /// let classes = app.classes(CourseType::Bachelor, "2022", SemesterType::Two, false).await.unwrap();
     /// println!("{:?}", classes); // around 3s(depends on network environment)
     /// // [ClassGrade { ... }, ClassGrade { ... }]
     /// # })
@@ -402,11 +406,12 @@ impl<'a> CourseGrades {
     /// # tokio_test::block_on(async {
     /// # use std::sync::Arc;
     /// # use rusaint::USaintSession;
-    /// # use rusaint::model::{CourseType, SemesterType};
+    /// # use rusaint::application::course_grades::{ model::CourseType, CourseGrades };
+    /// # use rusaint::model::SemesterType;
     /// # use rusaint::application::USaintApplicationBuilder;
     /// # let session = Arc::new(USaintSession::with_password("20212345", "password").await.unwrap());
-    /// let app = USaintApplicationBuilder::new().session(session).build_into::<CourseGrades>().await.unwrap();
-    /// let classes = app.classes("2022", SemesterType::Two, true).unwrap();
+    /// let mut app = USaintApplicationBuilder::new().session(session).build_into::<CourseGrades>().await.unwrap();
+    /// let classes = app.classes(CourseType::Bachelor, "2022", SemesterType::Two, true).await.unwrap();
     /// println!("{:?}", classes); // around 10s(depends on network environment)
     /// // [ClassGrade { ... }, ClassGrade { ... }]
     /// # })
@@ -431,7 +436,7 @@ impl<'a> CourseGrades {
                 })?
                 .iter();
             iter.map(|row| {
-                let btn_cell = &row[10];
+                let btn_cell = &row[4];
                 let btn_id = if let Some(ElementWrapper::Button(btn)) = btn_cell.content() {
                     Some(btn.id().to_owned())
                 } else {
@@ -458,14 +463,14 @@ impl<'a> CourseGrades {
             };
             let parsed: Option<ClassGrade> = (|| {
                 Some(ClassGrade::new(
-                    values[1].trim().to_owned(),
-                    values[2].trim().to_owned(),
-                    values[3].trim().to_owned(),
-                    values[4].trim().to_owned(),
-                    values[5].parse().ok()?,
-                    values[6].parse().ok()?,
-                    values[7].trim().to_owned(),
+                    year.to_owned(),
+                    semester.to_string(),
                     values[8].trim().to_owned(),
+                    values[3].trim().to_owned(),
+                    values[5].parse().ok()?,
+                    values[1].parse().ok()?,
+                    values[2].trim().to_owned(),
+                    values[6].trim().to_owned(),
                     detail,
                 ))
             })();
@@ -482,13 +487,14 @@ impl<'a> CourseGrades {
     /// # tokio_test::block_on(async {
     /// # use std::sync::Arc;
     /// # use rusaint::USaintSession;
+    /// # use rusaint::model::SemesterType;
+    /// # use rusaint::application::course_grades::{ model::CourseType, CourseGrades };
     /// # use rusaint::application::USaintApplicationBuilder;
-    /// # use self::model::CourseType;
     /// # let session = Arc::new(USaintSession::with_password("20212345", "password").await.unwrap());
-    /// let app = USaintApplicationBuilder::new().session(session).build_into::<CourseGrades>().await.unwrap();
-    /// let classes = app.classes(CourseType::Bachelor, "2022", SemesterType::Two, false).unwrap();
-    /// let class = classes.iter().first().unwrap();
-    /// let class_detail = app.class_detail("2022", SemesterType::Two, class.code());
+    /// let mut app = USaintApplicationBuilder::new().session(session).build_into::<CourseGrades>().await.unwrap();
+    /// let classes = app.classes(CourseType::Bachelor, "2022", SemesterType::Two, false).await.unwrap();
+    /// let class = classes.iter().next().unwrap();
+    /// let class_detail = app.class_detail(CourseType::Bachelor, "2022", SemesterType::Two, class.code()).await.unwrap();
     /// println!("{:?}", class_detail);
     /// // {"출석(20.000)": 20.0, "중간고사(30.000)": 30.0, "과제(20.000)": 20.0, "기말고사(30.000)": 28.0}
     /// # })
@@ -504,25 +510,36 @@ impl<'a> CourseGrades {
         self.select_course(course_type).await?;
         self.select_semester(year, semester).await?;
         let table_elem = Self::GRADE_BY_CLASSES_TABLE.from_body(self.body())?;
-        let Some(table) = table_elem.table()  else {
-            return Err(ElementError::NoSuchContent { element: table_elem.id().to_string(), content: "Table body".to_string() })?;
+        let Some(table) = table_elem.table() else {
+            return Err(ElementError::NoSuchContent {
+                element: table_elem.id().to_string(),
+                content: "Table body".to_string(),
+            })?;
         };
         let Some(btn) = ({
-            table.iter().find(|row| {
-                if let Some(ElementWrapper::TextView(code_elem)) = row[3].content() {
-                    code_elem.text() == code
-                } else {
-                    false
-                }
-            }).and_then(|row| {
-                if let Some(ElementWrapper::Button(btn)) = row[10].content() {
-                    Some(ElementDef::<'_, Button<'_>>::new_dynamic(btn.id().to_owned()))
-                } else {
-                    None
-                }
-            })
+            table
+                .iter()
+                .find(|row| {
+                    if let Some(ElementWrapper::TextView(code_elem)) = row[8].content() {
+                        code_elem.text() == code
+                    } else {
+                        false
+                    }
+                })
+                .and_then(|row| {
+                    if let Some(ElementWrapper::Button(btn)) = row[4].content() {
+                        Some(ElementDef::<'_, Button<'_>>::new_dynamic(
+                            btn.id().to_owned(),
+                        ))
+                    } else {
+                        None
+                    }
+                })
         }) else {
-            return Err(ElementError::NoSuchData { element: table_elem.id().to_string(), field: format!("details of class {}", code) })?;
+            return Err(ElementError::NoSuchData {
+                element: table_elem.id().to_string(),
+                field: format!("details of class {}", code),
+            })?;
         };
         self.class_detail_in_popup(btn).await
     }
@@ -555,9 +572,12 @@ mod test {
     use std::sync::{Arc, OnceLock};
 
     use crate::{
-        application::{USaintApplicationBuilder, course_grades::CourseGrades},
+        application::{course_grades::CourseGrades, USaintApplicationBuilder},
         session::USaintSession,
-        webdynpro::{element::{layout::PopupWindow, Element}, application::Application},
+        webdynpro::{
+            application::Application,
+            element::{layout::PopupWindow, Element},
+        },
     };
     use dotenv::dotenv;
 

@@ -25,7 +25,7 @@
 //!
 //! [`BasicApplication`]을 활용하여 u-saint 외의 다른 사이트에 대한 정의를 만들 수 있으나, [`LoadingPlaceholder`] 로딩이나 [`ClientInspector`] 처리 등 추가적인 처리가 필요할 수 있습니다.
 //! 추가 정보는 [`LoadingPlaceholder`], [`ClientInspector`] 와 [`Custom`] 엘리먼트를 참고하십시오.
-//! ```
+//! ```ignore
 //! use futures::executor::block_on;
 //! use rusaint::application::USaintApplication;
 //! use rusaint::define_elements;
@@ -41,7 +41,7 @@
 //!     // 엘리먼트를 정의하는 매크로
 //!     define_elements! {
 //!         // 담당자문의 정보에 해당하는 캡션의 ID 정의
-//!         CAPTION: Caption<'a> = "ZCMW_DEVINFO_RE.ID_D080C16F227F4D68751326DC40BB6BE0:MAIN.CAPTION"
+//!         CAPTION: Caption<'a> = "ZCMW_DEVINFO_RE.ID_D080C16F227F4D68751326DC40BB6BE0:MAIN.CAPTION";
 //!     }
 //!
 //!     // 애플리케이션 생성 함수
