@@ -1,4 +1,4 @@
-pub enum CourseCategory {
+pub enum LectureCategory {
     Major {
         collage: String,
         department: String,
@@ -36,4 +36,22 @@ pub enum CourseCategory {
     },
     DualListing,
     Cyber,
+}
+
+pub struct Lecture {
+  syllabus: Option<String>,
+  category: String,
+  sub_category: String,
+  abeek_info: String,
+  field: String,
+  code: String,
+  name: String,
+  division: String,
+  professor: String,
+  department: String,
+  time_points: String,
+  personeel: String,
+  remaining_seats: String,
+  schedule_room: String,
+  target: String
 }
