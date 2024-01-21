@@ -18,26 +18,31 @@
 //! - **간편한 기능 정의(예정)** — rusaint 에서 지원하지 않는 u-saint 애플리케이션에 대한 파싱 및 지원을 제공하는 API를 이용해 간편하게 정의할 수 있습니다.
 //! ## 예시
 //!
-//! ```rust
-//! use rusaint::application::course_grades::{CourseGrades, data::GradeSummary};
-//! use rusaint::session::USaintSession;
+//! ```no_run
+//! use rusaint::application::course_grades::{CourseGrades, model::CourseType, model::SemesterGrade};
+//! use rusaint::application::USaintApplicationBuilder;
+//! use rusaint::webdynpro::element::Element;
+//! use rusaint::RusaintError;
+//! use std::sync::Arc;
+//! use rusaint::USaintSession;
 //! use futures::executor::block_on;
 //!
 //! // 성적 정보를 출력하는 애플리케이션
 //! fn main() {
 //!     block_on(print_grades());
-//!     /* GradeSummary { year: 2022, semester: "2 학기", attempted_credits: 17.5, earned_credits: 17.5, pf_earned_credits: 0.5, grade_points_avarage: 4.5, grade_points_sum: 100.0, arithmetic_mean: 100.0, semester_rank: (1, 99), general_rank: (1, 99), academic_probation: false, consult: false, flunked: false }
+//!     /* SemesterGrade { year: 2022, semester: "2 학기", attempted_credits: 17.5, earned_credits: 17.5, pf_earned_credits: 0.5, grade_points_avarage: 4.5, grade_points_sum: 100.0, arithmetic_mean: 100.0, semester_rank: (1, 99), general_rank: (1, 99), academic_probation: false, consult: false, flunked: false }
 //!      */
 //! }
 //!
 //! async fn print_grades() -> Result<(), RusaintError> {
-//!     // USaintSession::from_token(id: &str, token: &str) 을 이용하여 비밀번호 없이 SSO 토큰으로 로그인 할 수 있음
-//!     let session = USaintSession::from_password("20211561", "password").await?;
-//!     let app = CourseGrades::new(session).await?;
-//!     let grades: Vec<GradeSummary> = app.grade_summary().await?;
+//!     // USaintSession::with_token(id: &str, token: &str) 을 이용하여 비밀번호 없이 SSO 토큰으로 로그인 할 수 있음
+//!     let session = Arc::new(USaintSession::with_password("20211561", "password").await?);
+//!     let mut app = USaintApplicationBuilder::new().session(session).build_into::<CourseGrades>().await?;
+//!     let grades: Vec<SemesterGrade> = app.semesters(CourseType::Bachelor).await?;
 //!     for grade in grades {
 //!         println!("{:?}", grade);
 //!     }
+//!     Ok(())
 //! }
 //! ```
 #[cfg(feature = "application")]
