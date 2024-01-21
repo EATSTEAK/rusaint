@@ -32,7 +32,7 @@ impl<'a> CourseSchedule {
         }
     }
 
-    pub async fn select_period(
+    async fn select_period(
         &mut self,
         year: &str,
         period: SemesterType,
@@ -49,7 +49,7 @@ impl<'a> CourseSchedule {
         self.send_events(events).await
     }
 
-    pub async fn select_rows(&mut self, row: u32) -> Result<(), WebDynproError> {
+    async fn select_rows(&mut self, row: u32) -> Result<(), WebDynproError> {
         let events = {
             let body = self.body();
             let table_rows = Self::TABLE_ROWS.from_body(body)?;
@@ -58,7 +58,7 @@ impl<'a> CourseSchedule {
         self.send_events(events).await
     }
 
-    pub async fn select_edu(&mut self) -> Result<(), WebDynproError> {
+    async fn select_edu(&mut self) -> Result<(), WebDynproError> {
         let events = {
             let body = self.body();
             let tab_strip = Self::TABSTRIP.from_body(body)?;
@@ -67,7 +67,7 @@ impl<'a> CourseSchedule {
         self.send_events(events).await
     }
 
-    async fn search_edu(&mut self) -> Result<(), WebDynproError> {
+    fn search_edu(&mut self) -> Result<(), WebDynproError> {
         let events = {
             let body = self.body();
             let button_edu = Self::BUTTON_EDU.from_body(body)?;
@@ -76,15 +76,24 @@ impl<'a> CourseSchedule {
         self.send_events(events).await
     }
 
-    pub async fn load_edu(&mut self) -> Result<(), WebDynproError> {
+    async fn load_edu(&mut self) -> Result<(), WebDynproError> {
         self.select_edu().await?;
         self.search_edu().await?;
         Ok(())
     }
 
-    pub fn read_edu_raw(&self) -> Result<SapTable, WebDynproError> {
+    fn read_edu_raw(&self) -> Result<SapTable, WebDynproError> {
         let main_table = Self::MAIN_TABLE.from_body(self.body())?;
         Ok(main_table)
+    }
+
+    pub async fn find_lectures(
+        &mut self,
+        year: &str,
+        period: SemesterType,
+        lecture_category: LectureCategory,
+    ) -> Result<impl Iterator<'_, Lecture>, WebDynproError> {
+        todo!("Unimplemented")
     }
 }
 
