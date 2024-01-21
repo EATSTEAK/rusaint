@@ -32,7 +32,7 @@ async fn get_session() -> Result<Arc<USaintSession>> {
 
 #[tokio::test]
 #[serial]
-async fn summaries() {
+async fn recorded_summary() {
     let session = get_session().await.unwrap();
     let mut app = USaintApplicationBuilder::new()
         .session(session)
@@ -47,6 +47,23 @@ async fn summaries() {
         .unwrap();
     println!("Certificated: {:?}", certificated_summary);
 }
+
+#[tokio::test]
+#[serial]
+async fn certificated_summary() {
+    let session = get_session().await.unwrap();
+    let mut app = USaintApplicationBuilder::new()
+        .session(session)
+        .build_into::<CourseGrades>()
+        .await
+        .unwrap();
+    let certificated_summary = app
+        .certificated_summary(CourseType::Bachelor)
+        .await
+        .unwrap();
+    println!("Certificated: {:?}", certificated_summary);
+}
+
 #[tokio::test]
 #[serial]
 async fn semesters() {
