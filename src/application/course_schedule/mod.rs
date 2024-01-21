@@ -1,4 +1,5 @@
 use crate::{
+    application::course_schedule::model::{Lecture, LectureCategory},
     define_elements,
     model::SemesterType,
     webdynpro::{
@@ -67,7 +68,7 @@ impl<'a> CourseSchedule {
         self.send_events(events).await
     }
 
-    fn search_edu(&mut self) -> Result<(), WebDynproError> {
+    async fn search_edu(&mut self) -> Result<(), WebDynproError> {
         let events = {
             let body = self.body();
             let button_edu = Self::BUTTON_EDU.from_body(body)?;
@@ -92,8 +93,8 @@ impl<'a> CourseSchedule {
         year: &str,
         period: SemesterType,
         lecture_category: LectureCategory,
-    ) -> Result<impl Iterator<'_, Lecture>, WebDynproError> {
-        todo!("Unimplemented")
+    ) -> Result<impl Iterator<Item = Lecture>, WebDynproError> {
+        unimplemented!();
     }
 }
 
