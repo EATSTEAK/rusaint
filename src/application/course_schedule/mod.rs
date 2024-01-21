@@ -182,3 +182,5 @@ mod test {
         assert!(true);
     }
 }
+
+pub mod model;
