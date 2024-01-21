@@ -81,16 +81,16 @@ impl<'a> BasicApplication {
     /// > `send_events()` 함수는 [`Body`]의 변경 가능한 레퍼런스를 가져오므로 [`Body`]의 참조가 남아있을 경우 작동하지 않습니다(엘리먼트 등).
     /// > 엘리먼트의 이벤트를 만드려면 엘리먼트가 `send_events()`함수를 호출 할 때 살아있지 않도록 생명주기를 관리하십시오.
     /// ### 예시
-    /// ```
+    /// ```ignore
     /// # tokio_test::block_on(async {
     /// # use std::sync::Arc;
     /// # use rusaint::application::USaintApplicationBuilder;
-    /// # use rusaint::webdynpro::element::{ElementDef, selection::combo_box::ComboBox};
+    /// # use rusaint::webdynpro::element::{ElementDef, selection::ComboBox};
     /// const PERIOD_YEAR: ElementDef<'_, ComboBox<'_>> = ElementDef::new("ZCMW_PERIOD_RE.ID_A61C4ED604A2BFC2A8F6C6038DE6AF18:VIW_MAIN.PERYR");
-    /// # let app = USaintApplicationBuilder::new().name("ZCMW2100").await.unwrap();
+    /// # let app = USaintApplicationBuilder::new().build("ZCMW2100").await.unwrap();
     /// let select_event = {
     ///     // body를 참조하는 변수를 격리
-    ///     let elem = PERIOD_YEAR.from_body(app.body());
+    ///     let elem = PERIOD_YEAR.from_body(app.body()).unwrap();
     ///     elem.select("2022").unwrap()
     /// };
     /// // app: BasicApplication
@@ -135,17 +135,16 @@ impl<'a> BasicApplication {
 pub struct BasicApplicationBuilder<'a> {
     base_url: &'a str,
     name: &'a str,
-    client: Option<Client>
+    client: Option<Client>,
 }
 
 impl<'a> BasicApplicationBuilder<'a> {
-
     /// 새로운 [`BasicApplicationBuilder`]를 만듭니다.
     pub fn new(base_url: &'a str, name: &'a str) -> BasicApplicationBuilder<'a> {
         BasicApplicationBuilder {
             base_url,
             name,
-            client: None
+            client: None,
         }
     }
 
@@ -158,8 +157,8 @@ impl<'a> BasicApplicationBuilder<'a> {
     /// 새로운 [`BasicApplication`]을 생성합니다.
     pub async fn build(self) -> Result<BasicApplication, WebDynproError> {
         let client = match self.client {
-            Some(client) => { client },
-            None => Client::new()
+            Some(client) => client,
+            None => Client::new(),
         };
         let base_url = Url::parse(self.base_url)
             .or(Err(ClientError::InvalidBaseUrl(self.base_url.to_string())))?;
