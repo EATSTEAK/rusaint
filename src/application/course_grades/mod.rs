@@ -431,7 +431,7 @@ impl<'a> CourseGrades {
                 })?
                 .iter();
             iter.map(|row| {
-                let btn_cell = &row[10];
+                let btn_cell = &row[4];
                 let btn_id = if let Some(ElementWrapper::Button(btn)) = btn_cell.content() {
                     Some(btn.id().to_owned())
                 } else {
@@ -458,14 +458,14 @@ impl<'a> CourseGrades {
             };
             let parsed: Option<ClassGrade> = (|| {
                 Some(ClassGrade::new(
-                    values[1].trim().to_owned(),
-                    values[2].trim().to_owned(),
-                    values[3].trim().to_owned(),
-                    values[4].trim().to_owned(),
-                    values[5].parse().ok()?,
-                    values[6].parse().ok()?,
-                    values[7].trim().to_owned(),
+                    year.to_owned(),
+                    semester.to_string(),
                     values[8].trim().to_owned(),
+                    values[3].trim().to_owned(),
+                    values[5].parse().ok()?,
+                    values[1].parse().ok()?,
+                    values[2].trim().to_owned(),
+                    values[6].trim().to_owned(),
                     detail,
                 ))
             })();
@@ -509,13 +509,13 @@ impl<'a> CourseGrades {
         };
         let Some(btn) = ({
             table.iter().find(|row| {
-                if let Some(ElementWrapper::TextView(code_elem)) = row[3].content() {
+                if let Some(ElementWrapper::TextView(code_elem)) = row[8].content() {
                     code_elem.text() == code
                 } else {
                     false
                 }
             }).and_then(|row| {
-                if let Some(ElementWrapper::Button(btn)) = row[10].content() {
+                if let Some(ElementWrapper::Button(btn)) = row[4].content() {
                     Some(ElementDef::<'_, Button<'_>>::new_dynamic(btn.id().to_owned()))
                 } else {
                     None
