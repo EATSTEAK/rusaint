@@ -62,7 +62,7 @@ impl<'a> CourseGrades {
         // Average Points in Certificate
         AVG2: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.AVG2";
         // Credits earned in P/F Classes in Certificate
-        PF_EARN_CRD1: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.T_PF_EARN_CRD1";
+        PF_EARN_CRD1: InputField<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.T_PF_ERN_CRD1";
     );
 
     // Elements for Class Grades
