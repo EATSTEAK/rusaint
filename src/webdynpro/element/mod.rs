@@ -7,7 +7,7 @@ use serde_json::{Map, Value};
 
 use self::{action::{Button, Link}, layout::{ButtonRow, Container, FlowLayout, Form, GridLayout, grid_layout::cell::GridLayoutCell, TabStrip, tab_strip::item::TabStripItem, PopupWindow, Tray, Scrollbar, ScrollContainer}, system::{ClientInspector, Custom, LoadingPlaceholder}, selection::{ComboBox, list_box::{ListBoxPopup, ListBoxPopupFiltered, ListBoxPopupJson, ListBoxPopupJsonFiltered, ListBoxMultiple, ListBoxSingle, item::{ListBoxItem, ListBoxActionItem}}}, graphic::Image, text::{InputField, Label, TextView, Caption}, complex::SapTable};
 
-use super::{event::{ucf_parameters::UcfParameters, Event, EventBuilder}, error::{ElementError, BodyError, WebDynproError}, application::body::Body};
+use super::{event::{ucf_parameters::UcfParameters, Event, EventBuilder}, error::{ElementError, BodyError, WebDynproError}, client::body::Body};
 
 /// 버튼 등 기본적인 액션에 이용되는 엘리먼트
 pub mod action;
