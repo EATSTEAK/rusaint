@@ -1,7 +1,7 @@
 use std::{borrow::Cow, cell::OnceCell, collections::HashMap};
 
 use crate::webdynpro::error::{BodyError, WebDynproError};
-use crate::webdynpro::{application::body::Body, error::ElementError, event::Event};
+use crate::webdynpro::{client::body::Body, error::ElementError, event::Event};
 
 use crate::webdynpro::element::{
     define_element_interactable, Element, ElementWrapper, Interactable,

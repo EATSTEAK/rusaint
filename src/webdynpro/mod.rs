@@ -5,19 +5,19 @@
 //!
 //! ## WebDynpro 페이지 분석하기
 //! 직접 WebDynpro 페이지를 분석하여 이에 대한 자동화된 애플리케이션을 구현하려면, 애플리케이션에서 조작하고자 하는 주요 요소들에 대해 정의하는 작업이 선행되어야 합니다.
-//! 
+//!
 //! 대부분의 조작하고자 하는 요소는 WebDynpro 엘리먼트로 구성되어 있으므로, 조작/분석하고자 하는 엘리먼트의 종류, ID를 미리 컴파일 타임에 정의하여 파싱/조작 작업을 원활히 수행할 수 있습니다.
 //!
 //! ### 페이지 내 엘리먼트가 정적인 ID를 가지도록 하기
 //! 기본적으로 WebDynpro 페이지의 엘리먼트 ID는 동적으로 구성되도록 되어 있습니다. 대략적으로 엘리먼트가 렌더링되는 순서대로 ID가 부여되며, 따라서 동일한 위치에 있는 동일한 엘리먼트임에도 불구하고 수행한 동작의 순서나 종류에 따라 다른 ID를 가질 수 있습니다.
-//! 
+//!
 //! 이러한 현상을 방지하려면 WebDynpro 에서 자동 테스팅 목적으로 제공하는 파라메터 `SAP-WD-STABLEIDS`를 `X` 로 표시하면 정적인 ID를 가진 페이지를 확인할 수 있습니다.
 //! [예시](https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/ZCMW2100?sap-wd-stableids=x)
 //!
 //! ### 엘리먼트의 종류 알아내기
 //! 엘리먼트의 종류는 해당 엘리먼트 태그의 `ct` HTML 어트리뷰트 값을 rusaint WebDynpro 엘리먼트의 [`CONTROL_ID`]와 매칭시켜 알아낼 수 있습니다.
 //! > **예시:** `ct="B"` 어트리뷰트의 경우 WebDynpro 엘리먼트의 [`Button`]과 매칭됩니다.
-//! 
+//!
 //! 엘리먼트의 종류나 렌더링 방법에 따라 엘리먼트 자체를 감싸는 태그가 있을 수 있습니다. 이런 태그는 보통 해당 엘리먼트의 ID 뒤에 `-r` 접미사가 붙는것으로 확인할 수 있습니다.
 //!
 //! ## 애플리케이션 정의 예시
@@ -79,8 +79,8 @@
 //! [`ClientInspector`]: webdynpro::element::system::ClientInspector
 //! [`Custom`]: webdynpro::element::system::Custom
 
-/// WebDynpro 페이지의 기본 애플리케이션
-pub mod application;
+/// WebDynpro 페이지의 기본 클라이언트
+pub mod client;
 /// WebDynpro 페이지를 구성하는 엘리먼트
 pub mod element;
 /// WebDynpro 클라이언트 작업 중 발생할 수 있는 오류
