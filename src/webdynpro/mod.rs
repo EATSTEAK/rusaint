@@ -83,6 +83,10 @@
 pub mod client;
 /// WebDynpro 페이지를 구성하는 엘리먼트
 pub mod element;
+
+/// WebDynpro 클라이언트를 조작하는 명령
+pub mod command;
+
 /// WebDynpro 클라이언트 작업 중 발생할 수 있는 오류
 pub mod error;
 /// WebDynpro 엘리먼트가 발생시키는 이벤트 처리
