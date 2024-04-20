@@ -1,4 +1,4 @@
-use std::{marker, collections::HashMap, borrow::Cow};
+use std::{borrow::Cow, collections::HashMap, hash::{DefaultHasher, Hash, Hasher}, marker};
 
 
 use regex::Regex;
@@ -274,17 +274,23 @@ register_elements![
     Caption: Caption<'a>,
 ];
 
+#[derive(Clone, Debug)]
+pub struct ElementNodeId {
+    body_hash: u64,
+    node_id: ego_tree::NodeId,
+}
 /// 컴파일 타임에서도 생성할 수 있는 [`Element`] 정의
 #[derive(Debug)]
 pub struct ElementDef<'a, T>
     where T: Element<'a> {
     id: Cow<'static, str>,
+    node_id: Option<ElementNodeId>,
     _marker: marker::PhantomData<&'a T>,
 }
 
 impl<'a, T: Element<'a>> Clone for ElementDef<'a, T> {
     fn clone(&self) -> Self {
-        Self { id: self.id.clone(), _marker: self._marker.clone() }
+        Self { id: self.id.clone(), node_id: self.node_id.clone(), _marker: self._marker.clone() }
     }
 
     fn clone_from(&mut self, source: &Self) {
@@ -305,6 +311,7 @@ where T: Element<'a>
     pub const fn new(id: &'static str) -> ElementDef<'a, T> {
         ElementDef {
             id: Cow::Borrowed(id),
+            node_id: None,
             _marker: std::marker::PhantomData
         }
     }
@@ -319,7 +326,16 @@ where T: Element<'a>
     /// ```
     pub fn new_dynamic(id: String) -> ElementDef<'a, T> {
         ElementDef {
-            id: id.into(), _marker: std::marker::PhantomData
+            id: id.into(), node_id: None, _marker: std::marker::PhantomData
+        }
+    }
+
+    /// 빠른 엘리먼트 탐색을 위해 `ego_tree::NodeId`와 함께 엘리먼트 정의를 생성합니다.
+    pub fn with_node_id(id: String, body_hash: u64, node_id: ego_tree::NodeId) -> ElementDef<'a, T> {
+        ElementDef {
+            id: id.into(),
+            node_id: Some(ElementNodeId { body_hash, node_id }),
+            _marker: std::marker::PhantomData
         }
     }
 
@@ -423,6 +439,16 @@ pub trait Element<'a>: Sized {
 
 	/// 엘리먼트 정의와 [`Body`]에서 엘리먼트를 가져옵니다.
     fn from_body(elem_def: &ElementDef<'a, Self>, body: &'a Body) -> Result<Self, WebDynproError> {
+        if let Some(node_id) = &elem_def.node_id {
+            let mut hasher = DefaultHasher::new();
+            body.hash(&mut hasher);
+            let body_hash = hasher.finish();
+            if body_hash == node_id.body_hash {
+                if let Some(elem) = body.document().tree.get(node_id.node_id).and_then(|node| ElementRef::wrap(node)) {
+                    return Self::from_elem(elem_def, elem)
+                }
+            }
+        }
         let selector = &elem_def.selector().or(Err(BodyError::InvalidSelector))?;
         let element = body
             .document()
