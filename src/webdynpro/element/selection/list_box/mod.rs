@@ -38,7 +38,7 @@ macro_rules! def_listbox_subset {
                     })
             }
 
-            fn from_elem(elem_def: ElementDef<'a, Self>, element: scraper::ElementRef<'a>) -> Result<Self, $crate::webdynpro::error::WebDynproError> {
+            fn from_elem(elem_def: &ElementDef<'a, Self>, element: scraper::ElementRef<'a>) -> Result<Self, $crate::webdynpro::error::WebDynproError> {
                 Ok(Self::new(elem_def.id.to_owned(), element))
             }
 

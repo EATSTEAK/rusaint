@@ -7,7 +7,7 @@ use self::property::ScrollDirection;
 pub mod property {
     use serde::Deserialize;
 
-    #[derive(Deserialize, Debug)]
+    #[derive(Clone, Deserialize, Debug)]
     #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
     pub enum ScrollDirection {
         Vertical,

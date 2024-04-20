@@ -42,7 +42,7 @@ macro_rules! define_lsdata {
         }
     } => {
         $(#[$lsdata_outer])*
-        #[derive(serde::Deserialize, Debug, Default)]
+        #[derive(Clone, serde::Deserialize, Debug, Default)]
         #[allow(unused)]
         pub struct $lsdata {
             $(
@@ -105,7 +105,7 @@ macro_rules! define_element_base {
             }
 
             fn from_elem(
-                elem_def: $crate::webdynpro::element::ElementDef<'a, Self>,
+                elem_def: &$crate::webdynpro::element::ElementDef<'a, Self>,
                 element: scraper::ElementRef<'a>,
             ) -> Result<Self, $crate::webdynpro::error::WebDynproError> {
                 Ok(Self::new(elem_def.id.to_owned(), element))
@@ -345,12 +345,12 @@ where T: Element<'a>
     }
 
 	/// [`Body`]에서 엘리먼트를 불러옵니다.
-    pub fn from_body(self, body: &'a Body) -> Result<T, WebDynproError> {
+    pub fn from_body(&self, body: &'a Body) -> Result<T, WebDynproError> {
         T::from_body(self, body)
     }
 	
     /// `scraper::ElementRef`에서 엘리먼트를 불러옵니다.
-    pub fn from_elem(self, element: scraper::ElementRef<'a>) -> Result<T, WebDynproError> {
+    pub fn from_elem(&self, element: scraper::ElementRef<'a>) -> Result<T, WebDynproError> {
         T::from_elem(self, element)
     }
 }
@@ -422,7 +422,7 @@ pub trait Element<'a>: Sized {
     }
 
 	/// 엘리먼트 정의와 [`Body`]에서 엘리먼트를 가져옵니다.
-    fn from_body(elem_def: ElementDef<'a, Self>, body: &'a Body) -> Result<Self, WebDynproError> {
+    fn from_body(elem_def: &ElementDef<'a, Self>, body: &'a Body) -> Result<Self, WebDynproError> {
         let selector = &elem_def.selector().or(Err(BodyError::InvalidSelector))?;
         let element = body
             .document()
@@ -433,7 +433,7 @@ pub trait Element<'a>: Sized {
     }
 
 	/// 엘리먼트 정의와 [`scraper::ElementRef`]에서 엘리먼트를 가져옵니다.
-    fn from_elem(elem_def: ElementDef<'a, Self>, element: scraper::ElementRef<'a>) -> Result<Self, WebDynproError>;
+    fn from_elem(elem_def: &ElementDef<'a, Self>, element: scraper::ElementRef<'a>) -> Result<Self, WebDynproError>;
 
 	/// 엘리먼트의 자식 엘리먼트를 가져옵니다.
     fn children_elem(root: scraper::ElementRef<'a>) -> Vec<ElementWrapper<'a>> {

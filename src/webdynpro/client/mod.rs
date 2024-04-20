@@ -2,9 +2,9 @@ use crate::{
     define_elements,
     utils::{default_header, DEFAULT_USER_AGENT},
     webdynpro::{
+        element::layout::Form,
         error::{ClientError, WebDynproError},
         event::{event_queue::EventQueue, Event},
-        element::layout::Form,
     },
 };
 use body::{Body, BodyUpdate};
@@ -12,11 +12,13 @@ use reqwest::{cookie::Jar, header::*, RequestBuilder};
 use std::sync::Arc;
 use url::Url;
 
+use super::command::WebDynproCommand;
+
 /// WebDynpro 애플리케이션의 웹 요청 및 페이지 문서 처리를 담당하는 클라이언트
-pub struct BasicWDClient {
+pub struct WebDynproClient {
     base_url: Url,
     name: String,
-    body: Option<Body>,
+    body: Body,
     client: reqwest::Client,
     event_queue: EventQueue,
 }
@@ -36,19 +38,28 @@ fn wd_xhr_header() -> HeaderMap {
     headers
 }
 
-/// WebDynpro 애플리케이션의 기본 기능
-pub trait WebDynproClient {
+impl<'a> WebDynproClient {
+    define_elements! {
+        SSR_FORM: Form<'a> = "sap.client.SsrClient.form";
+    }
+
     /// WebDynpro 애플리케이션의 이름을 반환합니다.
-    fn name(&self) -> &str;
+    pub fn name(&self) -> &str {
+        &self.name
+    }
 
     /// WebDynpro 애플리케이션의 기본 URL을 반환합니다.
-    fn base_url(&self) -> &Url;
+    pub fn base_url(&self) -> &Url {
+        &self.base_url
+    }
 
     /// WebDynpro 애플리케이션의 페이지 문서를 반환합니다.
-    fn body(&self) -> Option<&Body>;
+    pub fn body(&self) -> &Body {
+        &self.body
+    }
 
     /// 실제로 요청하는 애플리케이션의 URL을 반환합니다.
-    fn client_url(&self) -> String {
+    pub fn client_url(&self) -> String {
         let mut url = "".to_owned();
         url.push_str(&self.base_url().as_str());
         if !url.ends_with('/') {
@@ -58,29 +69,9 @@ pub trait WebDynproClient {
         url.push_str("?sap-wd-stableids=X#");
         url
     }
-}
-
-impl WebDynproClient for BasicWDClient {
-    fn name(&self) -> &str {
-        &self.name
-    }
-
-    fn base_url(&self) -> &Url {
-        &self.base_url
-    }
-
-    fn body(&self) -> Option<&Body> {
-        (&self.body).as_ref()
-    }
-}
-
-impl<'a> BasicWDClient {
-    define_elements! {
-        SSR_FORM: Form<'a> = "sap.client.SsrClient.form";
-    }
 
     /// 새로운 클라이언트를 생성합니다.
-    pub fn new(base_url: Url, name: &str) -> BasicWDClient {
+    async fn new(base_url: Url, name: &str) -> Result<WebDynproClient, ClientError> {
         let jar: Arc<Jar> = Arc::new(Jar::default());
         let client = reqwest::Client::builder()
             .cookie_provider(jar)
@@ -88,57 +79,97 @@ impl<'a> BasicWDClient {
             .user_agent(DEFAULT_USER_AGENT)
             .build()
             .unwrap();
-        Self::with_client(base_url, name, client)
+        Self::with_client(base_url, name, client).await
     }
 
     /// 임의의 reqwest::Client 와 함께 클라이언트를 생성합니다.
-    pub fn with_client(base_url: Url, name: &str, client: reqwest::Client) -> BasicWDClient {
-        BasicWDClient {
-            base_url,
-            name: name.to_owned(),
-            body: None,
-            client,
-            event_queue: EventQueue::new(),
-        }
-    }
-
-    pub(crate) async fn navigate(
-        &mut self,
-        base_url: &Url,
-        app_name: &str,
-    ) -> Result<(), ClientError> {
-        let raw_body = self
-            .client
-            .wd_navigate(base_url, app_name)
+    async fn with_client(
+        base_url: Url,
+        name: &str,
+        client: reqwest::Client,
+    ) -> Result<WebDynproClient, ClientError> {
+        let raw_body = client
+            .wd_navigate(&base_url, name)
             .send()
             .await?
             .text()
             .await?;
-        self.body = Some(Body::new(raw_body)?);
+        Ok(WebDynproClient {
+            base_url,
+            name: name.to_owned(),
+            body: Body::new(raw_body)?,
+            client,
+            event_queue: EventQueue::new(),
+        })
+    }
+
+    /// WebDynpro 클라이언트에 명령을 전송합니다.
+    pub async fn send<T: WebDynproCommand>(
+        &mut self,
+        command: T,
+    ) -> Result<T::Result, WebDynproError> {
+        command.dispatch(self).await
+    }
+
+    /// 특정 WebDynpro 애플리케이션으로 탐색합니다.
+    pub(crate) async fn navigate(&mut self, base_url: &Url, name: &str) -> Result<(), ClientError> {
+        let raw_body = self
+            .client
+            .wd_navigate(base_url, name)
+            .send()
+            .await?
+            .text()
+            .await?;
+        self.body = Body::new(raw_body)?;
         Ok(())
     }
 
-    pub(crate) fn add_event(&mut self, event: Event) {
+    /// 이벤트 유형에 따라 이벤트 큐를 큐에 추가하거나 서버에 전송합니다.
+    pub async fn process_event(
+        &mut self,
+        force_send: bool,
+        event: Event,
+    ) -> Result<EventProcessResult, WebDynproError> {
+        let form_req = Self::SSR_FORM
+            .from_body(self.body())?
+            .request(false, "", "", false, false)
+            .or(Err(ClientError::NoSuchForm(
+                Self::SSR_FORM.id().to_string(),
+            )))?;
+        if (!event.is_enqueable() && event.is_submitable()) || force_send {
+            {
+                self.add_event(event);
+                self.add_event(form_req.to_owned());
+            }
+            let update = { self.send_events().await? };
+            self.mutate_body(update)?;
+            Ok(EventProcessResult::Sent)
+        } else {
+            self.add_event(event);
+            Ok(EventProcessResult::Enqueued)
+        }
+    }
+
+    /// 이벤트를 이벤트 큐에 추가합니다.
+    fn add_event(&mut self, event: Event) {
         self.event_queue.add(event)
     }
 
-    pub(crate) async fn send_event(
-        &mut self,
-        base_url: &Url,
-        ssr_client: &SapSsrClient,
-    ) -> Result<BodyUpdate, WebDynproError> {
-        let res = self.event_request(base_url, ssr_client).await?;
+    /// 이벤트 큐 내의 이벤트를 전송하고 그 결과를 `BodyUpdate`로 반환합니다.
+    async fn send_events(&mut self) -> Result<BodyUpdate, WebDynproError> {
+        let res = self.event_request().await?;
         Ok(BodyUpdate::new(&res)?)
     }
 
-    async fn event_request(
-        &mut self,
-        base_url: &Url,
-        ssr_client: &SapSsrClient,
-    ) -> Result<String, ClientError> {
+    /// 이벤트 큐 내부 내용을 서버에 전송하고 응답을 받습니다.
+    async fn event_request(&mut self) -> Result<String, ClientError> {
         let res = self
             .client
-            .wd_xhr(base_url, ssr_client, &mut self.event_queue)?
+            .wd_xhr(
+                &self.base_url,
+                self.body.ssr_client(),
+                &mut self.event_queue,
+            )?
             .send()
             .await?;
         if !res.status().is_success() {
@@ -147,61 +178,42 @@ impl<'a> BasicWDClient {
         Ok(res.text().await?)
     }
 
-    /// WebDynpro 클라이언트에 임의의 엘리먼트 이벤트를 보냅니다.
-    ///
-    /// > | **주의** |
-    /// > `send_events()` 함수는 [`Body`]의 변경 가능한 레퍼런스를 가져오므로 [`Body`]의 참조가 남아있을 경우 작동하지 않습니다(엘리먼트 등).
-    /// > 엘리먼트의 이벤트를 만드려면 엘리먼트가 `send_events()`함수를 호출 할 때 살아있지 않도록 생명주기를 관리하십시오.
-    /// ### 예시
-    /// ```ignore
-    /// # tokio_test::block_on(async {
-    /// # use std::sync::Arc;
-    /// # use rusaint::application::USaintApplicationBuilder;
-    /// # use rusaint::webdynpro::element::{ElementDef, selection::ComboBox};
-    /// const PERIOD_YEAR: ElementDef<'_, ComboBox<'_>> = ElementDef::new("ZCMW_PERIOD_RE.ID_A61C4ED604A2BFC2A8F6C6038DE6AF18:VIW_MAIN.PERYR");
-    /// # let app = USaintApplicationBuilder::new().build("ZCMW2100").await.unwrap();
-    /// let select_event = {
-    ///     // body를 참조하는 변수를 격리
-    ///     let elem = PERIOD_YEAR.from_body(app.body()).unwrap();
-    ///     elem.select("2022").unwrap()
-    /// };
-    /// // app: BasicApplication
-    /// app.send_events(vec![select_event]).await.unwrap();
-    /// # })
-    pub(crate) async fn send_events(
-        &mut self,
-        events: impl IntoIterator<Item = Event>,
-    ) -> Result<(), WebDynproError> {
-        if self.body().is_none() {
-          self.navigate(&self.base_url, &self.name).await?;
+    fn mutate_body(&mut self, update: BodyUpdate) -> Result<(), WebDynproError> {
+        Ok(self.body.apply(update)?)
+    }
+}
+
+/// [`WebDynproClient`]을 생성하는 빌더
+pub struct WebDynproClientBuilder<'a> {
+    base_url: &'a str,
+    name: &'a str,
+    client: Option<reqwest::Client>,
+}
+
+impl<'a> WebDynproClientBuilder<'a> {
+    /// 새로운 [`WebDynproClientBuilder`]를 만듭니다.
+    pub fn new(base_url: &'a str, name: &'a str) -> WebDynproClientBuilder<'a> {
+        WebDynproClientBuilder {
+            base_url,
+            name,
+            client: None,
         }
-        let body = self.body().unwrap();
-        let form_req = Self::SSR_FORM
-            .from_body(body)?
-            .request(false, "", "", false, false)
-            .or(Err(ClientError::NoSuchForm(
-                Self::SSR_FORM.id().to_string(),
-            )))?;
-        for event in events.into_iter() {
-            if !event.is_enqueable() && event.is_submitable() {
-                {
-                    self.add_event(event);
-                    self.add_event(form_req.to_owned());
-                }
-                let update = {
-                    self.send_event(&self.base_url, self.body.ssr_client())
-                        .await?
-                };
-                self.mutate_body(update)?
-            } else {
-                self.add_event(event);
-            }
-        }
-        Ok(())
     }
 
-    fn mutate_body(&mut self, update: BodyUpdate) -> Result<(), WebDynproError> {
-        Ok(self.body.unwrap().apply(update)?)
+    /// 애플리케이션에 임의의 [`reqwest::Client`]를 추가합니다.
+    pub fn client(mut self, client: reqwest::Client) -> WebDynproClientBuilder<'a> {
+        self.client = Some(client);
+        self
+    }
+
+    /// 새로운 [`WebDynproClient`]을 생성합니다.
+    pub async fn build(self) -> Result<WebDynproClient, WebDynproError> {
+        let base_url = Url::parse(self.base_url)
+            .or(Err(ClientError::InvalidBaseUrl(self.base_url.to_string())))?;
+        match self.client {
+            Some(client) => Ok(WebDynproClient::with_client(base_url, self.name, client).await?),
+            None => Ok(WebDynproClient::new(base_url, self.name).await?),
+        }
     }
 }
 
@@ -274,24 +286,37 @@ pub(crate) struct SapSsrClient {
     use_beacon: bool,
 }
 
+/// 전달받은 이벤트가 어떻게 처리되었는지 표현합니다.
+pub enum EventProcessResult {
+    /// 전달받은 이벤트가 큐에 추가되었을 경우
+    Enqueued,
+    /// 전달받은 이벤트가 큐에 추가된 후 서버에 전송되었을 경우
+    Sent,
+}
+
+/// WebDynpro의 페이지를 파싱, 업데이트하는 [`Body`] 구현
 pub mod body;
 
 #[cfg(test)]
 mod test {
     use url::Url;
 
-    use crate::webdynpro::client::BasicWDClient;
+    use crate::webdynpro::client::WebDynproClientBuilder;
 
     #[tokio::test]
     async fn initial_load() {
-        let mut client = BasicWDClient::new("https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/", "ZCMW2100");
-        let body = client
+        let mut client =
+            WebDynproClientBuilder::new("https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/", "ZCMW2100")
+                .build()
+                .await
+                .unwrap();
+        client
             .navigate(
                 &Url::parse("https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/").unwrap(),
                 "ZCMW2100",
             )
             .await
             .unwrap();
-        assert_eq!(body.ssr_client().app_name, "ZCMW2100");
+        assert_eq!(client.body.ssr_client().app_name, "ZCMW2100");
     }
 }
