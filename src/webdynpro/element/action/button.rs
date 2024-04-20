@@ -1,8 +1,8 @@
 use std::{borrow::Cow, cell::OnceCell, collections::HashMap};
 
 use crate::webdynpro::{
-    client::EventProcessResult, command::WebDynproCommand, element::{
-        define_element_interactable, property::{ContentVisibility, HotkeyValue, SemanticColor, TextDesign, Visibility}, ElementDef, Interactable
+    element::{
+        define_element_interactable, property::{ContentVisibility, HotkeyValue, SemanticColor, TextDesign, Visibility}, Interactable
     }, error::WebDynproError, event::Event
 };
 
@@ -118,19 +118,5 @@ impl<'a> Button<'a> {
         let mut parameters: HashMap<String, String> = HashMap::new();
         parameters.insert("Id".to_string(), self.id.clone().to_string());
         self.fire_event("Press".to_string(), parameters)
-    }
-}
-
-
-pub struct ButtonPressCommand<'a> {
-    element_def: ElementDef<'a, Button<'a>>
-}
-
-impl<'a> WebDynproCommand for ButtonPressCommand<'a> {
-    type Result = EventProcessResult;
-
-    async fn dispatch(&self, client: &mut crate::webdynpro::client::WebDynproClient) -> Result<Self::Result, WebDynproError> {
-        let event = (&self.element_def).from_body(client.body())?.press()?;
-        client.process_event(false, event).await
     }
 }

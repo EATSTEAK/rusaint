@@ -16,3 +16,7 @@ pub trait WebDynproCommand {
 pub trait WebDynproCommandResult {}
 
 impl WebDynproCommandResult for EventProcessResult {}
+
+
+/// 엘리먼트 관련 명령
+pub mod element;
