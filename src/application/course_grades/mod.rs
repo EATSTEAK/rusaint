@@ -4,8 +4,7 @@ use crate::{
     define_elements,
     model::SemesterType,
     webdynpro::{
-        client::body::Body,
-        element::{
+        client::body::Body, command::element::selection::{ComboBoxSelectCommand, ReadComboBoxLSDataCommand}, element::{
             action::Button,
             complex::sap_table::{
                 cell::{SapTableCell, SapTableCellWrapper},
@@ -16,9 +15,7 @@ use crate::{
             selection::ComboBox,
             text::InputField,
             Element, ElementDef, ElementWrapper, SubElement,
-        },
-        error::{BodyError, ElementError, WebDynproError},
-        event::Event,
+        }, error::{BodyError, ElementError, WebDynproError}, event::Event
     },
     RusaintError,
 };
@@ -127,17 +124,10 @@ impl<'a> CourseGrades {
     }
 
     async fn select_course(&mut self, course: CourseType) -> Result<(), WebDynproError> {
-        let select = {
-            let course = Self::course_type_to_key(course);
-            let mut vec = Vec::with_capacity(1);
-            let course_combobox = Self::PROGRESS_TYPE.from_body(self.client.body())?;
-            if (|| Some(course_combobox.lsdata().key()?.as_str()))() != Some(course) {
-                vec.push(course_combobox.select(&course.to_string(), false)?);
-            }
-            Result::<Vec<Event>, WebDynproError>::Ok(vec)
-        }?;
-        for event in select {
-            self.client.process_event(false, event).await?;
+        let course = Self::course_type_to_key(course);
+        let combobox_lsdata = self.client.send(ReadComboBoxLSDataCommand::new(Self::PROGRESS_TYPE)).await?;
+        if (|| Some(combobox_lsdata.key()?.as_str()))() != Some(course) {
+            self.client.send(ComboBoxSelectCommand::new(Self::PROGRESS_TYPE, course, false)).await?;
         }
         Ok(())
     }
@@ -147,21 +137,14 @@ impl<'a> CourseGrades {
         year: &str,
         semester: SemesterType,
     ) -> Result<(), WebDynproError> {
-        let select = {
-            let semester = Self::semester_to_key(semester);
-            let mut vec = Vec::with_capacity(2);
-            let year_combobox = Self::PERIOD_YEAR.from_body(self.client.body())?;
-            if (|| Some(year_combobox.lsdata().key()?.as_str()))() != Some(year) {
-                vec.push(year_combobox.select(&year.to_string(), false)?);
-            }
-            let semester_combobox = Self::PERIOD_SEMESTER.from_body(self.client.body())?;
-            if (|| Some(semester_combobox.lsdata().key()?.as_str()))() != Some(semester) {
-                vec.push(semester_combobox.select(semester, false)?);
-            }
-            Result::<Vec<Event>, WebDynproError>::Ok(vec)
-        }?;
-        for event in select {
-            self.client.process_event(false, event).await?;
+        let semester = Self::semester_to_key(semester);
+        let year_combobox_lsdata = self.client.send(ReadComboBoxLSDataCommand::new(Self::PERIOD_YEAR)).await?;
+        let semester_combobox_lsdata = self.client.send(ReadComboBoxLSDataCommand::new(Self::PERIOD_SEMESTER)).await?;
+        if (|| Some(year_combobox_lsdata.key()?.as_str()))() != Some(year) {
+            self.client.send(ComboBoxSelectCommand::new(Self::PERIOD_YEAR, &year, false)).await?;
+        }
+        if (|| Some(semester_combobox_lsdata.key()?.as_str()))() != Some(semester) {
+            self.client.send(ComboBoxSelectCommand::new(Self::PERIOD_SEMESTER, semester, false)).await?;
         }
         Ok(())
     }
