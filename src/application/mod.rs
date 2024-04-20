@@ -5,9 +5,7 @@ use crate::{
     session::USaintSession,
     utils::DEFAULT_USER_AGENT,
     webdynpro::{
-        application::{
-            body::Body, client::Client, Application, BasicApplication, BasicApplicationBuilder,
-        },
+        client::{body::Body, EventProcessResult, WebDynproClient, WebDynproClientBuilder},
         element::{
             define_elements,
             system::{ClientInspector, Custom, CustomClientInfo, LoadingPlaceholder},
@@ -15,114 +13,16 @@ use crate::{
         error::WebDynproError,
         event::Event,
     },
+    RusaintError,
 };
-
-/// 새로운 u-saint 애플리케이션을 만듭니다.
-///
-/// ### 예시
-/// ```no_run
-/// # use std::sync::Arc;
-/// # use rusaint::USaintSession;
-/// # use rusaint::define_elements;
-/// # use rusaint::define_usaint_application;
-/// # use rusaint::application::{ USaintApplication, USaintApplicationBuilder };
-/// # use rusaint::webdynpro::element::{ Element, text::Caption };
-/// # use crate::rusaint::webdynpro::application::Application;
-///
-/// define_usaint_application!(pub struct ExampleApplication<"ZCMW1001n">);
-///
-/// impl<'a> ExampleApplication {
-///
-///     // 엘리먼트를 정의하는 매크로
-///     define_elements! {
-///         // 담당자문의 정보에 해당하는 캡션의 ID 정의
-///         CAPTION: Caption<'a> = "ZCMW_DEVINFO_RE.ID_D080C16F227F4D68751326DC40BB6BE0:MAIN.CAPTION";
-///     }
-///
-///     async fn test(&mut self) -> Result<(), anyhow::Error> {
-///         let session = Arc::new(USaintSession::with_password("20212345", "password").await?);
-///         let caption = ExampleApplication::CAPTION.from_body(self.body())?;
-///         // Some("담당자문의 정보");
-///         println!("{:?}", caption.lsdata().text());
-///         Ok(())
-///     }
-/// }
-///
-/// ```
-#[macro_export]
-macro_rules! define_usaint_application {
-    (
-        $(#[$attr:meta])*
-        $vis:vis struct $name:ident<$app_name:literal>
-    ) => {
-        $(#[$attr])*
-        $vis struct $name($crate::application::USaintApplication);
-
-        impl $crate::webdynpro::application::Application for $name {
-            fn name(&self) -> &str {
-                self.0.name()
-            }
-
-            fn base_url(&self) -> &url::Url {
-                self.0.base_url()
-            }
-
-            fn body(&self) -> &$crate::webdynpro::application::body::Body {
-                self.0.body()
-            }
-        }
-
-        impl From<USaintApplication> for $name {
-            fn from(value: USaintApplication) -> Self {
-                $name(value)
-            }
-        }
-
-        impl $crate::application::PredefinedUSaintApplication for $name {
-            const APP_NAME: &'static str = $app_name;
-        }
-
-        impl $name {
-            #[allow(unused)]
-            async fn send_events(
-                &mut self,
-                events: impl IntoIterator<Item = $crate::webdynpro::event::Event>,
-            ) -> Result<(), $crate::webdynpro::error::WebDynproError> {
-                self.0.send_events(events).await
-            }
-        }
-    };
-}
-
-pub use define_usaint_application;
 
 const SSU_WEBDYNPRO_BASE_URL: &str = "https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/";
 const INITIAL_CLIENT_DATA_WD01: &str = "ClientWidth:1920px;ClientHeight:1000px;ScreenWidth:1920px;ScreenHeight:1080px;ScreenOrientation:landscape;ThemedTableRowHeight:33px;ThemedFormLayoutRowHeight:32px;ThemedSvgLibUrls:{\"SAPGUI-icons\":\"https://ecc.ssu.ac.kr:8443/sap/public/bc/ur/nw5/themes/~cache-20210223121230/Base/baseLib/sap_fiori_3/svg/libs/SAPGUI-icons.svg\",\"SAPWeb-icons\":\"https://ecc.ssu.ac.kr:8443/sap/public/bc/ur/nw5/themes/~cache-20210223121230/Base/baseLib/sap_fiori_3/svg/libs/SAPWeb-icons.svg\"};ThemeTags:Fiori_3,Touch;ThemeID:sap_fiori_3;SapThemeID:sap_fiori_3;DeviceType:DESKTOP";
 const INITIAL_CLIENT_DATA_WD02: &str = "ThemedTableRowHeight:25px";
-/// u-saint에 접속하기 위한 기본 애플리케이션
-pub struct USaintApplication(BasicApplication);
+/// u-saint에 접속하기 위한 기본 클라이언트
+pub struct USaintClient(WebDynproClient);
 
-impl From<BasicApplication> for USaintApplication {
-    fn from(value: BasicApplication) -> Self {
-        USaintApplication(value)
-    }
-}
-
-impl Application for USaintApplication {
-    fn name(&self) -> &str {
-        self.0.name()
-    }
-
-    fn base_url(&self) -> &Url {
-        self.0.base_url()
-    }
-
-    fn body(&self) -> &Body {
-        self.0.body()
-    }
-}
-
-impl<'a> USaintApplication {
+impl<'a> USaintClient {
     define_elements! {
         CLIENT_INSPECTOR_WD01: ClientInspector<'a> = "WD01";
         CLIENT_INSPECTOR_WD02: ClientInspector<'a> = "WD02";
@@ -131,16 +31,39 @@ impl<'a> USaintApplication {
 
     const CUSTOM: Custom = Custom::new(std::borrow::Cow::Borrowed("WD01"));
 
-    fn new(app: BasicApplication) -> USaintApplication {
-        USaintApplication(app)
+    async fn new(client: WebDynproClient) -> Result<USaintClient, WebDynproError> {
+        let mut client = USaintClient(client);
+        client.load_placeholder().await?;
+        Ok(client)
     }
 
-    /// 이벤트를 서버에 전송합니다. [`send_events()`](crate::webdynpro::application::BasicApplication::send_events)를 참조하세요.
-    pub async fn send_events(
+    /// WebDynpro 애플리케이션의 이름을 반환합니다.
+    pub fn name(&self) -> &str {
+        self.0.name()
+    }
+
+    /// WebDynpro 애플리케이션의 기본 URL을 반환합니다.
+    pub fn base_url(&self) -> &Url {
+        self.0.base_url()
+    }
+
+    /// WebDynpro 애플리케이션의 페이지 문서를 반환합니다.
+    pub fn body(&self) -> &Body {
+        self.0.body()
+    }
+
+    /// 실제로 요청하는 애플리케이션의 URL을 반환합니다.
+    pub fn client_url(&self) -> String {
+        self.0.client_url()
+    }
+
+    /// 이벤트를 처리합니다. [`process_event()`](crate::webdynpro::client::WebDynproClient::process_event)를 참조하세요.
+    pub async fn process_event(
         &mut self,
-        events: impl IntoIterator<Item = Event>,
-    ) -> Result<(), WebDynproError> {
-        self.0.send_events(events).await
+        force_send: bool,
+        event: Event,
+    ) -> Result<EventProcessResult, WebDynproError> {
+        self.0.process_event(force_send, event).await
     }
 
     async fn load_placeholder(&mut self) -> Result<(), WebDynproError> {
@@ -161,58 +84,62 @@ impl<'a> USaintApplication {
                 client_infos,
             ]
         };
-        self.send_events(events).await
+        for event in events {
+            self.process_event(false, event).await?;
+        }
+        Ok(())
     }
 }
 
-/// 컴파일 타임에 정의하는 [`USaintApplication`]의 마커
-pub trait PredefinedUSaintApplication: From<USaintApplication> {
-    /// 정의된 애플리케이션의 이름
+/// U-Saint 애플리케이션이 구현하는 트레이트
+pub trait USaintApplication: Sized {
+    /// U-Saint WebDynpro 애플리케이션 이름
     const APP_NAME: &'static str;
+
+    /// U-Saint 클라이언트를 애플리케이션으로 변환합니다.
+    fn from_client(client: USaintClient) -> Result<Self, RusaintError>;
 }
 
-/// 새로운 [`USaintApplication`] 혹은 [`PredefinedUSaintApplication`]을 구현하는 애플리케이션을 생성하는 빌더
-pub struct USaintApplicationBuilder {
+/// 새로운 [`USaintClient`]를 생성하는 빌더
+pub struct USaintClientBuilder {
     session: Option<Arc<USaintSession>>,
 }
 
-impl USaintApplicationBuilder {
+impl USaintClientBuilder {
     /// 새로운 빌더를 만듭니다.
-    pub fn new() -> USaintApplicationBuilder {
-        USaintApplicationBuilder { session: None }
+    pub fn new() -> USaintClientBuilder {
+        USaintClientBuilder { session: None }
     }
 
     /// 빌더에 [`USaintSession`]을 추가합니다.
-    pub fn session(mut self, session: Arc<USaintSession>) -> USaintApplicationBuilder {
+    pub fn session(mut self, session: Arc<USaintSession>) -> USaintClientBuilder {
         self.session = Some(session);
         self
     }
 
-    /// 특정 [`PredefinedUSaintApplication`]을 만듭니다.
-    pub async fn build_into<T: PredefinedUSaintApplication>(self) -> Result<T, WebDynproError> {
-        let name = T::APP_NAME;
-        Ok(self.build(name).await?.into())
-    }
-
-    /// 애플리케이션 이름과 함께 [`USaintApplication`]을 생성합니다.
-    pub async fn build(self, name: &str) -> Result<USaintApplication, WebDynproError> {
-        let mut builder = BasicApplicationBuilder::new(SSU_WEBDYNPRO_BASE_URL, name);
+    /// 애플리케이션 이름과 함께 [`USaintClient`]을 생성합니다.
+    pub async fn build(self, name: &str) -> Result<USaintClient, WebDynproError> {
+        let mut builder = WebDynproClientBuilder::new(SSU_WEBDYNPRO_BASE_URL, name);
         if let Some(session) = self.session {
-            let r_client = reqwest::Client::builder()
+            let client = reqwest::Client::builder()
                 .cookie_provider(session)
                 .user_agent(DEFAULT_USER_AGENT)
                 .build()
                 .unwrap();
-            let client = Client::with_client(r_client);
             builder = builder.client(client);
         }
         let base_app = builder.build().await?;
-        let mut app = USaintApplication::new(base_app);
-        app.load_placeholder().await?;
-        Ok(app)
+        USaintClient::new(base_app).await
+    }
+
+    /// 특정 [`USaintApplication`]을 만듭니다.
+    pub async fn build_into<T: USaintApplication>(self) -> Result<T, RusaintError> {
+        let name = T::APP_NAME;
+        let client = self.build(name).await?;
+        T::from_client(client)
     }
 }
 /// 학생 성적 조회: [`CourseGrades`](course_grades::CourseGrades)
 pub mod course_grades;
-mod course_schedule;
-mod student_information;
+// mod course_schedule;
+// mod student_information;

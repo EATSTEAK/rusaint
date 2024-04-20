@@ -1,9 +1,14 @@
-use super::{client::WebDynproClient, error::WebDynproError};
+use super::{
+    client::{EventProcessResult, WebDynproClient},
+    error::WebDynproError,
+};
 
-pub(crate) trait WebDynproCommand {
+pub trait WebDynproCommand {
     type Result: WebDynproCommandResult;
 
     async fn dispatch(&self, client: &mut WebDynproClient) -> Result<Self::Result, WebDynproError>;
 }
 
-pub(crate) trait WebDynproCommandResult {}
+pub trait WebDynproCommandResult {}
+
+impl WebDynproCommandResult for EventProcessResult {}

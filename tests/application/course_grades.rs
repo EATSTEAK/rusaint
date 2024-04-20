@@ -5,7 +5,7 @@ use dotenv::dotenv;
 use rusaint::{
     application::{
         course_grades::{model::CourseType, CourseGrades},
-        USaintApplicationBuilder,
+        USaintClientBuilder,
     },
     model::SemesterType,
     USaintSession,
@@ -34,7 +34,7 @@ async fn get_session() -> Result<Arc<USaintSession>> {
 #[serial]
 async fn recorded_summary() {
     let session = get_session().await.unwrap();
-    let mut app = USaintApplicationBuilder::new()
+    let mut app = USaintClientBuilder::new()
         .session(session)
         .build_into::<CourseGrades>()
         .await
@@ -52,7 +52,7 @@ async fn recorded_summary() {
 #[serial]
 async fn certificated_summary() {
     let session = get_session().await.unwrap();
-    let mut app = USaintApplicationBuilder::new()
+    let mut app = USaintClientBuilder::new()
         .session(session)
         .build_into::<CourseGrades>()
         .await
@@ -68,7 +68,7 @@ async fn certificated_summary() {
 #[serial]
 async fn semesters() {
     let session = get_session().await.unwrap();
-    let mut app = USaintApplicationBuilder::new()
+    let mut app = USaintClientBuilder::new()
         .session(session)
         .build_into::<CourseGrades>()
         .await
@@ -82,7 +82,7 @@ async fn semesters() {
 #[serial]
 async fn classes_with_detail() {
     let session = get_session().await.unwrap();
-    let mut app = USaintApplicationBuilder::new()
+    let mut app = USaintClientBuilder::new()
         .session(session)
         .build_into::<CourseGrades>()
         .await

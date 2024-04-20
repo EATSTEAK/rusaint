@@ -4,7 +4,7 @@ use crate::{
     define_elements,
     model::SemesterType,
     webdynpro::{
-        application::{body::Body, Application},
+        client::body::Body,
         element::{
             action::Button,
             complex::sap_table::{
@@ -20,16 +20,29 @@ use crate::{
         error::{BodyError, ElementError, WebDynproError},
         event::Event,
     },
+    RusaintError,
 };
 
 use self::model::{ClassGrade, CourseType, GradeSummary, SemesterGrade};
 
-use super::USaintApplication;
+use super::{USaintApplication, USaintClient};
 
-define_usaint_application!(
-    #[doc = "[학생 성적 조회](https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/ZCMB3W0017)"]
-    pub struct CourseGrades<"ZCMB3W0017">
-);
+/// [학생 성적 조회](https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/ZCMB3W0017)
+pub struct CourseGrades {
+    client: USaintClient,
+}
+
+impl USaintApplication for CourseGrades {
+    const APP_NAME: &'static str = "ZCMW3W0017";
+
+    fn from_client(client: USaintClient) -> Result<Self, RusaintError> {
+        if client.name() != Self::APP_NAME {
+            Err(RusaintError::InvalidClientError)
+        } else {
+            Ok(CourseGrades { client })
+        }
+    }
+}
 
 #[allow(unused)]
 impl<'a> CourseGrades {
@@ -74,7 +87,7 @@ impl<'a> CourseGrades {
 
     async fn close_popups(&mut self) -> Result<(), WebDynproError> {
         fn make_close_event(app: &CourseGrades) -> Option<Event> {
-            let body = app.body();
+            let body = app.client.body();
             let popup_selector =
                 scraper::Selector::parse(format!(r#"[ct="{}"]"#, PopupWindow::CONTROL_ID).as_str())
                     .unwrap();
@@ -89,7 +102,7 @@ impl<'a> CourseGrades {
             })
         }
         while let Some(event) = make_close_event(self) {
-            self.send_events(vec![event]).await?;
+            self.client.process_event(false, event).await?;
         }
         Ok(())
     }
@@ -117,17 +130,16 @@ impl<'a> CourseGrades {
         let select = {
             let course = Self::course_type_to_key(course);
             let mut vec = Vec::with_capacity(1);
-            let course_combobox = Self::PROGRESS_TYPE.from_body(self.body())?;
+            let course_combobox = Self::PROGRESS_TYPE.from_body(self.client.body())?;
             if (|| Some(course_combobox.lsdata().key()?.as_str()))() != Some(course) {
                 vec.push(course_combobox.select(&course.to_string(), false)?);
             }
             Result::<Vec<Event>, WebDynproError>::Ok(vec)
         }?;
-        if !select.is_empty() {
-            self.send_events(select).await
-        } else {
-            Ok(())
+        for event in select {
+            self.client.process_event(false, event).await?;
         }
+        Ok(())
     }
 
     async fn select_semester(
@@ -138,21 +150,20 @@ impl<'a> CourseGrades {
         let select = {
             let semester = Self::semester_to_key(semester);
             let mut vec = Vec::with_capacity(2);
-            let year_combobox = Self::PERIOD_YEAR.from_body(self.body())?;
+            let year_combobox = Self::PERIOD_YEAR.from_body(self.client.body())?;
             if (|| Some(year_combobox.lsdata().key()?.as_str()))() != Some(year) {
                 vec.push(year_combobox.select(&year.to_string(), false)?);
             }
-            let semester_combobox = Self::PERIOD_SEMESTER.from_body(self.body())?;
+            let semester_combobox = Self::PERIOD_SEMESTER.from_body(self.client.body())?;
             if (|| Some(semester_combobox.lsdata().key()?.as_str()))() != Some(semester) {
                 vec.push(semester_combobox.select(semester, false)?);
             }
             Result::<Vec<Event>, WebDynproError>::Ok(vec)
         }?;
-        if !select.is_empty() {
-            self.send_events(select).await
-        } else {
-            Ok(())
+        for event in select {
+            self.client.process_event(false, event).await?;
         }
+        Ok(())
     }
 
     fn row_to_string(row: &SapTableRow) -> Option<Vec<String>> {
@@ -209,7 +220,7 @@ impl<'a> CourseGrades {
     ) -> Result<GradeSummary, WebDynproError> {
         self.close_popups().await?;
         self.select_course(course_type).await?;
-        let body = self.body();
+        let body = self.client.body();
         let attempted_credits = Self::value_as_f32(Self::ATTM_CRD1.from_body(body)?)?;
         let earned_credits = Self::value_as_f32(Self::EARN_CRD1.from_body(body)?)?;
         let gpa = Self::value_as_f32(Self::GT_GPA1.from_body(body)?)?;
@@ -247,7 +258,7 @@ impl<'a> CourseGrades {
     ) -> Result<GradeSummary, WebDynproError> {
         self.close_popups().await?;
         self.select_course(course_type).await?;
-        let body = self.body();
+        let body = self.client.body();
         let attempted_credits = Self::value_as_f32(Self::ATTM_CRD2.from_body(body)?)?;
         let earned_credits = Self::value_as_f32(Self::EARN_CRD2.from_body(body)?)?;
         let gpa = Self::value_as_f32(Self::GT_GPA2.from_body(body)?)?;
@@ -292,7 +303,7 @@ impl<'a> CourseGrades {
         self.close_popups().await?;
         self.select_course(course_type).await?;
 
-        let table_elem = Self::GRADES_SUMMARY_TABLE.from_body(self.body())?;
+        let table_elem = Self::GRADES_SUMMARY_TABLE.from_body(self.client.body())?;
         let table = table_elem.table().ok_or(ElementError::NoSuchContent {
             element: table_elem.id().to_string(),
             content: "table".to_string(),
@@ -374,9 +385,9 @@ impl<'a> CourseGrades {
                 })
                 .collect::<Result<Vec<(String, f32)>, WebDynproError>>()
         };
-        let event = { open_button.from_body(self.body())?.press() }?;
-        self.send_events(vec![event]).await?;
-        let table = parse_table_in_popup(self.body())?;
+        let event = { open_button.from_body(self.client.body())?.press() }?;
+        self.client.process_event(false, event).await?;
+        let table = parse_table_in_popup(self.client.body())?;
         self.close_popups().await?;
         Ok(HashMap::from_iter(table))
     }
@@ -427,7 +438,7 @@ impl<'a> CourseGrades {
         self.select_course(course_type).await?;
         self.select_semester(year, semester).await?;
         let class_grades: Vec<(Option<String>, Vec<String>)> = {
-            let grade_table_elem = Self::GRADE_BY_CLASSES_TABLE.from_body(self.body())?;
+            let grade_table_elem = Self::GRADE_BY_CLASSES_TABLE.from_body(self.client.body())?;
             let iter = grade_table_elem
                 .table()
                 .ok_or(ElementError::NoSuchContent {
@@ -509,7 +520,7 @@ impl<'a> CourseGrades {
         self.close_popups().await?;
         self.select_course(course_type).await?;
         self.select_semester(year, semester).await?;
-        let table_elem = Self::GRADE_BY_CLASSES_TABLE.from_body(self.body())?;
+        let table_elem = Self::GRADE_BY_CLASSES_TABLE.from_body(self.client.body())?;
         let Some(table) = table_elem.table() else {
             return Err(ElementError::NoSuchContent {
                 element: table_elem.id().to_string(),
@@ -572,12 +583,9 @@ mod test {
     use std::sync::{Arc, OnceLock};
 
     use crate::{
-        application::{course_grades::CourseGrades, USaintApplicationBuilder},
+        application::{course_grades::CourseGrades, USaintClientBuilder},
         session::USaintSession,
-        webdynpro::{
-            application::Application,
-            element::{layout::PopupWindow, Element},
-        },
+        webdynpro::element::{layout::PopupWindow, Element},
     };
     use dotenv::dotenv;
 
@@ -602,13 +610,13 @@ mod test {
     #[tokio::test]
     async fn close_popups() {
         let session = get_session().await.unwrap();
-        let mut app = USaintApplicationBuilder::new()
+        let mut app = USaintClientBuilder::new()
             .session(session)
             .build_into::<CourseGrades>()
             .await
             .unwrap();
         app.close_popups().await.unwrap();
-        let body = app.body();
+        let body = app.client.body();
         let popup_selector =
             scraper::Selector::parse(format!(r#"[ct="{}"]"#, PopupWindow::CONTROL_ID).as_str())
                 .unwrap();
