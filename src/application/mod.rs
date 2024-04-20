@@ -141,5 +141,5 @@ impl USaintClientBuilder {
 }
 /// 학생 성적 조회: [`CourseGrades`](course_grades::CourseGrades)
 pub mod course_grades;
-// mod course_schedule;
-// mod student_information;
+mod course_schedule;
+mod student_information;
