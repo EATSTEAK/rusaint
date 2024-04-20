@@ -1,7 +1,7 @@
 use std::{borrow::Cow, cell::OnceCell, collections::HashMap};
 
 use crate::webdynpro::{
-    command::WebDynproCommand, element::{
+    client::EventProcessResult, command::WebDynproCommand, element::{
         define_element_interactable, property::{ContentVisibility, HotkeyValue, SemanticColor, TextDesign, Visibility}, ElementDef, Interactable
     }, error::WebDynproError, event::Event
 };
@@ -127,11 +127,11 @@ pub struct ButtonPressCommand {
 }
 
 impl WebDynproCommand for ButtonPressCommand {
-    type Result = ();
+    type Result = EventProcessResult;
 
     async fn dispatch(&self, client: &mut crate::webdynpro::client::WebDynproClient) -> Result<Self::Result, WebDynproError> {
         let element_def: ElementDef<'_, Button<'_>> = ElementDef::new_dynamic(self.id);
-        let element = element_def.from_body(client.body())?;
-        client.send_events(vec![element.press()?]).await
+        let event = element_def.from_body(client.body())?.press()?;
+        client.process_event(false, event)
     }
 }
