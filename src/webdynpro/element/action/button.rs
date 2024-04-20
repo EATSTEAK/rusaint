@@ -122,16 +122,15 @@ impl<'a> Button<'a> {
 }
 
 
-pub struct ButtonPressCommand {
-    id: String
+pub struct ButtonPressCommand<'a> {
+    element_def: ElementDef<'a, Button<'a>>
 }
 
-impl WebDynproCommand for ButtonPressCommand {
+impl<'a> WebDynproCommand for ButtonPressCommand<'a> {
     type Result = EventProcessResult;
 
     async fn dispatch(&self, client: &mut crate::webdynpro::client::WebDynproClient) -> Result<Self::Result, WebDynproError> {
-        let element_def: ElementDef<'_, Button<'_>> = ElementDef::new_dynamic(self.id);
-        let event = element_def.from_body(client.body())?.press()?;
-        client.process_event(false, event)
+        let event = (&self.element_def).from_body(client.body())?.press()?;
+        client.process_event(false, event).await
     }
 }

@@ -1,10 +1,12 @@
 use std::{borrow::Cow, cell::OnceCell, collections::HashMap};
 
+use crate::webdynpro::client::EventProcessResult;
+use crate::webdynpro::command::WebDynproCommand;
 use crate::webdynpro::error::{BodyError, WebDynproError};
 use crate::webdynpro::{client::body::Body, error::ElementError, event::Event};
 
 use crate::webdynpro::element::{
-    define_element_interactable, Element, ElementWrapper, Interactable,
+    define_element_interactable, Element, ElementDef, ElementWrapper, Interactable
 };
 
 use super::list_box::ListBoxWrapper;
@@ -87,5 +89,21 @@ impl<'a> ComboBox<'a> {
         parameters.insert("Key".to_string(), key.to_string());
         parameters.insert("ByEnter".to_string(), by_enter.to_string());
         self.fire_event("Select".to_string(), parameters)
+    }
+}
+
+
+pub struct ComboBoxSelectCommand<'a> {
+    element_def: ElementDef<'a, ComboBox<'a>>,
+    key: String,
+    by_enter: bool
+}
+
+impl<'a> WebDynproCommand for ComboBoxSelectCommand<'a> {
+    type Result = EventProcessResult;
+
+    async fn dispatch(&self, client: &mut crate::webdynpro::client::WebDynproClient) -> Result<Self::Result, WebDynproError> {
+        let event = self.element_def.from_body(client.body())?.select(&self.key, self.by_enter)?;
+        client.process_event(false, event).await
     }
 }
