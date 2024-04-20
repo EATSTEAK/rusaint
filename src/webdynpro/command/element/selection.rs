@@ -8,6 +8,7 @@ use crate::webdynpro::{
     error::WebDynproError,
 };
 
+/// [`ComboBox`]의 선택지를 선택하도록 함
 pub struct ComboBoxSelectCommand<'a> {
     element_def: ElementDef<'a, ComboBox<'a>>,
     key: String,
@@ -15,6 +16,7 @@ pub struct ComboBoxSelectCommand<'a> {
 }
 
 impl<'a> ComboBoxSelectCommand<'a> {
+  /// 새로운 명령 객체를 생성합니다.
   pub fn new(element_def: ElementDef<'a, ComboBox<'a>>, key: &str, by_enter: bool) -> ComboBoxSelectCommand<'a> {
     Self {
       element_def,
@@ -39,11 +41,13 @@ impl<'a> WebDynproCommand for ComboBoxSelectCommand<'a> {
     }
 }
 
+/// [`ComboBoxLSData`]를 반환
 pub struct ReadComboBoxLSDataCommand<'a> {
     element_def: ElementDef<'a, ComboBox<'a>>,
 }
 
 impl<'a> ReadComboBoxLSDataCommand<'a> {
+  /// 새로운 명령 객체를 생성합니다.
     pub fn new(element_def: ElementDef<'a, ComboBox<'a>>) -> ReadComboBoxLSDataCommand<'a> {
         Self { element_def }
     }
