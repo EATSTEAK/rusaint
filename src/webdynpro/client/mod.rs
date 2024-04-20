@@ -286,8 +286,11 @@ pub(crate) struct SapSsrClient {
     use_beacon: bool,
 }
 
+/// 전달받은 이벤트가 어떻게 처리되었는지 표현합니다.
 pub enum EventProcessResult {
+    /// 전달받은 이벤트가 큐에 추가되었을 경우
     Enqueued,
+    /// 전달받은 이벤트가 큐에 추가된 후 서버에 전송되었을 경우
     Sent,
 }
 

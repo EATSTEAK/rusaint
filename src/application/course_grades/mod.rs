@@ -39,7 +39,7 @@ impl USaintApplication for CourseGrades {
         if client.name() != Self::APP_NAME {
             Err(RusaintError::InvalidClientError)
         } else {
-            Ok(CourseGrades { client })
+            Ok(Self { client })
         }
     }
 }
