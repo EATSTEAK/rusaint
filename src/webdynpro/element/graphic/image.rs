@@ -12,7 +12,7 @@ pub mod property {
 
     /// 이미지 표시 모드
     #[allow(missing_docs)]
-    #[derive(Deserialize, Debug)]
+    #[derive(Clone, Deserialize, Debug)]
     #[serde(rename_all = "UPPERCASE")]
     pub enum ItsDisplayMode {
         Normal,

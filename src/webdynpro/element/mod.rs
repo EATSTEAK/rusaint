@@ -42,7 +42,7 @@ macro_rules! define_lsdata {
         }
     } => {
         $(#[$lsdata_outer])*
-        #[derive(serde::Deserialize, Debug, Default)]
+        #[derive(Clone, serde::Deserialize, Debug, Default)]
         #[allow(unused)]
         pub struct $lsdata {
             $(

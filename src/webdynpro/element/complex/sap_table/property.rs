@@ -27,7 +27,7 @@ impl ToString for AccessType {
 
 /// 테이블 셀의 형태 종류
 #[allow(missing_docs)]
-#[derive(Deserialize, Debug)]
+#[derive(Clone, Deserialize, Debug)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum SapTableCellDesign {
     Standard,
@@ -276,7 +276,7 @@ pub enum SapTableCellDesign {
 
 /// 테이블 셀의 종류
 #[allow(missing_docs)]
-#[derive(Deserialize, Debug)]
+#[derive(Clone, Deserialize, Debug)]
 #[serde(rename_all = "UPPERCASE")]
 pub enum SapTableCellType {
     Text,
@@ -290,7 +290,7 @@ pub enum SapTableCellType {
 
 /// [`SapTableHeaderCell`](super::cell::SapTableHeaderCell)의 형태 종류
 #[allow(missing_docs)]
-#[derive(Deserialize, Debug)]
+#[derive(Clone, Deserialize, Debug)]
 #[serde(rename_all = "UPPERCASE")]
 pub enum SapTableHeaderCellDesign {
     Level1Header,
@@ -300,7 +300,7 @@ pub enum SapTableHeaderCellDesign {
 
 /// [`SapTableHeaderCell`](super::cell::SapTableHeaderCell)의 종류
 #[allow(missing_docs)]
-#[derive(Deserialize, Debug)]
+#[derive(Clone, Deserialize, Debug)]
 #[serde(rename_all = "UPPERCASE")]
 pub enum SapTableHeaderCellType {
     Standard,
@@ -309,7 +309,7 @@ pub enum SapTableHeaderCellType {
 
 /// [`SapTableHierarchicalCell`](super::cell::SapTableHierarchicalCell)의 상태
 #[allow(missing_docs)]
-#[derive(Deserialize, Debug)]
+#[derive(Clone, Deserialize, Debug)]
 #[serde(rename_all = "UPPERCASE")]
 pub enum SapTableHierarchicalCellStatus {
     None,
@@ -339,7 +339,7 @@ pub enum SapTableSelectionState {
 
 /// 테이블 내부 행의 전체적인 선택 상태
 #[allow(missing_docs)]
-#[derive(Deserialize, Debug)]
+#[derive(Clone, Deserialize, Debug)]
 #[serde(rename_all = "UPPERCASE")]
 pub enum SapTableRowSelectionMassState {
     None,
@@ -364,7 +364,7 @@ pub enum SapTableRowType {
 
 /// 테이블 열 선택시의 액션
 #[allow(missing_docs)]
-#[derive(Deserialize, Debug)]
+#[derive(Clone, Deserialize, Debug)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum SapTableSelectionColumnAction {
     None,

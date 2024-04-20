@@ -4,7 +4,7 @@ use super::complex::sap_table::property::SapTableCellDesign;
 
 /// 텍스트 형태 종류
 #[allow(missing_docs)]
-#[derive(Deserialize, Debug)]
+#[derive(Clone, Deserialize, Debug)]
 #[serde(rename_all = "UPPERCASE")]
 pub enum TextDesign {
     Standard,
@@ -12,7 +12,7 @@ pub enum TextDesign {
 }
 /// 텍스트 방향
 #[allow(missing_docs)]
-#[derive(Deserialize, Debug)]
+#[derive(Clone, Deserialize, Debug)]
 #[serde(rename_all = "UPPERCASE")]
 pub enum TextDirection {
     Ltr,
@@ -21,7 +21,7 @@ pub enum TextDirection {
 }
 /// 엘리먼트의 가시성
 #[allow(missing_docs)]
-#[derive(Deserialize, Debug)]
+#[derive(Clone, Deserialize, Debug)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum Visibility {
     Visible,
@@ -31,7 +31,7 @@ pub enum Visibility {
 }
 /// 컨텐츠 가시성
 #[allow(missing_docs)]
-#[derive(Deserialize, Debug)]
+#[derive(Clone, Deserialize, Debug)]
 #[serde(rename_all = "UPPERCASE")]
 pub enum ContentVisibility {
     All,
@@ -41,7 +41,7 @@ pub enum ContentVisibility {
 
 /// 단축키 값
 #[allow(missing_docs)]
-#[derive(Deserialize, Debug)]
+#[derive(Clone, Deserialize, Debug)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum HotkeyValue {
     None,
@@ -200,7 +200,7 @@ pub enum HotkeyValue {
 
 /// 수평 텍스트 정렬
 #[allow(missing_docs)]
-#[derive(Deserialize, Debug)]
+#[derive(Clone, Deserialize, Debug)]
 #[serde(rename_all = "UPPERCASE")]
 pub enum HorizontalTextAlign {
     Center,
@@ -211,7 +211,7 @@ pub enum HorizontalTextAlign {
 
 /// 엘리먼트가 잠겼을 때의 형태
 #[allow(missing_docs)]
-#[derive(Deserialize, Debug)]
+#[derive(Clone, Deserialize, Debug)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum LockedDesign {
     Transparent,
@@ -226,7 +226,7 @@ pub enum LockedDesign {
 
 /// 윈도우 모드
 #[allow(missing_docs)]
-#[derive(Deserialize, Debug)]
+#[derive(Clone, Deserialize, Debug)]
 #[serde(rename_all = "UPPERCASE")]
 pub enum Mode {
     Modal,
@@ -236,7 +236,7 @@ pub enum Mode {
 
 /// 스크롤 모드
 #[allow(missing_docs)]
-#[derive(Deserialize, Debug)]
+#[derive(Clone, Deserialize, Debug)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum ScrollingMode {
     Auto,
@@ -254,7 +254,7 @@ pub type SemanticColor = SapTableCellDesign;
 
 /// 정렬 상태
 #[allow(missing_docs)]
-#[derive(Deserialize, Debug)]
+#[derive(Clone, Deserialize, Debug)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum SortState {
     Disabled,
@@ -265,7 +265,7 @@ pub enum SortState {
 
 /// 수직 텍스트 정렬
 #[allow(missing_docs)]
-#[derive(Deserialize, Debug)]
+#[derive(Clone, Deserialize, Debug)]
 #[serde(rename_all = "UPPERCASE")]
 pub enum VerticalTextAlign {
     Middle,
@@ -276,7 +276,7 @@ pub enum VerticalTextAlign {
 
 /// 퀵뷰 윈도우 디자인
 #[allow(missing_docs)]
-#[derive(Deserialize, Debug)]
+#[derive(Clone, Deserialize, Debug)]
 #[serde(rename_all = "UPPERCASE")]
 pub enum QuickViewDesign {
     Standard,
