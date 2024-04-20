@@ -574,7 +574,7 @@ impl<'a> SapTableCellWrapper<'a> {
     }
 }
 
-/// [`CourseGrades`](CourseGrades)에서 사용하는 데이터
+/// [`CourseGrades`]에서 사용하는 데이터
 pub mod model;
 
 #[cfg(test)]
