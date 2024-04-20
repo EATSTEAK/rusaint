@@ -4,7 +4,12 @@ use crate::{
     define_elements,
     model::SemesterType,
     webdynpro::{
-        client::body::Body, command::element::selection::{ComboBoxSelectCommand, ReadComboBoxLSDataCommand}, element::{
+        client::body::Body,
+        command::element::{
+            action::ButtonPressCommand,
+            selection::{ComboBoxSelectCommand, ReadComboBoxLSDataCommand},
+        },
+        element::{
             action::Button,
             complex::sap_table::{
                 cell::{SapTableCell, SapTableCellWrapper},
@@ -15,7 +20,9 @@ use crate::{
             selection::ComboBox,
             text::InputField,
             Element, ElementDef, ElementWrapper, SubElement,
-        }, error::{BodyError, ElementError, WebDynproError}, event::Event
+        },
+        error::{BodyError, ElementError, WebDynproError},
+        event::Event,
     },
     RusaintError,
 };
@@ -125,9 +132,18 @@ impl<'a> CourseGrades {
 
     async fn select_course(&mut self, course: CourseType) -> Result<(), WebDynproError> {
         let course = Self::course_type_to_key(course);
-        let combobox_lsdata = self.client.send(ReadComboBoxLSDataCommand::new(Self::PROGRESS_TYPE)).await?;
+        let combobox_lsdata = self
+            .client
+            .send(ReadComboBoxLSDataCommand::new(Self::PROGRESS_TYPE))
+            .await?;
         if (|| Some(combobox_lsdata.key()?.as_str()))() != Some(course) {
-            self.client.send(ComboBoxSelectCommand::new(Self::PROGRESS_TYPE, course, false)).await?;
+            self.client
+                .send(ComboBoxSelectCommand::new(
+                    Self::PROGRESS_TYPE,
+                    course,
+                    false,
+                ))
+                .await?;
         }
         Ok(())
     }
@@ -138,13 +154,27 @@ impl<'a> CourseGrades {
         semester: SemesterType,
     ) -> Result<(), WebDynproError> {
         let semester = Self::semester_to_key(semester);
-        let year_combobox_lsdata = self.client.send(ReadComboBoxLSDataCommand::new(Self::PERIOD_YEAR)).await?;
-        let semester_combobox_lsdata = self.client.send(ReadComboBoxLSDataCommand::new(Self::PERIOD_SEMESTER)).await?;
+        let year_combobox_lsdata = self
+            .client
+            .send(ReadComboBoxLSDataCommand::new(Self::PERIOD_YEAR))
+            .await?;
+        let semester_combobox_lsdata = self
+            .client
+            .send(ReadComboBoxLSDataCommand::new(Self::PERIOD_SEMESTER))
+            .await?;
         if (|| Some(year_combobox_lsdata.key()?.as_str()))() != Some(year) {
-            self.client.send(ComboBoxSelectCommand::new(Self::PERIOD_YEAR, &year, false)).await?;
+            self.client
+                .send(ComboBoxSelectCommand::new(Self::PERIOD_YEAR, &year, false))
+                .await?;
         }
         if (|| Some(semester_combobox_lsdata.key()?.as_str()))() != Some(semester) {
-            self.client.send(ComboBoxSelectCommand::new(Self::PERIOD_SEMESTER, semester, false)).await?;
+            self.client
+                .send(ComboBoxSelectCommand::new(
+                    Self::PERIOD_SEMESTER,
+                    semester,
+                    false,
+                ))
+                .await?;
         }
         Ok(())
     }
@@ -287,10 +317,7 @@ impl<'a> CourseGrades {
         self.select_course(course_type).await?;
 
         let table_elem = Self::GRADES_SUMMARY_TABLE.from_body(self.client.body())?;
-        let table = table_elem.table().ok_or(ElementError::NoSuchContent {
-            element: table_elem.id().to_string(),
-            content: "table".to_string(),
-        })?;
+        let table = table_elem.table()?;
         let ret = table
             .iter()
             .filter_map(Self::row_to_string)
@@ -344,7 +371,7 @@ impl<'a> CourseGrades {
                 .next()
                 .ok_or(BodyError::NoSuchElement("Table in popup".to_string()))?;
             let table_elem: SapTable<'_> = ElementWrapper::dyn_elem(table_ref)?.try_into()?;
-            let zip = (|| Some(table_elem.table()?.zip_header().next()?))()
+            let zip = (|| Some(table_elem.table().ok()?.zip_header().next()?))()
                 .and_then(|(header, row)| {
                     let header = CourseGrades::row_to_string(header)?;
                     let row = CourseGrades::row_to_string(row)?;
@@ -368,8 +395,9 @@ impl<'a> CourseGrades {
                 })
                 .collect::<Result<Vec<(String, f32)>, WebDynproError>>()
         };
-        let event = { open_button.from_body(self.client.body())?.press() }?;
-        self.client.process_event(false, event).await?;
+        self.client
+            .send(ButtonPressCommand::new(open_button))
+            .await?;
         let table = parse_table_in_popup(self.client.body())?;
         self.close_popups().await?;
         Ok(HashMap::from_iter(table))
@@ -422,13 +450,7 @@ impl<'a> CourseGrades {
         self.select_semester(year, semester).await?;
         let class_grades: Vec<(Option<String>, Vec<String>)> = {
             let grade_table_elem = Self::GRADE_BY_CLASSES_TABLE.from_body(self.client.body())?;
-            let iter = grade_table_elem
-                .table()
-                .ok_or(ElementError::NoSuchContent {
-                    element: grade_table_elem.id().to_string(),
-                    content: "Table body".to_string(),
-                })?
-                .iter();
+            let iter = grade_table_elem.table()?.iter();
             iter.map(|row| {
                 let btn_cell = &row[4];
                 let btn_id = if let Some(ElementWrapper::Button(btn)) = btn_cell.content() {
@@ -504,12 +526,7 @@ impl<'a> CourseGrades {
         self.select_course(course_type).await?;
         self.select_semester(year, semester).await?;
         let table_elem = Self::GRADE_BY_CLASSES_TABLE.from_body(self.client.body())?;
-        let Some(table) = table_elem.table() else {
-            return Err(ElementError::NoSuchContent {
-                element: table_elem.id().to_string(),
-                content: "Table body".to_string(),
-            })?;
-        };
+        let table = table_elem.table()?;
         let Some(btn) = ({
             table
                 .iter()

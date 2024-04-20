@@ -175,7 +175,7 @@ mod test {
             .unwrap();
         app.load_edu().await.unwrap();
         let table = app.read_edu_raw().unwrap();
-        if let Some(table) = table.table() {
+        if let Ok(table) = table.table() {
             for row in table.with_header() {
                 print!("row: ");
                 for col in row.iter() {
