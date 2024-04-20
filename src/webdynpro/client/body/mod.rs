@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::hash::Hash;
 
 use lol_html::{element, html_content::ContentType, rewrite_str, RewriteStrSettings};
 use roxmltree::Node;
@@ -129,6 +130,12 @@ pub struct Body {
     raw_body: String,
     document: Html,
     sap_ssr_client: SapSsrClient,
+}
+
+impl Hash for Body {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.raw_body.hash(state);
+    }
 }
 
 impl Body {
