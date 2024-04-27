@@ -87,7 +87,7 @@ impl<'a> Element<'a> for Custom {
         elem_def: &ElementDef<'_, Self>,
         _element: scraper::ElementRef,
     ) -> Result<Self, WebDynproError> {
-        Ok(Self::new(elem_def.id.to_owned()))
+        Ok(Self::new(elem_def.id().into()))
     }
 
     fn id(&self) -> &str {

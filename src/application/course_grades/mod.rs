@@ -10,16 +10,11 @@ use crate::{
             selection::{ComboBoxSelectCommand, ReadComboBoxLSDataCommand},
         },
         element::{
-            action::Button,
-            complex::sap_table::{
+            action::Button, complex::sap_table::{
                 cell::{SapTableCell, SapTableCellWrapper},
                 property::SapTableCellType,
                 SapTable, SapTableRow,
-            },
-            layout::PopupWindow,
-            selection::ComboBox,
-            text::InputField,
-            Element, ElementDef, ElementWrapper, SubElement,
+            }, definition::ElementDef, layout::PopupWindow, selection::ComboBox, text::InputField, Element, ElementWrapper, SubElement
         },
         error::{BodyError, ElementError, WebDynproError},
         event::Event,

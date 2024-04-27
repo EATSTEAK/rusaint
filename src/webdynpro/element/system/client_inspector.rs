@@ -145,7 +145,7 @@ impl<'a> Element<'a> for ClientInspector<'a> {
         elem_def: &ElementDef<'a, Self>,
         element: scraper::ElementRef<'a>,
     ) -> Result<Self, WebDynproError> {
-        Ok(Self::new(elem_def.id.to_owned(), element))
+        Ok(Self::new(elem_def.id().into(), element))
     }
 
     fn id(&self) -> &str {

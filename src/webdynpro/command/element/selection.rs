@@ -3,7 +3,7 @@ use crate::webdynpro::{
     command::WebDynproCommand,
     element::{
         selection::{ComboBox, ComboBoxLSData},
-        Element, ElementDef,
+        Element, definition::ElementDef,
     },
     error::WebDynproError,
 };
