@@ -275,7 +275,7 @@ register_elements![
 ];
 
 #[derive(Clone, Debug)]
-pub struct ElementNodeId {
+struct ElementNodeId {
     body_hash: u64,
     node_id: ego_tree::NodeId,
 }
