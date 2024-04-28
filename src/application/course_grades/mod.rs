@@ -38,7 +38,7 @@ pub struct CourseGrades {
 }
 
 impl USaintApplication for CourseGrades {
-    const APP_NAME: &'static str = "ZCMW3W0017";
+    const APP_NAME: &'static str = "ZCMB3W0017";
 
     fn from_client(client: USaintClient) -> Result<Self, RusaintError> {
         if client.name() != Self::APP_NAME {
