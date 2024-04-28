@@ -26,6 +26,6 @@ pub enum SsuSsoError {
     #[error("Can't load form data from page, is page changed?")]
     CantLoadForm,
     /// 페이지 로그인이 실패하여 토큰이 응답에 포함되지 않음
-    #[error("Token is not included in response.")]
-    CantFindToken,
+    #[error("Token is not included in response: {0}")]
+    CantFindToken(String),
 }

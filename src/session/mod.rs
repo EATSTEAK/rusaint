@@ -174,11 +174,24 @@ pub async fn obtain_ssu_sso_token(id: &str, password: &str) -> Result<String, Ss
         .form(&params)
         .send()
         .await?;
-    let cookie_token = res
-        .cookies()
-        .find(|cookie| cookie.name() == "sToken" && !cookie.value().is_empty())
-        .ok_or(SsuSsoError::CantFindToken)?;
-    Ok(cookie_token.value().to_string())
+    let cookie_token = {
+        res.cookies()
+            .find(|cookie| cookie.name() == "sToken" && !cookie.value().is_empty())
+            .and_then(|cookie| Some(cookie.value().to_string()))
+    };
+    let message = if cookie_token.is_none() {
+        let mut content = res.text().await?;
+        let start = content.find("alert(\\\"").unwrap_or(0);
+        let end = content.find("\\\");").unwrap_or(content.len());
+        let mut message = content.split_off(start);
+        message.truncate(end);
+        Some(message)
+    } else {
+        None
+    };
+    Ok(cookie_token.ok_or(SsuSsoError::CantFindToken(
+        message.unwrap_or("Internal Error".to_string()),
+    ))?)
 }
 
 #[cfg(test)]
