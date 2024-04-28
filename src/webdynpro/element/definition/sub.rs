@@ -92,12 +92,14 @@ where
 
     /// 서브 엘리먼트의 CSS Selector를 반환합니다.
     pub fn selector(&self) -> Result<Selector, WebDynproError> {
-        Selector::parse(format!(r#"[id="{}"] [id="{}"]"#, self.parent.id, self.id).as_str()).or(
-            Err(ElementError::InvalidId(format!(
-                "{}, {}",
-                self.parent.id, self.id
-            )))?,
-        )
+        Selector::parse(format!(r#"[id="{}"] [id="{}"]"#, self.parent.id, self.id).as_str())
+            .or_else(|e| {
+                println!("{e:?}");
+                Err(ElementError::InvalidId(format!(
+                    "{}, {}",
+                    self.parent.id, self.id
+                )))?
+            })
     }
 
     /// [`Body`]에서 서브 엘리먼트를 가져옵니다.
