@@ -178,16 +178,16 @@ mod test {
         if let Ok(table) = table.table() {
             for row in table.with_header() {
                 print!("row: ");
-                for col in row.iter() {
+                for col in row.iter_value(app.body()) {
                     match col {
-                        SapTableCellWrapper::Header(cell) => {
+                        Ok(SapTableCellWrapper::Header(cell)) => {
                             let content = cell.content();
                             print!("Header: ");
                             if let Some(elem) = content {
                                 print!("{:?}, ", elem);
                             }
                         }
-                        SapTableCellWrapper::Normal(cell) => {
+                        Ok(SapTableCellWrapper::Normal(cell)) => {
                             let content = cell.content();
                             if let Some(elem) = content {
                                 print!("{:?}, ", elem);
