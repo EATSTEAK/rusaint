@@ -9,14 +9,14 @@ use crate::webdynpro::{
 
 use super::Element;
 
+/// 엘리먼트의 정의로부터 빠른 엘리먼트 탐색을 위한 DOM Tree 노드 Id
 #[derive(Clone, Debug)]
-struct ElementNodeId {
+pub struct ElementNodeId {
     body_hash: u64,
     node_id: ego_tree::NodeId,
 }
 
 impl ElementNodeId {
-
     pub(super) fn body_hash(&self) -> u64 {
         self.body_hash
     }
@@ -101,6 +101,10 @@ where
     /// 엘리먼트의 Id를 반환합니다.
     pub fn id(&self) -> &str {
         &self.id
+    }
+
+    pub(crate) fn id_cow(&self) -> Cow<'static, str> {
+        self.id.clone()
     }
 
     /// `scraper`에서 이 엘리먼트를 선택할 수 있는 CSS Selector를 반환합니다.

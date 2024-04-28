@@ -111,7 +111,7 @@ macro_rules! define_element_base {
                 elem_def: &$crate::webdynpro::element::definition::ElementDef<'a, Self>,
                 element: scraper::ElementRef<'a>,
             ) -> Result<Self, $crate::webdynpro::error::WebDynproError> {
-                Ok(Self::new(elem_def.id().into(), element))
+                Ok(Self::new(elem_def.id_cow(), element))
             }
 
             fn id(&self) -> &str {

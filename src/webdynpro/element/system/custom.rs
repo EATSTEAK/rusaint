@@ -39,7 +39,6 @@ impl Default for CustomClientInfo {
 }
 
 impl CustomClientInfo {
-
     /// 주어진 값을 토대로 [`Custom`] 엘리먼트를 만듭니다.
     pub fn new(
         window_opener_exists: bool,
@@ -63,7 +62,7 @@ impl CustomClientInfo {
 }
 
 /// 클라이언트의 정보를 알리기 위해 사용하는 가상 엘리먼트
-/// 
+///
 /// 이 엘리먼트는 실제로 페이지에 존재하지 않으며, 최초 페이지 로드 및 초기화 시 서버에 기본 렌더링을 위한 클라이언트 정보를 보내기 위한 가상 엘리먼트입니다.
 /// 최초 한번 `Custom.ClientInfos` 이벤트를 전송하고 사용되지 않습니다.
 #[derive(Debug)]
@@ -84,10 +83,10 @@ impl<'a> Element<'a> for Custom {
     }
 
     fn from_elem(
-        elem_def: &ElementDef<'_, Self>,
+        elem_def: &ElementDef<'a, Self>,
         _element: scraper::ElementRef,
     ) -> Result<Self, WebDynproError> {
-        Ok(Self::new(elem_def.id().into()))
+        Ok(Self::new(elem_def.id_cow()))
     }
 
     fn id(&self) -> &str {

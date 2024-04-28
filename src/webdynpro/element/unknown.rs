@@ -34,7 +34,7 @@ impl<'a> Element<'a> for Unknown<'a> {
         elem_def: &ElementDef<'a, Self>,
         element: scraper::ElementRef<'a>,
     ) -> Result<Self, WebDynproError> {
-        Ok(Self::new(elem_def.id().into(), element))
+        Ok(Self::new(elem_def.id_cow(), element))
     }
 
     fn id(&self) -> &str {

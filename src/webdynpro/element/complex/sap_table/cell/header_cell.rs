@@ -71,7 +71,7 @@ impl<'a> SubElement<'a> for SapTableHeaderCell<'a> {
         elem_def: SubElementDef<'a, Parent, Self>,
         element: scraper::ElementRef<'a>,
     ) -> Result<Self, WebDynproError> {
-        Ok(Self::new(elem_def.id().into(), element))
+        Ok(Self::new(elem_def.id_cow(), element))
     }
 
     fn id(&self) -> &str {

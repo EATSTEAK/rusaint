@@ -8,7 +8,7 @@ use crate::webdynpro::{
     error::{ElementError, WebDynproError},
 };
 
-use super::ElementDef;
+use super::{ElementDef, ElementNodeId};
 
 /// [`SapTable`]등에서 사용하는 [`SubElement`]
 #[derive(Debug)]
@@ -19,6 +19,7 @@ where
 {
     id: Cow<'static, str>,
     parent: ElementDef<'a, Parent>,
+    node_id: Option<ElementNodeId>,
     _marker: std::marker::PhantomData<&'a T>,
 }
 
@@ -27,6 +28,7 @@ impl<'a, Parent: Element<'a>, T: SubElement<'a>> Clone for SubElementDef<'a, Par
         Self {
             id: self.id.clone(),
             parent: self.parent.clone(),
+            node_id: self.node_id.clone(),
             _marker: self._marker.clone(),
         }
     }
@@ -49,6 +51,7 @@ where
         SubElementDef {
             id: Cow::Borrowed(id),
             parent,
+            node_id: None,
             _marker: std::marker::PhantomData,
         }
     }
@@ -58,6 +61,22 @@ where
         SubElementDef {
             id: id.into(),
             parent,
+            node_id: None,
+            _marker: std::marker::PhantomData,
+        }
+    }
+
+    /// 빠른 엘리먼트 탐색을 위해 `ego_tree::NodeId`와 함께 서브 엘리먼트 정의를 생성합니다.
+    pub fn with_node_id(
+        id: String,
+        parent: ElementDef<'a, Parent>,
+        body_hash: u64,
+        node_id: ego_tree::NodeId,
+    ) -> SubElementDef<'a, Parent, T> {
+        SubElementDef {
+            id: id.into(),
+            parent,
+            node_id: Some(ElementNodeId { body_hash, node_id }),
             _marker: std::marker::PhantomData,
         }
     }
@@ -65,6 +84,10 @@ where
     /// 서브 엘리먼트의 Id를 반환합니다.
     pub fn id(&self) -> &str {
         &self.id
+    }
+
+    pub(crate) fn id_cow(&self) -> Cow<'static, str> {
+        self.id.clone()
     }
 
     /// 서브 엘리먼트의 CSS Selector를 반환합니다.
