@@ -1,7 +1,7 @@
 use std::{borrow::Cow, cell::OnceCell};
 
 use super::define_element_base;
-use super::property::{Visibility, LockedDesign};
+use super::property::{LockedDesign, Visibility};
 
 define_element_base! {
     #[doc = "HTML `flow` 레이아웃"]

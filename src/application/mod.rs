@@ -5,10 +5,14 @@ use crate::{
     session::USaintSession,
     utils::DEFAULT_USER_AGENT,
     webdynpro::{
-        client::{body::Body, EventProcessResult, WebDynproClient, WebDynproClientBuilder}, command::WebDynproCommand, element::{
+        client::{body::Body, EventProcessResult, WebDynproClient, WebDynproClientBuilder},
+        command::WebDynproCommand,
+        element::{
             define_elements,
             system::{ClientInspector, Custom, CustomClientInfo, LoadingPlaceholder},
-        }, error::WebDynproError, event::Event
+        },
+        error::WebDynproError,
+        event::Event,
     },
     RusaintError,
 };
@@ -61,7 +65,6 @@ impl<'a> USaintClient {
     ) -> Result<T::Result, WebDynproError> {
         self.0.send(command).await
     }
-
 
     /// 이벤트를 처리합니다. [`process_event()`](crate::webdynpro::client::WebDynproClient::process_event)를 참조하세요.
     pub async fn process_event(

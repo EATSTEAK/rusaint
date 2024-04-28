@@ -32,7 +32,6 @@ define_element_interactable! {
 }
 
 impl<'a> Link<'a> {
-
     /// HTML 엘리먼트로부터 [`Link`] 엘리먼트를 생성합니다.
     pub fn new(id: Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {
         Self {
