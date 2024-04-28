@@ -80,8 +80,8 @@ pub enum BodyError {
     #[error("Failed to parse body document")]
     Parse,
     /// 파싱할 문서가 올바르지 않음
-    #[error("Given body document is invalid")]
-    Invalid,
+    #[error("Given body document is invalid: {0}")]
+    Invalid(String),
     /// 문서 파싱에 필요한 CSS Selector가 올바르지 않음
     #[error("Given selector for parsing body is invalid")]
     InvalidSelector,

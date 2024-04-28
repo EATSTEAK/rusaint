@@ -421,14 +421,14 @@ pub trait Interactable<'a>: Element<'a> {
 
 	/// 엘리먼트가 발생시킬 수 있는 이벤트와 파라메터를 가져옵니다.
     fn lsevents_elem(element: scraper::ElementRef) -> Result<EventParameterMap, WebDynproError> {
-        let raw_data = element.value().attr("lsevents").ok_or(BodyError::Invalid)?;
+        let raw_data = element.value().attr("lsevents").ok_or(BodyError::Invalid("Cannot find lsevents from element".to_string()))?;
         let normalized = normalize_lsjson(raw_data);
-        let json: Map<String, Value> = serde_json::from_str::<Map<String, Value>>(&normalized).or(Err(BodyError::Invalid))?.to_owned();
+        let json: Map<String, Value> = serde_json::from_str::<Map<String, Value>>(&normalized).or(Err(BodyError::Invalid("Cannot deserialize lsevents field".to_string())))?.to_owned();
         Ok(json.into_iter().flat_map(|(key, value)| -> Result<(String, (UcfParameters, HashMap<String, String>)), BodyError> {
-                    let mut parameters = value.as_array().ok_or(BodyError::Invalid)?.to_owned().into_iter();
-                    let raw_ucf = parameters.next().ok_or(BodyError::Invalid)?;
-                    let ucf: UcfParameters = serde_json::from_value(raw_ucf).or(Err(BodyError::Invalid))?;
-                    let mut custom = parameters.next().ok_or(BodyError::Invalid)?.as_object().ok_or(BodyError::Invalid)?.to_owned();
+                    let mut parameters = value.as_array().ok_or(BodyError::Invalid("Cannot deserialize lsevents field".to_string()))?.to_owned().into_iter();
+                    let raw_ucf = parameters.next().ok_or(BodyError::Invalid("Cannot deserialize lsevents field".to_string()))?;
+                    let ucf: UcfParameters = serde_json::from_value(raw_ucf).or(Err(BodyError::Invalid("Cannot deserialize lsevents field".to_string())))?;
+                    let mut custom = parameters.next().ok_or(BodyError::Invalid("Cannot deserialize lsevents field".to_string()))?.as_object().ok_or(BodyError::Invalid("Cannot deserialize lsevents field".to_string()))?.to_owned();
                     let custom_map = custom.iter_mut().map(|(key, value)| { 
                         (key.to_owned(), value.to_string())
                     }).collect::<HashMap<String, String>>();
