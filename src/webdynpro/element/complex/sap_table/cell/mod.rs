@@ -1,5 +1,5 @@
 use crate::webdynpro::client::body::Body;
-use crate::webdynpro::element::{ElementDef, ElementDefWrapper, ElementWrapper, SubElement, SubElementDef};
+use crate::webdynpro::element::{ElementDef, ElementDefWrapper, SubElement, SubElementDef};
 use crate::webdynpro::error::WebDynproError;
 
 /// [`SapTable`] 셀의 Wrapper

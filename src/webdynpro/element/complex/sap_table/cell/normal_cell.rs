@@ -4,7 +4,7 @@ use scraper::Selector;
 
 use crate::webdynpro::{
     element::{
-        complex::sap_table::property::{SapTableCellDesign, SapTableCellType}, define_lsdata, Element, ElementDefWrapper, ElementWrapper, SubElement, SubElementDef
+        complex::sap_table::property::{SapTableCellDesign, SapTableCellType}, define_lsdata, Element, ElementDefWrapper, SubElement, SubElementDef
     },
     error::WebDynproError,
 };

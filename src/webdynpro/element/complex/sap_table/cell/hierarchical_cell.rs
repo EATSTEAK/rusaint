@@ -5,7 +5,7 @@ use scraper::Selector;
 use crate::webdynpro::{
     element::{
         complex::sap_table::property::{SapTableCellDesign, SapTableHierarchicalCellStatus},
-        define_lsdata, Element, ElementDefWrapper, ElementWrapper, SubElement, SubElementDef,
+        define_lsdata, Element, ElementDefWrapper, SubElement, SubElementDef,
     },
     error::WebDynproError,
 };

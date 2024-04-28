@@ -7,7 +7,7 @@ use crate::webdynpro::{
         complex::sap_table::property::{
             SapTableHeaderCellDesign, SapTableHeaderCellType, SapTableRowSelectionMassState,
             SapTableSelectionColumnAction,
-        }, define_lsdata, property::SortState, Element, ElementDefWrapper, ElementWrapper, SubElement, SubElementDef
+        }, define_lsdata, property::SortState, Element, ElementDefWrapper, SubElement, SubElementDef
     },
     error::{BodyError, WebDynproError},
 };
