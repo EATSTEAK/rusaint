@@ -58,7 +58,7 @@ where
     /// 엘리먼트 정의를 생성합니다. 이 함수를 직접 실행하기보다는 [`define_elements`]매크로 사용을 추천합니다.
     /// ### 예시
     /// ```
-    /// # use rusaint::webdynpro::element::{ElementDef, action::Button};
+    /// # use rusaint::webdynpro::element::{definition::ElementDef, action::Button};
     /// const BUTTON: ElementDef<'_, Button<'_>> = ElementDef::new("TEST.BUTTON1");
     /// ```
     pub const fn new(id: &'static str) -> ElementDef<'a, T> {
@@ -72,7 +72,7 @@ where
     /// 런타임에서 엘리먼트 정의를 생성합니다. 엘리먼트의 Id 등을 컴파일 타임에서 미리 알 수 없는 경우 유용합니다.
     /// ### 예시
     /// ```
-    /// # use rusaint::webdynpro::element::{ ElementDef, action::Button };
+    /// # use rusaint::webdynpro::element::{ definition::ElementDef, action::Button };
     /// # fn get_dynamic_button() -> String { return "TEST.BUTTON1".to_string() }
     /// let runtime_string: String = get_dynamic_button();
     /// let button_def: ElementDef<'_, Button<'_>> = ElementDef::new_dynamic(runtime_string);
