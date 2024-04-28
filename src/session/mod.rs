@@ -181,10 +181,10 @@ pub async fn obtain_ssu_sso_token(id: &str, password: &str) -> Result<String, Ss
     };
     let message = if cookie_token.is_none() {
         let mut content = res.text().await?;
-        let start = content.find("alert(\\\"").unwrap_or(0);
-        let end = content.find("\\\");").unwrap_or(content.len());
-        let mut message = content.split_off(start);
-        message.truncate(end);
+        let start = content.find("alert(\"").unwrap_or(0);
+        let end = content.find("\");").unwrap_or(content.len());
+        content.truncate(end);
+        let message = content.split_off(start + 7);
         Some(message)
     } else {
         None
