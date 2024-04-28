@@ -7,7 +7,7 @@ use crate::webdynpro::{element::ElementDef, error::ElementError};
 use super::{property::SapTableRowType, row::SapTableRow, SapTable};
 
 /// [`SapTable`] 내부 테이블
-#[derive(custom_debug_derive::Debug)]
+#[derive(Clone, custom_debug_derive::Debug)]
 #[allow(unused)]
 pub struct SapTableBody<'a> {
     table_def: ElementDef<'a, SapTable<'a>>,

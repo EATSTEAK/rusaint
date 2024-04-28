@@ -238,6 +238,27 @@ macro_rules! register_elements {
                 }
             }
         )+
+
+        /// 다양한 [`Element`]를 대상으로 하는 [`ElementDef`]를 공통의 타입으로 취급할 수 있게 하는 Wrapper
+        #[allow(missing_docs)]
+        #[derive(Clone, Debug)]
+        pub enum ElementDefWrapper<'a> {
+            $( $enum($crate::webdynpro::element::definition::ElementDef::<'a, $type>), )*
+            Unknown($crate::webdynpro::element::definition::ElementDef::<'a, $crate::webdynpro::element::unknown::Unknown<'a>>)
+        }
+
+        impl<'a> ElementDefWrapper<'a> {
+        	/// 분류를 알 수 없는 엘리먼트의 `scraper::ElementRef`로 [`ElementDefWrapper`]를 반환합니다.
+            pub fn dyn_elem_def(element: scraper::ElementRef<'a>) -> Result<ElementDefWrapper<'a>, WebDynproError> {
+                let value = element.value();
+                let id = value.id().ok_or(BodyError::NoSuchAttribute("id".to_owned()))?.to_owned();
+                #[allow(unreachable_patterns)]
+                match element.value().attr("ct") {
+                    $( Some(<$type>::CONTROL_ID) => Ok(ElementDefWrapper::$enum($crate::webdynpro::element::definition::ElementDef::<$type>::new_dynamic(id))), )*
+                    _ => Ok(ElementDefWrapper::Unknown($crate::webdynpro::element::definition::ElementDef::<$crate::webdynpro::element::unknown::Unknown>::new_dynamic(id)))
+                }
+            }
+        }
         
     };
 }

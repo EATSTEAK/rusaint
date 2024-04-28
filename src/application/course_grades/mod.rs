@@ -10,17 +10,11 @@ use crate::{
             selection::{ComboBoxSelectCommand, ReadComboBoxLSDataCommand},
         },
         element::{
-            action::Button,
-            complex::sap_table::{
+            action::Button, complex::sap_table::{
                 cell::{SapTableCell, SapTableCellWrapper},
                 property::SapTableCellType,
                 SapTable, SapTableRow,
-            },
-            definition::ElementDef,
-            layout::PopupWindow,
-            selection::ComboBox,
-            text::InputField,
-            Element, ElementWrapper, SubElement,
+            }, definition::ElementDef, layout::PopupWindow, selection::ComboBox, text::InputField, Element, ElementDefWrapper, ElementWrapper, SubElement
         },
         error::{BodyError, ElementError, WebDynproError},
         event::Event,
@@ -194,9 +188,11 @@ impl<'a> CourseGrades {
             iter.map(|val| {
                 match val {
                     Ok(cell) => match cell.content() {
-                        Some(ElementWrapper::TextView(tv)) => Some(tv.text().to_owned()),
-                        Some(ElementWrapper::Caption(cap)) => {
-                            Some(cap.lsdata().text().unwrap_or(&String::default()).to_owned())
+                        Some(ElementDefWrapper::TextView(tv)) => {
+                            (|| { Some(tv.from_body(self.client.body()).ok()?.text().to_owned()) })()
+                        },
+                        Some(ElementDefWrapper::Caption(cap)) => {
+                            (|| { Some(cap.from_body(self.client.body()).ok()?.lsdata().text().unwrap_or(&String::default()).to_owned()) })()
                         }
                         _ => None,
                     },
@@ -467,7 +463,7 @@ impl<'a> CourseGrades {
                     .from_body(self.client.body())
                     .ok()
                     .and_then(|cell| {
-                        if let Some(ElementWrapper::Button(btn)) = cell.content() {
+                        if let Some(ElementDefWrapper::Button(btn)) = cell.content() {
                             Some(btn.id().to_owned())
                         } else {
                             None
@@ -545,8 +541,8 @@ impl<'a> CourseGrades {
                 .iter()
                 .find(|row| match row[8].clone().from_body(self.client.body()) {
                     Ok(cell) => {
-                        if let Some(ElementWrapper::TextView(code_elem)) = cell.content() {
-                            code_elem.text() == code
+                        if let Some(ElementDefWrapper::TextView(code_elem)) = cell.content() {
+                            code_elem.from_body(self.client.body()).is_ok_and(|elem| elem.text() == code)
                         } else {
                             false
                         }
@@ -555,7 +551,7 @@ impl<'a> CourseGrades {
                 })
                 .and_then(|row| match row[4].clone().from_body(self.client.body()) {
                     Ok(cell) => {
-                        if let Some(ElementWrapper::Button(btn)) = cell.content() {
+                        if let Some(ElementDefWrapper::Button(btn)) = cell.content() {
                             Some(ElementDef::<'_, Button<'_>>::new_dynamic(
                                 btn.id().to_owned(),
                             ))

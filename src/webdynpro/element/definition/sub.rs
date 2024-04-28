@@ -5,7 +5,7 @@ use scraper::Selector;
 use crate::webdynpro::{
     client::body::Body,
     element::{Element, SubElement},
-    error::{ElementError, WebDynproError},
+    error::{BodyError, ElementError, WebDynproError},
 };
 
 use super::{ElementDef, ElementNodeId};
@@ -79,6 +79,19 @@ where
             node_id: Some(ElementNodeId { body_hash, node_id }),
             _marker: std::marker::PhantomData,
         }
+    }
+
+    pub(crate) fn from_element_ref(
+        parent: ElementDef<'a, Parent>,
+        element: scraper::ElementRef<'a>,
+    ) -> Result<SubElementDef<'a, Parent, T>, WebDynproError> {
+        let id = element.value().id().ok_or(BodyError::InvalidElement)?;
+        Ok(SubElementDef {
+            id: id.to_string().into(),
+            parent,
+            node_id: None,
+            _marker: std::marker::PhantomData,
+        })
     }
 
     /// 서브 엘리먼트의 Id를 반환합니다.

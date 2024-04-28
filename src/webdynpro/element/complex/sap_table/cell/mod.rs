@@ -1,5 +1,5 @@
 use crate::webdynpro::client::body::Body;
-use crate::webdynpro::element::{ElementDef, ElementWrapper, SubElement, SubElementDef};
+use crate::webdynpro::element::{ElementDef, ElementDefWrapper, SubElement, SubElementDef};
 use crate::webdynpro::error::WebDynproError;
 
 /// [`SapTable`] 셀의 Wrapper
@@ -174,11 +174,11 @@ impl<'a> SapTableCellDefWrapper<'a> {
 /// [`SapTable`]의 공통된 셀 기능
 pub trait SapTableCell<'a> {
     /// 셀 내부 컨텐츠 엘리먼트를 반환합니다.
-    fn content(&self) -> Option<&ElementWrapper<'a>>;
+    fn content(&self) -> Option<ElementDefWrapper<'a>>;
 }
 
 impl<'a> SapTableCell<'a> for SapTableCellWrapper<'a> {
-    fn content(&self) -> Option<&ElementWrapper<'a>> {
+    fn content(&self) -> Option<ElementDefWrapper<'a>> {
         match self {
             SapTableCellWrapper::Normal(elem) => elem.content(),
             SapTableCellWrapper::Header(elem) => elem.content(),

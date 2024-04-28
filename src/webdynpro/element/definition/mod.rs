@@ -85,6 +85,17 @@ where
         }
     }
 
+    pub(crate) fn from_element_ref(
+        element: scraper::ElementRef<'a>,
+    ) -> Result<ElementDef<'a, T>, WebDynproError> {
+        let id = element.value().id().ok_or(BodyError::InvalidElement)?;
+        Ok(ElementDef {
+            id: id.to_string().into(),
+            node_id: None,
+            _marker: std::marker::PhantomData,
+        })
+    }
+
     /// 빠른 엘리먼트 탐색을 위해 `ego_tree::NodeId`와 함께 엘리먼트 정의를 생성합니다.
     pub fn with_node_id(
         id: String,
