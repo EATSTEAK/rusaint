@@ -192,25 +192,33 @@ impl Body {
             data.insert(id, value);
         });
         Ok(SapSsrClient {
-            action: html_escape::decode_html_entities(
-                data.get("action").ok_or(BodyError::Invalid)?,
-            )
+            action: html_escape::decode_html_entities(data.get("action").ok_or(
+                BodyError::NoSuchAttribute("'action' field of SSR Form".to_string()),
+            )?)
             .to_string(),
             charset: data
                 .get("sap-charset")
-                .ok_or(BodyError::Invalid)?
+                .ok_or(BodyError::NoSuchAttribute(
+                    "'sap-charset' field of SSR Form".to_string(),
+                ))?
                 .to_owned(),
             wd_secure_id: data
                 .get("sap-wd-secure-id")
-                .ok_or(BodyError::Invalid)?
+                .ok_or(BodyError::NoSuchAttribute(
+                    "'sap-wd-secure-id' field of SSR Form".to_string(),
+                ))?
                 .to_owned(),
             app_name: data
                 .get("fesrAppName")
-                .ok_or(BodyError::Invalid)?
+                .ok_or(BodyError::NoSuchAttribute(
+                    "'fesrAppName' field of SSR Form".to_string(),
+                ))?
                 .to_owned(),
             use_beacon: (data
                 .get("fesrUseBeacon")
-                .ok_or(BodyError::Invalid)?
+                .ok_or(BodyError::NoSuchAttribute(
+                    "'fesrUseBeacon' field of SSR Form".to_string(),
+                ))?
                 .to_owned()
                 .as_str()
                 == "true"),
