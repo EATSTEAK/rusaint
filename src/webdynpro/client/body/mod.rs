@@ -165,10 +165,9 @@ impl Body {
 
     fn parse_sap_ssr_client(document: &Html) -> Result<SapSsrClient, BodyError> {
         let selector = Selector::parse(r#"#sap\.client\.SsrClient\.form"#).unwrap();
-        let client_form = document
-            .select(&selector)
-            .next()
-            .ok_or(BodyError::Invalid)?;
+        let client_form = document.select(&selector).next().ok_or(BodyError::Invalid(
+            "Cannot find SSR Client form".to_string(),
+        ))?;
         let mut data = HashMap::<String, String>::new();
         data.insert(
             "action".to_owned(),
