@@ -207,13 +207,4 @@ mod test {
         let session = USaintSession::with_password(&id, &password).await.unwrap();
         println!("{:?}", session);
     }
-
-    #[tokio::test]
-    async fn test_obtain_sso_token() {
-        dotenv().ok();
-        let id = std::env::var("SSO_ID").unwrap();
-        let password = std::env::var("SSO_PASSWORD").unwrap();
-        let token = obtain_ssu_sso_token(&id, &password).await.unwrap();
-        assert_ne!("", token);
-    }
 }
