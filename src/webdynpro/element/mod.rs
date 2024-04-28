@@ -355,7 +355,7 @@ pub trait Element<'a>: Sized {
                 }
             }
         }
-        let selector = &elem_def.selector().or(Err(BodyError::InvalidSelector))?;
+        let selector = &elem_def.selector()?;
         let element = body
             .document()
             .select(selector)
@@ -476,7 +476,7 @@ pub trait SubElement<'a>: Sized {
         elem_def: SubElementDef<'a, Parent, Self>,
         body: &'a Body,
     ) -> Result<Self, WebDynproError> {
-        let selector = &elem_def.selector().or(Err(BodyError::InvalidSelector))?;
+        let selector = &elem_def.selector()?;
         let element = body
             .document()
             .select(selector)
