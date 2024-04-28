@@ -7,10 +7,7 @@ use crate::webdynpro::{
         complex::sap_table::property::{
             SapTableHeaderCellDesign, SapTableHeaderCellType, SapTableRowSelectionMassState,
             SapTableSelectionColumnAction,
-        },
-        define_lsdata,
-        property::SortState,
-        Element, ElementWrapper, SubElement, SubElementDef,
+        }, define_lsdata, property::SortState, Element, ElementDefWrapper, SubElement, SubElementDef
     },
     error::{BodyError, WebDynproError},
 };
@@ -24,7 +21,7 @@ pub struct SapTableHeaderCell<'a> {
     #[debug(skip)]
     element_ref: scraper::ElementRef<'a>,
     lsdata: OnceCell<SapTableHeaderCellLSData>,
-    content: OnceCell<Option<ElementWrapper<'a>>>,
+    content: OnceCell<Option<ElementDefWrapper<'a>>>,
 }
 
 define_lsdata! {
@@ -60,8 +57,8 @@ impl<'a> SubElement<'a> for SapTableHeaderCell<'a> {
     fn lsdata(&self) -> &Self::SubElementLSData {
         self.lsdata.get_or_init(|| {
             let Ok(lsdata_obj) = Self::lsdata_elem(self.element_ref) else {
-                    return Self::SubElementLSData::default();
-                };
+                return Self::SubElementLSData::default();
+            };
             serde_json::from_value::<Self::SubElementLSData>(lsdata_obj)
                 .unwrap_or(Self::SubElementLSData::default())
         })
@@ -71,7 +68,7 @@ impl<'a> SubElement<'a> for SapTableHeaderCell<'a> {
         elem_def: SubElementDef<'a, Parent, Self>,
         element: scraper::ElementRef<'a>,
     ) -> Result<Self, WebDynproError> {
-        Ok(Self::new(elem_def.id.to_owned(), element))
+        Ok(Self::new(elem_def.id_cow(), element))
     }
 
     fn id(&self) -> &str {
@@ -84,22 +81,21 @@ impl<'a> SubElement<'a> for SapTableHeaderCell<'a> {
 }
 
 impl<'a> SapTableCell<'a> for SapTableHeaderCell<'a> {
-    fn content(&self) -> Option<&ElementWrapper<'a>> {
+    fn content(&self) -> Option<ElementDefWrapper<'a>> {
         self.content
             .get_or_init(|| {
                 let content_selector =
                     Selector::parse(format!(r#"[id="{}-CONTENT"] [ct]"#, &self.id).as_str())
                         .or(Err(BodyError::InvalidSelector))
                         .ok()?;
-                ElementWrapper::dyn_elem(
+                ElementDefWrapper::dyn_elem_def(
                     self.element_ref
                         .select(&content_selector)
                         .next()?
                         .to_owned(),
                 )
                 .ok()
-            })
-            .as_ref()
+            }).to_owned()
     }
 }
 

@@ -17,7 +17,7 @@ pub mod property {
 
     /// 버튼의 외형 종류
     #[allow(missing_docs)]
-    #[derive(Deserialize, Debug)]
+    #[derive(Clone, Deserialize, Debug)]
     #[serde(rename_all = "UPPERCASE")]
     pub enum ButtonDesign {
         Emphasized,
@@ -32,7 +32,7 @@ pub mod property {
 
     /// 버튼의 동작 분류
     #[allow(missing_docs)]
-    #[derive(Deserialize, Debug)]
+    #[derive(Clone, Deserialize, Debug)]
     #[serde(rename_all = "UPPERCASE")]
     pub enum ButtonType {
         None,
@@ -58,7 +58,7 @@ pub mod property {
 
     /// 버튼의 상호작용 동작
     #[allow(missing_docs)]
-    #[derive(Deserialize, Debug)]
+    #[derive(Clone, Deserialize, Debug)]
     #[serde(rename_all = "UPPERCASE")]
     pub enum ButtonInteractionBehaviour {
         Push,

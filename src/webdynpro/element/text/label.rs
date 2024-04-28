@@ -2,7 +2,6 @@ use std::{borrow::Cow, cell::OnceCell};
 
 use crate::webdynpro::element::define_element_interactable;
 
-
 // TODO: Implement additional events and data
 define_element_interactable! {
     #[doc = "버튼 등의 엘리먼트를 부연하는 라벨"]

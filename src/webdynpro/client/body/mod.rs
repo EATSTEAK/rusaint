@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::hash::Hash;
 
 use lol_html::{element, html_content::ContentType, rewrite_str, RewriteStrSettings};
 use roxmltree::Node;
@@ -131,6 +132,12 @@ pub struct Body {
     sap_ssr_client: SapSsrClient,
 }
 
+impl Hash for Body {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.raw_body.hash(state);
+    }
+}
+
 impl Body {
     pub(crate) fn new(body: String) -> Result<Body, BodyError> {
         let document = Html::parse_document(&body);
@@ -158,10 +165,9 @@ impl Body {
 
     fn parse_sap_ssr_client(document: &Html) -> Result<SapSsrClient, BodyError> {
         let selector = Selector::parse(r#"#sap\.client\.SsrClient\.form"#).unwrap();
-        let client_form = document
-            .select(&selector)
-            .next()
-            .ok_or(BodyError::Invalid)?;
+        let client_form = document.select(&selector).next().ok_or(BodyError::Invalid(
+            "Cannot find SSR Client form".to_string(),
+        ))?;
         let mut data = HashMap::<String, String>::new();
         data.insert(
             "action".to_owned(),
@@ -185,25 +191,33 @@ impl Body {
             data.insert(id, value);
         });
         Ok(SapSsrClient {
-            action: html_escape::decode_html_entities(
-                data.get("action").ok_or(BodyError::Invalid)?,
-            )
+            action: html_escape::decode_html_entities(data.get("action").ok_or(
+                BodyError::NoSuchAttribute("'action' field of SSR Form".to_string()),
+            )?)
             .to_string(),
             charset: data
                 .get("sap-charset")
-                .ok_or(BodyError::Invalid)?
+                .ok_or(BodyError::NoSuchAttribute(
+                    "'sap-charset' field of SSR Form".to_string(),
+                ))?
                 .to_owned(),
             wd_secure_id: data
                 .get("sap-wd-secure-id")
-                .ok_or(BodyError::Invalid)?
+                .ok_or(BodyError::NoSuchAttribute(
+                    "'sap-wd-secure-id' field of SSR Form".to_string(),
+                ))?
                 .to_owned(),
             app_name: data
                 .get("fesrAppName")
-                .ok_or(BodyError::Invalid)?
+                .ok_or(BodyError::NoSuchAttribute(
+                    "'fesrAppName' field of SSR Form".to_string(),
+                ))?
                 .to_owned(),
             use_beacon: (data
                 .get("fesrUseBeacon")
-                .ok_or(BodyError::Invalid)?
+                .ok_or(BodyError::NoSuchAttribute(
+                    "'fesrUseBeacon' field of SSR Form".to_string(),
+                ))?
                 .to_owned()
                 .as_str()
                 == "true"),

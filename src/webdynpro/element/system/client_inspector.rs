@@ -134,18 +134,18 @@ impl<'a> Element<'a> for ClientInspector<'a> {
     fn lsdata(&self) -> &Self::ElementLSData {
         self.lsdata.get_or_init(|| {
             let Ok(lsdata_obj) = Self::lsdata_elem(self.element_ref) else {
-                    return ClientInspectorLSData::default();
-                };
+                return ClientInspectorLSData::default();
+            };
             serde_json::from_value::<Self::ElementLSData>(lsdata_obj)
                 .unwrap_or(ClientInspectorLSData::default())
         })
     }
 
     fn from_elem(
-        elem_def: ElementDef<'a, Self>,
+        elem_def: &ElementDef<'a, Self>,
         element: scraper::ElementRef<'a>,
     ) -> Result<Self, WebDynproError> {
-        Ok(Self::new(elem_def.id.to_owned(), element))
+        Ok(Self::new(elem_def.id_cow(), element))
     }
 
     fn id(&self) -> &str {

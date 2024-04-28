@@ -31,10 +31,10 @@ impl<'a> Element<'a> for Unknown<'a> {
     }
 
     fn from_elem(
-        elem_def: ElementDef<'a, Self>,
+        elem_def: &ElementDef<'a, Self>,
         element: scraper::ElementRef<'a>,
     ) -> Result<Self, WebDynproError> {
-        Ok(Self::new(elem_def.id.to_owned(), element))
+        Ok(Self::new(elem_def.id_cow(), element))
     }
 
     fn id(&self) -> &str {

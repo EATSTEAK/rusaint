@@ -4,8 +4,7 @@ use scraper::Selector;
 
 use crate::webdynpro::{
     element::{
-        complex::sap_table::property::{SapTableCellDesign, SapTableCellType},
-        define_lsdata, Element, ElementWrapper, SubElement, SubElementDef,
+        complex::sap_table::property::{SapTableCellDesign, SapTableCellType}, define_lsdata, Element, ElementDefWrapper, SubElement, SubElementDef
     },
     error::WebDynproError,
 };
@@ -19,7 +18,7 @@ pub struct SapTableNormalCell<'a> {
     #[debug(skip)]
     element_ref: scraper::ElementRef<'a>,
     lsdata: OnceCell<SapTableNormalCellLSData>,
-    content: OnceCell<Option<ElementWrapper<'a>>>,
+    content: OnceCell<Option<ElementDefWrapper<'a>>>,
 }
 
 define_lsdata! {
@@ -37,19 +36,18 @@ define_lsdata! {
 }
 
 impl<'a> SapTableCell<'a> for SapTableNormalCell<'a> {
-    fn content(&self) -> Option<&ElementWrapper<'a>> {
+    fn content(&self) -> Option<ElementDefWrapper<'a>> {
         self.content
             .get_or_init(|| {
                 let content_selector = Selector::parse(":root [ct]").unwrap();
-                ElementWrapper::dyn_elem(
+                ElementDefWrapper::dyn_elem_def(
                     self.element_ref
                         .select(&content_selector)
                         .next()?
                         .to_owned(),
                 )
                 .ok()
-            })
-            .as_ref()
+            }).to_owned()
     }
 }
 
@@ -62,8 +60,8 @@ impl<'a> SubElement<'a> for SapTableNormalCell<'a> {
     fn lsdata(&self) -> &Self::SubElementLSData {
         self.lsdata.get_or_init(|| {
             let Ok(lsdata_obj) = Self::lsdata_elem(self.element_ref) else {
-                    return Self::SubElementLSData::default();
-                };
+                return Self::SubElementLSData::default();
+            };
             serde_json::from_value::<Self::SubElementLSData>(lsdata_obj)
                 .unwrap_or(Self::SubElementLSData::default())
         })
@@ -73,7 +71,7 @@ impl<'a> SubElement<'a> for SapTableNormalCell<'a> {
         elem_def: SubElementDef<'a, Parent, Self>,
         element: scraper::ElementRef<'a>,
     ) -> Result<Self, WebDynproError> {
-        Ok(Self::new(elem_def.id.to_owned(), element))
+        Ok(Self::new(elem_def.id_cow(), element))
     }
 
     fn id(&self) -> &str {

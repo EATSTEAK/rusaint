@@ -37,8 +37,14 @@ impl<'a> SapTable<'a> {
     }
 
     /// 테이블 내부 컨텐츠를 반환합니다.
-    pub fn table(&self) -> Option<&SapTableBody<'a>> {
-        self.table.get_or_init(|| self.parse_table().ok()).as_ref()
+    pub fn table(&self) -> Result<&SapTableBody<'a>, WebDynproError> {
+        self.table
+            .get_or_init(|| self.parse_table().ok())
+            .as_ref()
+            .ok_or(WebDynproError::Element(ElementError::NoSuchContent {
+                element: self.id.to_string(),
+                content: "Table body".to_string(),
+            }))
     }
 
     fn parse_table(&self) -> Result<SapTableBody<'a>, WebDynproError> {
@@ -62,11 +68,11 @@ impl<'a> SapTable<'a> {
         )
         .or(Err(BodyError::InvalidSelector))?;
         let Some(tbody) = element.select(&tbody_selector).next() else {
-                return Err(ElementError::NoSuchContent {
-                    element: self.id.clone().into_owned(),
-                    content: "Table body".to_string(),
-                })?;
-            };
+            return Err(ElementError::NoSuchContent {
+                element: self.id.clone().into_owned(),
+                content: "Table body".to_string(),
+            })?;
+        };
         Ok(SapTableBody::new(def, tbody)?)
     }
 
