@@ -20,7 +20,7 @@
 //!
 //! ```no_run
 //! use rusaint::application::course_grades::{CourseGrades, model::CourseType, model::SemesterGrade};
-//! use rusaint::application::USaintApplicationBuilder;
+//! use rusaint::application::USaintClientBuilder;
 //! use rusaint::webdynpro::element::Element;
 //! use rusaint::RusaintError;
 //! use std::sync::Arc;
@@ -37,7 +37,7 @@
 //! async fn print_grades() -> Result<(), RusaintError> {
 //!     // USaintSession::with_token(id: &str, token: &str) 을 이용하여 비밀번호 없이 SSO 토큰으로 로그인 할 수 있음
 //!     let session = Arc::new(USaintSession::with_password("20211561", "password").await?);
-//!     let mut app = USaintApplicationBuilder::new().session(session).build_into::<CourseGrades>().await?;
+//!     let mut app = USaintClientBuilder::new().session(session).build_into::<CourseGrades>().await?;
 //!     let grades: Vec<SemesterGrade> = app.semesters(CourseType::Bachelor).await?;
 //!     for grade in grades {
 //!         println!("{:?}", grade);

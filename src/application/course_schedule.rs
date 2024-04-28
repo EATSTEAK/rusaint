@@ -2,15 +2,30 @@ use crate::{
     define_elements,
     model::SemesterType,
     webdynpro::{
-        application::Application,
+        client::body::Body,
         element::{action::Button, complex::SapTable, layout::TabStrip, selection::ComboBox},
         error::WebDynproError,
     },
+    RusaintError,
 };
 
-use super::USaintApplication;
+use super::{USaintApplication, USaintClient};
 
-define_usaint_application!(pub struct CourseSchedule<"ZCMW2100">);
+pub struct CourseSchedule {
+    client: USaintClient,
+}
+
+impl USaintApplication for CourseSchedule {
+    const APP_NAME: &'static str = "ZCMW2100";
+
+    fn from_client(client: USaintClient) -> Result<Self, RusaintError> {
+        if client.name() != Self::APP_NAME {
+            Err(RusaintError::InvalidClientError)
+        } else {
+            Ok(Self { client })
+        }
+    }
+}
 
 #[allow(unused)]
 impl<'a> CourseSchedule {
@@ -38,7 +53,7 @@ impl<'a> CourseSchedule {
         period: SemesterType,
     ) -> Result<(), WebDynproError> {
         let events = {
-            let body = self.body();
+            let body = self.client.body();
             let period_year = Self::PERIOD_YEAR.from_body(body)?;
             let period_id = Self::PERIOD_ID.from_body(body)?;
             vec![
@@ -46,34 +61,40 @@ impl<'a> CourseSchedule {
                 period_id.select(Self::semester_to_key(period), false)?,
             ]
         };
-        self.send_events(events).await
+        for event in events {
+            self.client.process_event(false, event).await?;
+        }
+        Ok(())
     }
 
     pub async fn select_rows(&mut self, row: u32) -> Result<(), WebDynproError> {
         let events = {
-            let body = self.body();
+            let body = self.client.body();
             let table_rows = Self::TABLE_ROWS.from_body(body)?;
-            vec![table_rows.select(row.to_string().as_str(), false)?]
+            table_rows.select(row.to_string().as_str(), false)?
         };
-        self.send_events(events).await
+        self.client.process_event(false, events).await?;
+        Ok(())
     }
 
     pub async fn select_edu(&mut self) -> Result<(), WebDynproError> {
         let events = {
-            let body = self.body();
+            let body = self.client.body();
             let tab_strip = Self::TABSTRIP.from_body(body)?;
-            vec![tab_strip.tab_select("ZCMW2100.ID_0001:VIW_MAIN.TAB_EDU", 4, 0)?]
+            tab_strip.tab_select("ZCMW2100.ID_0001:VIW_MAIN.TAB_EDU", 4, 0)?
         };
-        self.send_events(events).await
+        self.client.process_event(false, events).await?;
+        Ok(())
     }
 
     async fn search_edu(&mut self) -> Result<(), WebDynproError> {
         let events = {
-            let body = self.body();
+            let body = self.client.body();
             let button_edu = Self::BUTTON_EDU.from_body(body)?;
-            vec![button_edu.press()?]
+            button_edu.press()?
         };
-        self.send_events(events).await
+        self.client.process_event(false, events).await?;
+        Ok(())
     }
 
     pub async fn load_edu(&mut self) -> Result<(), WebDynproError> {
@@ -83,28 +104,29 @@ impl<'a> CourseSchedule {
     }
 
     pub fn read_edu_raw(&self) -> Result<SapTable, WebDynproError> {
-        let main_table = Self::MAIN_TABLE.from_body(self.body())?;
+        let main_table = Self::MAIN_TABLE.from_body(self.client.body())?;
         Ok(main_table)
+    }
+
+    fn body(&self) -> &Body {
+        self.client.body()
     }
 }
 
 #[cfg(test)]
 mod test {
     use crate::{
-        application::{course_schedule::CourseSchedule, USaintApplicationBuilder},
-        webdynpro::{
-            application::Application,
-            element::{
-                complex::sap_table::cell::{SapTableCell, SapTableCellWrapper},
-                selection::list_box::{item::ListBoxItemWrapper, ListBoxWrapper},
-                ElementWrapper,
-            },
+        application::{course_schedule::CourseSchedule, USaintClientBuilder},
+        webdynpro::element::{
+            complex::sap_table::cell::{SapTableCell, SapTableCellWrapper},
+            selection::list_box::{item::ListBoxItemWrapper, ListBoxWrapper},
+            ElementWrapper,
         },
     };
 
     #[tokio::test]
     async fn examine_elements() {
-        let app = USaintApplicationBuilder::new()
+        let app = USaintClientBuilder::new()
             .build_into::<CourseSchedule>()
             .await
             .unwrap();
@@ -119,7 +141,7 @@ mod test {
 
     #[tokio::test]
     async fn combobox_items() {
-        let app = USaintApplicationBuilder::new()
+        let app = USaintClientBuilder::new()
             .build_into::<CourseSchedule>()
             .await
             .unwrap();
@@ -147,25 +169,25 @@ mod test {
 
     #[tokio::test]
     async fn table_test() {
-        let mut app = USaintApplicationBuilder::new()
+        let mut app = USaintClientBuilder::new()
             .build_into::<CourseSchedule>()
             .await
             .unwrap();
         app.load_edu().await.unwrap();
         let table = app.read_edu_raw().unwrap();
-        if let Some(table) = table.table() {
+        if let Ok(table) = table.table() {
             for row in table.with_header() {
                 print!("row: ");
-                for col in row.iter() {
+                for col in row.iter_value(app.body()) {
                     match col {
-                        SapTableCellWrapper::Header(cell) => {
+                        Ok(SapTableCellWrapper::Header(cell)) => {
                             let content = cell.content();
                             print!("Header: ");
                             if let Some(elem) = content {
                                 print!("{:?}, ", elem);
                             }
                         }
-                        SapTableCellWrapper::Normal(cell) => {
+                        Ok(SapTableCellWrapper::Normal(cell)) => {
                             let content = cell.content();
                             if let Some(elem) = content {
                                 print!("{:?}, ", elem);

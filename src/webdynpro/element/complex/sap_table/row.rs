@@ -2,22 +2,22 @@ use std::ops::Index;
 
 use scraper::ElementRef;
 
-use crate::webdynpro::{element::ElementDef, error::ElementError};
+use crate::webdynpro::{client::body::Body, element::ElementDef, error::{ElementError, WebDynproError}};
 
 use super::{
-    cell::SapTableCellWrapper,
+    cell::{SapTableCellDefWrapper, SapTableCellWrapper},
     property::{SapTableRowType, SapTableSelectionState},
     SapTable,
 };
 
 /// [`SapTable`]의 행
-#[derive(custom_debug_derive::Debug)]
+#[derive(Clone, custom_debug_derive::Debug)]
 #[allow(unused)]
 pub struct SapTableRow<'a> {
     table_def: ElementDef<'a, SapTable<'a>>,
     #[debug(skip)]
     elem_ref: ElementRef<'a>,
-    cells: Vec<SapTableCellWrapper<'a>>,
+    cells: Vec<SapTableCellDefWrapper<'a>>,
     row_index: Option<u32>,
     user_data: Option<String>,
     drag_data: Option<String>,
@@ -36,8 +36,10 @@ impl<'a> SapTableRow<'a> {
         let subct_selector = scraper::Selector::parse("[subct]").unwrap();
         let subcts = row_ref.select(&subct_selector);
         let cells = subcts
-            .filter_map(|subct_ref| SapTableCellWrapper::dyn_cell(table_def.clone(), subct_ref))
-            .collect::<Vec<SapTableCellWrapper<'a>>>();
+            .filter_map(|subct_ref| {
+                SapTableCellDefWrapper::dyn_cell_def(table_def.clone(), subct_ref)
+            })
+            .collect::<Vec<SapTableCellDefWrapper<'a>>>();
         Ok(SapTableRow {
             table_def,
             elem_ref: row_ref,
@@ -63,9 +65,16 @@ impl<'a> SapTableRow<'a> {
         self.cells.len()
     }
 
-    /// 행 내부 셀의 [`Iterator`]를 반환합니다.
-    pub fn iter(&self) -> impl Iterator<Item = &SapTableCellWrapper<'a>> + ExactSizeIterator {
+    /// 행 내부 셀 정의의 [`Iterator`]를 반환합니다.
+    pub fn iter(&self) -> impl Iterator<Item = &SapTableCellDefWrapper<'a>> + ExactSizeIterator {
         self.cells.iter()
+    }
+
+    /// 행 내부 셀 엘리먼트의 [`Iterator`]를 반환합니다.
+    pub fn iter_value(&'a self, body: &'a Body) -> impl Iterator<Item = Result<SapTableCellWrapper<'a>, WebDynproError>> + ExactSizeIterator {
+        self.cells.iter().map(|def| {
+            def.clone().from_body(body)
+        })
     }
 
     /// 원본 [`SapTable`]의 [`ElementDef`]를 반환합니다.
@@ -110,7 +119,7 @@ impl<'a> SapTableRow<'a> {
 }
 
 impl<'a> Index<usize> for SapTableRow<'a> {
-    type Output = SapTableCellWrapper<'a>;
+    type Output = SapTableCellDefWrapper<'a>;
 
     fn index(&self, index: usize) -> &Self::Output {
         &self.cells[index]

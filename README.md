@@ -47,10 +47,11 @@ fn main() {
 async fn print_grades() -> Result<(), RusaintError> {
     // USaintSession::from_token(id: &str, token: &str) 을 이용하여 비밀번호 없이 SSO 토큰으로 로그인 할 수 있음
     let session = USaintSession::from_password("20211561", "password").await?;
-    let app = CourseGrades::new(session).await?;
-    let grades: Vec<SemesterSummary> = app.semesters().await?;
+    let mut app = USaintClientBuilder::new().session(session).build_into::<CourseGrades>().await?;
+    let grades: Vec<SemesterGrade> = app.semesters(CourseType::Bachelor).await?;
     for grade in grades {
         println!("{:?}", grade);
     }
+    Ok(())
 }
 ```

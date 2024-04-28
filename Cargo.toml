@@ -1,6 +1,6 @@
 [package]
 name = "rusaint"
-version = "0.1.4"
+version = "0.2.0"
 description = "Easy-to-use SSU u-saint client"
 keywords = ["ssu", "u-saint", "scraping", "parser"]
 categories = ["web-programming"]
@@ -15,8 +15,8 @@ application = []
 model = ["application"]
 
 [dependencies]
-derive_builder = "0.12.0"
-reqwest = { version = "0.11.18", features = [
+derive_builder = "0.20.0"
+reqwest = { version = "0.12.4", features = [
     "cookies",
     "gzip",
     "brotli",
@@ -27,13 +27,14 @@ tokio = { version = "1.29.1", features = ["macros", "test-util"] }
 html-escape = "0.2.13"
 url = "2.4.1"
 roxmltree = "0.19.0"
-lol_html = "1.1.1"
-scraper = "0.18.1"
+lol_html = "1.2.1"
+scraper = "0.19.0"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 regex = "1.9.5"
 getset = "0.1.2"
-custom_debug_derive = "0.5.1"
+custom_debug_derive = "0.6.1"
+ego-tree = "0.6.2"
 
 
 [dev-dependencies]

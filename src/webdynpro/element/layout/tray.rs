@@ -9,7 +9,7 @@ use self::property::TrayDesign;
 
 pub mod property {
     use serde::Deserialize;
-    #[derive(Deserialize, Debug)]
+    #[derive(Clone, Deserialize, Debug)]
     #[serde(rename_all = "UPPERCASE")]
     pub enum TrayDesign {
         Transparent,

@@ -1,6 +1,28 @@
-use super::USaintApplication;
+use crate::{webdynpro::client::body::Body, RusaintError};
 
-define_usaint_application!(pub struct StudentInformation<"ZCMW1001n">);
+use super::{USaintApplication, USaintClient};
+
+pub struct StudentInformation {
+    client: USaintClient,
+}
+
+impl USaintApplication for StudentInformation {
+    const APP_NAME: &'static str = "ZCMW2100";
+
+    fn from_client(client: USaintClient) -> Result<Self, RusaintError> {
+        if client.name() != Self::APP_NAME {
+            Err(RusaintError::InvalidClientError)
+        } else {
+            Ok(Self { client })
+        }
+    }
+}
+
+impl StudentInformation {
+    fn body(&self) -> &Body {
+        self.client.body()
+    }
+}
 
 #[cfg(test)]
 mod test {
@@ -8,9 +30,9 @@ mod test {
     use std::sync::{Arc, OnceLock};
 
     use crate::{
-        application::{student_information::StudentInformation, USaintApplicationBuilder},
+        application::{student_information::StudentInformation, USaintClientBuilder},
         session::USaintSession,
-        webdynpro::{application::Application, element::ElementWrapper},
+        webdynpro::element::ElementWrapper,
     };
     use dotenv::dotenv;
 
@@ -35,7 +57,7 @@ mod test {
     #[tokio::test]
     async fn examine_elements() {
         let session = get_session().await.unwrap();
-        let app = USaintApplicationBuilder::new()
+        let app = USaintClientBuilder::new()
             .session(session)
             .build_into::<StudentInformation>()
             .await
