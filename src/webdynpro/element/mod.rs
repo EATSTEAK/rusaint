@@ -241,6 +241,7 @@ macro_rules! register_elements {
 
         /// 다양한 [`Element`]를 대상으로 하는 [`ElementDef`]를 공통의 타입으로 취급할 수 있게 하는 Wrapper
         #[allow(missing_docs)]
+        #[derive(Clone, Debug)]
         pub enum ElementDefWrapper<'a> {
             $( $enum($crate::webdynpro::element::definition::ElementDef::<'a, $type>), )*
             Unknown($crate::webdynpro::element::definition::ElementDef::<'a, $crate::webdynpro::element::unknown::Unknown<'a>>)
