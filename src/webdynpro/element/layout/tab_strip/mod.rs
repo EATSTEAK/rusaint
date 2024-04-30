@@ -16,7 +16,7 @@ define_element_interactable! {
     #[doc = ""]
     #[doc = "> |**참고**| 이 엘리먼트는 실제 구현에서 >= IE6 용 구현과 기본 구현으로 나누어져 있지만, rusaint에서는 최신의 브라우저를 기준으로 하므로 전자의 구현은 구현되어있지 않습니다."]
     TabStrip<"TS_standards", "TabStrip"> {
-        tab_items: OnceCell<Vec<ElementDef<'a, TabStripItem<'a>>>>,
+        tab_items: OnceCell<Vec<String>>
     },
     #[doc = "[`TabStrip`] 내부 데이터"]
     TabStripLSData {
@@ -51,10 +51,10 @@ impl<'a> TabStrip<'a> {
         }
     }
 
-    /// 탭 내부 [`TabStripItem`]을 반환합니다.
+    /// 탭 내부 [`TabStripItem`]의 정의를 반환합니다.
     pub fn tab_items(
         &self,
-    ) -> impl Iterator<Item = &ElementDef<'a, TabStripItem<'a>>> + ExactSizeIterator {
+    ) -> impl Iterator<Item = ElementDef<'_, TabStripItem<'_>>> {
         self.tab_items
             .get_or_init(|| {
                 let Ok(items_selector) =
@@ -66,12 +66,12 @@ impl<'a> TabStrip<'a> {
                 self.element_ref
                     .select(&items_selector)
                     .filter_map(|eref| {
-                        let id = eref.value().id()?;
-                        Some(ElementDef::<TabStripItem>::new_dynamic(id.to_owned()))
+                        eref.value().id().and_then(|id| Some(id.to_string()))
                     })
                     .collect()
+            }).iter().map(|id| {
+                ElementDef::<TabStripItem>::new_dynamic(id.to_owned())
             })
-            .iter()
     }
 
     /// 특정 탭을 선택하는 이벤트를 반환합니다.
