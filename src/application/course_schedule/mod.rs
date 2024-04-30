@@ -3,7 +3,13 @@ use crate::{
     define_elements,
     model::SemesterType,
     webdynpro::{
-        client::body::Body, command::element::{action::ButtonPressCommand, layout::TabStripTabSelectCommand, selection::ComboBoxSelectCommand}, element::{action::Button, complex::SapTable, layout::TabStrip, selection::ComboBox}, error::WebDynproError
+        client::body::Body,
+        command::element::{
+            action::ButtonPressCommand, layout::TabStripTabSelectCommand,
+            selection::ComboBoxSelectCommand,
+        },
+        element::{action::Button, complex::SapTable, layout::{tab_strip::item::TabStripItem, TabStrip}, selection::ComboBox},
+        error::WebDynproError,
     },
     RusaintError,
 };
@@ -33,7 +39,7 @@ impl<'a> CourseSchedule {
         PERIOD_ID: ComboBox<'a> = "ZCMW_PERIOD_RE.ID_A61C4ED604A2BFC2A8F6C6038DE6AF18:VIW_MAIN.PERID";
         TABLE_ROWS: ComboBox<'a> = "ZCMW2100.ID_0001:VIW_MODULES.ROWS";
         TABSTRIP: TabStrip<'a> = "ZCMW2100.ID_0001:VIW_MAIN.MODULE_TABSTRIP";
-        TAB_EDU: TapStripItem<'a> = "ZCMW2100.ID_0001:VIW_MAIN.TAB_EDU";
+        TAB_EDU: TabStripItem<'a> = "ZCMW2100.ID_0001:VIW_MAIN.TAB_EDU";
         BUTTON_EDU: Button<'a> = "ZCMW2100.ID_0001:VIW_MAIN.BUTTON_EDU";
         MAIN_TABLE: SapTable<'a> = "SALV_WD_TABLE.ID_DE0D9128A4327646C94670E2A892C99C:VIEW_TABLE.SALV_WD_UIE_TABLE";
     }
@@ -52,25 +58,46 @@ impl<'a> CourseSchedule {
         year: &str,
         period: SemesterType,
     ) -> Result<(), WebDynproError> {
-        self.client.send(ComboBoxSelectCommand::new(Self::PERIOD_YEAR, year, false)).await?;
-        self.client.send(ComboBoxSelectCommand::new(Self::PERIOD_ID, Self::semester_to_key(period), false)).await?;
+        self.client
+            .send(ComboBoxSelectCommand::new(Self::PERIOD_YEAR, year, false))
+            .await?;
+        self.client
+            .send(ComboBoxSelectCommand::new(
+                Self::PERIOD_ID,
+                Self::semester_to_key(period),
+                false,
+            ))
+            .await?;
         Ok(())
     }
 
     async fn select_rows(&mut self, row: u32) -> Result<(), WebDynproError> {
-        self.client.send(ComboBoxSelectCommand::new(Self::TABLE_ROWS, row.to_string().as_str(), false)).await?;
+        self.client
+            .send(ComboBoxSelectCommand::new(
+                Self::TABLE_ROWS,
+                row.to_string().as_str(),
+                false,
+            ))
+            .await?;
         Ok(())
     }
 
     async fn select_edu(&mut self) -> Result<(), WebDynproError> {
-        self.client.send(
-            TabStripTabSelectCommand::new(Self::TABSTRIP, Self::TAB_EDU, 4, 0)
-        ).await?;
+        self.client
+            .send(TabStripTabSelectCommand::new(
+                Self::TABSTRIP,
+                Self::TAB_EDU,
+                4,
+                0,
+            ))
+            .await?;
         Ok(())
     }
 
     async fn search_edu(&mut self) -> Result<(), WebDynproError> {
-        self.client.send(ButtonPressCommand::new(Self::BUTTON_EDU)).await?;
+        self.client
+            .send(ButtonPressCommand::new(Self::BUTTON_EDU))
+            .await?;
         Ok(())
     }
 
@@ -94,7 +121,6 @@ impl<'a> CourseSchedule {
         unimplemented!();
         Ok(Vec::<Lecture>::with_capacity(0).into_iter())
     }
-    
 
     fn body(&self) -> &Body {
         self.client.body()
