@@ -1,5 +1,7 @@
 use crate::webdynpro::{
-    client::EventProcessResult, command::WebDynproCommand, element::{action::Button, definition::ElementDef},
+    client::EventProcessResult,
+    command::WebDynproCommand,
+    element::{action::Button, definition::ElementDef},
     error::WebDynproError,
 };
 
