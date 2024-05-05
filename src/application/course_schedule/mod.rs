@@ -188,7 +188,7 @@ mod test {
         app.load_edu().await.unwrap();
         let table = app.read_edu_raw().unwrap();
         if let Ok(table) = table.table() {
-            for row in table.with_header() {
+            for row in table.iter() {
                 print!("row: ");
                 for col in row.iter_value(app.body()) {
                     match col {

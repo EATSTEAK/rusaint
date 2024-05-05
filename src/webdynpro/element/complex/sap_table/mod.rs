@@ -124,6 +124,8 @@ impl<'a> SapTable<'a> {
 }
 
 mod body;
+mod from_sap_table;
+mod header;
 mod row;
 
 /// [`SapTable`] 내부 셀
@@ -132,4 +134,6 @@ pub mod cell;
 pub mod property;
 
 pub use self::body::SapTableBody;
+pub use self::from_sap_table::FromSapTable;
+pub use self::header::SapTableHeader;
 pub use self::row::SapTableRow;
