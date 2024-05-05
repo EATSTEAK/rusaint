@@ -2,26 +2,21 @@ use std::{borrow::Cow, cell::OnceCell};
 
 use scraper::Selector;
 
-use crate::webdynpro::{
-    element::{
-        complex::sap_table::property::SapTableCellType, define_lsdata, Element, ElementDefWrapper, SubElement, SubElementDef,
-    },
-    error::WebDynproError,
+use crate::webdynpro::element::{
+    complex::{sap_table::{property::SapTableCellType, SapTableDef}, SapTable},
+    sub::define_subelement,
+    ElementDefWrapper,
 };
 
 use super::{SapTableCell, SapTableCellWrapper};
 
-/// 선택 가능한 테이블 셀
-#[derive(custom_debug_derive::Debug)]
-pub struct SapTableSelectionCell<'a> {
-    id: Cow<'static, str>,
-    #[debug(skip)]
-    element_ref: scraper::ElementRef<'a>,
-    lsdata: OnceCell<SapTableSelectionCellLSData>,
-    content: OnceCell<Option<ElementDefWrapper<'a>>>,
-}
-
-define_lsdata! {
+define_subelement! {
+    #[doc = "선택 가능한 [`SapTable`]의 셀"]
+    SapTableSelectionCell<SapTable, SapTableDef, "SC", "SapTableSelectionCell"> {
+        content: OnceCell<Option<ElementDefWrapper<'a>>>,
+    },
+    #[doc = "[`SapTableSelectionCell`]의 정의"]
+    SapTableSelectionCellDef,
     #[doc = "[`SapTableSelectionCell`] 내부 데이터"]
     SapTableSelectionCellLSData {
         is_selected: bool => "0",
@@ -49,38 +44,6 @@ impl<'a> SapTableCell<'a> for SapTableSelectionCell<'a> {
                 .ok()
             })
             .to_owned()
-    }
-}
-
-impl<'a> SubElement<'a> for SapTableSelectionCell<'a> {
-    const SUBCONTROL_ID: &'static str = "SC";
-    const ELEMENT_NAME: &'static str = "SapTableSelectionCell";
-
-    type SubElementLSData = SapTableSelectionCellLSData;
-
-    fn lsdata(&self) -> &Self::SubElementLSData {
-        self.lsdata.get_or_init(|| {
-            let Ok(lsdata_obj) = Self::lsdata_elem(self.element_ref) else {
-                return Self::SubElementLSData::default();
-            };
-            serde_json::from_value::<Self::SubElementLSData>(lsdata_obj)
-                .unwrap_or(Self::SubElementLSData::default())
-        })
-    }
-
-    fn from_elem<Parent: Element<'a>>(
-        elem_def: SubElementDef<'a, Parent, Self>,
-        element: scraper::ElementRef<'a>,
-    ) -> Result<Self, WebDynproError> {
-        Ok(Self::new(elem_def.id_cow(), element))
-    }
-
-    fn id(&self) -> &str {
-        &self.id
-    }
-
-    fn element_ref(&self) -> &scraper::ElementRef<'a> {
-        &self.element_ref
     }
 }
 

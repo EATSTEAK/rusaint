@@ -6,6 +6,8 @@ use crate::webdynpro::element::define_element_interactable;
 define_element_interactable! {
     #[doc = "HTML `grid` 레이아웃"]
     GridLayout<"GL", "GridLayout"> {},
+    #[doc = "[`GridLayout`]의 정의"]
+    GridLayoutDef,
     #[doc = "[`GridLayout`] 내부 데이터"]
     GridLayoutLSData {
         height: String => "0",

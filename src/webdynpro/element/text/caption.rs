@@ -11,6 +11,8 @@ define_element_interactable! {
     #[doc = "[`Tray`]: crate::webdynpro::element::layout::Tray"]
     Caption<"CP", "Caption"> {
     },
+    #[doc = "[`Caption`]의 정의"]
+    CaptionDef,
     #[doc = "[`Caption`] 내부 데이터"]
     CaptionLSData {
         tooltip: String=> "0",

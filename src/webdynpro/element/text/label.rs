@@ -6,6 +6,8 @@ use crate::webdynpro::element::define_element_interactable;
 define_element_interactable! {
     #[doc = "버튼 등의 엘리먼트를 부연하는 라벨"]
     Label<"L", "Label"> {},
+    #[doc = "[`Label`]의 정의"]
+    LabelDef,
     #[doc = "[`Label`] 내부 데이터"]
     LabelLSData {
         tooltip: String => "0",

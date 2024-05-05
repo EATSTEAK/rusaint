@@ -18,6 +18,8 @@ pub mod property {
 define_element_interactable! {
     #[doc = "스크롤을 수행하는 스크롤 바"]
     Scrollbar<"SCB", "Scrollbar"> {},
+    #[doc = "[`Scrollbar`]의 정의"]
+    ScrollbarDef,
     #[doc = "[`Scrollbar`] 내부 데이터"]
     ScrollbarLSData {
         value: i32 => "0",

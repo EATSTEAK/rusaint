@@ -1,15 +1,18 @@
 use std::{borrow::Cow, collections::HashMap};
 
 use crate::webdynpro::{
-    element::ElementWrapper,
-    error::WebDynproError,
+    element::{
+        definition::{ElementDefinition, ElementNodeId},
+        ElementWrapper,
+    },
+    error::{BodyError, WebDynproError},
     event::{
         ucf_parameters::{UcfAction, UcfParametersBuilder, UcfResponseData},
         Event, EventBuilder,
     },
 };
 
-use crate::webdynpro::element::{Element, ElementDef};
+use crate::webdynpro::element::Element;
 
 /// 페이지 최초 로드시 서버에 전송하는 클라이언트 정보 값입니다.
 #[allow(missing_docs)]
@@ -70,6 +73,52 @@ pub struct Custom {
     id: Cow<'static, str>,
 }
 
+#[doc = "[`Custom`]의 정의"]
+#[derive(Clone, Debug)]
+pub struct CustomDef {
+    id: Cow<'static, str>,
+}
+
+impl CustomDef {
+    /// 엘리먼트의 정의를 생성합니다.
+    pub const fn new(id: &'static str) -> Self {
+        Self {
+            id: Cow::Borrowed(id),
+        }
+    }
+}
+
+impl<'body> ElementDefinition<'body> for CustomDef {
+    type Element = Custom;
+
+    fn new_dynamic(id: String) -> Self {
+        Self { id: id.into() }
+    }
+
+    fn from_element_ref(element_ref: scraper::ElementRef<'_>) -> Result<Self, WebDynproError> {
+        let id = element_ref.value().id().ok_or(BodyError::InvalidElement)?;
+        Ok(Self {
+            id: id.to_string().into(),
+        })
+    }
+
+    fn with_node_id(id: String, _body_hash: u64, _node_id: ego_tree::NodeId) -> Self {
+        Self { id: id.into() }
+    }
+
+    fn id(&self) -> &str {
+        &self.id
+    }
+
+    fn id_cow(&self) -> Cow<'static, str> {
+        self.id.clone()
+    }
+
+    fn node_id(&self) -> Option<&ElementNodeId> {
+        None
+    }
+}
+
 impl<'a> Element<'a> for Custom {
     // Note: This element is not rendered to client itself. This control id is a dummy.
     const CONTROL_ID: &'static str = "CUSTOM";
@@ -78,12 +127,14 @@ impl<'a> Element<'a> for Custom {
 
     type ElementLSData = ();
 
+    type Def = CustomDef;
+
     fn lsdata(&self) -> &Self::ElementLSData {
         &()
     }
 
-    fn from_elem(
-        elem_def: &ElementDef<'a, Self>,
+    fn from_element(
+        elem_def: &impl ElementDefinition<'a>,
         _element: scraper::ElementRef,
     ) -> Result<Self, WebDynproError> {
         Ok(Self::new(elem_def.id_cow()))
@@ -107,7 +158,6 @@ impl<'a> Element<'a> for Custom {
 }
 
 impl Custom {
-
     /// 식별자를 바탕으로 새로운 [`Custom`] 엘리먼트를 생성합니다.
     pub const fn new(id: Cow<'static, str>) -> Self {
         Self { id }

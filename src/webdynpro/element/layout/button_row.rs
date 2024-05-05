@@ -2,14 +2,17 @@ use scraper::Selector;
 use std::{borrow::Cow, cell::OnceCell};
 
 use crate::webdynpro::element::{
-    action::Button, define_element_base, definition::ElementDef, property::Visibility
+    action::Button, define_element_base, definition::ElementDefinition, property::Visibility,
+    Element,
 };
 
 define_element_base! {
     #[doc = "[`Button`]의 나열"]
     ButtonRow<"BR", "ButtonRow"> {
-        buttons: OnceCell<Vec<ElementDef<'a, Button<'a>>>>
+        buttons: OnceCell<Vec<<Button<'a> as Element<'a>>::Def>>
     },
+    #[doc = "[`ButtonRow`]의 정의"]
+    ButtonRowDef,
     #[doc = "[`ButtonRow`] 내부 데이터"]
     ButtonRowLSData {
         visibility: Visibility => "0",
@@ -29,20 +32,22 @@ impl<'a> ButtonRow<'a> {
     }
 
     /// 내부 [`Button`]을 반환합니다.
-    pub fn buttons(&'a self) -> impl Iterator<Item = &ElementDef<'a, Button<'a>>> + ExactSizeIterator {
+    pub fn buttons(
+        &'a self,
+    ) -> impl Iterator<Item = &<Button<'a> as Element<'a>>::Def> + ExactSizeIterator {
         self.buttons
             .get_or_init(|| {
                 let button_selector = &Selector::parse(r#":root [ct="B"]"#).unwrap();
                 self.element_ref
                     .select(button_selector)
                     .filter_map(|elem| {
-                        let def = ElementDef::from_element_ref(elem);
+                        let def = <Button<'a> as Element<'a>>::Def::from_element_ref(elem);
                         match def {
                             Ok(button_def) => Some(button_def),
-                            _ => None
+                            _ => None,
                         }
                     })
-                    .collect::<Vec<ElementDef<'a, Button<'a>>>>()
+                    .collect::<Vec<<Button<'a> as Element<'a>>::Def>>()
             })
             .iter()
     }

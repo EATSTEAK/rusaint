@@ -9,6 +9,8 @@ use crate::webdynpro::element::{
 define_element_interactable! {
     #[doc = "스크롤을 처리하는 컨테이너"]
     ScrollContainer<"SC", "ScrollContainer"> {},
+    #[doc = "[`ScrollContainer`]의 정의"]
+    ScrollContainerDef,
     #[doc = "[`ScrollContainer`] 내부 데이터"]
     ScrollContainerLSData {
         scrolling_mode: ScrollingMode => "0",
