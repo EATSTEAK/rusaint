@@ -10,7 +10,7 @@ use crate::webdynpro::{
 use super::{
     cell::{SapTableCellDefWrapper, SapTableCellWrapper},
     property::{SapTableRowType, SapTableSelectionState},
-    SapTableDef,
+    FromSapTable, SapTableDef, SapTableHeader,
 };
 
 /// [`SapTable`]의 행
@@ -20,6 +20,7 @@ pub struct SapTableRow<'a> {
     table_def: SapTableDef,
     #[debug(skip)]
     elem_ref: ElementRef<'a>,
+    header: &'a SapTableHeader<'a>,
     cells: Vec<SapTableCellDefWrapper>,
     row_index: Option<u32>,
     user_data: Option<String>,
@@ -33,6 +34,7 @@ pub struct SapTableRow<'a> {
 impl<'a> SapTableRow<'a> {
     pub(super) fn new(
         table_def: SapTableDef,
+        header: &'a SapTableHeader<'a>,
         row_ref: ElementRef<'a>,
     ) -> Result<SapTableRow<'a>, ElementError> {
         let row = row_ref.value();
@@ -46,6 +48,7 @@ impl<'a> SapTableRow<'a> {
         Ok(SapTableRow {
             table_def,
             elem_ref: row_ref,
+            header,
             cells,
             row_index: row.attr("rr").and_then(|s| s.parse::<u32>().ok()),
             user_data: row.attr("uDat").and_then(|s| Some(s.to_owned())),
@@ -120,6 +123,14 @@ impl<'a> SapTableRow<'a> {
     /// 행 종류를 반환합니다.
     pub fn row_type(&self) -> SapTableRowType {
         self.row_type
+    }
+
+    /// 행을 [`FromSapTable`]을 구현하는 형으로 변환합니다.
+    pub fn try_row_into<T: FromSapTable<'a>>(
+        &'a self,
+        body: &'a Body,
+    ) -> Result<T, WebDynproError> {
+        T::from_table(body, self.header, self)
     }
 }
 
