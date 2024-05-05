@@ -46,7 +46,7 @@ impl<'a> SapTableBody<'a> {
                 content: "Multiple header in table".to_owned(),
             });
         }
-        let mut rows_iter = ref_iter
+        let rows_iter = ref_iter
             .clone()
             .filter_map(|row_ref| SapTableRow::new(table_def.clone(), row_ref).ok())
             .filter(|row| !matches!(row.row_type(), SapTableRowType::Header));
