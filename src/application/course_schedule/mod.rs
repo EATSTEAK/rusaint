@@ -8,7 +8,7 @@ use crate::{
             action::ButtonPressCommand, layout::TabStripTabSelectCommand,
             selection::ComboBoxSelectCommand,
         },
-        element::{action::Button, complex::SapTable, definition::ElementDefinition, layout::TabStrip, selection::ComboBox},
+        element::{action::Button, complex::SapTable, definition::ElementDefinition, layout::{tab_strip::item::TabStripItem, TabStrip}, selection::ComboBox},
         error::WebDynproError,
     },
     RusaintError,
