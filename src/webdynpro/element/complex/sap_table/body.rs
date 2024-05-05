@@ -2,15 +2,15 @@ use std::{iter, ops::Index};
 
 use scraper::ElementRef;
 
-use crate::webdynpro::{element::ElementDef, error::ElementError};
+use crate::webdynpro::{element::definition::ElementDefinition, error::ElementError};
 
-use super::{property::SapTableRowType, row::SapTableRow, SapTable};
+use super::{property::SapTableRowType, row::SapTableRow, SapTableDef};
 
 /// [`SapTable`] 내부 테이블
 #[derive(Clone, custom_debug_derive::Debug)]
 #[allow(unused)]
 pub struct SapTableBody<'a> {
-    table_def: ElementDef<'a, SapTable<'a>>,
+    table_def: SapTableDef,
     #[debug(skip)]
     elem_ref: ElementRef<'a>,
     header: SapTableRow<'a>,
@@ -19,7 +19,7 @@ pub struct SapTableBody<'a> {
 
 impl<'a> SapTableBody<'a> {
     pub(super) fn new(
-        table_def: ElementDef<'a, SapTable<'a>>,
+        table_def: SapTableDef,
         elem_ref: ElementRef<'a>,
     ) -> Result<SapTableBody<'a>, ElementError> {
         let rows_iter = elem_ref
@@ -30,7 +30,10 @@ impl<'a> SapTableBody<'a> {
             .clone()
             .filter(|row| matches!(row.row_type(), SapTableRowType::Header));
         let Some(header) = header_iter.next() else {
-            return Err(ElementError::NoSuchContent { element: table_def.id().to_owned(), content: "Header of table".to_owned() });
+            return Err(ElementError::NoSuchContent {
+                element: table_def.id().to_owned(),
+                content: "Header of table".to_owned(),
+            });
         };
         if header_iter.next().is_some() {
             return Err(ElementError::InvalidContent {
@@ -69,8 +72,8 @@ impl<'a> SapTableBody<'a> {
         iter::once(self.header()).chain(self.rows.iter())
     }
 
-    /// 이 테이블의 원본 [`ElementDef`]를 반환합니다.
-    pub fn table_def(&self) -> ElementDef<'a, SapTable<'a>> {
+    /// 이 테이블의 원본 [`SapTableDef`]를 반환합니다.
+    pub fn table_def(&self) -> SapTableDef {
         self.table_def.clone()
     }
 

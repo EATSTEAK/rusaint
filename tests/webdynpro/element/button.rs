@@ -3,8 +3,7 @@ use rusaint::{
     define_elements,
     webdynpro::{
         element::{
-            action::{Button, Link},
-            text::TextView,
+            action::{Button, Link}, definition::ElementDefinition, text::TextView
         },
         error::WebDynproError,
     },

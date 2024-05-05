@@ -3,6 +3,6 @@ mod link;
 
 pub use self::button::{
     property::{ButtonDesign, ButtonInteractionBehaviour, ButtonType},
-    Button, ButtonLSData,
+    Button, ButtonDef, ButtonLSData,
 };
-pub use self::link::{Link, LinkLSData};
+pub use self::link::{Link, LinkDef, LinkLSData};

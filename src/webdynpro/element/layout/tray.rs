@@ -22,6 +22,8 @@ pub mod property {
 define_element_interactable! {
     #[doc = "열고 닫을 수 있는 트레이"]
     Tray<"TY", "Tray"> {},
+    #[doc = "[`Tray`]의 정의"]
+    TrayDef,
     #[doc = "[`Tray`] 내부 데이터"]
     TrayLSData {
         title: String => "0",

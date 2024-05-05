@@ -6,6 +6,8 @@ use super::property::{LockedDesign, Visibility};
 define_element_base! {
     #[doc = "HTML `flow` 레이아웃"]
     FlowLayout<"FL", "FlowLayout"> {},
+    #[doc = "[`FlowLayout`]의 정의"]
+    FlowLayoutDef,
     #[doc = "[`FlowLayout`] 내부 데이터"]
     FlowLayoutLSData {
         visibility: Visibility => "0",
@@ -27,6 +29,8 @@ impl<'a> FlowLayout<'a> {
 define_element_base! {
     #[doc = "가상 컨테이너"]
     Container<"CO", "Container"> {},
+    #[doc = "[`Container`]의 정의"]
+    ContainerDef,
     #[doc = "[`Container`] 내부 데이터"]
     ContainerLSData {
         locked: bool => "0",
@@ -56,9 +60,9 @@ pub mod grid_layout;
 pub mod tab_strip;
 
 #[doc(inline)]
-pub use self::grid_layout::{GridLayout, GridLayoutLSData};
+pub use self::grid_layout::{GridLayout, GridLayoutDef, GridLayoutLSData};
 #[doc(inline)]
-pub use self::tab_strip::{TabStrip, TabStripLSData};
+pub use self::tab_strip::{TabStrip, TabStripDef, TabStripLSData};
 
 mod button_row;
 mod form;
@@ -67,9 +71,9 @@ mod scroll_container;
 mod scrollbar;
 mod tray;
 
-pub use self::button_row::{ButtonRow, ButtonRowLSData};
-pub use self::form::{Form, FormData, FormLSData};
-pub use self::popup_window::{PopupWindow, PopupWindowLSData};
-pub use self::scroll_container::{ScrollContainer, ScrollContainerLSData};
-pub use self::scrollbar::{Scrollbar, ScrollbarLSData};
-pub use self::tray::{Tray, TrayLSData};
+pub use self::button_row::{ButtonRow, ButtonRowDef, ButtonRowLSData};
+pub use self::form::{Form, FormData, FormDef, FormLSData};
+pub use self::popup_window::{PopupWindow, PopupWindowDef, PopupWindowLSData};
+pub use self::scroll_container::{ScrollContainer, ScrollContainerDef, ScrollContainerLSData};
+pub use self::scrollbar::{Scrollbar, ScrollbarDef, ScrollbarLSData};
+pub use self::tray::{Tray, TrayDef, TrayLSData};

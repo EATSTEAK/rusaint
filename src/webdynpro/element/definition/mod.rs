@@ -1,4 +1,4 @@
-use std::{borrow::Cow, marker};
+use std::borrow::Cow;
 
 use scraper::Selector;
 
@@ -17,6 +17,10 @@ pub struct ElementNodeId {
 }
 
 impl ElementNodeId {
+    pub(super) fn new(body_hash: u64, node_id: ego_tree::NodeId) -> Self {
+        Self { body_hash, node_id }
+    }
+
     pub(super) fn body_hash(&self) -> u64 {
         self.body_hash
     }
@@ -27,96 +31,34 @@ impl ElementNodeId {
 }
 
 /// 컴파일 타임에서도 생성할 수 있는 [`Element`] 정의
-#[derive(Debug)]
-pub struct ElementDef<'a, T>
-where
-    T: Element<'a>,
-{
-    id: Cow<'static, str>,
-    node_id: Option<ElementNodeId>,
-    _marker: marker::PhantomData<&'a T>,
-}
-
-impl<'a, T: Element<'a>> Clone for ElementDef<'a, T> {
-    fn clone(&self) -> Self {
-        Self {
-            id: self.id.clone(),
-            node_id: self.node_id.clone(),
-            _marker: self._marker.clone(),
-        }
-    }
-
-    fn clone_from(&mut self, source: &Self) {
-        *self = source.clone()
-    }
-}
-
-impl<'a, T> ElementDef<'a, T>
-where
-    T: Element<'a>,
-{
-    /// 엘리먼트 정의를 생성합니다. 이 함수를 직접 실행하기보다는 [`define_elements`]매크로 사용을 추천합니다.
-    /// ### 예시
-    /// ```
-    /// # use rusaint::webdynpro::element::{definition::ElementDef, action::Button};
-    /// const BUTTON: ElementDef<'_, Button<'_>> = ElementDef::new("TEST.BUTTON1");
-    /// ```
-    pub const fn new(id: &'static str) -> ElementDef<'a, T> {
-        ElementDef {
-            id: Cow::Borrowed(id),
-            node_id: None,
-            _marker: std::marker::PhantomData,
-        }
-    }
+pub trait ElementDefinition<'body>: Sized {
+    /// 해당 정의가 생성할 수 있는 엘리먼트
+    type Element: Element<'body>;
 
     /// 런타임에서 엘리먼트 정의를 생성합니다. 엘리먼트의 Id 등을 컴파일 타임에서 미리 알 수 없는 경우 유용합니다.
     /// ### 예시
     /// ```
-    /// # use rusaint::webdynpro::element::{ definition::ElementDef, action::Button };
+    /// # use rusaint::webdynpro::element::{ action::ButtonDef, definition::ElementDefinition };
     /// # fn get_dynamic_button() -> String { return "TEST.BUTTON1".to_string() }
     /// let runtime_string: String = get_dynamic_button();
-    /// let button_def: ElementDef<'_, Button<'_>> = ElementDef::new_dynamic(runtime_string);
+    /// let button_def: ButtonDef = ButtonDef::new_dynamic(runtime_string);
     /// ```
-    pub fn new_dynamic(id: String) -> ElementDef<'a, T> {
-        ElementDef {
-            id: id.into(),
-            node_id: None,
-            _marker: std::marker::PhantomData,
-        }
-    }
+    fn new_dynamic(id: String) -> Self;
 
-    pub(crate) fn from_element_ref(
-        element: scraper::ElementRef<'a>,
-    ) -> Result<ElementDef<'a, T>, WebDynproError> {
-        let id = element.value().id().ok_or(BodyError::InvalidElement)?;
-        Ok(ElementDef {
-            id: id.to_string().into(),
-            node_id: None,
-            _marker: std::marker::PhantomData,
-        })
-    }
+    /// [`scraper::ElementRef`]에서 엘리먼트 정의를 생성합니다.
+    fn from_element_ref(element_ref: scraper::ElementRef<'_>) -> Result<Self, WebDynproError>;
 
     /// 빠른 엘리먼트 탐색을 위해 `ego_tree::NodeId`와 함께 엘리먼트 정의를 생성합니다.
-    pub fn with_node_id(
-        id: String,
-        body_hash: u64,
-        node_id: ego_tree::NodeId,
-    ) -> ElementDef<'a, T> {
-        ElementDef {
-            id: id.into(),
-            node_id: Some(ElementNodeId { body_hash, node_id }),
-            _marker: std::marker::PhantomData,
-        }
-    }
+    fn with_node_id(id: String, body_hash: u64, node_id: ego_tree::NodeId) -> Self;
 
     /// 엘리먼트의 Id를 반환합니다.
-    pub fn id(&self) -> &str {
-        &self.id
-    }
+    fn id(&self) -> &str;
 
-    pub(crate) fn id_cow(&self) -> Cow<'static, str> {
-        self.id.clone()
-    }
+    /// [`Cow`]형태의 Id가 필요한 경우 사용합니다.
+    fn id_cow(&self) -> Cow<'static, str>;
+
+    /// [`Body`]상 엘리먼트 노드 Id가 포함되었을 경우 이를 반환합니다.
+    fn node_id(&self) -> Option<&ElementNodeId>;
 
     /// `scraper`에서 이 엘리먼트를 선택할 수 있는 CSS Selector를 반환합니다.
     /// ### 예시
@@ -125,30 +67,31 @@ where
     /// const BUTTON: ElementDef<'_, Button<'_>> = ElementDef::new("TEST.BUTTON1");
     /// let selector = BUTTON.selector().unwrap();
     /// let btn_elem = body.document().select(&selector).next().unwrap();
-    /// let btn = ElementWrapper::dyn_elem(btn_elem).unwrap();
+    /// let btn = ElementWrapper::dyn_element(btn_elem).unwrap();
     /// if let ElementWrapper::Button(btn) = btn {
     ///     println!("It's button!");
     /// }
     /// ```
-    pub fn selector(&self) -> Result<Selector, WebDynproError> {
-        Ok(std::result::Result::or(
-            Selector::parse(format!(r#"[id="{}"]"#, &self.id).as_str()),
-            Err(BodyError::InvalidSelector),
-        )?)
+    fn selector(&self) -> Result<Selector, WebDynproError> {
+        Ok(
+            Selector::parse(format!(r#"[id="{}"]"#, self.id()).as_str()).or_else(|err| {
+                eprintln!("{err:?}");
+                Err(BodyError::InvalidSelector)
+            })?,
+        )
     }
 
     /// [`Body`]에서 엘리먼트를 불러옵니다.
-    pub fn from_body(&self, body: &'a Body) -> Result<T, WebDynproError> {
-        T::from_body(self, body)
+    fn from_body(&self, body: &'body Body) -> Result<Self::Element, WebDynproError> {
+        Self::Element::from_body(self, body)
     }
 
     /// `scraper::ElementRef`에서 엘리먼트를 불러옵니다.
-    pub fn from_elem(&self, element: scraper::ElementRef<'a>) -> Result<T, WebDynproError> {
-        T::from_elem(self, element)
-    }
-
-    pub(super) fn node_id(&self) -> Option<&ElementNodeId> {
-        (&self.node_id).as_ref()
+    fn from_element(
+        &self,
+        element_ref: scraper::ElementRef<'body>,
+    ) -> Result<Self::Element, WebDynproError> {
+        Self::Element::from_element(self, element_ref)
     }
 }
 

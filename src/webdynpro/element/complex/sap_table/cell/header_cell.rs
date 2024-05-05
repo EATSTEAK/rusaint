@@ -4,27 +4,32 @@ use scraper::Selector;
 
 use crate::webdynpro::{
     element::{
-        complex::sap_table::property::{
-            SapTableHeaderCellDesign, SapTableHeaderCellType, SapTableRowSelectionMassState,
-            SapTableSelectionColumnAction,
-        }, define_lsdata, property::SortState, Element, ElementDefWrapper, SubElement, SubElementDef
+        complex::{
+            sap_table::{
+                property::{
+                    SapTableHeaderCellDesign, SapTableHeaderCellType,
+                    SapTableRowSelectionMassState, SapTableSelectionColumnAction,
+                },
+                SapTableDef,
+            },
+            SapTable,
+        },
+        property::SortState,
+        sub::define_subelement,
+        ElementDefWrapper,
     },
-    error::{BodyError, WebDynproError},
+    error::BodyError,
 };
 
 use super::{SapTableCell, SapTableCellWrapper};
 
-/// 테이블의 헤더 셀
-#[derive(custom_debug_derive::Debug)]
-pub struct SapTableHeaderCell<'a> {
-    id: Cow<'static, str>,
-    #[debug(skip)]
-    element_ref: scraper::ElementRef<'a>,
-    lsdata: OnceCell<SapTableHeaderCellLSData>,
-    content: OnceCell<Option<ElementDefWrapper<'a>>>,
-}
-
-define_lsdata! {
+define_subelement! {
+    #[doc = "[`SapTable`]의 헤더 셀"]
+    SapTableHeaderCell<SapTable, SapTableDef, "HC", "SapTableHeaderCell"> {
+        content: OnceCell<Option<ElementDefWrapper<'a>>>
+    },
+    #[doc = "[`SapTableHeaderCell`]의 정의"]
+    SapTableHeaderCellDef,
     #[doc = "[`SapTableHeaderCell`] 내부 데이터"]
     SapTableHeaderCellLSData {
         sort_state: SortState => "0",
@@ -48,38 +53,6 @@ define_lsdata! {
     }
 }
 
-impl<'a> SubElement<'a> for SapTableHeaderCell<'a> {
-    const SUBCONTROL_ID: &'static str = "HC";
-    const ELEMENT_NAME: &'static str = "SapTableHeaderCell";
-
-    type SubElementLSData = SapTableHeaderCellLSData;
-
-    fn lsdata(&self) -> &Self::SubElementLSData {
-        self.lsdata.get_or_init(|| {
-            let Ok(lsdata_obj) = Self::lsdata_elem(self.element_ref) else {
-                return Self::SubElementLSData::default();
-            };
-            serde_json::from_value::<Self::SubElementLSData>(lsdata_obj)
-                .unwrap_or(Self::SubElementLSData::default())
-        })
-    }
-
-    fn from_elem<Parent: Element<'a>>(
-        elem_def: SubElementDef<'a, Parent, Self>,
-        element: scraper::ElementRef<'a>,
-    ) -> Result<Self, WebDynproError> {
-        Ok(Self::new(elem_def.id_cow(), element))
-    }
-
-    fn id(&self) -> &str {
-        &self.id
-    }
-
-    fn element_ref(&self) -> &scraper::ElementRef<'a> {
-        &self.element_ref
-    }
-}
-
 impl<'a> SapTableCell<'a> for SapTableHeaderCell<'a> {
     fn content(&self) -> Option<ElementDefWrapper<'a>> {
         self.content
@@ -95,7 +68,8 @@ impl<'a> SapTableCell<'a> for SapTableHeaderCell<'a> {
                         .to_owned(),
                 )
                 .ok()
-            }).to_owned()
+            })
+            .to_owned()
     }
 }
 

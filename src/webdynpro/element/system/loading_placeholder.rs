@@ -16,6 +16,8 @@ define_element_interactable! {
     #[doc = "[`Custom`]: crate::webdynpro::element::system::Custom"]
     #[doc = "[`ClientInspector`]: crate::webdynpro::element::system::ClientInspector"]
     LoadingPlaceholder<"LP", "LoadingPlaceHolder"> {},
+    #[doc = "[`LoadingPlaceholder`]의 정의"]
+    LoadingPlaceholderDef,
     #[doc = "[`LoadingPlaceholder`] 내부 데이터"]
     LoadingPlaceholderLSData {
         id: String => "0",

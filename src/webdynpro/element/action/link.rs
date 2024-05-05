@@ -13,6 +13,8 @@ use crate::webdynpro::{
 define_element_interactable! {
     #[doc = "액션을 수행하거나 링크로 이동하는 하이퍼링크"]
     Link<"LN", "Link"> {},
+    #[doc = "[`Link`]의 정의"]
+    LinkDef,
     #[doc ="[`Link`] 내부 데이터"]
     LinkLSData {
         tooltip: String => "0",

@@ -12,6 +12,8 @@ use super::list_box::ListBoxWrapper;
 define_element_interactable! {
     #[doc = "목록 혹은 직접 입력하여 선택할 수 있는 콤보 박스"]
     ComboBox<"CB", "ComboBox"> {},
+    #[doc = "[`ComboBox`]의 정의"]
+    ComboBoxDef,
     #[doc = "[`ComboBox`] 내부 데이터"]
     ComboBoxLSData {
         width: String => "0",
@@ -77,7 +79,7 @@ impl<'a> ComboBox<'a> {
             .next()
             .ok_or(BodyError::NoSuchElement(listbox_id.to_owned()))?;
         Ok(
-            ListBoxWrapper::from_elements(ElementWrapper::dyn_elem(elem)?)
+            ListBoxWrapper::from_elements(ElementWrapper::dyn_element(elem)?)
                 .ok_or(BodyError::NoSuchElement(listbox_id.to_owned()))?,
         )
     }

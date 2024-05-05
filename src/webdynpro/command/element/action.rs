@@ -1,23 +1,23 @@
 use crate::webdynpro::{
     client::EventProcessResult,
     command::WebDynproCommand,
-    element::{action::Button, definition::ElementDef},
+    element::{action::ButtonDef, definition::ElementDefinition},
     error::WebDynproError,
 };
 
 /// 주어진 [`Button`]을 누름
-pub struct ButtonPressCommand<'a> {
-    element_def: ElementDef<'a, Button<'a>>,
+pub struct ButtonPressCommand {
+    element_def: ButtonDef,
 }
 
-impl<'a> ButtonPressCommand<'a> {
+impl ButtonPressCommand {
     /// 새로운 명령 객체를 생성합니다.
-    pub fn new(element_def: ElementDef<'a, Button<'a>>) -> ButtonPressCommand<'a> {
+    pub fn new(element_def: ButtonDef) -> ButtonPressCommand {
         ButtonPressCommand { element_def }
     }
 }
 
-impl<'a> WebDynproCommand for ButtonPressCommand<'a> {
+impl WebDynproCommand for ButtonPressCommand {
     type Result = EventProcessResult;
 
     async fn dispatch(

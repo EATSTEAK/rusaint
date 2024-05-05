@@ -6,6 +6,8 @@ define_element_base! {
     // Note: This element renders as "TSITM_ie6" if >= IE6
     #[doc = "[`TabStrip`](crate::webdynpro::element::layout::TabStrip) 내부 아이템"]
     TabStripItem<"TSITM_standards", "TabStripTab"> {},
+    #[doc = "[`TabStripItem`]의 정의"]
+    TabStripItemDef,
     #[doc = "[`TabStripItem`] 내부 데이터"]
     TabStripItemLSData {
         id: String => "0",
