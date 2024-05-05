@@ -8,7 +8,13 @@ use crate::{
             action::ButtonPressCommand, layout::TabStripTabSelectCommand,
             selection::ComboBoxSelectCommand,
         },
-        element::{action::Button, complex::SapTable, definition::ElementDefinition, layout::{tab_strip::item::TabStripItem, TabStrip}, selection::ComboBox},
+        element::{
+            action::Button,
+            complex::SapTable,
+            definition::ElementDefinition,
+            layout::{tab_strip::item::TabStripItem, TabStrip},
+            selection::ComboBox,
+        },
         error::WebDynproError,
     },
     RusaintError,
@@ -34,14 +40,118 @@ impl USaintApplication for CourseSchedule {
 
 #[allow(unused)]
 impl<'a> CourseSchedule {
+    // 메인 요소
     define_elements! {
         PERIOD_YEAR: ComboBox<'a> = "ZCMW_PERIOD_RE.ID_A61C4ED604A2BFC2A8F6C6038DE6AF18:VIW_MAIN.PERYR";
         PERIOD_ID: ComboBox<'a> = "ZCMW_PERIOD_RE.ID_A61C4ED604A2BFC2A8F6C6038DE6AF18:VIW_MAIN.PERID";
         TABLE_ROWS: ComboBox<'a> = "ZCMW2100.ID_0001:VIW_MODULES.ROWS";
         TABSTRIP: TabStrip<'a> = "ZCMW2100.ID_0001:VIW_MAIN.MODULE_TABSTRIP";
-        TAB_EDU: TabStripItem<'a> = "ZCMW2100.ID_0001:VIW_MAIN.TAB_EDU";
-        BUTTON_EDU: Button<'a> = "ZCMW2100.ID_0001:VIW_MAIN.BUTTON_EDU";
         MAIN_TABLE: SapTable<'a> = "SALV_WD_TABLE.ID_DE0D9128A4327646C94670E2A892C99C:VIEW_TABLE.SALV_WD_UIE_TABLE";
+    }
+
+    // 학부전공별
+    define_elements! {
+        TAB_OTHERS: TabStripItem<'a> = "ZCMW2100.ID_0001:VIW_MAIN.TAB_OTHERS";
+        OTHERS_DDK_LV3: ComboBox<'a> = "ZCMW2100.ID_0001:VIW_TAB_OTHERS.DDK_LV3";
+        OTHERS_DDK_LV4: ComboBox<'a> = "ZCMW2100.ID_0001:VIW_TAB_OTHERS.DDK_LV4";
+        OTHERS_DDK_LV5: ComboBox<'a> = "ZCMW2100.ID_0001:VIW_TAB_OTHERS.DDK_LV5";
+        SEARCH_OTHERS: Button<'a> = "ZCMW2100.ID_0001:VIW_TAB_OTHERS.BUTTON";
+    }
+
+    // 교양필수
+    define_elements! {
+        TAB_GENERAL_REQ: TabStripItem<'a> = "ZCMW2100.ID_0001:VIW_MAIN.TAB_GENERAL_REQ";
+        GENERAL_REQ_TYPE: ComboBox<'a> = "ZCMW2100.ID_0001:VIW_TAB_GENERAL_REQ.SM_OBJID";
+        SEARCH_GENERAL_REQ: Button<'a> = "ZCMW2100.ID_0001:VIW_TAB_GENERAL_REQ.BUTTON_SEARCH";
+    }
+
+    // 교양선택
+    define_elements! {
+        TAB_GENERAL_OPT: TabStripItem<'a> = "ZCMW2100.ID_0001:VIW_MAIN.TAB_GENERAL_OPT";
+        GENERAL_OPT_DISCIPLINES: ComboBox<'a> = "ZCMW2100.ID_0001:VIW_TAB_GENERAL_OPT.DISCIPLINES";
+        SEARCH_GENERAL_OPT: Button<'a> = "ZCMW2100.ID_0001:VIW_TAB_GENERAL_OPT.BUTTON_SEARCH";
+    }
+
+    // 채플
+    define_elements! {
+        TAB_CHAPEL: TabStripItem<'a> = "ZCMW2100.ID_0001:VIW_MAIN.TAB_CHAPEL_REQ";
+        CHAPEL_TYPE: ComboBox<'a> = "ZCMW2100.ID_0001:VIW_TAB_CHAPEL_REQ.SM_OBJID";
+        SEARCH_CHAPEL: Button<'a> = "ZCMW2100.ID_0001:VIW_TAB_CHAPEL_REQ.BUTTON_SEARCH";
+    }
+
+    // 교직
+    define_elements! {
+        TAB_EDU: TabStripItem<'a> = "ZCMW2100.ID_0001:VIW_MAIN.TAB_EDU";
+        SEARCH_EDU: Button<'a> = "ZCMW2100.ID_0001:VIW_MAIN.BUTTON_EDU";
+    }
+
+    // 평생교육사
+    define_elements! {
+        TAB_LIFELONG: TabStripItem<'a> = "ZCMW2100.ID_0001:VIW_MAIN.TAB_LIFELONG";
+        SEARCH_LIFELONG: Button<'a> = "ZCMW2100.ID_0001:VIW_MAIN.BUTTON_LIFELONG";
+    }
+
+    // 일반선택
+    define_elements! {
+        TAB_ROTC_CYBER: TabStripItem<'a> = "ZCMW2100.ID_0001:VIW_MAIN.TAB_ROTC_CYBER";
+        SEARCH_ROTC_CYBER: Button<'a> = "ZCMW2100.ID_0001:VIW_MAIN.BUTTON_ROTC_CYBER";
+    }
+
+    // 대학원
+    define_elements! {
+        TAB_GRADUATE: TabStripItem<'a> = "ZCMW2100.ID_0001:VIW_MAIN.TAB_GRADUATE";
+        GRADUATE_DDK_LV3: ComboBox<'a> = "ZCMW2100.ID_0001:VIW_TAB_GRADUATE.DDK_LV3";
+        GRADUATE_DDK_LV4: ComboBox<'a> = "ZCMW2100.ID_0001:VIW_TAB_GRADUATE.DDK_LV4";
+        SEARCH_GRADUATE: Button<'a> = "ZCMW2100.ID_0001:VIW_TAB_GRADUATE.BUTTON";
+    }
+
+    // 연계전공
+    define_elements! {
+        TAB_YOMA: TabStripItem<'a> = "ZCMW2100.ID_0001:VIW_MAIN.TAB_YOMA";
+        COMBO_YOMA: ComboBox<'a> = "ZCMW2100.ID_0001:VIW_TAB_YOMA.CONNECT_MAJO";
+        SEARCH_YOMA: Button<'a> = "ZCMW2100.ID_0001:VIW_TAB_YOMA.BUTTON_SEARCH";
+    }
+
+    // 융합전공
+    define_elements! {
+        TAB_UNMA: TabStripItem<'a> = "ZCMW2100.ID_0001:VIW_MAIN.TAB_UNMA";
+        COMBO_UNMA: ComboBox<'a> = "ZCMW2100.ID_0001:VIW_TAB_UNMA.CG_OBJID";
+        SEARCH_UNMA: Button<'a> = "ZCMW2100.ID_0001:VIW_TAB_UNMA.BUTTON_SEARCH";
+    }
+
+    // 교수명검색
+    define_elements! {
+        TAB_PROFESSOR: TabStripItem<'a> = "ZCMW2100.ID_0001:VIW_MAIN.TAB_PROFESSOR";
+        COMBO_PROFESSOR: Unknown<'a> = "ZCMW2100.ID_0001:VIW_TAB_PROFESSOR.PROFESSOR"; // TODO: implement ComboBoxString
+        SEARCH_PROFESSOR: Button<'a> = "ZCMW2100.ID_0001:VIW_TAB_PROFESSOR.BUTTON_SEARCH";
+    }
+
+    // 과목검색
+    define_elements! {
+        TAB_SEARCH: TabStripItem<'a> = "ZCMW2100.ID_0001:VIW_MAIN.TAB_SEARCH";
+        COMBO_SEARCH: Unknown<'a> = "ZCMW2100.ID_0001:VIW_TAB_SEARCH.SEARCH_TEXT";
+        SEARCH_SEARCH: Button<'a> = "ZCMW2100.ID_0001:VIW_TAB_SEARCH.BUTTON_SEARCH";
+    }
+
+    // 타전공인정과목
+    define_elements! {
+        TAB_OTHER_GC: TabStripItem<'a> = "ZCMW2100.ID_0001:VIW_MAIN.TAB_OTHER_GC";
+        OTHER_GC_DDK_LV3: ComboBox<'a> = "ZCMW2100.ID_0001:VIW_TAB_OTHER_GC.DDK_LV3";
+        OTHER_GC_DDK_LV4: ComboBox<'a> = "ZCMW2100.ID_0001:VIW_TAB_OTHER_GC.DDK_LV4";
+        OTHER_GC_DDK_LV5: ComboBox<'a> = "ZCMW2100.ID_0001:VIW_TAB_OTHER_GC.DDK_LV5";
+        SEARCH_OTHER_GC: Button<'a> = "ZCMW2100.ID_0001:VIW_TAB_OTHER_GC.BTN_OTHER_GC";
+    }
+
+    // 듀얼리스팅과목
+    define_elements! {
+        TAB_DUALLT_SM: TabStripItem<'a> = "ZCMW2100.ID_0001:VIW_MAIN.TAB_DUALLT_SM";
+        SEARCH_DUALLT: Button<'a> = "ZCMW2100.ID_0001:VIW_TAB_DUALLT_SM.BTN_DUALLT_SM";
+    }
+
+    // 숭실사이버대
+    define_elements! {
+        TAB_CYBER: TabStripItem<'a> = "ZCMW2100.ID_0001:VIW_MAIN.TAB_CYBER";
+        SEARCH_CYBER: Button<'a> = "ZCMW2100.ID_0001:VIW_MAIN.BTN_CYBER";
     }
 
     fn semester_to_key(period: SemesterType) -> &'static str {
@@ -82,36 +192,6 @@ impl<'a> CourseSchedule {
         Ok(())
     }
 
-    async fn select_edu(&mut self) -> Result<(), WebDynproError> {
-        self.client
-            .send(TabStripTabSelectCommand::new(
-                Self::TABSTRIP,
-                Self::TAB_EDU,
-                4,
-                0,
-            ))
-            .await?;
-        Ok(())
-    }
-
-    async fn search_edu(&mut self) -> Result<(), WebDynproError> {
-        self.client
-            .send(ButtonPressCommand::new(Self::BUTTON_EDU))
-            .await?;
-        Ok(())
-    }
-
-    async fn load_edu(&mut self) -> Result<(), WebDynproError> {
-        self.select_edu().await?;
-        self.search_edu().await?;
-        Ok(())
-    }
-
-    pub fn read_edu_raw(&self) -> Result<SapTable, WebDynproError> {
-        let main_table = Self::MAIN_TABLE.from_body(self.client.body())?;
-        Ok(main_table)
-    }
-
     pub async fn find_lectures(
         &mut self,
         year: &str,
@@ -132,7 +212,10 @@ mod test {
     use crate::{
         application::{course_schedule::CourseSchedule, USaintClientBuilder},
         webdynpro::element::{
-            complex::sap_table::cell::{SapTableCell, SapTableCellWrapper}, definition::ElementDefinition, selection::list_box::{item::ListBoxItemWrapper, ListBoxWrapper}, ElementWrapper
+            complex::sap_table::cell::{SapTableCell, SapTableCellWrapper},
+            definition::ElementDefinition,
+            selection::list_box::{item::ListBoxItemWrapper, ListBoxWrapper},
+            ElementWrapper,
         },
     };
 
@@ -174,43 +257,6 @@ mod test {
             }
             _ => {
                 panic!("Unknown Listbox type {:?}", listbox);
-            }
-        }
-        assert!(true);
-    }
-
-    #[tokio::test]
-    async fn table_test() {
-        let mut app = USaintClientBuilder::new()
-            .build_into::<CourseSchedule>()
-            .await
-            .unwrap();
-        app.load_edu().await.unwrap();
-        let table = app.read_edu_raw().unwrap();
-        if let Ok(table) = table.table() {
-            for row in table.iter() {
-                print!("row: ");
-                for col in row.iter_value(app.body()) {
-                    match col {
-                        Ok(SapTableCellWrapper::Header(cell)) => {
-                            let content = cell.content();
-                            print!("Header: ");
-                            if let Some(elem) = content {
-                                print!("{:?}, ", elem);
-                            }
-                        }
-                        Ok(SapTableCellWrapper::Normal(cell)) => {
-                            let content = cell.content();
-                            if let Some(elem) = content {
-                                print!("{:?}, ", elem);
-                            }
-                        }
-                        _ => {
-                            print!("{:?}, ", col);
-                        }
-                    }
-                }
-                println!("");
             }
         }
         assert!(true);
