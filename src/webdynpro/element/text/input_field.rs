@@ -6,6 +6,8 @@ use crate::webdynpro::element::define_element_interactable;
 define_element_interactable! {
     #[doc = "입력 필드"]
     InputField<"I", "InputField"> {},
+    #[doc = "[`InputField`]의 정의"]
+    InputFieldDef,
     #[doc = "[`InputField`] 내부 데이터"]
     InputFieldLSData {
         value: String => "0",

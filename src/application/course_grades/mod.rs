@@ -10,11 +10,18 @@ use crate::{
             selection::{ComboBoxSelectCommand, ReadComboBoxLSDataCommand},
         },
         element::{
-            action::Button, complex::sap_table::{
+            action::ButtonDef,
+            complex::sap_table::{
                 cell::{SapTableCell, SapTableCellWrapper},
                 property::SapTableCellType,
                 SapTable, SapTableRow,
-            }, definition::ElementDef, layout::PopupWindow, selection::ComboBox, text::InputField, Element, ElementDefWrapper, ElementWrapper, SubElement
+            },
+            definition::ElementDefinition,
+            layout::PopupWindow,
+            selection::ComboBox,
+            sub::SubElement,
+            text::InputField,
+            Element, ElementDefWrapper, ElementWrapper,
         },
         error::{BodyError, ElementError, WebDynproError},
         event::Event,
@@ -92,7 +99,7 @@ impl<'a> CourseGrades {
                     .unwrap();
             let mut popup_iter = body.document().select(&popup_selector);
             popup_iter.next().and_then(|elem| {
-                let elem_wrapped = ElementWrapper::dyn_elem(elem).ok()?;
+                let elem_wrapped = ElementWrapper::dyn_element(elem).ok()?;
                 if let ElementWrapper::PopupWindow(popup) = elem_wrapped {
                     popup.close().ok()
                 } else {
@@ -189,11 +196,18 @@ impl<'a> CourseGrades {
                 match val {
                     Ok(cell) => match cell.content() {
                         Some(ElementDefWrapper::TextView(tv)) => {
-                            (|| { Some(tv.from_body(self.client.body()).ok()?.text().to_owned()) })()
-                        },
-                        Some(ElementDefWrapper::Caption(cap)) => {
-                            (|| { Some(cap.from_body(self.client.body()).ok()?.lsdata().text().unwrap_or(&String::default()).to_owned()) })()
+                            (|| Some(tv.from_body(self.client.body()).ok()?.text().to_owned()))()
                         }
+                        Some(ElementDefWrapper::Caption(cap)) => (|| {
+                            Some(
+                                cap.from_body(self.client.body())
+                                    .ok()?
+                                    .lsdata()
+                                    .text()
+                                    .unwrap_or(&String::default())
+                                    .to_owned(),
+                            )
+                        })(),
                         _ => None,
                     },
                     Err(_) => None,
@@ -364,9 +378,9 @@ impl<'a> CourseGrades {
         Ok(ret.collect())
     }
 
-    async fn class_detail_in_popup<'f>(
+    async fn class_detail_in_popup(
         &mut self,
-        open_button: ElementDef<'f, Button<'f>>,
+        open_button: ButtonDef,
     ) -> Result<HashMap<String, f32>, WebDynproError> {
         self.client
             .send(ButtonPressCommand::new(open_button))
@@ -379,7 +393,7 @@ impl<'a> CourseGrades {
             let table_ref = table_inside_popup
                 .next()
                 .ok_or(BodyError::NoSuchElement("Table in popup".to_string()))?;
-            let table_elem: SapTable<'_> = ElementWrapper::dyn_elem(table_ref)?.try_into()?;
+            let table_elem: SapTable<'_> = ElementWrapper::dyn_element(table_ref)?.try_into()?;
             let zip = (|| Some(table_elem.table().ok()?.zip_header().next()?))()
                 .and_then(|(header, row)| {
                     let header = self.row_to_string(header)?;
@@ -478,7 +492,7 @@ impl<'a> CourseGrades {
         for (btn_id, values) in class_grades {
             let detail: Option<HashMap<String, f32>> = if let Some(btn_id) = btn_id {
                 if include_details {
-                    let btn_def = ElementDef::<Button<'_>>::new_dynamic(btn_id);
+                    let btn_def = ButtonDef::new_dynamic(btn_id);
                     Some(self.class_detail_in_popup(btn_def).await?)
                 } else {
                     None
@@ -542,7 +556,9 @@ impl<'a> CourseGrades {
                 .find(|row| match row[8].clone().from_body(self.client.body()) {
                     Ok(cell) => {
                         if let Some(ElementDefWrapper::TextView(code_elem)) = cell.content() {
-                            code_elem.from_body(self.client.body()).is_ok_and(|elem| elem.text() == code)
+                            code_elem
+                                .from_body(self.client.body())
+                                .is_ok_and(|elem| elem.text() == code)
                         } else {
                             false
                         }
@@ -552,9 +568,7 @@ impl<'a> CourseGrades {
                 .and_then(|row| match row[4].clone().from_body(self.client.body()) {
                     Ok(cell) => {
                         if let Some(ElementDefWrapper::Button(btn)) = cell.content() {
-                            Some(ElementDef::<'_, Button<'_>>::new_dynamic(
-                                btn.id().to_owned(),
-                            ))
+                            Some(ButtonDef::new_dynamic(btn.id().to_owned()))
                         } else {
                             None
                         }

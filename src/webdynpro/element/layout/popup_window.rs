@@ -10,6 +10,8 @@ use crate::webdynpro::element::{define_element_interactable, Interactable};
 define_element_interactable! {
     #[doc = "브라우저 창 내부에 모달 등의 팝업으로 표시되는 창"]
     PopupWindow<"PW", "PopupWindow"> {},
+    #[doc = "[`PopupWindow`]의 정의"]
+    PopupWindowDef,
     #[doc = "[`PopupWindow`] 내부 데이터"]
     PopupWindowLSData {
         is_resizable: bool => "0",

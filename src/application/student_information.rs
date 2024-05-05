@@ -64,7 +64,7 @@ mod test {
             .unwrap();
         let ct_selector = scraper::Selector::parse("[ct]").unwrap();
         for elem_ref in app.body().document().select(&ct_selector) {
-            let elem = ElementWrapper::dyn_elem(elem_ref);
+            let elem = ElementWrapper::dyn_element(elem_ref);
             if let Ok(elem) = elem {
                 println!("{:?}", elem);
             }

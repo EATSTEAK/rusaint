@@ -4,124 +4,72 @@ use scraper::Selector;
 
 use crate::webdynpro::{
     client::body::Body,
-    element::{Element, SubElement},
-    error::{BodyError, ElementError, WebDynproError},
+    element::{definition::ElementDefinition, sub::SubElement, Element},
+    error::{ElementError, WebDynproError},
 };
 
-use super::{ElementDef, ElementNodeId};
+use super::ElementNodeId;
 
-/// [`SapTable`]등에서 사용하는 [`SubElement`]
-#[derive(Debug)]
-pub struct SubElementDef<'a, Parent, T>
-where
-    Parent: Element<'a>,
-    T: SubElement<'a>,
-{
-    id: Cow<'static, str>,
-    parent: ElementDef<'a, Parent>,
-    node_id: Option<ElementNodeId>,
-    _marker: std::marker::PhantomData<&'a T>,
-}
+/// [`SapTable`]등에서 사용하는 [`SubElement`]의 정의
+pub trait SubElementDefinition<'body>: Sized {
+    /// 부모 [`Element`]
+    type Parent: Element<'body>;
 
-impl<'a, Parent: Element<'a>, T: SubElement<'a>> Clone for SubElementDef<'a, Parent, T> {
-    fn clone(&self) -> Self {
-        Self {
-            id: self.id.clone(),
-            parent: self.parent.clone(),
-            node_id: self.node_id.clone(),
-            _marker: self._marker.clone(),
-        }
-    }
-
-    fn clone_from(&mut self, source: &Self) {
-        *self = source.clone()
-    }
-}
-
-impl<'a, Parent, T> SubElementDef<'a, Parent, T>
-where
-    Parent: Element<'a>,
-    T: SubElement<'a>,
-{
-    /// 새로운 서브 엘리먼트의 정의를 만듭니다.
-    pub const fn new(
-        parent: ElementDef<'a, Parent>,
-        id: &'static str,
-    ) -> SubElementDef<'a, Parent, T> {
-        SubElementDef {
-            id: Cow::Borrowed(id),
-            parent,
-            node_id: None,
-            _marker: std::marker::PhantomData,
-        }
-    }
+    /// 이 정의가 생성하는 [`SubElement`]
+    type SubElement: SubElement<'body>;
 
     /// 런타임에서 서브 엘리먼트의 정의를 만듭니다.
-    pub fn new_dynamic(parent: ElementDef<'a, Parent>, id: String) -> SubElementDef<'a, Parent, T> {
-        SubElementDef {
-            id: id.into(),
-            parent,
-            node_id: None,
-            _marker: std::marker::PhantomData,
-        }
-    }
+    fn new_dynamic(parent: <Self::Parent as Element<'body>>::Def, id: String) -> Self;
 
     /// 빠른 엘리먼트 탐색을 위해 `ego_tree::NodeId`와 함께 서브 엘리먼트 정의를 생성합니다.
-    pub fn with_node_id(
+    fn with_node_id(
         id: String,
-        parent: ElementDef<'a, Parent>,
+        parent: <Self::Parent as Element<'body>>::Def,
         body_hash: u64,
         node_id: ego_tree::NodeId,
-    ) -> SubElementDef<'a, Parent, T> {
-        SubElementDef {
-            id: id.into(),
-            parent,
-            node_id: Some(ElementNodeId { body_hash, node_id }),
-            _marker: std::marker::PhantomData,
-        }
-    }
+    ) -> Self;
 
-    pub(crate) fn from_element_ref(
-        parent: ElementDef<'a, Parent>,
-        element: scraper::ElementRef<'a>,
-    ) -> Result<SubElementDef<'a, Parent, T>, WebDynproError> {
-        let id = element.value().id().ok_or(BodyError::InvalidElement)?;
-        Ok(SubElementDef {
-            id: id.to_string().into(),
-            parent,
-            node_id: None,
-            _marker: std::marker::PhantomData,
-        })
-    }
+    /// [`scraper::ElementRef`]에서 엘리먼트 정의를 생성합니다.
+    fn from_element_ref(
+        parent: <Self::Parent as Element<'body>>::Def,
+        element: scraper::ElementRef<'body>,
+    ) -> Result<Self, WebDynproError>;
 
     /// 서브 엘리먼트의 Id를 반환합니다.
-    pub fn id(&self) -> &str {
-        &self.id
-    }
+    fn id(&self) -> &str;
 
-    pub(crate) fn id_cow(&self) -> Cow<'static, str> {
-        self.id.clone()
-    }
+    /// [`Cow`]형태의 Id가 필요한 경우 사용합니다.
+    fn id_cow(&self) -> Cow<'static, str>;
+
+    /// [`Body`]상 엘리먼트 노드 Id가 포함되었을 경우 이를 반환합니다.
+    fn node_id(&self) -> Option<&ElementNodeId>;
+
+    /// 이 [`SubElement`]의 부모 [`Element`]의 정의를 반환합니다.
+    fn parent(&self) -> &<Self::Parent as Element<'body>>::Def;
 
     /// 서브 엘리먼트의 CSS Selector를 반환합니다.
-    pub fn selector(&self) -> Result<Selector, WebDynproError> {
-        Selector::parse(format!(r#"[id="{}"] [id="{}"]"#, self.parent.id, self.id).as_str())
+    fn selector(&self) -> Result<Selector, WebDynproError> {
+        Selector::parse(format!(r#"[id="{}"] [id="{}"]"#, self.parent().id(), self.id()).as_str())
             .or_else(|e| {
                 println!("{e:?}");
                 Err(ElementError::InvalidId(format!(
                     "{}, {}",
-                    self.parent.id, self.id
+                    self.parent().id(),
+                    self.id()
                 )))?
             })
     }
 
     /// [`Body`]에서 서브 엘리먼트를 가져옵니다.
-    pub fn from_body(self, body: &'a Body) -> Result<T, WebDynproError> {
-        T::from_body(self, body)
+    fn from_body(&self, body: &'body Body) -> Result<Self::SubElement, WebDynproError> {
+        Self::SubElement::from_body(self, body)
     }
 
     /// [`scraper::ElementRef`]에서 서브 엘리먼트를 가져옵니다.
-    pub fn from_elem(self, element: scraper::ElementRef<'a>) -> Result<T, WebDynproError> {
-        T::from_elem(self, element)
+    fn from_element(
+        &self,
+        element: scraper::ElementRef<'body>,
+    ) -> Result<Self::SubElement, WebDynproError> {
+        Self::SubElement::from_subelement(self, element)
     }
 }

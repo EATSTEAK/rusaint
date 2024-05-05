@@ -3,7 +3,7 @@ use std::{borrow::Cow, cell::OnceCell, collections::HashMap};
 use scraper::Selector;
 
 use crate::webdynpro::{
-    element::{define_element_interactable, ElementDef, Interactable},
+    element::{define_element_interactable, definition::ElementDefinition, Interactable},
     error::{BodyError, ElementError, WebDynproError},
     event::Event,
 };
@@ -15,6 +15,8 @@ define_element_interactable! {
     SapTable<"ST", "SapTable"> {
         table: OnceCell<Option<SapTableBody<'a>>>,
     },
+    #[doc = "[`SapTable`]의 정의"]
+    SapTableDef,
     #[doc = "[`SapTable`] 내부 데이터"]
     SapTableLSData {
         title_text: String => "0",
@@ -48,11 +50,11 @@ impl<'a> SapTable<'a> {
     }
 
     fn parse_table(&self) -> Result<SapTableBody<'a>, WebDynproError> {
-        let def: ElementDef<'a, SapTable<'a>> = {
+        let def: SapTableDef = {
             if let Cow::Borrowed(id) = self.id {
-                ElementDef::new(id)
+                SapTableDef::new(id)
             } else {
-                ElementDef::new_dynamic((&self.id).to_string())
+                SapTableDef::new_dynamic((&self.id).to_string())
             }
         };
         let element = self.element_ref;

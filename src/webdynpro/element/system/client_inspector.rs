@@ -2,12 +2,11 @@ use std::{borrow::Cow, cell::OnceCell, collections::HashMap};
 
 use serde::{Deserialize, Serialize};
 
-use crate::webdynpro::error::WebDynproError;
+use crate::webdynpro::element::definition::{ElementDefinition, ElementNodeId};
+use crate::webdynpro::error::{BodyError, WebDynproError};
 use crate::webdynpro::event::Event;
 
-use crate::webdynpro::element::{
-    Element, ElementDef, ElementWrapper, EventParameterMap, Interactable,
-};
+use crate::webdynpro::element::{Element, ElementWrapper, EventParameterMap, Interactable};
 
 /// 클라이언트의 변경 사항을 감시
 ///
@@ -124,6 +123,61 @@ pub struct ClientInspectorLSData {
     parent_accessible: Option<String>,
 }
 
+#[doc = "[`ClientInspector`]의 정의"]
+#[derive(Clone, Debug)]
+pub struct ClientInspectorDef {
+    id: Cow<'static, str>,
+    node_id: Option<ElementNodeId>,
+}
+
+impl ClientInspectorDef {
+    /// 엘리먼트의 정의를 생성합니다.
+    pub const fn new(id: &'static str) -> Self {
+        Self {
+            id: Cow::Borrowed(id),
+            node_id: None,
+        }
+    }
+}
+
+impl<'body> ElementDefinition<'body> for ClientInspectorDef {
+    type Element = ClientInspector<'body>;
+
+    fn new_dynamic(id: String) -> Self {
+        Self {
+            id: id.into(),
+            node_id: None,
+        }
+    }
+
+    fn from_element_ref(element_ref: scraper::ElementRef<'_>) -> Result<Self, WebDynproError> {
+        let id = element_ref.value().id().ok_or(BodyError::InvalidElement)?;
+        Ok(Self {
+            id: id.to_string().into(),
+            node_id: None,
+        })
+    }
+
+    fn with_node_id(id: String, body_hash: u64, node_id: ego_tree::NodeId) -> Self {
+        Self {
+            id: id.into(),
+            node_id: Some(ElementNodeId::new(body_hash, node_id)),
+        }
+    }
+
+    fn id(&self) -> &str {
+        &self.id
+    }
+
+    fn id_cow(&self) -> Cow<'static, str> {
+        self.id.clone()
+    }
+
+    fn node_id(&self) -> Option<&ElementNodeId> {
+        (&self.node_id).as_ref()
+    }
+}
+
 impl<'a> Element<'a> for ClientInspector<'a> {
     const CONTROL_ID: &'static str = "CI";
 
@@ -131,9 +185,11 @@ impl<'a> Element<'a> for ClientInspector<'a> {
 
     type ElementLSData = ClientInspectorLSData;
 
+    type Def = ClientInspectorDef;
+
     fn lsdata(&self) -> &Self::ElementLSData {
         self.lsdata.get_or_init(|| {
-            let Ok(lsdata_obj) = Self::lsdata_elem(self.element_ref) else {
+            let Ok(lsdata_obj) = Self::lsdata_element(self.element_ref) else {
                 return ClientInspectorLSData::default();
             };
             serde_json::from_value::<Self::ElementLSData>(lsdata_obj)
@@ -141,8 +197,8 @@ impl<'a> Element<'a> for ClientInspector<'a> {
         })
     }
 
-    fn from_elem(
-        elem_def: &ElementDef<'a, Self>,
+    fn from_element(
+        elem_def: &impl ElementDefinition<'a>,
         element: scraper::ElementRef<'a>,
     ) -> Result<Self, WebDynproError> {
         Ok(Self::new(elem_def.id_cow(), element))
@@ -161,14 +217,14 @@ impl<'a> Element<'a> for ClientInspector<'a> {
     }
 
     fn children(&self) -> Vec<ElementWrapper<'a>> {
-        Self::children_elem(self.element_ref().clone())
+        Self::children_element(self.element_ref().clone())
     }
 }
 
 impl<'a> Interactable<'a> for ClientInspector<'a> {
     fn lsevents(&self) -> Option<&EventParameterMap> {
         self.lsevents
-            .get_or_init(|| Self::lsevents_elem(self.element_ref).ok())
+            .get_or_init(|| Self::lsevents_element(self.element_ref).ok())
             .as_ref()
     }
 }

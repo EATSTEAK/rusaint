@@ -10,6 +10,8 @@ define_element_interactable! {
     Form<"FOR", "Form"> {
         data: OnceCell<FormData>
     },
+    #[doc = "[`Form`]의 정의"]
+    FormDef,
     #[doc = "[`Form`] 내부 데이터"]
     FormLSData {
         has_event_queue: bool => "0",

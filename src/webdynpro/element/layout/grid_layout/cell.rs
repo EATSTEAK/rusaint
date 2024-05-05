@@ -6,6 +6,8 @@ use crate::webdynpro::element::define_element_interactable;
 define_element_interactable! {
     #[doc = "[`GridLayout`](crate::webdynpro::element::layout::GridLayout) 내부 셀"]
     GridLayoutCell<"GLC", "GridLayoutCell"> {},
+    #[doc = "[`GridLayoutCell`]의 정의"]
+    GridLayoutCellDef,
     #[doc = "[`GridLayoutCell`] 내부 데이터"]
     GridLayoutCellLSData {
         drag_data: String => "0",
