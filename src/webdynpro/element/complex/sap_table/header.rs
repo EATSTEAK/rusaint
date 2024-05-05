@@ -3,20 +3,19 @@ use std::ops::Index;
 use scraper::ElementRef;
 
 use crate::webdynpro::{
-    client::body::Body,
-    error::{ElementError, WebDynproError},
+    client::body::Body, element::definition::ElementDefinition, error::{ElementError, WebDynproError}
 };
 
 use super::{
     cell::{SapTableCellDefWrapper, SapTableCellWrapper},
     property::{SapTableRowType, SapTableSelectionState},
-    FromSapTable, SapTableDef, SapTableHeader,
+    SapTableDef,
 };
 
 /// [`SapTable`]의 행
 #[derive(Clone, custom_debug_derive::Debug)]
 #[allow(unused)]
-pub struct SapTableRow<'a> {
+pub struct SapTableHeader<'a> {
     table_def: SapTableDef,
     #[debug(skip)]
     elem_ref: ElementRef<'a>,
@@ -27,25 +26,31 @@ pub struct SapTableRow<'a> {
     drop_target_info: Option<String>,
     parent_drop_target_info: Option<String>,
     selection_state: SapTableSelectionState,
-    row_type: SapTableRowType,
 }
 
-impl<'a> SapTableRow<'a> {
+impl<'a> SapTableHeader<'a> {
     pub(super) fn new(
         table_def: SapTableDef,
-        row_ref: ElementRef<'a>,
-    ) -> Result<SapTableRow<'a>, ElementError> {
-        let row = row_ref.value();
+        header_ref: ElementRef<'a>,
+    ) -> Result<SapTableHeader<'a>, ElementError> {
+        let row = header_ref.value();
         let subct_selector = scraper::Selector::parse("[subct]").unwrap();
-        let subcts = row_ref.select(&subct_selector);
+        let subcts = header_ref.select(&subct_selector);
         let cells = subcts
             .filter_map(|subct_ref| {
                 SapTableCellDefWrapper::dyn_cell_def(table_def.clone(), subct_ref)
             })
             .collect::<Vec<SapTableCellDefWrapper>>();
-        Ok(SapTableRow {
+        let row_type = row
+        .attr("rt")
+        .and_then(|s| Some(s.into()))
+        .unwrap_or(SapTableRowType::default());
+        if !matches!(row_type, SapTableRowType::Header) {
+            return Err(ElementError::InvalidContent { element: table_def.id().to_string(), content: "Header of table is invalid".to_string() })
+        }
+        Ok(SapTableHeader {
             table_def,
-            elem_ref: row_ref,
+            elem_ref: header_ref,
             cells,
             row_index: row.attr("rr").and_then(|s| s.parse::<u32>().ok()),
             user_data: row.attr("uDat").and_then(|s| Some(s.to_owned())),
@@ -56,10 +61,6 @@ impl<'a> SapTableRow<'a> {
                 .attr("sst")
                 .and_then(|s| Some(s.into()))
                 .unwrap_or(SapTableSelectionState::default()),
-            row_type: row
-                .attr("rt")
-                .and_then(|s| Some(s.into()))
-                .unwrap_or(SapTableRowType::default()),
         })
     }
 
@@ -116,52 +117,12 @@ impl<'a> SapTableRow<'a> {
     pub fn selection_state(&self) -> SapTableSelectionState {
         self.selection_state
     }
-
-    /// 행 종류를 반환합니다.
-    pub fn row_type(&self) -> SapTableRowType {
-        self.row_type
-    }
-
-    /// 행을 [`FromSapTable`]을 구현하는 형으로 변환합니다.
-    pub fn try_row_into<T: FromSapTable<'a>>(
-        &'a self,
-        header: &'a SapTableHeader<'a>,
-        body: &'a Body,
-    ) -> Result<T, WebDynproError> {
-        T::from_table(body, header, self)
-    }
 }
 
-impl<'a> Index<usize> for SapTableRow<'a> {
+impl<'a> Index<usize> for SapTableHeader<'a> {
     type Output = SapTableCellDefWrapper;
 
     fn index(&self, index: usize) -> &Self::Output {
         &self.cells[index]
-    }
-}
-
-impl From<&str> for SapTableSelectionState {
-    fn from(s: &str) -> Self {
-        match s {
-            "4" => Self::NotSelectable,
-            "0" => Self::NotSelected,
-            "2" => Self::Selected,
-            "1" => Self::PrimarySelected,
-            _ => Self::None,
-        }
-    }
-}
-
-impl From<&str> for SapTableRowType {
-    fn from(s: &str) -> Self {
-        match s {
-            "1" => Self::Standard,
-            "2" => Self::Header,
-            "3" => Self::Filter,
-            "4" => Self::TopFixed,
-            "5" => Self::BottomFixed,
-            "6" => Self::Pivot,
-            _ => Self::Unspecified,
-        }
     }
 }
