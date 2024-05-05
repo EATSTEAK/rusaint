@@ -1,3 +1,3 @@
 mod image;
 
-pub use image::{Image, ImageLSData};
+pub use image::{Image, ImageDef, ImageLSData};

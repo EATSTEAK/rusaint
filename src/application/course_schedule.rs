@@ -3,7 +3,7 @@ use crate::{
     model::SemesterType,
     webdynpro::{
         client::body::Body,
-        element::{action::Button, complex::SapTable, layout::TabStrip, selection::ComboBox},
+        element::{action::Button, complex::SapTable, definition::ElementDefinition, layout::TabStrip, selection::ComboBox},
         error::WebDynproError,
     },
     RusaintError,
@@ -118,9 +118,7 @@ mod test {
     use crate::{
         application::{course_schedule::CourseSchedule, USaintClientBuilder},
         webdynpro::element::{
-            complex::sap_table::cell::{SapTableCell, SapTableCellWrapper},
-            selection::list_box::{item::ListBoxItemWrapper, ListBoxWrapper},
-            ElementWrapper,
+            complex::sap_table::cell::{SapTableCell, SapTableCellWrapper}, definition::ElementDefinition, selection::list_box::{item::ListBoxItemWrapper, ListBoxWrapper}, ElementWrapper
         },
     };
 
@@ -132,7 +130,7 @@ mod test {
             .unwrap();
         let ct_selector = scraper::Selector::parse("[ct]").unwrap();
         for elem_ref in app.body().document().select(&ct_selector) {
-            let elem = ElementWrapper::dyn_elem(elem_ref);
+            let elem = ElementWrapper::dyn_element(elem_ref);
             if let Ok(elem) = elem {
                 println!("{:?}", elem);
             }
@@ -176,7 +174,7 @@ mod test {
         app.load_edu().await.unwrap();
         let table = app.read_edu_raw().unwrap();
         if let Ok(table) = table.table() {
-            for row in table.with_header() {
+            for row in table.iter() {
                 print!("row: ");
                 for col in row.iter_value(app.body()) {
                     match col {

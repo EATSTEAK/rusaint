@@ -196,7 +196,7 @@ pub async fn obtain_ssu_sso_token(id: &str, password: &str) -> Result<String, Ss
 
 #[cfg(test)]
 mod test {
-    use crate::session::{obtain_ssu_sso_token, USaintSession};
+    use crate::session::USaintSession;
     use dotenv::dotenv;
 
     #[tokio::test]

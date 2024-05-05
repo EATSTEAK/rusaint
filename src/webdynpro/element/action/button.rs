@@ -69,6 +69,8 @@ pub mod property {
 define_element_interactable! {
     #[doc = "누를 수 있는 버튼"]
     Button<"B", "Button"> {},
+    #[doc = "[`Button`]의 정의"]
+    ButtonDef,
     #[doc = "[`Button`]의 내부 데이터"]
     ButtonLSData {
         text: String => "0",

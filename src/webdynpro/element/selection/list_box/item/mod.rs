@@ -25,6 +25,8 @@ define_element_base! {
         group_title: OnceCell<Option<&'a str>>,
         title: OnceCell<&'a str>,
     },
+    #[doc = "[`ListBoxItem`]의 정의"]
+    ListBoxItemDef,
     #[doc = "[`ListBoxItem`] 내부 데이터"]
     ListBoxItemLSData {
         icon_src: String => "0",
@@ -157,4 +159,4 @@ impl<'a> ListBoxItem<'a> {
 
 mod action_item;
 
-pub use self::action_item::{ListBoxActionItem, ListBoxActionItemLSData};
+pub use self::action_item::{ListBoxActionItem, ListBoxActionItemDef, ListBoxActionItemLSData};

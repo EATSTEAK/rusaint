@@ -10,17 +10,18 @@ use crate::{
             selection::{ComboBoxSelectCommand, ReadComboBoxLSDataCommand},
         },
         element::{
-            action::Button,
+            action::ButtonDef,
             complex::sap_table::{
                 cell::{SapTableCell, SapTableCellWrapper},
                 property::SapTableCellType,
-                SapTable, SapTableRow,
+                SapTable,
             },
-            definition::ElementDef,
+            definition::ElementDefinition,
             layout::PopupWindow,
             selection::ComboBox,
+            sub::SubElement,
             text::InputField,
-            Element, ElementWrapper, SubElement,
+            Element, ElementDefWrapper, ElementWrapper,
         },
         error::{BodyError, ElementError, WebDynproError},
         event::Event,
@@ -98,7 +99,7 @@ impl<'a> CourseGrades {
                     .unwrap();
             let mut popup_iter = body.document().select(&popup_selector);
             popup_iter.next().and_then(|elem| {
-                let elem_wrapped = ElementWrapper::dyn_elem(elem).ok()?;
+                let elem_wrapped = ElementWrapper::dyn_element(elem).ok()?;
                 if let ElementWrapper::PopupWindow(popup) = elem_wrapped {
                     popup.close().ok()
                 } else {
@@ -178,34 +179,6 @@ impl<'a> CourseGrades {
                 .await?;
         }
         Ok(())
-    }
-
-    fn row_to_string(&'a self, row: &'a SapTableRow<'a>) -> Option<Vec<String>> {
-        if row.len() == 0
-            || !row[0]
-                .clone()
-                .from_body(self.client.body())
-                .is_ok_and(|cell| !cell.is_empty_row())
-        {
-            return None;
-        };
-        let iter = row.iter_value(self.client.body());
-        Some(
-            iter.map(|val| {
-                match val {
-                    Ok(cell) => match cell.content() {
-                        Some(ElementWrapper::TextView(tv)) => Some(tv.text().to_owned()),
-                        Some(ElementWrapper::Caption(cap)) => {
-                            Some(cap.lsdata().text().unwrap_or(&String::default()).to_owned())
-                        }
-                        _ => None,
-                    },
-                    Err(_) => None,
-                }
-                .unwrap_or("".to_string())
-            })
-            .collect::<Vec<String>>(),
-        )
     }
 
     fn value_as_f32(field: InputField<'_>) -> Result<f32, WebDynproError> {
@@ -328,8 +301,8 @@ impl<'a> CourseGrades {
         let table_elem = Self::GRADES_SUMMARY_TABLE.from_body(self.client.body())?;
         let table = table_elem.table()?;
         let ret = table
-            .iter()
-            .filter_map(|row| self.row_to_string(row))
+            .try_table_into::<Vec<String>>(self.client.body())?
+            .into_iter()
             .filter_map(|values| {
                 if values.len() == 14 {
                     Some(SemesterGrade::new(
@@ -368,9 +341,9 @@ impl<'a> CourseGrades {
         Ok(ret.collect())
     }
 
-    async fn class_detail_in_popup<'f>(
+    async fn class_detail_in_popup(
         &mut self,
-        open_button: ElementDef<'f, Button<'f>>,
+        open_button: ButtonDef,
     ) -> Result<HashMap<String, f32>, WebDynproError> {
         self.client
             .send(ButtonPressCommand::new(open_button))
@@ -383,17 +356,17 @@ impl<'a> CourseGrades {
             let table_ref = table_inside_popup
                 .next()
                 .ok_or(BodyError::NoSuchElement("Table in popup".to_string()))?;
-            let table_elem: SapTable<'_> = ElementWrapper::dyn_elem(table_ref)?.try_into()?;
-            let zip = (|| Some(table_elem.table().ok()?.zip_header().next()?))()
-                .and_then(|(header, row)| {
-                    let header = self.row_to_string(header)?;
-                    let row = self.row_to_string(row)?;
-                    Some(header.into_iter().zip(row.into_iter()))
-                })
+            let table_elem: SapTable<'_> = ElementWrapper::dyn_element(table_ref)?.try_into()?;
+            let table_body = table_elem.table()?;
+            let zip = table_body
+                .iter()
+                .next()
                 .ok_or(ElementError::InvalidContent {
                     element: table_elem.id().to_string(),
                     content: "header and first row".to_string(),
-                })?;
+                })?
+                .try_row_into::<Vec<(String, String)>>(table_body.header(), body)?
+                .into_iter();
             zip.skip(4)
                 .map(|(key, val)| {
                     Ok((
@@ -460,14 +433,15 @@ impl<'a> CourseGrades {
         self.select_semester(year, semester).await?;
         let class_grades: Vec<(Option<String>, Vec<String>)> = {
             let grade_table_elem = Self::GRADE_BY_CLASSES_TABLE.from_body(self.client.body())?;
-            let iter = grade_table_elem.table()?.iter();
+            let grade_table_body = grade_table_elem.table()?;
+            let iter = grade_table_body.iter();
             iter.map(|row| {
                 let btn_id = row[4]
                     .clone()
                     .from_body(self.client.body())
                     .ok()
                     .and_then(|cell| {
-                        if let Some(ElementWrapper::Button(btn)) = cell.content() {
+                        if let Some(ElementDefWrapper::Button(btn)) = cell.content() {
                             Some(btn.id().to_owned())
                         } else {
                             None
@@ -475,14 +449,18 @@ impl<'a> CourseGrades {
                     });
                 (btn_id, row)
             })
-            .filter_map(|(btn_id, row)| self.row_to_string(row).and_then(|row| Some((btn_id, row))))
+            .filter_map(|(btn_id, row)| {
+                row.try_row_into::<Vec<String>>(grade_table_body.header(), self.client.body())
+                    .ok()
+                    .and_then(|row| Some((btn_id, row)))
+            })
             .collect()
         };
         let mut ret: Vec<ClassGrade> = vec![];
         for (btn_id, values) in class_grades {
             let detail: Option<HashMap<String, f32>> = if let Some(btn_id) = btn_id {
                 if include_details {
-                    let btn_def = ElementDef::<Button<'_>>::new_dynamic(btn_id);
+                    let btn_def = ButtonDef::new_dynamic(btn_id);
                     Some(self.class_detail_in_popup(btn_def).await?)
                 } else {
                     None
@@ -545,8 +523,10 @@ impl<'a> CourseGrades {
                 .iter()
                 .find(|row| match row[8].clone().from_body(self.client.body()) {
                     Ok(cell) => {
-                        if let Some(ElementWrapper::TextView(code_elem)) = cell.content() {
-                            code_elem.text() == code
+                        if let Some(ElementDefWrapper::TextView(code_elem)) = cell.content() {
+                            code_elem
+                                .from_body(self.client.body())
+                                .is_ok_and(|elem| elem.text() == code)
                         } else {
                             false
                         }
@@ -555,10 +535,8 @@ impl<'a> CourseGrades {
                 })
                 .and_then(|row| match row[4].clone().from_body(self.client.body()) {
                     Ok(cell) => {
-                        if let Some(ElementWrapper::Button(btn)) = cell.content() {
-                            Some(ElementDef::<'_, Button<'_>>::new_dynamic(
-                                btn.id().to_owned(),
-                            ))
+                        if let Some(ElementDefWrapper::Button(btn)) = cell.content() {
+                            Some(ButtonDef::new_dynamic(btn.id().to_owned()))
                         } else {
                             None
                         }

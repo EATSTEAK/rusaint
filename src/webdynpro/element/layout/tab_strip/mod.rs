@@ -3,7 +3,7 @@ use std::{borrow::Cow, cell::OnceCell, collections::HashMap};
 use scraper::Selector;
 
 use crate::webdynpro::{
-    element::{define_element_interactable, Element, ElementDef, Interactable},
+    element::{define_element_interactable, definition::ElementDefinition, Element, Interactable},
     error::{BodyError, WebDynproError},
     event::Event,
 };
@@ -16,8 +16,10 @@ define_element_interactable! {
     #[doc = ""]
     #[doc = "> |**참고**| 이 엘리먼트는 실제 구현에서 >= IE6 용 구현과 기본 구현으로 나누어져 있지만, rusaint에서는 최신의 브라우저를 기준으로 하므로 전자의 구현은 구현되어있지 않습니다."]
     TabStrip<"TS_standards", "TabStrip"> {
-        tab_items: OnceCell<Vec<ElementDef<'a, TabStripItem<'a>>>>,
+        tab_items: OnceCell<Vec<<TabStripItem<'a> as Element<'a>>::Def>>,
     },
+    #[doc = "[`TabStrip`]의 정의"]
+    TabStripDef,
     #[doc = "[`TabStrip`] 내부 데이터"]
     TabStripLSData {
         current_index: i32 => "0",
@@ -54,7 +56,7 @@ impl<'a> TabStrip<'a> {
     /// 탭 내부 [`TabStripItem`]을 반환합니다.
     pub fn tab_items(
         &self,
-    ) -> impl Iterator<Item = &ElementDef<'a, TabStripItem<'a>>> + ExactSizeIterator {
+    ) -> impl Iterator<Item = &<TabStripItem<'a> as Element<'a>>::Def> + ExactSizeIterator {
         self.tab_items
             .get_or_init(|| {
                 let Ok(items_selector) =
@@ -67,7 +69,9 @@ impl<'a> TabStrip<'a> {
                     .select(&items_selector)
                     .filter_map(|eref| {
                         let id = eref.value().id()?;
-                        Some(ElementDef::<TabStripItem>::new_dynamic(id.to_owned()))
+                        Some(<TabStripItem<'a> as Element<'a>>::Def::new_dynamic(
+                            id.to_owned(),
+                        ))
                     })
                     .collect()
             })

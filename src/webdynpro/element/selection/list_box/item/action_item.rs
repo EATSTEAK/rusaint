@@ -8,6 +8,8 @@ define_element_base! {
         title: OnceCell<String>,
         text: OnceCell<String>,
     },
+    #[doc = "[`ListBoxActionItem`]의 정의"]
+    ListBoxActionItemDef,
     #[doc = "[`ListBoxActionItem`]의 내부 데이터"]
     ListBoxActionItemLSData {
         custom_data: String => "0",

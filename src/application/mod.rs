@@ -9,6 +9,7 @@ use crate::{
         command::WebDynproCommand,
         element::{
             define_elements,
+            definition::ElementDefinition,
             system::{ClientInspector, Custom, CustomClientInfo, LoadingPlaceholder},
         },
         error::WebDynproError,

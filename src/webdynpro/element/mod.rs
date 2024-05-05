@@ -5,7 +5,7 @@ use regex::Regex;
 use scraper::ElementRef;
 use serde_json::{Map, Value};
 
-use self::{action::{Button, Link}, complex::SapTable, definition::{sub::SubElementDef, ElementDef}, graphic::Image, layout::{grid_layout::cell::GridLayoutCell, tab_strip::item::TabStripItem, ButtonRow, Container, FlowLayout, Form, GridLayout, PopupWindow, ScrollContainer, Scrollbar, TabStrip, Tray}, selection::{list_box::{item::{ListBoxActionItem, ListBoxItem}, ListBoxMultiple, ListBoxPopup, ListBoxPopupFiltered, ListBoxPopupJson, ListBoxPopupJsonFiltered, ListBoxSingle}, ComboBox}, system::{ClientInspector, Custom, LoadingPlaceholder}, text::{Caption, InputField, Label, TextView}};
+use self::{action::{Button, Link}, complex::SapTable, definition::ElementDefinition, graphic::Image, layout::{grid_layout::cell::GridLayoutCell, tab_strip::item::TabStripItem, ButtonRow, Container, FlowLayout, Form, GridLayout, PopupWindow, ScrollContainer, Scrollbar, TabStrip, Tray}, selection::{list_box::{item::{ListBoxActionItem, ListBoxItem}, ListBoxMultiple, ListBoxPopup, ListBoxPopupFiltered, ListBoxPopupJson, ListBoxPopupJsonFiltered, ListBoxSingle}, ComboBox}, system::{ClientInspector, Custom, LoadingPlaceholder}, text::{Caption, InputField, Label, TextView}};
 
 use super::{event::{ucf_parameters::UcfParameters, Event, EventBuilder}, error::{ElementError, BodyError, WebDynproError}, client::body::Body};
 
@@ -71,6 +71,8 @@ macro_rules! define_element_base {
         $name:ident<$controlid:literal, $element_name:literal> {
             $($sfield:ident : $stype:ty),* $(,)?
         },
+        $(#[$def_outer:meta])*
+        $def_name:ident,
         $(#[$lsdata_outer:meta])*
         $lsdata:ident {
             $(
@@ -79,6 +81,62 @@ macro_rules! define_element_base {
             ),* $(,)?
         }
     } => {
+
+        $(#[$def_outer])*
+        #[derive(Clone, Debug)]
+        pub struct $def_name {
+            id: std::borrow::Cow<'static, str>,
+            node_id: Option<crate::webdynpro::element::definition::ElementNodeId>
+        }
+
+        impl $def_name {
+            /// 엘리먼트 정의를 생성합니다. 이 함수를 직접 실행하기보다는 [`define_elements`]매크로 사용을 추천합니다.
+            pub const fn new(id: &'static str) -> Self {
+                Self {
+                    id: std::borrow::Cow::Borrowed(id),
+                    node_id: None
+                }
+            }
+        }
+
+        impl<'body> $crate::webdynpro::element::definition::ElementDefinition<'body> for $def_name {
+            type Element = $name<'body>;
+            
+            fn new_dynamic(id: String) -> Self {
+                Self {
+                    id: id.into(),
+                    node_id: None
+                }
+            }
+
+            fn from_element_ref(element_ref: scraper::ElementRef<'_>) -> Result<Self, $crate::webdynpro::error::WebDynproError> {
+                let id = element_ref.value().id().ok_or($crate::webdynpro::error::BodyError::InvalidElement)?;
+                Ok(Self {
+                    id: id.to_string().into(),
+                    node_id: None
+                })
+            }
+
+            fn with_node_id(id: String, body_hash: u64, node_id: ego_tree::NodeId) -> Self {
+                Self {
+                    id: id.into(),
+                    node_id: Some($crate::webdynpro::element::definition::ElementNodeId::new(body_hash, node_id))
+                }
+            }
+
+            fn id(&self) -> &str {
+                &self.id
+            }
+
+            fn id_cow(&self) -> Cow<'static, str> {
+                self.id.clone()
+            }
+
+            fn node_id(&self) -> Option<&$crate::webdynpro::element::definition::ElementNodeId> {
+                (&self.node_id).as_ref()
+            }
+        }
+
         $(#[$outer])*
         #[derive(custom_debug_derive::Debug)]
         #[allow(unused)]
@@ -97,21 +155,23 @@ macro_rules! define_element_base {
 
             type ElementLSData = $lsdata;
 
+            type Def = $def_name;
+
             fn lsdata(&self) -> &Self::ElementLSData {
                 self.lsdata
                     .get_or_init(|| {
-                        let Ok(lsdata_obj) = Self::lsdata_elem(self.element_ref) else {
+                        let Ok(lsdata_obj) = Self::lsdata_element(self.element_ref) else {
                             return $lsdata::default();
                         };
                         serde_json::from_value::<Self::ElementLSData>(lsdata_obj).ok().unwrap_or($lsdata::default())
                     })
             }
 
-            fn from_elem(
-                elem_def: &$crate::webdynpro::element::definition::ElementDef<'a, Self>,
+            fn from_element(
+                element_def: &impl $crate::webdynpro::element::definition::ElementDefinition<'a>,
                 element: scraper::ElementRef<'a>,
             ) -> Result<Self, $crate::webdynpro::error::WebDynproError> {
-                Ok(Self::new(elem_def.id_cow(), element))
+                Ok(Self::new($crate::webdynpro::element::definition::ElementDefinition::id_cow(element_def), element))
             }
 
             fn id(&self) -> &str {
@@ -127,7 +187,7 @@ macro_rules! define_element_base {
             }
 
             fn children(&self) -> Vec<$crate::webdynpro::element::ElementWrapper<'a>> {
-                Self::children_elem(self.element_ref().clone())
+                Self::children_element(self.element_ref().clone())
             }
         }
         
@@ -149,6 +209,8 @@ macro_rules! define_element_interactable {
         $name:ident<$controlid:literal, $element_name:literal> {
             $($sfield:ident : $stype:ty),* $(,)?
         },
+        $(#[$def_outer:meta])*
+        $def_name:ident,
         $(#[$lsdata_outer:meta])*
         $lsdata:ident {
             $(
@@ -163,6 +225,8 @@ macro_rules! define_element_interactable {
                 lsevents: std::cell::OnceCell<Option<$crate::webdynpro::element::EventParameterMap>>,
                 $($sfield : $stype, )*
             },
+            $(#[$def_outer])*
+            $def_name,
             $(#[$lsdata_outer])*
             $lsdata {
                 $(
@@ -175,7 +239,7 @@ macro_rules! define_element_interactable {
         impl<'a> $crate::webdynpro::element::Interactable<'a> for $name<'a> {
             fn lsevents(&self) -> Option<&$crate::webdynpro::element::EventParameterMap> {
                 self.lsevents
-                    .get_or_init(|| Self::lsevents_elem(self.element_ref).ok())
+                    .get_or_init(|| Self::lsevents_element(self.element_ref).ok())
                     .as_ref()
             }
         }
@@ -215,13 +279,13 @@ macro_rules! register_elements {
 
         impl<'a> ElementWrapper<'a> {
         	/// 분류를 알 수 없는 엘리먼트의 `scraper::ElementRef`로 [`ElementWrapper`]를 반환합니다.
-            pub fn dyn_elem(element: scraper::ElementRef<'a>) -> Result<ElementWrapper, WebDynproError> {
+            pub fn dyn_element(element: scraper::ElementRef<'a>) -> Result<ElementWrapper, WebDynproError> {
                 let value = element.value();
                 let id = value.id().ok_or(BodyError::NoSuchAttribute("id".to_owned()))?.to_owned();
                 #[allow(unreachable_patterns)]
                 match element.value().attr("ct") {
-                    $( Some(<$type>::CONTROL_ID) => Ok($crate::webdynpro::element::definition::ElementDef::<$type>::new_dynamic(id).from_elem(element)?.wrap()), )*
-                    _ => Ok($crate::webdynpro::element::definition::ElementDef::<$crate::webdynpro::element::unknown::Unknown>::new_dynamic(id).from_elem(element)?.wrap())
+                    $( Some(<$type>::CONTROL_ID) => Ok(<$type as $crate::webdynpro::element::Element<'a>>::Def::new_dynamic(id).from_element(element)?.wrap()), )*
+                    _ => Ok(<$crate::webdynpro::element::unknown::Unknown as $crate::webdynpro::element::Element<'a>>::Def::new_dynamic(id).from_element(element)?.wrap())
                 }
             }
         }
@@ -238,6 +302,27 @@ macro_rules! register_elements {
                 }
             }
         )+
+
+        /// 다양한 [`Element`]를 대상으로 하는 [`ElementDef`]를 공통의 타입으로 취급할 수 있게 하는 Wrapper
+        #[allow(missing_docs)]
+        #[derive(Clone, Debug)]
+        pub enum ElementDefWrapper<'a> {
+            $( $enum(<$type as $crate::webdynpro::element::Element<'a>>::Def), )*
+            Unknown(<$crate::webdynpro::element::unknown::Unknown<'a> as $crate::webdynpro::element::Element<'a>>::Def)
+        }
+
+        impl<'a> ElementDefWrapper<'a> {
+        	/// 분류를 알 수 없는 엘리먼트의 `scraper::ElementRef`로 [`ElementDefWrapper`]를 반환합니다.
+            pub fn dyn_elem_def(element: scraper::ElementRef<'a>) -> Result<ElementDefWrapper<'a>, WebDynproError> {
+                let value = element.value();
+                let id = value.id().ok_or(BodyError::NoSuchAttribute("id".to_owned()))?.to_owned();
+                #[allow(unreachable_patterns)]
+                match element.value().attr("ct") {
+                    $( Some(<$type>::CONTROL_ID) => Ok(ElementDefWrapper::$enum(<$type as $crate::webdynpro::element::Element<'a>>::Def::new_dynamic(id))), )*
+                    _ => Ok(ElementDefWrapper::Unknown(<$crate::webdynpro::element::unknown::Unknown<'a> as $crate::webdynpro::element::Element<'a>>::Def::new_dynamic(id)))
+                }
+            }
+        }
         
     };
 }
@@ -300,7 +385,7 @@ macro_rules! define_elements {
     ;)+) => {
         $(
             $(#[$attr])*
-            $v const $name: $crate::webdynpro::element::definition::ElementDef<$lt, $eltype<$lt>> = $crate::webdynpro::element::definition::ElementDef::new($id);
+            $v const $name: <$eltype<$lt> as $crate::webdynpro::element::Element<$lt>>::Def = <$eltype<$lt> as $crate::webdynpro::element::Element<$lt>>::Def::new($id);
         )*
     };
     ($(
@@ -309,7 +394,7 @@ macro_rules! define_elements {
     ;)+) => {
         $(
             $(#[$attr])*
-            const $name: $crate::webdynpro::element::definition::ElementDef<$lt, $eltype<$lt>> = $crate::webdynpro::element::definition::ElementDef::new($id);
+            const $name: <$eltype<$lt> as $crate::webdynpro::element::Element<$lt>>::Def = <$eltype<$lt> as $crate::webdynpro::element::Element<$lt>>::Def::new($id);
         )*
     }
 }
@@ -333,25 +418,28 @@ pub trait Element<'a>: Sized {
     const CONTROL_ID: &'static str;
     /// WebDynpro 상에서 사용하는 엘리먼트의 이름
     const ELEMENT_NAME: &'static str;
-/// 엘리먼트의 LSData
+    /// 엘리먼트의 LSData
     type ElementLSData;
+
+    /// 엘리먼트의 정의
+    type Def: ElementDefinition<'a>;
 	
     /// 엘리먼트의 JSON 객체 형태의 LSData를 반환합니다.
-    fn lsdata_elem(element: scraper::ElementRef) -> Result<Value, WebDynproError> {
+    fn lsdata_element(element: scraper::ElementRef) -> Result<Value, WebDynproError> {
         let raw_data = element.value().attr("lsdata").ok_or(ElementError::InvalidLSData(element.value().id().unwrap().to_string()))?;
         let normalized = normalize_lsjson(raw_data);
         return Ok(serde_json::from_str(&normalized).or(Err(ElementError::InvalidLSData(element.value().id().unwrap().to_string())))?);
     }
 
 	/// 엘리먼트 정의와 [`Body`]에서 엘리먼트를 가져옵니다.
-    fn from_body(elem_def: &ElementDef<'a, Self>, body: &'a Body) -> Result<Self, WebDynproError> {
+    fn from_body(elem_def: &impl ElementDefinition<'a>, body: &'a Body) -> Result<Self, WebDynproError> {
         if let Some(node_id) = elem_def.node_id() {
             let mut hasher = DefaultHasher::new();
             body.hash(&mut hasher);
             let body_hash = hasher.finish();
             if body_hash == node_id.body_hash() {
                 if let Some(elem) = body.document().tree.get(node_id.node_id()).and_then(|node| ElementRef::wrap(node)) {
-                    return Self::from_elem(elem_def, elem)
+                    return Self::from_element(elem_def, elem)
                 }
             }
         }
@@ -361,14 +449,14 @@ pub trait Element<'a>: Sized {
             .select(selector)
             .next()
             .ok_or(ElementError::InvalidId(elem_def.id().to_owned()))?;
-        Self::from_elem(elem_def, element)
+        Self::from_element(elem_def, element)
     }
 
 	/// 엘리먼트 정의와 [`scraper::ElementRef`]에서 엘리먼트를 가져옵니다.
-    fn from_elem(elem_def: &ElementDef<'a, Self>, element: scraper::ElementRef<'a>) -> Result<Self, WebDynproError>;
+    fn from_element(elem_def: &impl ElementDefinition<'a>, element: scraper::ElementRef<'a>) -> Result<Self, WebDynproError>;
 
 	/// 엘리먼트의 자식 엘리먼트를 가져옵니다.
-    fn children_elem(root: scraper::ElementRef<'a>) -> Vec<ElementWrapper<'a>> {
+    fn children_element(root: scraper::ElementRef<'a>) -> Vec<ElementWrapper<'a>> {
         let mut next_refs = vec![root];
         let mut cts: Vec<ElementRef<'_>> = vec![];
         while let Some(elem) = next_refs.pop() {
@@ -384,7 +472,7 @@ pub trait Element<'a>: Sized {
                 }
             }
         }
-        cts.into_iter().rev().filter_map(|eref| ElementWrapper::dyn_elem(eref).ok()).collect()
+        cts.into_iter().rev().filter_map(|eref| ElementWrapper::dyn_element(eref).ok()).collect()
     }
 
 	/// 엘리먼트의 자식 엘리먼트를 가져옵니다.
@@ -420,7 +508,7 @@ pub trait Interactable<'a>: Element<'a> {
     }
 
 	/// 엘리먼트가 발생시킬 수 있는 이벤트와 파라메터를 가져옵니다.
-    fn lsevents_elem(element: scraper::ElementRef) -> Result<EventParameterMap, WebDynproError> {
+    fn lsevents_element(element: scraper::ElementRef) -> Result<EventParameterMap, WebDynproError> {
         let raw_data = element.value().attr("lsevents").ok_or(BodyError::Invalid("Cannot find lsevents from element".to_string()))?;
         let normalized = normalize_lsjson(raw_data);
         let json: Map<String, Value> = serde_json::from_str::<Map<String, Value>>(&normalized).or(Err(BodyError::Invalid("Cannot deserialize lsevents field".to_string())))?.to_owned();
@@ -455,48 +543,5 @@ pub trait Interactable<'a>: Element<'a> {
     fn lsevents(&self) -> Option<&EventParameterMap>;
 }
 
-/// 서브 엘리먼트의 기능
-pub trait SubElement<'a>: Sized {
-	/// WebDynpro 내부에서 사용하는 서브 엘리먼트의 Id
-    const SUBCONTROL_ID: &'static str;
-    /// WebDynpro 내부에서 사용하는 서브 엘리먼트의 이름
-    const ELEMENT_NAME: &'static str;
-    /// 서브 엘리먼트의 LSData
-    type SubElementLSData;
-
-	/// 서브 엘리먼트의 LSData를 JSON 객체 형태로 반환합니다.
-    fn lsdata_elem(element: scraper::ElementRef) -> Result<Value, WebDynproError> {
-        let raw_data = element.value().attr("lsdata").ok_or(ElementError::InvalidLSData(element.value().id().unwrap().to_string()))?;
-        let normalized = normalize_lsjson(raw_data);
-        return Ok(serde_json::from_str(&normalized).or(Err(ElementError::InvalidLSData(element.value().id().unwrap().to_string())))?);
-    }
-
-	/// 서브 엘리먼트의 정의와 [`Body`]로부터 서브 엘리먼트를 가져옵니다.
-    fn from_body<Parent: Element<'a>>(
-        elem_def: SubElementDef<'a, Parent, Self>,
-        body: &'a Body,
-    ) -> Result<Self, WebDynproError> {
-        let selector = &elem_def.selector()?;
-        let element = body
-            .document()
-            .select(selector)
-            .next()
-            .ok_or(ElementError::InvalidId(elem_def.id().to_owned()))?;
-        Self::from_elem(elem_def, element)
-    }
-
-	/// 서브 엘리먼트 정의와[] `scraper::ElementRef`]로부터 서브 엘리먼트를 가져옵니다.
-    fn from_elem<Parent: Element<'a>>(
-        elem_def: SubElementDef<'a, Parent, Self>,
-        element: scraper::ElementRef<'a>
-    ) -> Result<Self, WebDynproError>;
-
-	/// 서브 엘리먼트의 LSData를 가져옵니다.
-    fn lsdata(&self) -> &Self::SubElementLSData;
-
-	/// 서브 엘리먼트의 Id를 가져옵니다.
-    fn id(&self) -> &str;
-
-	/// 서브 엘리먼트의 [`scraper::ElementRef`]를 가져옵니다.
-    fn element_ref(&self) -> &ElementRef<'a>;
-}
+/// [`SubElement`] 트레이트 모듈
+pub mod sub;

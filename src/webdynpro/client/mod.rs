@@ -12,7 +12,7 @@ use reqwest::{cookie::Jar, header::*, RequestBuilder};
 use std::sync::Arc;
 use url::Url;
 
-use super::command::WebDynproCommand;
+use super::{command::WebDynproCommand, element::definition::ElementDefinition};
 
 /// WebDynpro 애플리케이션의 웹 요청 및 페이지 문서 처리를 담당하는 클라이언트
 pub struct WebDynproClient {
@@ -111,6 +111,7 @@ impl<'a> WebDynproClient {
         command.dispatch(self).await
     }
 
+    #[allow(dead_code)]
     /// 특정 WebDynpro 애플리케이션으로 탐색합니다.
     pub(crate) async fn navigate(&mut self, base_url: &Url, name: &str) -> Result<(), ClientError> {
         let raw_body = self
