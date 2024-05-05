@@ -14,7 +14,7 @@ use crate::{
             complex::sap_table::{
                 cell::{SapTableCell, SapTableCellWrapper},
                 property::SapTableCellType,
-                SapTable, SapTableRow,
+                SapTable,
             },
             definition::ElementDefinition,
             layout::PopupWindow,
@@ -357,15 +357,15 @@ impl<'a> CourseGrades {
                 .next()
                 .ok_or(BodyError::NoSuchElement("Table in popup".to_string()))?;
             let table_elem: SapTable<'_> = ElementWrapper::dyn_element(table_ref)?.try_into()?;
-            let zip = table_elem
-                .table()?
+            let table_body = table_elem.table()?;
+            let zip = table_body
                 .iter()
                 .next()
                 .ok_or(ElementError::InvalidContent {
                     element: table_elem.id().to_string(),
                     content: "header and first row".to_string(),
                 })?
-                .try_row_into::<Vec<(String, String)>>(body)?
+                .try_row_into::<Vec<(String, String)>>(table_body.header(), body)?
                 .into_iter();
             zip.skip(4)
                 .map(|(key, val)| {
@@ -433,7 +433,8 @@ impl<'a> CourseGrades {
         self.select_semester(year, semester).await?;
         let class_grades: Vec<(Option<String>, Vec<String>)> = {
             let grade_table_elem = Self::GRADE_BY_CLASSES_TABLE.from_body(self.client.body())?;
-            let iter = grade_table_elem.table()?.iter();
+            let grade_table_body = grade_table_elem.table()?;
+            let iter = grade_table_body.iter();
             iter.map(|row| {
                 let btn_id = row[4]
                     .clone()
@@ -449,7 +450,7 @@ impl<'a> CourseGrades {
                 (btn_id, row)
             })
             .filter_map(|(btn_id, row)| {
-                row.try_row_into::<Vec<String>>(self.client.body())
+                row.try_row_into::<Vec<String>>(grade_table_body.header(), self.client.body())
                     .ok()
                     .and_then(|row| Some((btn_id, row)))
             })

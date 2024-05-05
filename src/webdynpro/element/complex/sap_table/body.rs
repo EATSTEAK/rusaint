@@ -48,7 +48,7 @@ impl<'a> SapTableBody<'a> {
         }
         let mut rows_iter = ref_iter
             .clone()
-            .filter_map(|row_ref| SapTableRow::new(table_def.clone(), &header, row_ref).ok())
+            .filter_map(|row_ref| SapTableRow::new(table_def.clone(), row_ref).ok())
             .filter(|row| !matches!(row.row_type(), SapTableRowType::Header));
         let rows = rows_iter.collect::<Vec<SapTableRow<'a>>>();
         Ok(SapTableBody {
