@@ -181,43 +181,6 @@ impl<'a> CourseGrades {
         Ok(())
     }
 
-    fn row_to_string(&'a self, row: &'a SapTableRow<'a>) -> Option<Vec<String>> {
-        if row.len() == 0
-            || !row[0]
-                .clone()
-                .from_body(self.client.body())
-                .is_ok_and(|cell| !cell.is_empty_row())
-        {
-            return None;
-        };
-        let iter = row.iter_value(self.client.body());
-        Some(
-            iter.map(|val| {
-                match val {
-                    Ok(cell) => match cell.content() {
-                        Some(ElementDefWrapper::TextView(tv)) => {
-                            (|| Some(tv.from_body(self.client.body()).ok()?.text().to_owned()))()
-                        }
-                        Some(ElementDefWrapper::Caption(cap)) => (|| {
-                            Some(
-                                cap.from_body(self.client.body())
-                                    .ok()?
-                                    .lsdata()
-                                    .text()
-                                    .unwrap_or(&String::default())
-                                    .to_owned(),
-                            )
-                        })(),
-                        _ => None,
-                    },
-                    Err(_) => None,
-                }
-                .unwrap_or("".to_string())
-            })
-            .collect::<Vec<String>>(),
-        )
-    }
-
     fn value_as_f32(field: InputField<'_>) -> Result<f32, WebDynproError> {
         let Some(value) = field.lsdata().value() else {
             return Err(ElementError::NoSuchData {
@@ -338,8 +301,8 @@ impl<'a> CourseGrades {
         let table_elem = Self::GRADES_SUMMARY_TABLE.from_body(self.client.body())?;
         let table = table_elem.table()?;
         let ret = table
-            .iter()
-            .filter_map(|row| self.row_to_string(row))
+            .try_table_into::<Vec<String>>(self.client.body())?
+            .into_iter()
             .filter_map(|values| {
                 if values.len() == 14 {
                     Some(SemesterGrade::new(
@@ -394,16 +357,16 @@ impl<'a> CourseGrades {
                 .next()
                 .ok_or(BodyError::NoSuchElement("Table in popup".to_string()))?;
             let table_elem: SapTable<'_> = ElementWrapper::dyn_element(table_ref)?.try_into()?;
-            let zip = (|| Some(table_elem.table().ok()?.zip_header().next()?))()
-                .and_then(|(header, row)| {
-                    let header = self.row_to_string(header)?;
-                    let row = self.row_to_string(row)?;
-                    Some(header.into_iter().zip(row.into_iter()))
-                })
+            let zip = table_elem
+                .table()?
+                .iter()
+                .next()
                 .ok_or(ElementError::InvalidContent {
                     element: table_elem.id().to_string(),
                     content: "header and first row".to_string(),
-                })?;
+                })?
+                .try_row_into::<Vec<(String, String)>>(body)?
+                .into_iter();
             zip.skip(4)
                 .map(|(key, val)| {
                     Ok((
@@ -485,7 +448,11 @@ impl<'a> CourseGrades {
                     });
                 (btn_id, row)
             })
-            .filter_map(|(btn_id, row)| self.row_to_string(row).and_then(|row| Some((btn_id, row))))
+            .filter_map(|(btn_id, row)| {
+                row.try_row_into::<Vec<String>>(self.client.body())
+                    .ok()
+                    .and_then(|row| Some((btn_id, row)))
+            })
             .collect()
         };
         let mut ret: Vec<ClassGrade> = vec![];
