@@ -1,5 +1,6 @@
 use std::{borrow::Cow, cell::OnceCell, collections::HashMap};
 
+use crate::webdynpro::element::property::{EmbeddingBehaviour, IMEMode, InputFieldTextStyle, InputFieldType, SemanticColor, SuggestFilterCondition, SuggestFilterType, TabBehaviour, TableFieldDesign, Visibility};
 use crate::webdynpro::error::{BodyError, WebDynproError};
 use crate::webdynpro::{client::body::Body, error::ElementError, event::Event};
 
@@ -7,7 +8,23 @@ use crate::webdynpro::element::{
     define_element_interactable, Element, ElementWrapper, Interactable,
 };
 
+use self::property::ComboBoxBehavior;
+
 use super::list_box::ListBoxWrapper;
+
+pub mod property {
+    use serde::Deserialize;
+
+    #[allow(missing_docs)]
+    #[derive(Clone, Deserialize, Debug)]
+    #[serde(rename_all = "UPPERCASE")]
+    pub enum ComboBoxBehavior {
+        DropdownSelect,
+        FreeText,
+        SuggestList,
+        SuggestFieldHelp,
+    }
+}
 
 define_element_interactable! {
     #[doc = "목록 혹은 직접 입력하여 선택할 수 있는 콤보 박스"]
@@ -17,36 +34,36 @@ define_element_interactable! {
     #[doc = "[`ComboBox`] 내부 데이터"]
     ComboBoxLSData {
         width: String => "0",
-        behavior: String => "1",
+        behavior: ComboBoxBehavior => "1",
         allow_virtual_typing: String => "2",
         item_list_box_id: String => "3",
         key: String => "4",
         value: String => "5",
-        visibility: String => "6",
+        visibility: Visibility => "6",
         container_width_set: bool => "7",
         label_text: String => "8",
         label_for: String => "9",
-        ime_mode: String => "10",
-        component_type: String => "11", // originally "type"
+        ime_mode: IMEMode => "10",
+        component_type: InputFieldType => "11", // originally "type"
         show_help_button_always: String => "12",
         access_key: String => "13",
-        suggest_filter: String => "14",
+        suggest_filter: SuggestFilterType => "14",
         display_as_text: bool => "15",
         hide_field_help: bool => "16",
         show_help_button: bool => "17",
         suggest_auto_complete: bool => "18",
-        suggest_filter_condition: String => "19",
+        suggest_filter_condition: SuggestFilterCondition => "19",
         field_help_floating: bool => "20",
         custom_data: String => "21",
         custom_style: String => "22",
-        text_style: String => "23",
-        semantic_color: String => "24",
-        embedding_behaviour: String => "25",
-        sap_table_field_design: String => "26",
+        text_style: InputFieldTextStyle => "23",
+        semantic_color: SemanticColor => "24",
+        embedding_behaviour: EmbeddingBehaviour => "25",
+        sap_table_field_design: TableFieldDesign => "26",
         field_help_embedding: bool => "27",
         height: String => "28",
         labelled_by: String => "29",
-        tab_behaviour: String => "30",
+        tab_behaviour: TabBehaviour => "30",
         described_by: String => "31",
     }
 }

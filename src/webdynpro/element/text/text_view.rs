@@ -1,6 +1,6 @@
 use std::{borrow::Cow, cell::OnceCell};
 
-use crate::webdynpro::element::{define_element_interactable, Element};
+use crate::webdynpro::element::{define_element_interactable, property::Visibility, Element};
 
 define_element_interactable! {
     #[doc = "텍스트 표시 뷰"]
@@ -19,7 +19,7 @@ define_element_interactable! {
         semantic_color: String => "5",
         semantic_bg_color: String => "6",
         is_nested: bool => "7",
-        visibility: String => "8",
+        visibility: Visibility => "8",
         text_overflow: bool => "9",
     }
 }
