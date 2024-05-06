@@ -134,6 +134,26 @@ macro_rules! def_listbox_subset {
         }
     )+
 
+    /// [`ListBox`] 분류의 엘리먼트의 정의를 위한 Wrapper
+    #[derive(Clone, Debug)]
+    pub enum ListBoxDefWrapper {
+        $(
+            $(#[$attr])*
+            $name($def_name),
+        )+
+    }
+
+    impl ListBoxDefWrapper {
+
+        /// [`ElementDefWrapper`]에서 [`ListBoxDefWrapper`]로 변환을 시도합니다.
+        pub fn from_def(element_def: $crate::webdynpro::element::ElementDefWrapper) -> Option<ListBoxDefWrapper> {
+            match element_def {
+                $($crate::webdynpro::element::ElementDefWrapper::$name(elem) => Some(ListBoxDefWrapper::$name(elem)),)+
+                _ => None
+            }
+        }
+    }
+
     /// [`ListBox`] 분류의 엘리먼트를 위한 공통된 Wrapper
     #[derive(Debug)]
     pub enum ListBoxWrapper<'a> {
