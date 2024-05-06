@@ -5,12 +5,12 @@ use crate::webdynpro::error::{BodyError, WebDynproError};
 use crate::webdynpro::{client::body::Body, error::ElementError, event::Event};
 
 use crate::webdynpro::element::{
-    define_element_interactable, Element, ElementWrapper, Interactable,
+    define_element_interactable, Element, ElementDefWrapper, ElementWrapper, Interactable
 };
 
 use self::property::ComboBoxBehavior;
 
-use super::list_box::ListBoxWrapper;
+use super::list_box::{ListBoxDefWrapper, ListBoxWrapper};
 
 pub mod property {
     use serde::Deserialize;
@@ -80,7 +80,7 @@ impl<'a> ComboBox<'a> {
     }
 
     /// [`ComboBox`]의 선택지 역할을 하는 [`ListBox`](super::list_box::ListBox) 엘리먼트를 가져옵니다.
-    pub fn item_list_box(&self, body: &'a Body) -> Result<ListBoxWrapper<'a>, WebDynproError> {
+    pub fn item_list_box(&self, body: &'a Body) -> Result<ListBoxDefWrapper, WebDynproError> {
         let listbox_id = self
             .lsdata()
             .item_list_box_id()
@@ -96,7 +96,7 @@ impl<'a> ComboBox<'a> {
             .next()
             .ok_or(BodyError::NoSuchElement(listbox_id.to_owned()))?;
         Ok(
-            ListBoxWrapper::from_elements(ElementWrapper::dyn_element(elem)?)
+            ListBoxDefWrapper::from_def(ElementDefWrapper::dyn_elem_def(elem)?)
                 .ok_or(BodyError::NoSuchElement(listbox_id.to_owned()))?,
         )
     }
