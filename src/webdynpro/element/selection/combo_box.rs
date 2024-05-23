@@ -1,11 +1,14 @@
 use std::{borrow::Cow, cell::OnceCell, collections::HashMap};
 
-use crate::webdynpro::element::property::{EmbeddingBehaviour, IMEMode, InputFieldTextStyle, InputFieldType, SemanticColor, SuggestFilterCondition, SuggestFilterType, TabBehaviour, TableFieldDesign, Visibility};
+use crate::webdynpro::element::property::{
+    EmbeddingBehaviour, IMEMode, InputFieldTextStyle, InputFieldType, SemanticColor,
+    SuggestFilterCondition, SuggestFilterType, TabBehaviour, TableFieldDesign, Visibility,
+};
 use crate::webdynpro::error::{BodyError, WebDynproError};
 use crate::webdynpro::{client::body::Body, error::ElementError, event::Event};
 
 use crate::webdynpro::element::{
-    define_element_interactable, Element, ElementDefWrapper, ElementWrapper, Interactable
+    define_element_interactable, Element, ElementDefWrapper, ElementWrapper, Interactable,
 };
 
 use self::property::ComboBoxBehavior;
@@ -108,5 +111,13 @@ impl<'a> ComboBox<'a> {
         parameters.insert("Key".to_string(), key.to_string());
         parameters.insert("ByEnter".to_string(), by_enter.to_string());
         self.fire_event("Select".to_string(), parameters)
+    }
+
+    /// 내용을 변경하는 이벤트를 반환합니다.
+    pub fn change(&self, value: &str) -> Result<Event, WebDynproError> {
+        let mut parameters: HashMap<String, String> = HashMap::new();
+        parameters.insert("Id".to_string(), self.id.clone().to_string());
+        parameters.insert("Value".to_string(), value.to_string());
+        self.fire_event("Change".to_string(), parameters)
     }
 }
