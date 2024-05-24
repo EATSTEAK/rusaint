@@ -75,6 +75,16 @@ impl<'a> SapTableCellWrapper<'a> {
             _ => None,
         }
     }
+
+    pub fn id(&self) -> &str {
+        match self {
+            SapTableCellWrapper::Normal(cell) => cell.id(),
+            SapTableCellWrapper::Header(cell) => cell.id(),
+            SapTableCellWrapper::Hierarchical(cell) => cell.id(),
+            SapTableCellWrapper::Matrix(cell) => cell.id(),
+            SapTableCellWrapper::Selection(cell) => cell.id(),
+        }
+    }
 }
 
 /// [`SapTable`] 셀에 대한 [`SubElementDef`] Wrapper

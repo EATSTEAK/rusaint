@@ -322,6 +322,13 @@ macro_rules! register_elements {
                     _ => Ok(ElementDefWrapper::Unknown(<$crate::webdynpro::element::unknown::Unknown<'a> as $crate::webdynpro::element::Element<'a>>::Def::new_dynamic(id)))
                 }
             }
+
+            pub fn id(&self) -> &str {
+                match self {
+                    $( ElementDefWrapper::$enum(element_def) => <$type as $crate::webdynpro::element::Element<'a>>::Def::id(element_def), )*
+                    ElementDefWrapper::Unknown(element_def) => <$crate::webdynpro::element::unknown::Unknown<'a> as $crate::webdynpro::element::Element<'a>>::Def::id(element_def),
+                }
+            }
         }
         
     };
