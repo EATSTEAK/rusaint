@@ -8,12 +8,12 @@ use crate::webdynpro::error::{BodyError, WebDynproError};
 use crate::webdynpro::{client::body::Body, error::ElementError, event::Event};
 
 use crate::webdynpro::element::{
-    define_element_interactable, Element, ElementDefWrapper, ElementWrapper, Interactable,
+    define_element_interactable, Element, ElementDefWrapper, Interactable,
 };
 
 use self::property::ComboBoxBehavior;
 
-use super::list_box::{ListBoxDefWrapper, ListBoxWrapper};
+use super::list_box::ListBoxDefWrapper;
 
 pub mod property {
     use serde::Deserialize;
