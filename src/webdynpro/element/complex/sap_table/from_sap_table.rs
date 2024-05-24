@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use crate::webdynpro::{
     client::body::Body,
     element::{definition::ElementDefinition, Element, ElementDefWrapper},
@@ -14,6 +16,36 @@ pub trait FromSapTable<'body>: Sized {
         header: &'body SapTableHeader<'body>,
         row: &'body SapTableRow<'body>,
     ) -> Result<Self, WebDynproError>;
+}
+
+impl<'body> FromSapTable<'body> for Vec<Option<String>> {
+    fn from_table(
+        body: &'body Body,
+        _header: &'body SapTableHeader<'body>,
+        row: &'body SapTableRow<'body>,
+    ) -> Result<Self, WebDynproError> {
+        let iter = row.iter_value(body);
+        let vec = iter
+            .map(|val| match val {
+                Ok(cell) => match cell.content() {
+                    Some(ElementDefWrapper::TextView(tv)) => {
+                        Some(tv.from_body(body).ok()?.text().to_owned())
+                    }
+                    Some(ElementDefWrapper::Caption(cap)) => Some(
+                        cap.from_body(body)
+                            .ok()?
+                            .lsdata()
+                            .text()
+                            .unwrap_or(&String::default())
+                            .to_owned(),
+                    ),
+                    _ => None,
+                },
+                Err(_err) => None,
+            })
+            .collect::<Vec<Option<String>>>();
+        Ok(vec)
+    }
 }
 
 impl<'body> FromSapTable<'body> for Vec<String> {
@@ -43,7 +75,7 @@ impl<'body> FromSapTable<'body> for Vec<String> {
     }
 }
 
-impl<'body> FromSapTable<'body> for Vec<(String, String)> {
+impl<'body> FromSapTable<'body> for HashMap<String, String> {
     fn from_table(
         body: &'body Body,
         header: &'body SapTableHeader<'body>,
@@ -62,8 +94,9 @@ impl<'body> FromSapTable<'body> for Vec<(String, String)> {
                         .text()
                         .unwrap_or(&String::default())
                         .to_owned()),
+                    None => Ok(cell.id().to_owned()),
                     _ => Err(ElementError::InvalidContent {
-                        element: "Cell Content".to_string(),
+                        element: "Header Cell Content".to_string(),
                         content: "Cannot convert to string".to_string(),
                     })?,
                 },
@@ -83,10 +116,8 @@ impl<'body> FromSapTable<'body> for Vec<(String, String)> {
                         .text()
                         .unwrap_or(&String::default())
                         .to_owned()),
-                    _ => Err(ElementError::InvalidContent {
-                        element: "Cell Content".to_string(),
-                        content: "Cannot convert to string".to_string(),
-                    })?,
+                    Some(wrapper) => Ok(wrapper.id().to_owned()),
+                    None => Ok("".to_owned()),
                 },
                 Err(err) => Err(err),
             })
@@ -94,7 +125,7 @@ impl<'body> FromSapTable<'body> for Vec<(String, String)> {
         let zip = header_string
             .into_iter()
             .zip(row_string.into_iter())
-            .collect::<Vec<(String, String)>>();
+            .collect::<HashMap<String, String>>();
         Ok(zip)
     }
 }

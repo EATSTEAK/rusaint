@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+
 use crate::{
     define_elements,
     model::SemesterType,
@@ -289,56 +290,13 @@ impl<'a> CourseGrades {
         &mut self,
         course_type: CourseType,
     ) -> Result<Vec<SemesterGrade>, WebDynproError> {
-        fn parse_rank(value: String) -> Option<(u32, u32)> {
-            let mut spl = value.split("/");
-            let first: u32 = spl.next()?.parse().ok()?;
-            let second: u32 = spl.next()?.parse().ok()?;
-            Some((first, second))
-        }
         self.close_popups().await?;
         self.select_course(course_type).await?;
 
         let table_elem = Self::GRADES_SUMMARY_TABLE.from_body(self.client.body())?;
         let table = table_elem.table()?;
-        let ret = table
-            .try_table_into::<Vec<String>>(self.client.body())?
-            .into_iter()
-            .filter_map(|values| {
-                if values.len() == 14 {
-                    Some(SemesterGrade::new(
-                        values[1].parse().ok()?,
-                        values[2].clone(),
-                        values[3].parse().ok()?,
-                        values[4].parse().ok()?,
-                        values[5].parse().ok()?,
-                        values[6].parse().ok()?,
-                        values[7].parse().ok()?,
-                        values[8].parse().ok()?,
-                        parse_rank(values[9].clone())?,
-                        parse_rank(values[10].clone())?,
-                        !values[11].trim().is_empty(),
-                        !values[12].trim().is_empty(),
-                        !values[13].trim().is_empty(),
-                    ))
-                } else {
-                    Some(SemesterGrade::new(
-                        values[1].parse().ok()?,
-                        values[2].clone(),
-                        values[3].parse().ok()?,
-                        values[4].parse().ok()?,
-                        values[5].parse().ok()?,
-                        values[6].parse().ok()?,
-                        values[7].parse().ok()?,
-                        values[8].parse().ok()?,
-                        parse_rank(values[9].clone())?,
-                        parse_rank(values[10].clone())?,
-                        false,
-                        !values[11].trim().is_empty(),
-                        !values[12].trim().is_empty(),
-                    ))
-                }
-            });
-        Ok(ret.collect())
+        let ret = table.try_table_into::<SemesterGrade>(self.client.body())?;
+        Ok(ret)
     }
 
     async fn class_detail_in_popup(
@@ -349,7 +307,7 @@ impl<'a> CourseGrades {
             .send(ButtonPressCommand::new(open_button))
             .await?;
 
-        let parse_table_in_popup = |body: &Body| -> Result<Vec<(String, f32)>, WebDynproError> {
+        let parse_table_in_popup = |body: &Body| -> Result<HashMap<String, f32>, WebDynproError> {
             let table_inside_popup_selector =
                 scraper::Selector::parse(r#"[ct="PW"] [ct="ST"]"#).unwrap();
             let mut table_inside_popup = body.document().select(&table_inside_popup_selector);
@@ -365,7 +323,7 @@ impl<'a> CourseGrades {
                     element: table_elem.id().to_string(),
                     content: "header and first row".to_string(),
                 })?
-                .try_row_into::<Vec<(String, String)>>(table_body.header(), body)?
+                .try_row_into::<HashMap<String, String>>(table_body.header(), body)?
                 .into_iter();
             zip.skip(4)
                 .map(|(key, val)| {
@@ -379,7 +337,7 @@ impl<'a> CourseGrades {
                             }))?,
                     ))
                 })
-                .collect::<Result<Vec<(String, f32)>, WebDynproError>>()
+                .collect::<Result<HashMap<String, f32>, WebDynproError>>()
         };
         let table = parse_table_in_popup(self.client.body())?;
         self.close_popups().await?;
@@ -431,7 +389,7 @@ impl<'a> CourseGrades {
         self.close_popups().await?;
         self.select_course(course_type).await?;
         self.select_semester(year, semester).await?;
-        let class_grades: Vec<(Option<String>, Vec<String>)> = {
+        let class_grades: Vec<(Option<String>, HashMap<String, String>)> = {
             let grade_table_elem = Self::GRADE_BY_CLASSES_TABLE.from_body(self.client.body())?;
             let grade_table_body = grade_table_elem.table()?;
             let iter = grade_table_body.iter();
@@ -450,7 +408,7 @@ impl<'a> CourseGrades {
                 (btn_id, row)
             })
             .filter_map(|(btn_id, row)| {
-                row.try_row_into::<Vec<String>>(grade_table_body.header(), self.client.body())
+                row.try_row_into::<HashMap<String, String>>(grade_table_body.header(), self.client.body())
                     .ok()
                     .and_then(|row| Some((btn_id, row)))
             })
@@ -472,12 +430,12 @@ impl<'a> CourseGrades {
                 Some(ClassGrade::new(
                     year.to_owned(),
                     semester.to_string(),
-                    values[8].trim().to_owned(),
-                    values[3].trim().to_owned(),
-                    values[5].parse().ok()?,
-                    values[1].parse().ok()?,
-                    values[2].trim().to_owned(),
-                    values[6].trim().to_owned(),
+                    values["과목코드"].trim().to_owned(),
+                    values["과목명"].trim().to_owned(),
+                    values["과목학점"].parse().ok()?,
+                    values["성적"].parse().ok()?,
+                    values["등급"].trim().to_owned(),
+                    values["교수명"].trim().to_owned(),
                     detail,
                 ))
             })();

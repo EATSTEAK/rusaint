@@ -1,6 +1,30 @@
 use std::{collections::HashMap, num::ParseIntError, str::FromStr};
 
 use getset::{CopyGetters, Getters};
+use serde::{
+    de::{value::MapDeserializer, IntoDeserializer},
+    Deserialize, Deserializer,
+};
+
+use crate::webdynpro::{
+    element::{complex::sap_table::FromSapTable, definition::ElementDefinition},
+    error::{ElementError, WebDynproError},
+};
+
+fn deserialize_u32_string<'de, D: Deserializer<'de>>(deserializer: D) -> Result<u32, D::Error> {
+    let value = String::deserialize(deserializer)?;
+    value.parse().map_err(serde::de::Error::custom)
+}
+
+fn deserialize_f32_string<'de, D: Deserializer<'de>>(deserializer: D) -> Result<f32, D::Error> {
+    let value = String::deserialize(deserializer)?;
+    value.parse().map_err(serde::de::Error::custom)
+}
+
+fn deserialize_empty<'de, D: Deserializer<'de>>(deserializer: D) -> Result<bool, D::Error> {
+    let value = String::deserialize(deserializer)?;
+    Ok(!value.trim().is_empty())
+}
 
 /// 전체 성적(학적부, 증명)
 #[derive(Getters, CopyGetters, Debug)]
@@ -41,37 +65,104 @@ impl GradeSummary {
 }
 
 /// 학기별 성적
-#[derive(Debug, Getters, CopyGetters)]
+#[derive(Debug, Deserialize, Getters, CopyGetters)]
 #[allow(unused)]
 #[get_copy = "pub"]
 pub struct SemesterGrade {
     /// 학년도
+    #[serde(
+        rename(deserialize = "학년도"),
+        deserialize_with = "deserialize_u32_string"
+    )]
     year: u32,
     /// 학기
     #[getset(skip)]
+    #[serde(rename(deserialize = "학기"))]
     semester: String,
     /// 신청학점
+    #[serde(
+        rename(deserialize = "신청학점"),
+        deserialize_with = "deserialize_f32_string"
+    )]
     attempted_credits: f32,
     /// 취득학점
+    #[serde(
+        rename(deserialize = "취득학점"),
+        deserialize_with = "deserialize_f32_string"
+    )]
     earned_credits: f32,
     /// P/F학점
+    #[serde(
+        rename(deserialize = "P/F학점"),
+        deserialize_with = "deserialize_f32_string"
+    )]
     pf_earned_credits: f32,
     /// 평점평균
+    #[serde(
+        rename(deserialize = "평점평균"),
+        deserialize_with = "deserialize_f32_string"
+    )]
     grade_points_avarage: f32,
     /// 평점계
+    #[serde(
+        rename(deserialize = "평점계"),
+        deserialize_with = "deserialize_f32_string"
+    )]
     grade_points_sum: f32,
     /// 산술평균
+    #[serde(
+        rename(deserialize = "산술평균"),
+        deserialize_with = "deserialize_f32_string"
+    )]
     arithmetic_mean: f32,
-    /// 학기석차
+    /// 학기별석차
+    #[serde(
+        rename(deserialize = "학기별석차"),
+        deserialize_with = "deserialize_rank"
+    )]
     semester_rank: (u32, u32),
     /// 전체석차
+    #[serde(
+        rename(deserialize = "전체석차"),
+        deserialize_with = "deserialize_rank"
+    )]
     general_rank: (u32, u32),
     /// 학사경고
+    #[serde(
+        rename(deserialize = "학사경고"),
+        default = "return_false",
+        deserialize_with = "deserialize_empty"
+    )]
     academic_probation: bool,
-    /// 상담
+    /// 상담여부
+    #[serde(
+        rename(deserialize = "상담여부"),
+        deserialize_with = "deserialize_empty"
+    )]
     consult: bool,
     /// 유급
+    #[serde(rename(deserialize = "유급"), deserialize_with = "deserialize_empty")]
     flunked: bool,
+}
+
+fn return_false() -> bool {
+    false
+}
+
+fn deserialize_rank<'de, D: Deserializer<'de>>(deserializer: D) -> Result<(u32, u32), D::Error> {
+    let value = String::deserialize(deserializer)?;
+    let mut spl = value.split("/");
+    let first: u32 = spl
+        .next()
+        .ok_or_else(|| serde::de::Error::custom("input rank is invalid"))?
+        .parse()
+        .map_err(|_e| serde::de::Error::custom("input rank is not a number"))?;
+    let second: u32 = spl
+        .next()
+        .ok_or_else(|| serde::de::Error::custom("input rank is invalid"))?
+        .parse()
+        .map_err(|_e| serde::de::Error::custom("input rank is not a number"))?;
+    Ok((first, second))
 }
 
 impl SemesterGrade {
@@ -110,6 +201,23 @@ impl SemesterGrade {
     /// 학기
     pub fn semester(&self) -> &str {
         self.semester.as_ref()
+    }
+}
+
+impl<'body> FromSapTable<'body> for SemesterGrade {
+    fn from_table(
+        body: &'body crate::webdynpro::client::body::Body,
+        header: &'body crate::webdynpro::element::complex::sap_table::SapTableHeader<'body>,
+        row: &'body crate::webdynpro::element::complex::sap_table::SapTableRow<'body>,
+    ) -> Result<Self, WebDynproError> {
+        let map_string = row.try_row_into::<HashMap<String, String>>(header, body)?;
+        let map_de: MapDeserializer<_, serde::de::value::Error> = map_string.into_deserializer();
+        Ok(
+            SemesterGrade::deserialize(map_de).map_err(|e| ElementError::InvalidContent {
+                element: row.table_def().id().to_string(),
+                content: e.to_string(),
+            })?,
+        )
     }
 }
 
@@ -207,7 +315,7 @@ pub enum CourseType {
     /// 박사과정
     Phd, // DR
     /// 석사과정
-    Master, // MA 
+    Master, // MA
     /// 석박과정
     PhdIntergrated, // MP
     /// 연구과정
