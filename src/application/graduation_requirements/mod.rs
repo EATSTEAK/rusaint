@@ -1,6 +1,6 @@
 use crate::{
     define_elements,
-    webdynpro::{client::body::Body, error::WebDynproError},
+    webdynpro::{client::body::Body, element::{action::Button, complex::SapTable, text::InputField}, error::WebDynproError},
     RusaintError,
 };
 
