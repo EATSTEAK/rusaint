@@ -75,7 +75,7 @@ impl<'body> FromSapTable<'body> for Vec<String> {
     }
 }
 
-impl<'body> FromSapTable<'body> for HashMap<String, String> {
+impl<'body> FromSapTable<'body> for Vec<(String, String)> {
     fn from_table(
         body: &'body Body,
         header: &'body SapTableHeader<'body>,
@@ -125,7 +125,18 @@ impl<'body> FromSapTable<'body> for HashMap<String, String> {
         let zip = header_string
             .into_iter()
             .zip(row_string.into_iter())
-            .collect::<HashMap<String, String>>();
+            .collect::<Vec<(String, String)>>();
         Ok(zip)
+    }
+}
+
+impl<'body> FromSapTable<'body> for HashMap<String, String> {
+    fn from_table(
+        body: &'body Body,
+        header: &'body SapTableHeader<'body>,
+        row: &'body SapTableRow<'body>,
+    ) -> Result<Self, WebDynproError> {
+        let vec = row.try_row_into::<Vec<(String, String)>>(header, body)?;
+        Ok(vec.into_iter().collect())
     }
 }
