@@ -31,7 +31,6 @@ mod test {
     use crate::{
         application::{student_information::StudentInformation, USaintClientBuilder},
         global_test_utils::get_session,
-        session::USaintSession,
         webdynpro::element::ElementWrapper,
     };
 

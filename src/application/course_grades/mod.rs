@@ -512,9 +512,7 @@ pub mod model;
 
 #[cfg(test)]
 mod test {
-    use anyhow::{Error, Result};
     use serial_test::serial;
-    use std::sync::{Arc, OnceLock};
 
     use crate::{
         application::{course_grades::CourseGrades, USaintClientBuilder},
