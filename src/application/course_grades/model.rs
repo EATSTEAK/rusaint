@@ -6,25 +6,10 @@ use serde::{
     Deserialize, Deserializer,
 };
 
-use crate::webdynpro::{
+use crate::{utils::de_with::{deserialize_empty, deserialize_f32_string, deserialize_u32_string}, webdynpro::{
     element::{complex::sap_table::FromSapTable, definition::ElementDefinition},
     error::{ElementError, WebDynproError},
-};
-
-fn deserialize_u32_string<'de, D: Deserializer<'de>>(deserializer: D) -> Result<u32, D::Error> {
-    let value = String::deserialize(deserializer)?;
-    value.parse().map_err(serde::de::Error::custom)
-}
-
-fn deserialize_f32_string<'de, D: Deserializer<'de>>(deserializer: D) -> Result<f32, D::Error> {
-    let value = String::deserialize(deserializer)?;
-    value.parse().map_err(serde::de::Error::custom)
-}
-
-fn deserialize_empty<'de, D: Deserializer<'de>>(deserializer: D) -> Result<bool, D::Error> {
-    let value = String::deserialize(deserializer)?;
-    Ok(!value.trim().is_empty())
-}
+}};
 
 /// 전체 성적(학적부, 증명)
 #[derive(Getters, CopyGetters, Debug)]
@@ -166,38 +151,6 @@ fn deserialize_rank<'de, D: Deserializer<'de>>(deserializer: D) -> Result<(u32, 
 }
 
 impl SemesterGrade {
-    pub(crate) fn new(
-        year: u32,
-        semester: String,
-        attempt_credits: f32,
-        earn_credits: f32,
-        pf_credits: f32,
-        grade_points_avarage: f32,
-        grade_points_sum: f32,
-        arithmetic_mean: f32,
-        semester_rank: (u32, u32),
-        general_rank: (u32, u32),
-        academic_probation: bool,
-        consult: bool,
-        flunked: bool,
-    ) -> Self {
-        Self {
-            year,
-            semester,
-            attempted_credits: attempt_credits,
-            earned_credits: earn_credits,
-            pf_earned_credits: pf_credits,
-            grade_points_avarage,
-            grade_points_sum,
-            arithmetic_mean,
-            semester_rank,
-            general_rank,
-            academic_probation,
-            consult,
-            flunked,
-        }
-    }
-
     /// 학기
     pub fn semester(&self) -> &str {
         self.semester.as_ref()
