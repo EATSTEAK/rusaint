@@ -102,6 +102,8 @@ impl<'a> CourseSchedule {
             .try_table_into::<Lecture>(self.client.body())?;
         Ok(lectures.into_iter())
     }
+
+    // TO-DO: 카테고리 별 선택지 가져오기 기능
 }
 
 #[cfg(test)]
