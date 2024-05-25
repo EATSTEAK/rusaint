@@ -6,8 +6,7 @@ use serde::{
 };
 
 use crate::{
-    define_elements,
-    webdynpro::{
+    define_elements, utils::de_with::deserialize_optional_string, webdynpro::{
         client::WebDynproClient,
         command::element::{
             action::ButtonPressCommand,
@@ -25,50 +24,81 @@ use crate::{
             selection::{ComboBox, ComboBoxDef},
         },
         error::{ElementError, WebDynproError},
-    },
+    }
 };
 
+/// 강의를 찾을 때 사용하는 강의 카테고리
 #[allow(unused)]
 pub enum LectureCategory {
+    /// 전공 강의
     Major {
+        /// 단과대명
         collage: String,
+        /// 학부명
         department: String,
+        /// 전공명
         major: Option<String>,
     },
+    /// 교양필수
     RequiredElective {
+        /// 과목명
         lecture_name: String,
     },
+    /// 교양선택
     OptionalElective {
+        /// 교양 분류
         category: String,
     },
+    /// 채플
     Chapel {
+        /// 과목명
         lecture_name: String,
     },
+    /// 교직이수
     Education,
+    /// 평생교육사
     LifelongLearning,
+    /// 일반선택
     StandardSelection,
+    /// 대학원
     Graduated {
+        /// 단과대명
         collage: String,
+        /// 학부명
         department: String,
     },
+    /// 연계전공
     ConnectedMajor {
+        /// 전공명
         major: String,
     },
+    /// 융합전공
     UnitedMajor {
+        /// 전공명
         major: String,
     },
+    /// 교수명 검색
     FindByProfessor {
+        /// 교수명
         keyword: String,
     },
+    /// 과목명 검색
     FindByLecture {
+        /// 과목명
         keyword: String,
     },
+    /// 타전공인정과목
     RecognizedOtherMajor {
+        /// 단과대명
         collage: String,
+        /// 학부명
         department: String,
+        /// 전공명
         major: Option<String>,
     },
+    /// 듀얼리스팅 과목
     DualListing,
+    /// 숭실사이버대
     Cyber,
 }
 
@@ -76,6 +106,107 @@ impl LectureCategory {
     define_elements! {
         TABSTRIP: TabStrip<'static> = "ZCMW2100.ID_0001:VIW_MAIN.MODULE_TABSTRIP";
     }
+
+    /// 전공과목 분류의 [`LectureCategory`]를 만듭니다.
+    pub fn major(collage: &str, department: &str, major: Option<&str>) -> Self {
+        Self::Major {
+            collage: collage.to_string(),
+            department: department.to_string(),
+            major: major.map(|str| str.to_string()),
+        }
+    }
+
+    /// 교양필수 분류의 [`LectureCategory`]를 만듭니다.
+    pub fn required_elective(lecture_name: &str) -> Self {
+        Self::RequiredElective {
+            lecture_name: lecture_name.to_string(),
+        }
+    }
+
+    /// 교양선택 분류의 [`LectureCategory`]를 만듭니다.
+    pub fn optional_elective(category: &str) -> Self {
+        Self::OptionalElective {
+            category: category.to_string(),
+        }
+    }
+
+    /// 채플 분류의 [`LectureCategory`]를 만듭니다.
+    pub fn chapel(lecture_name: &str) -> Self {
+        Self::Chapel {
+            lecture_name: lecture_name.to_string(),
+        }
+    }
+
+    /// 교직 분류의 [`LectureCategory`]를 만듭니다.
+    pub fn education() -> Self {
+        Self::Education
+    }
+
+    /// 평생교육사 분류의 [`LectureCategory`]를 만듭니다.
+    pub fn lifelong_learning() -> Self {
+        Self::LifelongLearning
+    }
+
+    /// 일반선택 분류의 [`LectureCategory`]를 만듭니다.
+    pub fn standard_selection() -> Self {
+        Self::StandardSelection
+    }
+
+    /// 대학원 분류의 [`LectureCategory`]를 만듭니다.
+    pub fn graduated(collage: &str, department: &str) -> Self {
+        Self::Graduated {
+            collage: collage.to_string(),
+            department: department.to_string(),
+        }
+    }
+
+    /// 연계전공 분류의 [`LectureCategory`]를 만듭니다.
+    pub fn connected_major(major: &str) -> Self {
+        Self::ConnectedMajor {
+            major: major.to_string(),
+        }
+    }
+
+    /// 융합전공 분류의 [`LectureCategory`]를 만듭니다.
+    pub fn united_major(major: &str) -> Self {
+        Self::UnitedMajor {
+            major: major.to_string(),
+        }
+    }
+
+    /// 교수명으로 찾기 위한 [`LectureCategory`]를 만듭니다.
+    pub fn find_by_professor(keyword: &str) -> Self {
+        Self::FindByProfessor {
+            keyword: keyword.to_string(),
+        }
+    }
+
+    /// 과목명으로 찾기 위한 [`LectureCategory`]를 만듭니다.
+    pub fn find_by_lecture(keyword: &str) -> Self {
+        Self::FindByLecture {
+            keyword: keyword.to_string(),
+        }
+    }
+
+    /// 타전공인정과목 분류의 [`LectureCategory`]를 만듭니다.
+    pub fn recognized_other_major(collage: &str, department: &str, major: Option<&str>) -> Self {
+        Self::RecognizedOtherMajor {
+            collage: collage.to_string(),
+            department: department.to_string(),
+            major: major.map(|str| str.to_string()),
+        }
+    }
+
+    /// 듀얼리스팅 과목 분류의 [`LectureCategory`]를 만듭니다.
+    pub fn dual_listing() -> Self {
+        Self::DualListing
+    }
+
+    /// 숭실사이버대 분류의 [`LectureCategory`]를 만듭니다.
+    pub fn cyber() -> Self {
+        Self::Cyber
+    }
+
     pub(super) async fn request_query(
         &self,
         client: &mut WebDynproClient,
@@ -452,20 +583,21 @@ impl LectureCategory {
     }
 }
 
+/// 과목 정보
 #[allow(unused)]
-#[derive(Deserialize)]
+#[derive(Debug, Deserialize)]
 pub struct Lecture {
     /// 계획
-    #[serde(rename(deserialize = "계획"), default)]
+    #[serde(rename(deserialize = "계획"), default, deserialize_with = "deserialize_optional_string")]
     syllabus: Option<String>,
     /// 이수구분(주전공)
     #[serde(rename(deserialize = "이수구분(주전공)"))]
     category: String,
     /// 이수구분(다전공)
-    #[serde(rename(deserialize = "이수구분(다전공)"), default)]
+    #[serde(rename(deserialize = "이수구분(다전공)"), default, deserialize_with = "deserialize_optional_string")]
     sub_category: Option<String>,
     /// 공학인증
-    #[serde(rename(deserialize = "공학인증"), default)]
+    #[serde(rename(deserialize = "공학인증"), default, deserialize_with = "deserialize_optional_string")]
     abeek_info: Option<String>,
     /// 교과영역
     #[serde(rename(deserialize = "교과영역"))]
@@ -477,7 +609,7 @@ pub struct Lecture {
     #[serde(rename(deserialize = "과목명"))]
     name: String,
     /// 분반
-    #[serde(rename(deserialize = "분반"), default)]
+    #[serde(rename(deserialize = "분반"), default, deserialize_with = "deserialize_optional_string")]
     division: Option<String>,
     /// 교수명
     #[serde(rename(deserialize = "교수명"))]
@@ -511,9 +643,9 @@ impl<'body> FromSapTable<'body> for Lecture {
         let map_string = row.try_row_into::<HashMap<String, String>>(header, body)?;
         let map_de: MapDeserializer<_, serde::de::value::Error> = map_string.into_deserializer();
         Ok(
-            Lecture::deserialize(map_de).map_err(|_e| ElementError::InvalidContent {
+            Lecture::deserialize(map_de).map_err(|e| ElementError::InvalidContent {
                 element: row.table_def().id().to_string(),
-                content: "This table doesn't match Lecture's structure".to_string(),
+                content: e.to_string(),
             })?,
         )
     }
