@@ -22,17 +22,28 @@ pub enum ListBoxItemDefWrapper {
 
 /// [`ListBoxItem`]의 정보
 pub enum ListBoxItemInfo {
+    /// 일반 [`ListBoxItem`]의 정보
     Item {
+        /// 아이템의 인덱스(순서)
         index: String,
+        /// 아이템의 키
         key: String,
+        /// 아이템의 첫번째 값
         value1: String,
+        /// 아이템의 두번째 값
         value2: String,
+        /// 아이템의 선택 여부
         selected: bool,
+        /// 아이템의 활성화 여부
         enabled: bool,
+        /// 제목
         title: String
     },
+    /// [`ListBoxActionItem`]의 정보
     ActionItem {
+        /// 제목
         title: String,
+        /// 내부 문자열
         text: String
     }
 }
