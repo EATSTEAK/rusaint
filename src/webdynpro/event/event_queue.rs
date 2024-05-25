@@ -1,6 +1,7 @@
 use super::{Event, EVENT_SPECTATOR};
 use std::collections::LinkedList;
 
+#[derive(Debug)]
 pub(crate) struct EventQueue(LinkedList<Event>);
 
 impl EventQueue {

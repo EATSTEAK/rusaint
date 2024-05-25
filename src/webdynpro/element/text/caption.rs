@@ -1,6 +1,6 @@
 use std::{borrow::Cow, cell::OnceCell};
 
-use crate::webdynpro::element::define_element_interactable;
+use crate::webdynpro::element::{define_element_interactable, property::Visibility};
 
 define_element_interactable! {
     #[doc = "엘리먼트 제목 부분 등에서 사용되는 캡션"]
@@ -22,7 +22,7 @@ define_element_interactable! {
         image_width: String => "4",
         image_height: String => "5",
         is_nested: bool => "6",
-        visibility: String => "7",
+        visibility: Visibility => "7",
         is_drag_handle: bool => "8",
         hover_image_src: String => "9",
         drag_source_info: String => "10",

@@ -1,6 +1,6 @@
 use std::{borrow::Cow, cell::OnceCell};
 
-use crate::webdynpro::element::define_element_interactable;
+use crate::webdynpro::element::{define_element_interactable, property::Visibility};
 
 // TODO: Implement additional events and data
 define_element_interactable! {
@@ -11,7 +11,7 @@ define_element_interactable! {
     #[doc = "[`GridLayout`] 내부 데이터"]
     GridLayoutLSData {
         height: String => "0",
-        visibility: String => "1",
+        visibility: Visibility => "1",
         drag_source_info: String => "2",
         drop_target_info: String => "3",
         drop_decorator_type: String => "4",

@@ -3,7 +3,7 @@ use std::{borrow::Cow, cell::OnceCell, collections::HashMap};
 use scraper::Selector;
 
 use crate::webdynpro::{
-    element::{define_element_interactable, definition::ElementDefinition, Element, Interactable},
+    element::{define_element_interactable, definition::ElementDefinition, property::Visibility, Element, Interactable},
     error::{BodyError, WebDynproError},
     event::Event,
 };
@@ -26,7 +26,7 @@ define_element_interactable! {
         height: String => "1",
         width: String => "2",
         accessibility_description: String => "3",
-        visibility: String => "4",
+        visibility: Visibility => "4",
         first_visible_item_idx: i32 => "5",
         scrollable: bool => "6",
         exact_tab_alignment: bool => "7",
@@ -53,7 +53,7 @@ impl<'a> TabStrip<'a> {
         }
     }
 
-    /// 탭 내부 [`TabStripItem`]을 반환합니다.
+    /// 탭 내부 [`TabStripItem`]의 정의를 반환합니다.
     pub fn tab_items(
         &self,
     ) -> impl Iterator<Item = &<TabStripItem<'a> as Element<'a>>::Def> + ExactSizeIterator {

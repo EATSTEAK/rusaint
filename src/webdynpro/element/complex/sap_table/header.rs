@@ -3,11 +3,13 @@ use std::ops::Index;
 use scraper::ElementRef;
 
 use crate::webdynpro::{
-    client::body::Body, element::definition::ElementDefinition, error::{ElementError, WebDynproError}
+    client::body::Body,
+    element::{definition::ElementDefinition, Element, ElementDefWrapper},
+    error::{ElementError, WebDynproError},
 };
 
 use super::{
-    cell::{SapTableCellDefWrapper, SapTableCellWrapper},
+    cell::{SapTableCell, SapTableCellDefWrapper, SapTableCellWrapper},
     property::{SapTableRowType, SapTableSelectionState},
     SapTableDef,
 };
@@ -42,11 +44,14 @@ impl<'a> SapTableHeader<'a> {
             })
             .collect::<Vec<SapTableCellDefWrapper>>();
         let row_type = row
-        .attr("rt")
-        .and_then(|s| Some(s.into()))
-        .unwrap_or(SapTableRowType::default());
+            .attr("rt")
+            .and_then(|s| Some(s.into()))
+            .unwrap_or(SapTableRowType::default());
         if !matches!(row_type, SapTableRowType::Header) {
-            return Err(ElementError::InvalidContent { element: table_def.id().to_string(), content: "Header of table is invalid".to_string() })
+            return Err(ElementError::InvalidContent {
+                element: table_def.id().to_string(),
+                content: "Header of table is invalid".to_string(),
+            });
         }
         Ok(SapTableHeader {
             table_def,
@@ -81,6 +86,44 @@ impl<'a> SapTableHeader<'a> {
     ) -> impl Iterator<Item = Result<SapTableCellWrapper<'a>, WebDynproError>> + ExactSizeIterator
     {
         self.cells.iter().map(|def| def.clone().from_body(body))
+    }
+
+    /// 헤더 행 제목들의 [`Vec`]를 반환합니다.
+    pub fn titles(&'a self, body: &'a Body) -> Result<Vec<String>, WebDynproError> {
+        let vec = self
+            .iter()
+            .map(|def| -> Result<String, WebDynproError> {
+                let cell_wrapper = def.clone().from_body(body)?;
+                if let SapTableCellWrapper::Header(header_cell) = cell_wrapper {
+                    if let Some(def_wrapper) = header_cell.content() {
+                        if let ElementDefWrapper::Caption(caption_def) = def_wrapper {
+                            Ok(caption_def
+                                .from_body(body)?
+                                .lsdata()
+                                .text()
+                                .unwrap_or(&String::default())
+                                .to_string())
+                        } else {
+                            Err(ElementError::InvalidContent {
+                                element: self.table_def().id().to_string(),
+                                content: "Caption inside table header cell".to_string(),
+                            })?
+                        }
+                    } else {
+                        Err(ElementError::NoSuchContent {
+                            element: self.table_def().id().to_string(),
+                            content: "Caption inside table header cell".to_string(),
+                        })?
+                    }
+                } else {
+                    Err(ElementError::InvalidContent {
+                        element: self.table_def().id().to_string(),
+                        content: "Table header cell".to_string(),
+                    })?
+                }
+            })
+            .collect::<Result<Vec<String>, WebDynproError>>();
+        vec
     }
 
     /// 원본 [`SapTable`]의 [`ElementDef`]를 반환합니다.
