@@ -46,6 +46,7 @@ impl WebDynproCommand for ComboBoxSelectCommand {
 }
 
 /// [`ComboBox`]의 내용을 바꿈
+#[allow(unused)]
 pub struct ComboBoxChangeCommand {
     element_def: ComboBoxDef,
     value: String,
@@ -79,6 +80,7 @@ impl WebDynproCommand for ComboBoxChangeCommand {
 }
 
 /// [`ComboBox`]의 선택지를 `value1`의 값을 기반으로 선택하도록 함
+#[allow(unused)]
 pub struct ComboBoxSelectByValue1Command {
     element_def: ComboBoxDef,
     value: String,

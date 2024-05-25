@@ -323,6 +323,7 @@ macro_rules! register_elements {
                 }
             }
 
+            /// 엘리먼트의 id를 반환합니다.
             pub fn id(&self) -> &str {
                 match self {
                     $( ElementDefWrapper::$enum(element_def) => <$type as $crate::webdynpro::element::Element<'a>>::Def::id(element_def), )*

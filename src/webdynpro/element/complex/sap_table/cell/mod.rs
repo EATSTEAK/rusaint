@@ -76,6 +76,7 @@ impl<'a> SapTableCellWrapper<'a> {
         }
     }
 
+    /// 셀의 id를 반환합니다.
     pub fn id(&self) -> &str {
         match self {
             SapTableCellWrapper::Normal(cell) => cell.id(),

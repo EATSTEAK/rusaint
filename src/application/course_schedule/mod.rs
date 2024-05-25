@@ -5,7 +5,9 @@ use crate::{
     webdynpro::{
         client::body::Body,
         command::element::selection::ComboBoxSelectCommand,
-        element::{complex::SapTable, definition::ElementDefinition, layout::TabStrip, selection::ComboBox},
+        element::{
+            complex::SapTable, definition::ElementDefinition, layout::TabStrip, selection::ComboBox,
+        },
         error::WebDynproError,
     },
     RusaintError,
@@ -13,6 +15,7 @@ use crate::{
 
 use super::{USaintApplication, USaintClient};
 
+/// [강의시간표](https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/ZCMW2100)
 pub struct CourseSchedule {
     client: USaintClient,
 }
@@ -78,45 +81,31 @@ impl<'a> CourseSchedule {
         Ok(())
     }
 
+    fn body(&self) -> &Body {
+        self.client.body()
+    }
+
+    /// 학기, 학년도, 강의 분류를 통해 강의를 찾습니다.
     pub async fn find_lectures(
         &mut self,
-        year: &str,
+        year: u32,
         period: SemesterType,
         lecture_category: LectureCategory,
     ) -> Result<impl Iterator<Item = Lecture>, WebDynproError> {
+        let year_str = format!("{}", year);
         self.select_rows(500).await?;
-        self.select_period(year, period).await?;
+        self.select_period(&year_str, period).await?;
         lecture_category.request_query(&mut self.client.0).await?;
-        let lectures = Self::MAIN_TABLE.from_body(self.client.body())?.table()?.try_table_into::<Lecture>(self.client.body())?;
+        let lectures = Self::MAIN_TABLE
+            .from_body(self.client.body())?
+            .table()?
+            .try_table_into::<Lecture>(self.client.body())?;
         Ok(lectures.into_iter())
-    }
-
-    fn body(&self) -> &Body {
-        self.client.body()
     }
 }
 
 #[cfg(test)]
-mod test {
-    use crate::{
-        application::{course_schedule::CourseSchedule, USaintClientBuilder},
-        webdynpro::element::ElementWrapper,
-    };
+mod test {}
 
-    #[tokio::test]
-    async fn examine_elements() {
-        let app = USaintClientBuilder::new()
-            .build_into::<CourseSchedule>()
-            .await
-            .unwrap();
-        let ct_selector = scraper::Selector::parse("[ct]").unwrap();
-        for elem_ref in app.body().document().select(&ct_selector) {
-            let elem = ElementWrapper::dyn_element(elem_ref);
-            if let Ok(elem) = elem {
-                println!("{:?}", elem);
-            }
-        }
-    }
-}
-
+/// 강의시간표 애플리케이션에서 사용하는 데이터 모델
 pub mod model;
