@@ -26,35 +26,17 @@ impl StudentInformation {
 
 #[cfg(test)]
 mod test {
-    use anyhow::{Error, Result};
-    use std::sync::{Arc, OnceLock};
+    use serial_test::serial;
 
     use crate::{
         application::{student_information::StudentInformation, USaintClientBuilder},
+        global_test_utils::get_session,
         session::USaintSession,
         webdynpro::element::ElementWrapper,
     };
-    use dotenv::dotenv;
-
-    static SESSION: OnceLock<Arc<USaintSession>> = OnceLock::new();
-
-    async fn get_session() -> Result<Arc<USaintSession>> {
-        if let Some(session) = SESSION.get() {
-            Ok(session.to_owned())
-        } else {
-            dotenv().ok();
-            let id = std::env::var("SSO_ID").unwrap();
-            let password = std::env::var("SSO_PASSWORD").unwrap();
-            let session = USaintSession::with_password(&id, &password).await?;
-            let _ = SESSION.set(Arc::new(session));
-            SESSION
-                .get()
-                .and_then(|arc| Some(arc.to_owned()))
-                .ok_or(Error::msg("Session is not initsiated"))
-        }
-    }
 
     #[tokio::test]
+    #[serial]
     async fn examine_elements() {
         let session = get_session().await.unwrap();
         let app = USaintClientBuilder::new()

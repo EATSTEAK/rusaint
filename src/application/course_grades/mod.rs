@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 
-
 use crate::{
     define_elements,
     model::SemesterType,
@@ -12,15 +11,10 @@ use crate::{
         },
         element::{
             action::ButtonDef,
-            complex::sap_table::{
-                cell::{SapTableCell, SapTableCellWrapper},
-                property::SapTableCellType,
-                SapTable,
-            },
+            complex::sap_table::{cell::SapTableCell, SapTable},
             definition::ElementDefinition,
             layout::PopupWindow,
             selection::ComboBox,
-            sub::SubElement,
             text::InputField,
             Element, ElementDefWrapper, ElementWrapper,
         },
@@ -323,19 +317,18 @@ impl<'a> CourseGrades {
                     element: table_elem.id().to_string(),
                     content: "header and first row".to_string(),
                 })?
-                .try_row_into::<HashMap<String, String>>(table_body.header(), body)?
+                .try_row_into::<Vec<(String, String)>>(table_body.header(), body)?
                 .into_iter();
             zip.skip(4)
                 .map(|(key, val)| {
-                    Ok((
-                        key,
+                    let float =
                         val.trim()
                             .parse::<f32>()
                             .or(Err(ElementError::InvalidContent {
-                                element: table_elem.id().to_string(),
+                                element: format!("TABLE: {}, key: {}", table_elem.id(), key),
                                 content: "(not an correct f32)".to_string(),
-                            }))?,
-                    ))
+                            }))?;
+                    Ok((key, float))
                 })
                 .collect::<Result<HashMap<String, f32>, WebDynproError>>()
         };
@@ -408,9 +401,12 @@ impl<'a> CourseGrades {
                 (btn_id, row)
             })
             .filter_map(|(btn_id, row)| {
-                row.try_row_into::<HashMap<String, String>>(grade_table_body.header(), self.client.body())
-                    .ok()
-                    .and_then(|row| Some((btn_id, row)))
+                row.try_row_into::<HashMap<String, String>>(
+                    grade_table_body.header(),
+                    self.client.body(),
+                )
+                .ok()
+                .and_then(|row| Some((btn_id, row)))
             })
             .collect()
         };
@@ -511,58 +507,23 @@ impl<'a> CourseGrades {
     }
 }
 
-// TODO: Implement empty row check in SapTableRow struct
-impl<'a> SapTableCellWrapper<'a> {
-    fn is_empty_row(&self) -> bool {
-        match self {
-            SapTableCellWrapper::Normal(cell) => cell
-                .lsdata()
-                .cell_type()
-                .is_some_and(|s| matches!(s, SapTableCellType::EmptyRow)),
-            SapTableCellWrapper::Header(_cell) => false,
-            SapTableCellWrapper::Selection(cell) => cell
-                .lsdata()
-                .cell_type()
-                .is_some_and(|s| matches!(s, SapTableCellType::EmptyRow)),
-            _ => false,
-        }
-    }
-}
-
 /// [`CourseGrades`]에서 사용하는 데이터
 pub mod model;
 
 #[cfg(test)]
 mod test {
     use anyhow::{Error, Result};
+    use serial_test::serial;
     use std::sync::{Arc, OnceLock};
 
     use crate::{
         application::{course_grades::CourseGrades, USaintClientBuilder},
-        session::USaintSession,
+        global_test_utils::get_session,
         webdynpro::element::{layout::PopupWindow, Element},
     };
-    use dotenv::dotenv;
-
-    static SESSION: OnceLock<Arc<USaintSession>> = OnceLock::new();
-
-    async fn get_session() -> Result<Arc<USaintSession>> {
-        if let Some(session) = SESSION.get() {
-            Ok(session.to_owned())
-        } else {
-            dotenv().ok();
-            let id = std::env::var("SSO_ID").unwrap();
-            let password = std::env::var("SSO_PASSWORD").unwrap();
-            let session = USaintSession::with_password(&id, &password).await?;
-            let _ = SESSION.set(Arc::new(session));
-            SESSION
-                .get()
-                .and_then(|arc| Some(arc.to_owned()))
-                .ok_or(Error::msg("Session is not initsiated"))
-        }
-    }
 
     #[tokio::test]
+    #[serial]
     async fn close_popups() {
         let session = get_session().await.unwrap();
         let mut app = USaintClientBuilder::new()
