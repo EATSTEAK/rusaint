@@ -63,4 +63,9 @@ impl<'a> InputField<'a> {
             lsevents: OnceCell::new(),
         }
     }
+
+    /// 이 [`InputField`]의 값을 가져옵니다.
+    pub fn value(&self) -> Option<&str> {
+        self.element_ref.attr("value")
+    }
 }
