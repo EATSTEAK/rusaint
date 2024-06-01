@@ -99,20 +99,27 @@ impl<'a> GeneralStudentInformation {
 mod academic_record;
 mod bank_account;
 mod family;
-mod religion;
-mod research_bank_account;
-mod work;
 mod graduation;
 mod qualification;
+mod religion;
+mod research_bank_account;
 mod transfer;
+mod work;
 
-pub use academic_record::StudentAcademicRecordInformation;
+pub use academic_record::{StudentAcademicRecord, StudentAcademicRecordInformation};
 pub use bank_account::StudentBankAccountInformation;
-pub use family::StudentFamilyInformation;
+pub use family::{StudentFamilyInformation, StudentFamilyMember};
+pub use graduation::StudentGraduationInformation;
+pub use qualification::{
+    StudentForignStudyInformation, StudentLifelongInformation, StudentQualificationInformation,
+    StudentTeachingMajorInformation, StudentTeachingPluralMajorInformation,
+};
 pub use religion::StudentReligionInformation;
 pub use research_bank_account::StudentResearchBankAccountInformation;
+pub use transfer::{StudentTransferInformation, StudentTransferRecord};
 pub use work::StudentWorkInformation;
-pub use graduation::StudentGraduationInformation;
-pub use qualification::StudentQualificationInformation;
 
-use crate::{define_elements, webdynpro::element::{action::Button, graphic::Image, text::InputField}};
+use crate::{
+    define_elements,
+    webdynpro::element::{action::Button, graphic::Image, text::InputField},
+};

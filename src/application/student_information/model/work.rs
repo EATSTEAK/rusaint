@@ -1,9 +1,22 @@
 use crate::{
     define_elements,
-    webdynpro::element::{action::Button, layout::tab_strip::item::TabStripItem, text::InputField},
+    webdynpro::element::{
+        action::Button, layout::tab_strip::item::TabStripItem, selection::ComboBox,
+        text::InputField,
+    },
 };
 
-pub struct StudentWorkInformation {}
+pub struct StudentWorkInformation {
+    job: Option<String>,
+    public_official: Option<String>,
+    company_name: Option<String>,
+    department_name: Option<String>,
+    title: Option<String>,
+    zip_code: Option<String>,
+    address: (Option<String>, Option<String>),
+    tel_number: Option<String>,
+    fax_number: Option<String>,
+}
 
 impl<'a> StudentWorkInformation {
     // 직장정보
@@ -13,7 +26,7 @@ impl<'a> StudentWorkInformation {
         // 직업
         COJOB: InputField<'a> = "ZCMW1001.ID_0001:VIW_TAB_WORK.COJOB";
         // 공무원 구분
-        COMPANY_ORGR: InputField<'a> = "ZCMW1001.ID_0001:VIW_TAB_WORK.COMPANY_ORGR";
+        COMPANY_ORGR: ComboBox<'a> = "ZCMW1001.ID_0001:VIW_TAB_WORK.COMPANY_ORGR";
         // 직장명
         COMPANY_NAM: InputField<'a> = "ZCMW1001.ID_0001:VIW_TAB_WORK.COMPANY_NAM";
         // 부서명

@@ -1,6 +1,15 @@
-use model::{GeneralStudentInformation, StudentAcademicRecordInformation, StudentBankAccountInformation, StudentFamilyInformation, StudentGraduationInformation, StudentQualificationInformation, StudentReligionInformation, StudentResearchBankAccountInformation, StudentWorkInformation};
+use model::{
+    GeneralStudentInformation, StudentAcademicRecordInformation, StudentBankAccountInformation,
+    StudentFamilyInformation, StudentGraduationInformation, StudentQualificationInformation,
+    StudentReligionInformation, StudentResearchBankAccountInformation, StudentTransferInformation,
+    StudentWorkInformation,
+};
 
-use crate::{define_elements, webdynpro::{client::body::Body, element::layout::TabStrip, error::WebDynproError}, RusaintError};
+use crate::{
+    define_elements,
+    webdynpro::{client::body::Body, element::layout::TabStrip, error::WebDynproError},
+    RusaintError,
+};
 
 use super::{USaintApplication, USaintClient};
 
@@ -22,8 +31,6 @@ impl USaintApplication for StudentInformation {
 }
 
 impl<'a> StudentInformation {
-
-
     // 부가정보 탭
     define_elements! {
         TAB_ADDITION: TabStrip<'a> = "ZCMW1001.ID_0001:VIW_MAIN.TAB_ADDITION";
@@ -53,15 +60,23 @@ impl<'a> StudentInformation {
         todo!()
     }
 
+    pub async fn transfer(&mut self) -> Result<StudentTransferInformation, WebDynproError> {
+        todo!()
+    }
+
     pub async fn bank_account(&mut self) -> Result<StudentBankAccountInformation, WebDynproError> {
         todo!()
     }
 
-    pub async fn academic_record(&mut self) -> Result<StudentAcademicRecordInformation, WebDynproError> {
+    pub async fn academic_record(
+        &mut self,
+    ) -> Result<StudentAcademicRecordInformation, WebDynproError> {
         todo!()
     }
 
-    pub async fn research_bank_account(&mut self) -> Result<StudentResearchBankAccountInformation, WebDynproError> {
+    pub async fn research_bank_account(
+        &mut self,
+    ) -> Result<StudentResearchBankAccountInformation, WebDynproError> {
         todo!()
     }
 

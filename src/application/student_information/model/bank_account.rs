@@ -1,6 +1,16 @@
-use crate::{define_elements, webdynpro::element::{action::Button, layout::tab_strip::item::TabStripItem, selection::ComboBox, text::InputField}};
+use crate::{
+    define_elements,
+    webdynpro::element::{
+        action::Button, layout::tab_strip::item::TabStripItem, selection::ComboBox,
+        text::InputField,
+    },
+};
 
-pub struct StudentBankAccountInformation {}
+pub struct StudentBankAccountInformation {
+    bank: Option<String>,
+    account_number: Option<String>,
+    holder: Option<String>,
+}
 
 impl<'a> StudentBankAccountInformation {
     // 은행계좌정보
