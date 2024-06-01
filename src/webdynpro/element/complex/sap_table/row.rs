@@ -34,15 +34,9 @@ impl<'a> SapTableRow<'a> {
     pub(super) fn new(
         table_def: SapTableDef,
         row_ref: ElementRef<'a>,
+        cells: Vec<SapTableCellDefWrapper>,
     ) -> Result<SapTableRow<'a>, ElementError> {
         let row = row_ref.value();
-        let subct_selector = scraper::Selector::parse("[subct]").unwrap();
-        let subcts = row_ref.select(&subct_selector);
-        let cells = subcts
-            .filter_map(|subct_ref| {
-                SapTableCellDefWrapper::dyn_cell_def(table_def.clone(), subct_ref)
-            })
-            .collect::<Vec<SapTableCellDefWrapper>>();
         Ok(SapTableRow {
             table_def,
             elem_ref: row_ref,

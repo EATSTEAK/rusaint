@@ -160,10 +160,10 @@ macro_rules! define_element_base {
             fn lsdata(&self) -> &Self::ElementLSData {
                 self.lsdata
                     .get_or_init(|| {
-                        let Ok(lsdata_obj) = Self::lsdata_element(self.element_ref) else {
+                        let Ok(lsdata_obj) = Self::lsdata_element(self.element_ref).or_else(|e| { eprintln!("{:?}", e); Err(e) }) else {
                             return $lsdata::default();
                         };
-                        serde_json::from_value::<Self::ElementLSData>(lsdata_obj).ok().unwrap_or($lsdata::default())
+                        serde_json::from_value::<Self::ElementLSData>(lsdata_obj).or_else(|e| { eprintln!("{:?}", e); Err(e) }).ok().unwrap_or($lsdata::default())
                     })
             }
 

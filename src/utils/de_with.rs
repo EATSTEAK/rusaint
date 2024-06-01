@@ -14,6 +14,13 @@ pub(crate) fn deserialize_f32_string<'de, D: Deserializer<'de>>(
     value.parse().map_err(serde::de::Error::custom)
 }
 
+pub(crate) fn deserialize_with_trim<'de, D: Deserializer<'de>>(
+    deserializer: D,
+) -> Result<String, D::Error> {
+    let value = String::deserialize(deserializer)?;
+    Ok(value.trim().to_string())
+}
+
 pub(crate) fn deserialize_empty<'de, D: Deserializer<'de>>(
     deserializer: D,
 ) -> Result<bool, D::Error> {
