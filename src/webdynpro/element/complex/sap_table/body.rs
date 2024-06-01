@@ -98,6 +98,20 @@ impl<'a> SapTableBody<'a> {
                     }
                 }
             }
+            // checks if spanning lasts after last cell
+            if spans.contains_key(&col_counter) {
+                let spanned_cell = spans.remove(&col_counter).unwrap();
+                if spanned_cell.1 - 1 > 1 {
+                    spans.insert(
+                        col_counter,
+                        (spanned_cell.0.clone(), spanned_cell.1 - 1, spanned_cell.2),
+                    );
+                }
+                for _ in 0..(spanned_cell.2) {
+                    col_counter += 1;
+                    cells.push(spanned_cell.0.clone());
+                }
+            }
             if let Ok(row) = SapTableRow::new(table_def.clone(), row_ref, cells) {
                 rows.push(row);
             }
