@@ -67,6 +67,33 @@ pub use session::USaintSession;
 /// u-saint 애플리케이션에서 공통으로 사용하는 데이터
 pub mod model;
 
-mod utils;
+pub(crate) mod utils;
 /// SAP WebDynpro 클라이언트를 파싱, 모방하는 클라이언트 엔진
 pub mod webdynpro;
+
+#[cfg(test)]
+pub mod global_test_utils {
+    use anyhow::{Error, Result};
+    use dotenv::dotenv;
+    use std::sync::{Arc, OnceLock};
+
+    use crate::USaintSession;
+
+    pub static SESSION: OnceLock<Arc<USaintSession>> = OnceLock::new();
+
+    pub async fn get_session() -> Result<Arc<USaintSession>> {
+        if let Some(session) = SESSION.get() {
+            Ok(session.to_owned())
+        } else {
+            dotenv().ok();
+            let id = std::env::var("SSO_ID").unwrap();
+            let password = std::env::var("SSO_PASSWORD").unwrap();
+            let session = USaintSession::with_password(&id, &password).await?;
+            let _ = SESSION.set(Arc::new(session));
+            SESSION
+                .get()
+                .and_then(|arc| Some(arc.to_owned()))
+                .ok_or(Error::msg("Session is not initsiated"))
+        }
+    }
+}

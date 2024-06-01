@@ -193,18 +193,3 @@ pub async fn obtain_ssu_sso_token(id: &str, password: &str) -> Result<String, Ss
         message.unwrap_or("Internal Error".to_string()),
     ))?)
 }
-
-#[cfg(test)]
-mod test {
-    use crate::session::USaintSession;
-    use dotenv::dotenv;
-
-    #[tokio::test]
-    async fn get_session() {
-        dotenv().ok();
-        let id = std::env::var("SSO_ID").unwrap();
-        let password = std::env::var("SSO_PASSWORD").unwrap();
-        let session = USaintSession::with_password(&id, &password).await.unwrap();
-        println!("{:?}", session);
-    }
-}

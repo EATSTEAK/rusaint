@@ -11,15 +11,10 @@ use crate::{
         },
         element::{
             action::ButtonDef,
-            complex::sap_table::{
-                cell::{SapTableCell, SapTableCellWrapper},
-                property::SapTableCellType,
-                SapTable,
-            },
+            complex::sap_table::{cell::SapTableCell, SapTable},
             definition::ElementDefinition,
             layout::PopupWindow,
             selection::ComboBox,
-            sub::SubElement,
             text::InputField,
             Element, ElementDefWrapper, ElementWrapper,
         },
@@ -182,7 +177,7 @@ impl<'a> CourseGrades {
     }
 
     fn value_as_f32(field: InputField<'_>) -> Result<f32, WebDynproError> {
-        let Some(value) = field.lsdata().value() else {
+        let Some(value) = field.value() else {
             return Err(ElementError::NoSuchData {
                 element: field.id().to_string(),
                 field: "value1".to_string(),
@@ -289,56 +284,13 @@ impl<'a> CourseGrades {
         &mut self,
         course_type: CourseType,
     ) -> Result<Vec<SemesterGrade>, WebDynproError> {
-        fn parse_rank(value: String) -> Option<(u32, u32)> {
-            let mut spl = value.split("/");
-            let first: u32 = spl.next()?.parse().ok()?;
-            let second: u32 = spl.next()?.parse().ok()?;
-            Some((first, second))
-        }
         self.close_popups().await?;
         self.select_course(course_type).await?;
 
         let table_elem = Self::GRADES_SUMMARY_TABLE.from_body(self.client.body())?;
         let table = table_elem.table()?;
-        let ret = table
-            .try_table_into::<Vec<String>>(self.client.body())?
-            .into_iter()
-            .filter_map(|values| {
-                if values.len() == 14 {
-                    Some(SemesterGrade::new(
-                        values[1].parse().ok()?,
-                        values[2].clone(),
-                        values[3].parse().ok()?,
-                        values[4].parse().ok()?,
-                        values[5].parse().ok()?,
-                        values[6].parse().ok()?,
-                        values[7].parse().ok()?,
-                        values[8].parse().ok()?,
-                        parse_rank(values[9].clone())?,
-                        parse_rank(values[10].clone())?,
-                        !values[11].trim().is_empty(),
-                        !values[12].trim().is_empty(),
-                        !values[13].trim().is_empty(),
-                    ))
-                } else {
-                    Some(SemesterGrade::new(
-                        values[1].parse().ok()?,
-                        values[2].clone(),
-                        values[3].parse().ok()?,
-                        values[4].parse().ok()?,
-                        values[5].parse().ok()?,
-                        values[6].parse().ok()?,
-                        values[7].parse().ok()?,
-                        values[8].parse().ok()?,
-                        parse_rank(values[9].clone())?,
-                        parse_rank(values[10].clone())?,
-                        false,
-                        !values[11].trim().is_empty(),
-                        !values[12].trim().is_empty(),
-                    ))
-                }
-            });
-        Ok(ret.collect())
+        let ret = table.try_table_into::<SemesterGrade>(self.client.body())?;
+        Ok(ret)
     }
 
     async fn class_detail_in_popup(
@@ -349,7 +301,7 @@ impl<'a> CourseGrades {
             .send(ButtonPressCommand::new(open_button))
             .await?;
 
-        let parse_table_in_popup = |body: &Body| -> Result<Vec<(String, f32)>, WebDynproError> {
+        let parse_table_in_popup = |body: &Body| -> Result<HashMap<String, f32>, WebDynproError> {
             let table_inside_popup_selector =
                 scraper::Selector::parse(r#"[ct="PW"] [ct="ST"]"#).unwrap();
             let mut table_inside_popup = body.document().select(&table_inside_popup_selector);
@@ -369,17 +321,16 @@ impl<'a> CourseGrades {
                 .into_iter();
             zip.skip(4)
                 .map(|(key, val)| {
-                    Ok((
-                        key,
+                    let float =
                         val.trim()
                             .parse::<f32>()
                             .or(Err(ElementError::InvalidContent {
-                                element: table_elem.id().to_string(),
+                                element: format!("TABLE: {}, key: {}", table_elem.id(), key),
                                 content: "(not an correct f32)".to_string(),
-                            }))?,
-                    ))
+                            }))?;
+                    Ok((key, float))
                 })
-                .collect::<Result<Vec<(String, f32)>, WebDynproError>>()
+                .collect::<Result<HashMap<String, f32>, WebDynproError>>()
         };
         let table = parse_table_in_popup(self.client.body())?;
         self.close_popups().await?;
@@ -431,7 +382,7 @@ impl<'a> CourseGrades {
         self.close_popups().await?;
         self.select_course(course_type).await?;
         self.select_semester(year, semester).await?;
-        let class_grades: Vec<(Option<String>, Vec<String>)> = {
+        let class_grades: Vec<(Option<String>, HashMap<String, String>)> = {
             let grade_table_elem = Self::GRADE_BY_CLASSES_TABLE.from_body(self.client.body())?;
             let grade_table_body = grade_table_elem.table()?;
             let iter = grade_table_body.iter();
@@ -450,9 +401,12 @@ impl<'a> CourseGrades {
                 (btn_id, row)
             })
             .filter_map(|(btn_id, row)| {
-                row.try_row_into::<Vec<String>>(grade_table_body.header(), self.client.body())
-                    .ok()
-                    .and_then(|row| Some((btn_id, row)))
+                row.try_row_into::<HashMap<String, String>>(
+                    grade_table_body.header(),
+                    self.client.body(),
+                )
+                .ok()
+                .and_then(|row| Some((btn_id, row)))
             })
             .collect()
         };
@@ -472,12 +426,12 @@ impl<'a> CourseGrades {
                 Some(ClassGrade::new(
                     year.to_owned(),
                     semester.to_string(),
-                    values[8].trim().to_owned(),
-                    values[3].trim().to_owned(),
-                    values[5].parse().ok()?,
-                    values[1].parse().ok()?,
-                    values[2].trim().to_owned(),
-                    values[6].trim().to_owned(),
+                    values["과목코드"].trim().to_owned(),
+                    values["과목명"].trim().to_owned(),
+                    values["과목학점"].parse().ok()?,
+                    values["성적"].parse().ok()?,
+                    values["등급"].trim().to_owned(),
+                    values["교수명"].trim().to_owned(),
                     detail,
                 ))
             })();
@@ -553,58 +507,21 @@ impl<'a> CourseGrades {
     }
 }
 
-// TODO: Implement empty row check in SapTableRow struct
-impl<'a> SapTableCellWrapper<'a> {
-    fn is_empty_row(&self) -> bool {
-        match self {
-            SapTableCellWrapper::Normal(cell) => cell
-                .lsdata()
-                .cell_type()
-                .is_some_and(|s| matches!(s, SapTableCellType::EmptyRow)),
-            SapTableCellWrapper::Header(_cell) => false,
-            SapTableCellWrapper::Selection(cell) => cell
-                .lsdata()
-                .cell_type()
-                .is_some_and(|s| matches!(s, SapTableCellType::EmptyRow)),
-            _ => false,
-        }
-    }
-}
-
 /// [`CourseGrades`]에서 사용하는 데이터
 pub mod model;
 
 #[cfg(test)]
 mod test {
-    use anyhow::{Error, Result};
-    use std::sync::{Arc, OnceLock};
+    use serial_test::serial;
 
     use crate::{
         application::{course_grades::CourseGrades, USaintClientBuilder},
-        session::USaintSession,
+        global_test_utils::get_session,
         webdynpro::element::{layout::PopupWindow, Element},
     };
-    use dotenv::dotenv;
-
-    static SESSION: OnceLock<Arc<USaintSession>> = OnceLock::new();
-
-    async fn get_session() -> Result<Arc<USaintSession>> {
-        if let Some(session) = SESSION.get() {
-            Ok(session.to_owned())
-        } else {
-            dotenv().ok();
-            let id = std::env::var("SSO_ID").unwrap();
-            let password = std::env::var("SSO_PASSWORD").unwrap();
-            let session = USaintSession::with_password(&id, &password).await?;
-            let _ = SESSION.set(Arc::new(session));
-            SESSION
-                .get()
-                .and_then(|arc| Some(arc.to_owned()))
-                .ok_or(Error::msg("Session is not initsiated"))
-        }
-    }
 
     #[tokio::test]
+    #[serial]
     async fn close_popups() {
         let session = get_session().await.unwrap();
         let mut app = USaintClientBuilder::new()

@@ -1,6 +1,6 @@
 use std::{borrow::Cow, cell::OnceCell};
 
-use crate::webdynpro::element::define_element_interactable;
+use crate::webdynpro::element::{define_element_interactable, property::Visibility};
 
 // TODO: Implement additional events and data
 define_element_interactable! {
@@ -20,7 +20,7 @@ define_element_interactable! {
         width: String => "7",
         has_icon: bool => "8",
         image_first: bool => "9",
-        visibility: String => "10",
+        visibility: Visibility => "10",
         show_help: bool => "11",
         access_key: String => "12",
         align: String => "13",

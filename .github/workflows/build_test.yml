@@ -1,0 +1,24 @@
+name: Build & Test
+
+on:
+  push:
+    branches: [ "main", "dev" ]
+  pull_request:
+    branches: [ "main", "dev" ]
+  schedule:
+    - cron: "23 3 * * *"
+env:
+  CARGO_TERM_COLOR: always
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment: testing
+    env:
+      SSO_ID: ${{ vars.SSO_ID }}
+      SSO_PASSWORD: ${{ secrets.SSO_PASSWORD }}
+    steps:
+    - uses: actions/checkout@v4
+    - name: Build
+      run: cargo build --verbose
+    - name: Run tests
+      run: cargo test --verbose

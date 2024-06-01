@@ -6,7 +6,7 @@ use rusaint::USaintSession;
 
 static SESSION: OnceLock<Arc<USaintSession>> = OnceLock::new();
 
-pub(crate) async fn get_session() -> Result<Arc<USaintSession>> {
+pub async fn get_session() -> Result<Arc<USaintSession>> {
     if let Some(session) = SESSION.get() {
         Ok(session.to_owned())
     } else {

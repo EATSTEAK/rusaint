@@ -160,10 +160,10 @@ macro_rules! define_element_base {
             fn lsdata(&self) -> &Self::ElementLSData {
                 self.lsdata
                     .get_or_init(|| {
-                        let Ok(lsdata_obj) = Self::lsdata_element(self.element_ref) else {
+                        let Ok(lsdata_obj) = Self::lsdata_element(self.element_ref).or_else(|e| { eprintln!("{:?}", e); Err(e) }) else {
                             return $lsdata::default();
                         };
-                        serde_json::from_value::<Self::ElementLSData>(lsdata_obj).ok().unwrap_or($lsdata::default())
+                        serde_json::from_value::<Self::ElementLSData>(lsdata_obj).or_else(|e| { eprintln!("{:?}", e); Err(e) }).ok().unwrap_or($lsdata::default())
                     })
             }
 
@@ -320,6 +320,14 @@ macro_rules! register_elements {
                 match element.value().attr("ct") {
                     $( Some(<$type>::CONTROL_ID) => Ok(ElementDefWrapper::$enum(<$type as $crate::webdynpro::element::Element<'a>>::Def::new_dynamic(id))), )*
                     _ => Ok(ElementDefWrapper::Unknown(<$crate::webdynpro::element::unknown::Unknown<'a> as $crate::webdynpro::element::Element<'a>>::Def::new_dynamic(id)))
+                }
+            }
+
+            /// 엘리먼트의 id를 반환합니다.
+            pub fn id(&self) -> &str {
+                match self {
+                    $( ElementDefWrapper::$enum(element_def) => <$type as $crate::webdynpro::element::Element<'a>>::Def::id(element_def), )*
+                    ElementDefWrapper::Unknown(element_def) => <$crate::webdynpro::element::unknown::Unknown<'a> as $crate::webdynpro::element::Element<'a>>::Def::id(element_def),
                 }
             }
         }

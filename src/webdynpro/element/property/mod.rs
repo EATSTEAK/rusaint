@@ -2,6 +2,25 @@ use serde::Deserialize;
 
 use super::complex::sap_table::property::SapTableCellDesign;
 
+/// 탭 키 동작
+#[allow(missing_docs)]
+#[derive(Clone, Deserialize, Debug)]
+#[serde(rename_all = "UPPERCASE")]
+pub enum TabBehaviour {
+    Standard,
+    AutoIntra,
+    AutoInter,
+}
+
+/// 테이블 필드 디자인
+#[allow(missing_docs)]
+#[derive(Clone, Deserialize, Debug)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum TableFieldDesign {
+    None,
+    EditableColored,
+}
+
 /// 텍스트 형태 종류
 #[allow(missing_docs)]
 #[derive(Clone, Deserialize, Debug)]
@@ -37,6 +56,182 @@ pub enum ContentVisibility {
     All,
     Text,
     Icon,
+}
+
+#[allow(missing_docs)]
+#[derive(Clone, Deserialize, Debug)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum EmbeddingBehaviour {
+    Compatible,
+    Fill,
+    FillFixedLayout,
+}
+
+/// 수평 텍스트 정렬
+#[allow(missing_docs)]
+#[derive(Clone, Deserialize, Debug)]
+#[serde(rename_all = "UPPERCASE")]
+pub enum HorizontalTextAlign {
+    Center,
+    Left,
+    Right,
+    Justify,
+}
+
+/// 엘리먼트가 잠겼을 때의 형태
+#[allow(missing_docs)]
+#[derive(Clone, Deserialize, Debug)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum LockedDesign {
+    Transparent,
+    Border,
+    Loading,
+    BorderLoading,
+    Semi,
+    SemiBorder,
+    SemiLoading,
+    SemiBorderLoading,
+}
+
+/// 추천 필터 분류
+#[allow(missing_docs)]
+#[derive(Clone, Deserialize, Debug)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum SuggestFilterType {
+    Off,
+    Server,
+    ClientServer,
+    ClientServerPrefix,
+}
+
+/// 추천 필터 조건
+#[allow(missing_docs)]
+#[derive(Clone, Deserialize, Debug)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum SuggestFilterCondition {
+    Value1OrValue2,
+    Value1,
+}
+
+/// IME 모드
+#[allow(missing_docs)]
+#[derive(Clone, Deserialize, Debug)]
+#[serde(rename_all = "UPPERCASE")]
+pub enum IMEMode {
+    Auto,
+    Active,
+    Inactive,
+    Disabled,
+}
+
+/// 입력 필드 종류
+#[allow(missing_docs)]
+#[derive(Clone, Deserialize, Debug)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum InputFieldType {
+    String,
+    Boolean,
+    Time,
+    Date,
+    Bdc,
+    Integer,
+    Amount,
+    Code,
+    CurrencyCode,
+    DateTime,
+    Description,
+    Duration,
+    Identifier,
+    Measure,
+    Numeric,
+    Percentage,
+    Quantity,
+    Ratio,
+    TimezoneCode,
+    UnitCode,
+    Uri,
+    Email,
+}
+
+/// 입력 필드 텍스트 스타일
+#[allow(missing_docs)]
+#[derive(Clone, Deserialize, Debug)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum InputFieldTextStyle {
+    Normal,
+    Underline,
+    UnderlineHotspot,
+    Bold,
+    BoldHotspot,
+    Italic,
+    ItalicHotspot,
+    BoldItalic,
+    BoldItalicHotspot,
+    BoldUnderline,
+    BoldItalicUnderline,
+    ItalicUnderline,
+    BoldUnderlineHotspot,
+    BoldItalicUnderlineHotspot,
+    ItalicUnderlineHotspot,
+}
+
+/// 윈도우 모드
+#[allow(missing_docs)]
+#[derive(Clone, Deserialize, Debug)]
+#[serde(rename_all = "UPPERCASE")]
+pub enum Mode {
+    Modal,
+    Amodal,
+    Floating,
+}
+
+/// 스크롤 모드
+#[allow(missing_docs)]
+#[derive(Clone, Deserialize, Debug)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum ScrollingMode {
+    Auto,
+    Both,
+    Hide,
+    None,
+    Horizontal,
+    HorizontalAuto,
+    Vertical,
+    VerticalAuto,
+}
+
+/// 테마 정의를 이용한 엘리먼트 색상
+pub type SemanticColor = SapTableCellDesign;
+
+/// 정렬 상태
+#[allow(missing_docs)]
+#[derive(Clone, Deserialize, Debug)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum SortState {
+    Disabled,
+    None,
+    Ascending,
+    Descending,
+}
+
+/// 수직 텍스트 정렬
+#[allow(missing_docs)]
+#[derive(Clone, Deserialize, Debug)]
+#[serde(rename_all = "UPPERCASE")]
+pub enum VerticalTextAlign {
+    Middle,
+    Baseline,
+    Top,
+    Bottom,
+}
+
+/// 퀵뷰 윈도우 디자인
+#[allow(missing_docs)]
+#[derive(Clone, Deserialize, Debug)]
+#[serde(rename_all = "UPPERCASE")]
+pub enum QuickViewDesign {
+    Standard,
+    Application,
 }
 
 /// 단축키 값
@@ -196,89 +391,4 @@ pub enum HotkeyValue {
     ShiftF10,
     ShiftF11,
     ShiftF12,
-}
-
-/// 수평 텍스트 정렬
-#[allow(missing_docs)]
-#[derive(Clone, Deserialize, Debug)]
-#[serde(rename_all = "UPPERCASE")]
-pub enum HorizontalTextAlign {
-    Center,
-    Left,
-    Right,
-    Justify,
-}
-
-/// 엘리먼트가 잠겼을 때의 형태
-#[allow(missing_docs)]
-#[derive(Clone, Deserialize, Debug)]
-#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
-pub enum LockedDesign {
-    Transparent,
-    Border,
-    Loading,
-    BorderLoading,
-    Semi,
-    SemiBorder,
-    SemiLoading,
-    SemiBorderLoading,
-}
-
-/// 윈도우 모드
-#[allow(missing_docs)]
-#[derive(Clone, Deserialize, Debug)]
-#[serde(rename_all = "UPPERCASE")]
-pub enum Mode {
-    Modal,
-    Amodal,
-    Floating,
-}
-
-/// 스크롤 모드
-#[allow(missing_docs)]
-#[derive(Clone, Deserialize, Debug)]
-#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
-pub enum ScrollingMode {
-    Auto,
-    Both,
-    Hide,
-    None,
-    Horizontal,
-    HorizontalAuto,
-    Vertical,
-    VerticalAuto,
-}
-
-/// 테마 정의를 이용한 엘리먼트 색상
-pub type SemanticColor = SapTableCellDesign;
-
-/// 정렬 상태
-#[allow(missing_docs)]
-#[derive(Clone, Deserialize, Debug)]
-#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
-pub enum SortState {
-    Disabled,
-    None,
-    Ascending,
-    Descending,
-}
-
-/// 수직 텍스트 정렬
-#[allow(missing_docs)]
-#[derive(Clone, Deserialize, Debug)]
-#[serde(rename_all = "UPPERCASE")]
-pub enum VerticalTextAlign {
-    Middle,
-    Baseline,
-    Top,
-    Bottom,
-}
-
-/// 퀵뷰 윈도우 디자인
-#[allow(missing_docs)]
-#[derive(Clone, Deserialize, Debug)]
-#[serde(rename_all = "UPPERCASE")]
-pub enum QuickViewDesign {
-    Standard,
-    Application,
 }

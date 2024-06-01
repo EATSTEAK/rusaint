@@ -87,7 +87,7 @@ pub fn unescape_str<'a>(text: &'a str) -> Result<Cow<'a, str>, EventStrUnescapeE
 
 /// 엘리먼트에서 전송하는 이벤트
 #[allow(missing_docs)]
-#[derive(Builder, Clone)]
+#[derive(Builder, Clone, Debug)]
 pub struct Event {
     event: String,
     control: String,

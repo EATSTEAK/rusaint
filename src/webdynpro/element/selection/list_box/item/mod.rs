@@ -1,6 +1,6 @@
 use std::{borrow::Cow, cell::OnceCell};
 
-use crate::webdynpro::element::define_element_base;
+use crate::webdynpro::{element::{define_element_base, ElementWrapper}, error::{ElementError, WebDynproError}};
 
 /// [`ListBox`](crate::webdynpro::element::selection::list_box::ListBox)의 아이템을 위한 Wrapper
 #[derive(Debug)]
@@ -9,6 +9,69 @@ pub enum ListBoxItemWrapper<'a> {
     Item(ListBoxItem<'a>),
     /// 수행할 수 있는 액션이 포함된 [`ListBox`](crate::webdynpro::element::selection::list_box::ListBox) 아이템
     ActionItem(ListBoxActionItem<'a>),
+}
+
+/// [`ListBox`](crate::webdynpro::element::selection::list_box::ListBox)의 아이템의 정의 Wrapper
+#[derive(Clone, Debug)]
+pub enum ListBoxItemDefWrapper {
+    /// 일반 아이템의 정의
+    Item(ListBoxItemDef),
+    /// 액션이 포함된 아이템의 정의
+    ActionItem(ListBoxActionItemDef)
+}
+
+/// [`ListBoxItem`]의 정보
+pub enum ListBoxItemInfo {
+    /// 일반 [`ListBoxItem`]의 정보
+    Item {
+        /// 아이템의 인덱스(순서)
+        index: String,
+        /// 아이템의 키
+        key: String,
+        /// 아이템의 첫번째 값
+        value1: String,
+        /// 아이템의 두번째 값
+        value2: String,
+        /// 아이템의 선택 여부
+        selected: bool,
+        /// 아이템의 활성화 여부
+        enabled: bool,
+        /// 제목
+        title: String
+    },
+    /// [`ListBoxActionItem`]의 정보
+    ActionItem {
+        /// 제목
+        title: String,
+        /// 내부 문자열
+        text: String
+    }
+}
+
+impl ListBoxItemInfo {
+    pub(super) fn from_element_ref(element_ref: scraper::ElementRef<'_>) -> Result<ListBoxItemInfo, WebDynproError> {
+        let element = ElementWrapper::dyn_element(element_ref)?;
+        match element {
+            ElementWrapper::ListBoxItem(item) => {
+                Ok(ListBoxItemInfo::Item { 
+                    index: item.index().unwrap_or("").to_string(),
+                    key: item.key().unwrap_or("").to_string(),
+                    value1: item.value1().unwrap_or("").to_string(),
+                    value2: item.value2().unwrap_or("").to_string(),
+                    selected: item.selected().unwrap_or(false),
+                    enabled: item.enabled().unwrap_or(true),
+                    title: item.title().to_string()
+                })
+            },
+            ElementWrapper::ListBoxActionItem(action_item) => {
+                Ok(ListBoxItemInfo::ActionItem {
+                    title: action_item.title().to_string(),
+                    text: action_item.text().to_string()
+                })
+            }
+            _ => Err(ElementError::InvalidContent { element: "ListBox".to_string(), content: "ListBoxItem".to_string() })?
+        }
+    }
 }
 
 define_element_base! {

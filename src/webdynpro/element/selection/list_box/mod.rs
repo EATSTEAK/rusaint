@@ -2,9 +2,9 @@ use std::{borrow::Cow, cell::OnceCell};
 
 use serde::Deserialize;
 
-use crate::webdynpro::element::{ElementWrapper, EventParameterMap};
+use crate::webdynpro::{element::{ElementDefWrapper, EventParameterMap}, error::WebDynproError};
 
-use self::item::ListBoxItemWrapper;
+use self::item::{ListBoxItemDefWrapper, ListBoxItemInfo};
 
 macro_rules! def_listbox_subset {
     [$({
@@ -134,6 +134,37 @@ macro_rules! def_listbox_subset {
         }
     )+
 
+    /// [`ListBox`] 분류의 엘리먼트의 정의를 위한 Wrapper
+    #[derive(Clone, Debug)]
+    pub enum ListBoxDefWrapper {
+        $(
+            $(#[$attr])*
+            $name($def_name),
+        )+
+    }
+
+    impl ListBoxDefWrapper {
+
+        /// [`ElementDefWrapper`]에서 [`ListBoxDefWrapper`]로 변환을 시도합니다.
+        pub fn from_def(element_def: $crate::webdynpro::element::ElementDefWrapper) -> Option<ListBoxDefWrapper> {
+            match element_def {
+                $($crate::webdynpro::element::ElementDefWrapper::$name(elem) => Some(ListBoxDefWrapper::$name(elem)),)+
+                _ => None
+            }
+        }
+
+        /// [`ListBoxWrapper`]를 가져옵니다.
+        pub fn from_body<'body>(&self, body: &'body $crate::webdynpro::client::body::Body) -> Result<ListBoxWrapper<'body>, $crate::webdynpro::error::WebDynproError> {
+            match self {
+                $(ListBoxDefWrapper::$name(def) => {
+                    let raw_element = $crate::webdynpro::element::definition::ElementDefinition::from_body(def, body)?;
+                    let elem_wrapper = $crate::webdynpro::element::Element::wrap(raw_element);
+                    Ok(ListBoxWrapper::from_elements(elem_wrapper).ok_or($crate::webdynpro::error::BodyError::InvalidElement)?)
+                },)+
+            }
+        }
+    }
+
     /// [`ListBox`] 분류의 엘리먼트를 위한 공통된 Wrapper
     #[derive(Debug)]
     pub enum ListBoxWrapper<'a> {
@@ -163,7 +194,7 @@ pub struct ListBox<'a> {
     element_ref: scraper::ElementRef<'a>,
     lsdata: OnceCell<ListBoxLSData>,
     lsevents: OnceCell<Option<EventParameterMap>>,
-    items: OnceCell<Vec<ListBoxItemWrapper<'a>>>,
+    items: OnceCell<Vec<ListBoxItemDefWrapper>>,
 }
 
 def_listbox_subset![
@@ -281,21 +312,21 @@ impl<'a> ListBox<'a> {
         }
     }
 
-    /// [`ListBoxItemWrapper`]의 목록을 반환합니다.
-    pub fn items(&self) -> impl Iterator<Item = &ListBoxItemWrapper<'a>> {
+    /// [`ListBoxItemDefWrapper`]의 목록을 반환합니다.
+    pub fn items(&self) -> impl Iterator<Item = &ListBoxItemDefWrapper> {
         self.items
             .get_or_init(|| {
                 let items_selector = scraper::Selector::parse("[ct]").unwrap();
                 self.element_ref
                     .select(&items_selector)
                     .filter_map(|elem_ref| {
-                        let element = ElementWrapper::dyn_element(elem_ref).ok()?;
+                        let element = ElementDefWrapper::dyn_elem_def(elem_ref).ok()?;
                         match element {
-                            ElementWrapper::ListBoxItem(item) => {
-                                Some(ListBoxItemWrapper::Item(item))
+                            ElementDefWrapper::ListBoxItem(item) => {
+                                Some(ListBoxItemDefWrapper::Item(item))
                             }
-                            ElementWrapper::ListBoxActionItem(item) => {
-                                Some(ListBoxItemWrapper::ActionItem(item))
+                            ElementDefWrapper::ListBoxActionItem(item) => {
+                                Some(ListBoxItemDefWrapper::ActionItem(item))
                             }
                             _ => None,
                         }
@@ -303,6 +334,18 @@ impl<'a> ListBox<'a> {
                     .collect()
             })
             .iter()
+    }
+
+    /// [`ListBoxItemInfo`]의 Iterator를 반환합니다.
+    pub fn item_infos(&self) -> Result<impl Iterator<Item = ListBoxItemInfo>, WebDynproError> {
+        let items_selector = scraper::Selector::parse("[ct]").unwrap();
+        let vec = self.element_ref
+            .select(&items_selector)
+            .map(|elem_ref| {
+                ListBoxItemInfo::from_element_ref(elem_ref)
+            })
+            .collect::<Result<Vec<ListBoxItemInfo>, WebDynproError>>()?;
+        Ok(vec.into_iter())
     }
 }
 
