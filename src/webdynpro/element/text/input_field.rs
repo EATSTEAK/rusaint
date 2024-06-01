@@ -1,6 +1,12 @@
 use std::{borrow::Cow, cell::OnceCell};
 
-use crate::webdynpro::element::{define_element_interactable, property::{EmbeddingBehaviour, IMEMode, InputFieldTextStyle, InputFieldType, SemanticColor, TabBehaviour, TableFieldDesign, Visibility}};
+use crate::webdynpro::element::{
+    define_element_interactable,
+    property::{
+        EmbeddingBehaviour, IMEMode, InputFieldTextStyle, InputFieldType, SemanticColor,
+        TabBehaviour, TableFieldDesign, Visibility,
+    },
+};
 
 // TODO: Implement additional events and data
 define_element_interactable! {
@@ -14,34 +20,36 @@ define_element_interactable! {
         show_help_button: bool => "1",
         // This field originally named "type"
         input_field_type: InputFieldType => "2",
-        visibility: Visibility => "3",
-        label_text: String => "4",
-        hide_field_help: bool => "5",
-        container_width_set: bool => "6",
-        ime_mode: IMEMode => "7",
-        auto_complete: bool => "8",
-        format_string: String => "9",
-        show_help_button_always: bool => "10",
-        date_picker_start_ref_id: String => "11",
-        access_key: String => "12",
-        display_as_text: bool => "13",
-        text_style: InputFieldTextStyle => "14",
-        spinner_increment: i32 => "15",
-        spinner_bounds_check: bool => "16",
-        spinner_max: i32 => "17",
-        spinner_min: i32 => "18",
-        sap_table_field_design: TableFieldDesign => "19",
-        validation_trigger: String => "20",
-        tab_behaviour: TabBehaviour => "21",
-        semantic_color: SemanticColor => "22",
-        embedding_behaviour: EmbeddingBehaviour => "23",
-        field_help_floating: bool => "24",
-        first_day_of_week: i32 => "25",
-        custom_data: String => "26",
-        custom_style: String => "27",
-        field_help_embedding: bool => "28",
-        labelled_by: String => "29",
-        described_by: String => "30",
+        width: String => "3",
+        visibility: Visibility => "4",
+        label_text: String => "5",
+        hide_field_help: bool => "6",
+        container_width_set: bool => "7",
+        ime_mode: IMEMode => "8",
+        auto_complete: bool => "9",
+        format_string: String => "10",
+        show_help_button_always: bool => "11",
+        date_picker_start_ref_id: String => "12",
+        access_key: String => "13",
+        display_as_text: bool => "14",
+        text_style: InputFieldTextStyle => "15",
+        spinner_increment: i32 => "16",
+        spinner_bounds_check: bool => "17",
+        spinner_max: i32 => "18",
+        spinner_min: i32 => "19",
+        sap_table_field_design: TableFieldDesign => "20",
+        validation_trigger: String => "21",
+        tab_behaviour: TabBehaviour => "22",
+        semantic_color: SemanticColor => "23",
+        embedding_behaviour: EmbeddingBehaviour => "24",
+        field_help_floating: bool => "25",
+        first_day_of_week: i32 => "26",
+        custom_data: String => "27",
+        custom_style: String => "28",
+        field_help_embedding: bool => "29",
+        height: String => "30",
+        labelled_by: String => "31",
+        described_by: String => "32",
     }
 }
 
