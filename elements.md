@@ -15,7 +15,7 @@
 - [ ] BRC: BreadCrumb
   - [ ] BRCI: BreadCrumbItem
 - [x] B: Button
-- [ ] BR: ButtonRow
+- [X] BR: ButtonRow
 - [ ] CGR: CssGrid
   - [ ] CGRI: CssGridItem
 - [ ] CAL_DAY: CalendarDayView
@@ -23,7 +23,7 @@
 - [ ] CAL_MONTH: CalendarMonthView
 - [ ] CAL_YEAR: CalendarYearView
 - [ ] CAL_RH: CalendarRowHeader
-- [ ] CP: Caption
+- [X] CP: Caption
 - [ ] CARS: Carousel(Single)
 - [ ] CARM: Carousel(Multiple)
 - [ ] CHART: Chart
@@ -34,9 +34,9 @@
 - [ ] CL: ColumnLayout
   - [ ] CLS: ColumnLayoutSection
   - [ ] CLC: ColumnLayoutCell(Fragment)
-- [ ] CB: ComboBox
+- [X] CB: ComboBox
   - [ ] CBS: ComboBoxString
-- [ ] CO: Container (!)
+- [X] CO: Container (!)
 - [ ] CTAR: ContentArea
 - [ ] CXP: ContextualPanel
 - [ ] DT~: DropTarget~
@@ -52,7 +52,7 @@
 - [ ] DRT: DropTarget
 - [ ] FU: FileUploadInput
 - [ ] FLC: Flash
-- [ ] FL: FlowLayout (!)
+- [X] FL: FlowLayout (!)
 - [ ] FLL: FluidLayout
   - [ ] FLCL: FluidLayoutCell
 - [ ] FLCO: FluidLayoutContainer
@@ -60,8 +60,8 @@
 - [ ] FTV: FormattedTextView
 - [ ] FRA: FreeContextualArea
 - [ ] GM: GeoMap
-- [ ] GL: GridLayout (!)
-  - [ ] GLC: GridLayoutCell (!)
+- [X] GL: GridLayout (!)
+  - [X] GLC: GridLayoutCell (!)
 - [ ] G: Group (!)
 - [ ] HTV: HtmlTextView
 - [ ] HAR: HeaderArea
@@ -85,8 +85,8 @@
 - [ ] IF: Iframe
 - [ ] IMGM: ImageMap
   - [ ] IMGMA: ImageMapArea
-- [ ] IMG: Image
-- [ ] I: InputField (!)
+- [X] IMG: Image
+- [X] I: InputField (!)
   - [ ] II: InputField(with DisplayAsText)
   - [ ] IT: InputFieldText
 - [ ] IFA: InteractiveFormAbap
@@ -110,7 +110,7 @@
   - [X] LIB_AI: ListBoxActionItem
 - [ ] IL: ItemList
   - [ ] ILI: ItemListItem
-- [ ] L: Label (!)
+- [X] L: Label (!)
 - [ ] LB: LargeButton
 - [ ] LEG: Legend
 - [ ] LNC: LinkChoice
@@ -177,9 +177,9 @@
 - [ ] RM: RoadMap
   - [ ] RMI: RoadMapItem(RoadMapStep)
 - [ ] STCS: SapTableCS
-- [ ] ST: SapTable
-- [ ] SC: ScrollContainer (!)
-- [ ] SCB: Scrollbar (!)
+- [X] ST: SapTable
+- [X] SC: ScrollContainer (!)
+- [X] SCB: Scrollbar (!)
 - [ ] SH: SectionHeader
 - [ ] SB: SegmentedButton
 - [ ] SHC: Shuttle
@@ -218,7 +218,7 @@
   - [ ] T_ie6: Toolbar(ie6)
   - [ ] TBARSEP: ToolbarSeparator
 - [ ] TSW: TrackSwitch
-- [ ] TY: Tray (!)
+- [X] TY: Tray (!)
 - [ ] TR: Tree
   - [ ] TRN: TreeNode
 - [ ] TRI: TriStateCheckBox(standards,ie6)
