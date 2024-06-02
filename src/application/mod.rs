@@ -160,3 +160,6 @@ pub mod graduation_requirements;
 
 /// 학생 정보 조회: [`StudentInformation`](student_information::StudentInformation)
 pub mod student_information;
+
+/// 채플 정보 조회: [`Chapel`](chapel::Chapel)
+pub mod chapel;
