@@ -52,23 +52,29 @@ impl<'a> StudentFamilyInformation {
 
 #[derive(Clone, Deserialize, Debug)]
 pub struct StudentFamilyMember {
-    #[serde(rename(deserialize = "가족 관계 유형"))]
-    relation_type: String,
-    #[serde(rename(deserialize = "전화번호"))]
-    tel_number: String,
-    #[serde(rename(deserialize = "성명"))]
-    name: String,
-    #[serde(rename(deserialize = "휴대전화"))]
-    mobile_number: String,
-    #[serde(rename(deserialize = "근무처(직장명)"))]
-    office: String,
-    #[serde(rename(deserialize = "직업"))]
-    job: String,
-    #[serde(rename(deserialize = "직위"))]
-    position: String,
-    #[serde(rename(deserialize = "보호자여부"))]
+    #[serde(rename(deserialize = "가족 관계 유형"), deserialize_with = "deserialize_optional_string")]
+    relation_type: Option<String>,
+    #[serde(rename(deserialize = "전화번호"), deserialize_with = "deserialize_optional_string")]
+    tel_number: Option<String>,
+    #[serde(rename(deserialize = "성명"), deserialize_with = "deserialize_optional_string")]
+    name: Option<String>,
+    #[serde(rename(deserialize = "휴대전화"), deserialize_with = "deserialize_optional_string")]
+    mobile_number: Option<String>,
+    #[serde(rename(deserialize = "근무처(직장명)"), deserialize_with = "deserialize_optional_string")]
+    office: Option<String>,
+    #[serde(rename(deserialize = "직업"), deserialize_with = "deserialize_optional_string")]
+    job: Option<String>,
+    #[serde(rename(deserialize = "직위"), deserialize_with = "deserialize_optional_string")]
+    position: Option<String>,
+    #[serde(
+        rename(deserialize = "보호자여부"),
+        deserialize_with = "deserialize_bool_string"
+    )]
     is_guardian: bool,
-    #[serde(rename(deserialize = "동거여부"))]
+    #[serde(
+        rename(deserialize = "동거여부"),
+        deserialize_with = "deserialize_bool_string"
+    )]
     is_cohabit: bool,
 }
 
@@ -78,6 +84,13 @@ impl<'a> FromSapTable<'a> for StudentFamilyMember {
         header: &'a crate::webdynpro::element::complex::sap_table::SapTableHeader<'a>,
         row: &'a crate::webdynpro::element::complex::sap_table::SapTableRow<'a>,
     ) -> Result<Self, WebDynproError> {
-        todo!() // Implement Checkbox first
+        let map_string = row.try_row_into::<HashMap<String, String>>(header, body)?;
+        let map_de: MapDeserializer<_, serde::de::value::Error> = map_string.into_deserializer();
+        Ok(
+            StudentFamilyMember::deserialize(map_de).map_err(|e| ElementError::InvalidContent {
+                element: row.table_def().id().to_string(),
+                content: e.to_string(),
+            })?,
+        )
     }
 }
