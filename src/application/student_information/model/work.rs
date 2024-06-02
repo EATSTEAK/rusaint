@@ -45,20 +45,60 @@ impl<'a> StudentWorkInformation {
         WORK_SAVE_BUTTON: Button<'a> = "ZCMW1001.ID_0001:VIW_TAB_WORK.SAVE_BUTTON";
     }
 
-    pub(crate) async fn with_client(client: &mut USaintClient) -> Result<StudentWorkInformation, WebDynproError> {
-        client.send(TabStripTabSelectCommand::new(StudentInformation::TAB_ADDITION, Self::TAB_WORK, 0, 0)).await?;
-        Ok(
-            Self {
-                job: Self::COJOB.from_body(client.body())?.value().map(str::to_string),
-                public_official: Self::COMPANY_ORGR.from_body(client.body())?.value().map(str::to_string),
-                company_name: Self::COMPANY_NAM.from_body(client.body())?.value().map(str::to_string),
-                department_name: Self::COMPANY_DEPT_NAM.from_body(client.body())?.value().map(str::to_string),
-                title: Self::COMPANY_TITLE.from_body(client.body())?.value().map(str::to_string),
-                zip_code: Self::COMPANY_ZIP_COD.from_body(client.body())?.value().map(str::to_string),
-                address: (Self::COMPANY_ADDRESS.from_body(client.body())?.value().map(str::to_string), Self::COMPANY_ADDRESS2.from_body(client.body())?.value().map(str::to_string)),
-                tel_number: Self::COMPANY_TEL1.from_body(client.body())?.value().map(str::to_string),
-                fax_number: Self::COMPANY_TEL2.from_body(client.body())?.value().map(str::to_string),
-            }
-        )
+    pub(crate) async fn with_client(
+        client: &mut USaintClient,
+    ) -> Result<StudentWorkInformation, WebDynproError> {
+        client
+            .send(TabStripTabSelectCommand::new(
+                StudentInformation::TAB_ADDITION,
+                Self::TAB_WORK,
+                0,
+                0,
+            ))
+            .await?;
+        Ok(Self {
+            job: Self::COJOB
+                .from_body(client.body())?
+                .value()
+                .map(str::to_string),
+            public_official: Self::COMPANY_ORGR
+                .from_body(client.body())?
+                .value()
+                .map(str::to_string),
+            company_name: Self::COMPANY_NAM
+                .from_body(client.body())?
+                .value()
+                .map(str::to_string),
+            department_name: Self::COMPANY_DEPT_NAM
+                .from_body(client.body())?
+                .value()
+                .map(str::to_string),
+            title: Self::COMPANY_TITLE
+                .from_body(client.body())?
+                .value()
+                .map(str::to_string),
+            zip_code: Self::COMPANY_ZIP_COD
+                .from_body(client.body())?
+                .value()
+                .map(str::to_string),
+            address: (
+                Self::COMPANY_ADDRESS
+                    .from_body(client.body())?
+                    .value()
+                    .map(str::to_string),
+                Self::COMPANY_ADDRESS2
+                    .from_body(client.body())?
+                    .value()
+                    .map(str::to_string),
+            ),
+            tel_number: Self::COMPANY_TEL1
+                .from_body(client.body())?
+                .value()
+                .map(str::to_string),
+            fax_number: Self::COMPANY_TEL2
+                .from_body(client.body())?
+                .value()
+                .map(str::to_string),
+        })
     }
 }

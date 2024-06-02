@@ -1,4 +1,15 @@
-use crate::{application::{student_information::StudentInformation, USaintClient}, define_elements, webdynpro::{command::element::layout::TabStripTabSelectCommand, element::{action::Button, definition::ElementDefinition, layout::tab_strip::item::TabStripItem, selection::ComboBox, text::InputField}, error::WebDynproError}};
+use crate::{
+    application::{student_information::StudentInformation, USaintClient},
+    define_elements,
+    webdynpro::{
+        command::element::layout::TabStripTabSelectCommand,
+        element::{
+            action::Button, definition::ElementDefinition, layout::tab_strip::item::TabStripItem,
+            selection::ComboBox, text::InputField,
+        },
+        error::WebDynproError,
+    },
+};
 
 pub struct StudentReligionInformation {
     religion_type: Option<String>,
@@ -14,7 +25,7 @@ pub struct StudentReligionInformation {
     baptism_date: Option<String>,
     baptism_church: Option<String>,
     baptism_man: Option<String>,
-    church_grp: Option<String>
+    church_grp: Option<String>,
 }
 
 impl<'a> StudentReligionInformation {
@@ -55,24 +66,71 @@ impl<'a> StudentReligionInformation {
     }
     
     pub(crate) async fn with_client(client: &mut USaintClient) -> Result<Self, WebDynproError> {
-        client.send(TabStripTabSelectCommand::new(StudentInformation::TAB_ADDITION, Self::TAB_RELIGION, 0, 0)).await?;
-        Ok(
-            Self {
-                religion_type: Self::RELIGION_COD.from_body(client.body())?.value().map(str::to_string),
-                start_date: Self::BELIEF_START_DATE.from_body(client.body())?.value().map(str::to_string),
-                church: Self::PRES_CHURCH.from_body(client.body())?.value().map(str::to_string),
-                church_man: Self::CHURCH_MAN.from_body(client.body())?.value().map(str::to_string),
-                baptism_level: Self::BAPTISM_LVL.from_body(client.body())?.value().map(str::to_string),
-                baptism_grp: Self::BAPTISM_GRP.from_body(client.body())?.value().map(str::to_string),
-                service_department: Self::SERVICE_DEPT_DES.from_body(client.body())?.value().map(str::to_string),
-                service_department_title: Self::SERVICE_DEPT_LVL.from_body(client.body())?.value().map(str::to_string),
-                church_address: Self::CHURCH_ADDR.from_body(client.body())?.value().map(str::to_string),
-                singeub: Self::SINGEUB_DES.from_body(client.body())?.value().map(str::to_string),
-                baptism_date: Self::BAPTISM_DT.from_body(client.body())?.value().map(str::to_string),
-                baptism_church: Self::BAPTISM_CH.from_body(client.body())?.value().map(str::to_string),
-                baptism_man: Self::BAPTISM_MAN.from_body(client.body())?.value().map(str::to_string),
-                church_grp: Self::CHURCH_GRP.from_body(client.body())?.value().map(str::to_string),
-            }
-        )
+        client
+            .send(TabStripTabSelectCommand::new(
+                StudentInformation::TAB_ADDITION,
+                Self::TAB_RELIGION,
+                2,
+                0,
+            ))
+            .await?;
+        Ok(Self {
+            religion_type: Self::RELIGION_COD
+                .from_body(client.body())?
+                .value()
+                .map(str::to_string),
+            start_date: Self::BELIEF_START_DATE
+                .from_body(client.body())?
+                .value()
+                .map(str::to_string),
+            church: Self::PRES_CHURCH
+                .from_body(client.body())?
+                .value()
+                .map(str::to_string),
+            church_man: Self::CHURCH_MAN
+                .from_body(client.body())?
+                .value()
+                .map(str::to_string),
+            baptism_level: Self::BAPTISM_LVL
+                .from_body(client.body())?
+                .value()
+                .map(str::to_string),
+            baptism_grp: Self::BAPTISM_GRP
+                .from_body(client.body())?
+                .value()
+                .map(str::to_string),
+            service_department: Self::SERVICE_DEPT_DES
+                .from_body(client.body())?
+                .value()
+                .map(str::to_string),
+            service_department_title: Self::SERVICE_DEPT_LVL
+                .from_body(client.body())?
+                .value()
+                .map(str::to_string),
+            church_address: Self::CHURCH_ADDR
+                .from_body(client.body())?
+                .value()
+                .map(str::to_string),
+            singeub: Self::SINGEUB_DES
+                .from_body(client.body())?
+                .value()
+                .map(str::to_string),
+            baptism_date: Self::BAPTISM_DT
+                .from_body(client.body())?
+                .value()
+                .map(str::to_string),
+            baptism_church: Self::BAPTISM_CH
+                .from_body(client.body())?
+                .value()
+                .map(str::to_string),
+            baptism_man: Self::BAPTISM_MAN
+                .from_body(client.body())?
+                .value()
+                .map(str::to_string),
+            church_grp: Self::CHURCH_GRP
+                .from_body(client.body())?
+                .value()
+                .map(str::to_string),
+        })
     }
 }

@@ -24,7 +24,7 @@ impl<'a> StudentTransferInformation {
             .send(TabStripTabSelectCommand::new(
                 StudentInformation::TAB_ADDITION,
                 Self::TAB_TRANSFER,
-                1,
+                3,
                 0,
             ))
             .await?;

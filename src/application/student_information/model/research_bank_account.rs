@@ -1,7 +1,14 @@
 use crate::{
-    application::{student_information::StudentInformation, USaintClient}, define_elements, webdynpro::{command::element::layout::TabStripTabSelectCommand, element::{
-        action::Button, definition::ElementDefinition, layout::tab_strip::item::TabStripItem, selection::ComboBox, text::InputField
-    }, error::WebDynproError}
+    application::{student_information::StudentInformation, USaintClient},
+    define_elements,
+    webdynpro::{
+        command::element::layout::TabStripTabSelectCommand,
+        element::{
+            action::Button, definition::ElementDefinition, layout::tab_strip::item::TabStripItem,
+            selection::ComboBox, text::InputField,
+        },
+        error::WebDynproError,
+    },
 };
 
 pub struct StudentResearchBankAccountInformation {
@@ -30,16 +37,23 @@ impl<'a> StudentResearchBankAccountInformation {
             .send(TabStripTabSelectCommand::new(
                 StudentInformation::TAB_ADDITION,
                 Self::TAB_RES_ACCOUNT,
-                1,
+                6,
                 0,
             ))
             .await?;
-        Ok(
-            Self {
-                bank: Self::BANK_TEXT.from_body(client.body())?.value().map(str::to_string),
-                account_number: Self::BANKN_TEXT.from_body(client.body())?.value().map(str::to_string),
-                holder: Self::ZKOINH_TEXT.from_body(client.body())?.value().map(str::to_string),
-            }
-        )
+        Ok(Self {
+            bank: Self::BANK_TEXT
+                .from_body(client.body())?
+                .value()
+                .map(str::to_string),
+            account_number: Self::BANKN_TEXT
+                .from_body(client.body())?
+                .value()
+                .map(str::to_string),
+            holder: Self::ZKOINH_TEXT
+                .from_body(client.body())?
+                .value()
+                .map(str::to_string),
+        })
     }
 }

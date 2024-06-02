@@ -30,7 +30,7 @@ impl<'a> StudentBankAccountInformation {
             .send(TabStripTabSelectCommand::new(
                 StudentInformation::TAB_ADDITION,
                 Self::TAB_BANK_CP,
-                1,
+                4,
                 0,
             ))
             .await?;
