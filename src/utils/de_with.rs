@@ -28,6 +28,14 @@ pub(crate) fn deserialize_empty<'de, D: Deserializer<'de>>(
     Ok(!value.trim().is_empty())
 }
 
+pub(crate) fn deserialize_bool_string<'de, D: Deserializer<'de>>(
+    deserializer: D,
+) -> Result<bool, D::Error> {
+    let value = String::deserialize(deserializer)?;
+    Ok(value.trim() == "true")
+}
+
+
 pub(crate) fn deserialize_optional_string<'de, D: Deserializer<'de>>(
     deserializer: D,
 ) -> Result<Option<String>, D::Error> {
