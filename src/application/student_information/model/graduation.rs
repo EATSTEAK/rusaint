@@ -1,6 +1,7 @@
 use crate::{define_elements, webdynpro::{client::body::Body, element::{definition::ElementDefinition, text::InputField}, error::{ElementError, WebDynproError}}};
 
 #[derive(Clone, Debug)]
+/// 학생의 졸업 정보를 반환합니다. 졸업하지 않았다면 반환되지 않습니다.
 pub struct StudentGraduationInformation {
   graduation_cardinal: u32,
   graduation_certification_number: u32,
@@ -57,4 +58,54 @@ impl<'a> StudentGraduationInformation {
     })
     }
   }
+  
+  /// 졸업회수를 반환합니다.
+  pub fn graduation_cardinal(&self) -> u32 {
+        self.graduation_cardinal
+    }
+  
+  /// 졸업증서번호를 반환합니다.
+  pub fn graduation_certification_number(&self) -> u32 {
+        self.graduation_certification_number
+    }
+  
+  /// 졸업년도를 반환합니다.
+  pub fn graduation_year(&self) -> u32 {
+        self.graduation_year
+    }
+  
+  /// 졸업학기를 반환합니다.
+  pub fn graduation_terms(&self) -> u32 {
+        self.graduation_terms
+    }
+  
+  /// 학위수여일을 반환합니다.
+  pub fn graduation_date(&self) -> &str {
+        &self.graduation_date
+    }
+  
+  /// 학위번호를 반환합니다.
+  pub fn academic_degree_number(&self) -> u32 {
+        self.academic_degree_number
+    }
+  
+  /// 학위명을 반환합니다.
+  pub fn academic_degree_name(&self) -> &str {
+        &self.academic_degree_name
+    }
+  
+  /// 조기졸업여부를 반환합니다.
+  pub fn early_graduation(&self) -> bool {
+        self.early_graduation
+    }
+  
+  /// 전체졸업석차를 반환합니다.
+  pub fn graduation_rank(&self) -> u32 {
+        self.graduation_rank
+    }
+  
+  /// 전체졸업인원을 반환합니다.
+  pub fn graduation_personnel_number(&self) -> u32 {
+        self.graduation_personnel_number
+    }
 }

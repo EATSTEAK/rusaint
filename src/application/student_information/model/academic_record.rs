@@ -7,6 +7,7 @@ use crate::{
 };
 
 #[derive(Clone, Debug)]
+/// 학생의 학적상태 정보
 pub struct StudentAcademicRecordInformation {
     records: Vec<StudentAcademicRecord>,
 }
@@ -34,9 +35,15 @@ impl<'a> StudentAcademicRecordInformation {
         let records = table.try_table_into::<StudentAcademicRecord>(client.body())?;
         Ok(Self { records })
     }
+    
+    /// 학생의 학적상태 기록들을 반환합니다.
+    pub fn records(&self) -> &[StudentAcademicRecord] {
+        &self.records
+    }
 }
 
 #[derive(Clone, Debug, Deserialize)]
+/// 학생의 학적상태 기록
 pub struct StudentAcademicRecord {
     #[serde(rename(deserialize = "시작일"))]
     start_date: String,
@@ -52,6 +59,43 @@ pub struct StudentAcademicRecord {
     reason: String,
     #[serde(rename(deserialize = "처리일자"))]
     process_date: String,
+}
+
+impl StudentAcademicRecord {
+    /// 종료일을 반환합니다.
+    pub fn end_date(&self) -> &str {
+        &self.end_date
+    }
+
+    /// 학년도를 반환합니다.
+    pub fn year(&self) -> &str {
+        &self.year
+    }
+
+    /// 학기(내역)을 반환합니다.
+    pub fn term(&self) -> &str {
+        &self.term
+    }
+
+    /// 내역을 반환합니다.
+    pub fn category(&self) -> &str {
+        &self.category
+    }
+
+    /// 사유를 반환합니다.
+    pub fn reason(&self) -> &str {
+        &self.reason
+    }
+
+    /// 처리일자를 반환합니다.
+    pub fn process_date(&self) -> &str {
+        &self.process_date
+    }
+    
+    /// 시작일을 반환합니다.
+    pub fn start_date(&self) -> &str {
+        &self.start_date
+    }
 }
 
 impl<'a> FromSapTable<'a> for StudentAcademicRecord {

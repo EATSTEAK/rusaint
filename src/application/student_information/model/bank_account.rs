@@ -5,6 +5,7 @@ use crate::{
 };
 
 #[derive(Clone, Debug)]
+/// 학생의 은행 계좌 정보
 pub struct StudentBankAccountInformation {
     bank: Option<String>,
     account_number: Option<String>,
@@ -22,7 +23,9 @@ impl<'a> StudentBankAccountInformation {
         BANKN: InputField<'a> = "ZCMW1001.ID_0001:VIW_TAB_BANK_CP.BANKN";
         // 예금주
         ZKOINH: InputField<'a> = "ZCMW1001.ID_0001:VIW_TAB_BANK_CP.ZKOINH";
+        #[allow(unused)]
         MODIFY_BUTTON: Button<'a> = "ZCMW1001.ID_0001:VIW_TAB_BANK_CP.MODIFY_BUTTON";
+        #[allow(unused)]
         SAVE_BUTTON: Button<'a> = "ZCMW1001.ID_0001:VIW_TAB_BANK_CP.SAVE_BUTTON";
     }
 
@@ -42,5 +45,20 @@ impl<'a> StudentBankAccountInformation {
                 holder: Self::ZKOINH.from_body(client.body())?.value().map(str::to_string),
             }
         )
+    }
+    
+    /// 학생 계좌의 은행을 반환합니다.
+    pub fn bank(&self) -> Option<&str> {
+        self.bank.as_ref().map(String::as_str)
+    }
+    
+    /// 학생 계좌번호를 반환합니다.
+    pub fn account_number(&self) -> Option<&str> {
+        self.account_number.as_ref().map(String::as_str)
+    }
+    
+    /// 학생 계좌의 예금주를 반환합니다.
+    pub fn holder(&self) -> Option<&str> {
+        self.holder.as_ref().map(String::as_str)
     }
 }

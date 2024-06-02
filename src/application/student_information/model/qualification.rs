@@ -8,6 +8,7 @@ use crate::{
 };
 
 #[derive(Clone, Debug)]
+/// 학생의 자격(교직이수, 평생교육사, 7+1 프로그램) 정보
 pub struct StudentQualificationInformation {
     teaching_major: Option<StudentTeachingMajorInformation>,
     teaching_plural_major: Option<StudentTeachingPluralMajorInformation>,
@@ -24,13 +25,34 @@ impl<'a> StudentQualificationInformation {
             forign_study: StudentForignStudyInformation::from_body(body).ok(),
         }
     }
+    
+    /// 교직(주전공) 정보를 반환합니다.
+    pub fn teaching_major(&self) -> Option<&StudentTeachingMajorInformation> {
+        self.teaching_major.as_ref()
+    }
+    
+    /// 교직(복수전공) 정보를 반환합니다.
+    pub fn teaching_plural_major(&self) -> Option<&StudentTeachingPluralMajorInformation> {
+        self.teaching_plural_major.as_ref()
+    }
+    
+    /// 평생교육사 정보를 반환합니다.
+    pub fn lifelong(&self) -> Option<&StudentLifelongInformation> {
+        self.lifelong.as_ref()
+    }
+    
+    /// 7+1 프로그램 정보를 반환합니다.
+    pub fn forign_study(&self) -> Option<&StudentForignStudyInformation> {
+        self.forign_study.as_ref()
+    }
 }
 
 #[derive(Clone, Debug)]
+/// 교직이수(주전공) 정보
 pub struct StudentTeachingMajorInformation {
     major_name: Option<String>,
     qualification_number: Option<String>,
-    initiciation_date: Option<String>,
+    initiation_date: Option<String>,
     qualification_date: Option<String>,
 }
 
@@ -59,7 +81,7 @@ impl<'a> StudentTeachingMajorInformation {
                 .from_body(body)?
                 .value()
                 .map(str::to_string),
-            initiciation_date: Self::MAJOR_SELECT_DT
+            initiation_date: Self::MAJOR_SELECT_DT
                 .from_body(body)?
                 .value()
                 .map(str::to_string),
@@ -69,9 +91,30 @@ impl<'a> StudentTeachingMajorInformation {
                 .map(str::to_string),
         })
     }
+    
+    /// 표시과목을 반환합니다.
+    pub fn major_name(&self) -> Option<&str> {
+        self.major_name.as_ref().map(String::as_str)
+    }
+    
+    /// 교원자격증번호를 반환합니다.
+    pub fn qualification_number(&self) -> Option<&str> {
+        self.qualification_number.as_ref().map(String::as_str)
+    }
+    
+    /// 선발일자를 반환합니다.
+    pub fn initiation_date(&self) -> Option<&str> {
+        self.initiation_date.as_ref().map(String::as_str)
+    }
+    
+    /// 교원자격증 발급일자를 반환합니다.
+    pub fn qualification_date(&self) -> Option<&str> {
+        self.qualification_date.as_ref().map(String::as_str)
+    }
 }
 
 #[derive(Clone, Debug)]
+/// 교직이수(복수전공) 정보
 pub struct StudentTeachingPluralMajorInformation {
     major_name: Option<String>,
     qualification_number: Option<String>,
@@ -107,9 +150,25 @@ impl<'a> StudentTeachingPluralMajorInformation {
                 .map(str::to_string),
         })
     }
+    
+    /// 표시과목을 반환합니다.
+    pub fn major_name(&self) -> Option<&str> {
+        self.major_name.as_ref().map(String::as_str)
+    }
+    
+    /// 교원자격증번호를 반환합니다.
+    pub fn qualification_number(&self) -> Option<&str> {
+        self.qualification_number.as_ref().map(String::as_str)
+    }
+    
+    /// 교원자격증 발급일자를 반환합니다.
+    pub fn qualification_date(&self) -> Option<&str> {
+        self.qualification_date.as_ref().map(String::as_str)
+    }
 }
 
 #[derive(Clone, Debug)]
+/// 평생교육사 정보
 pub struct StudentLifelongInformation {
     apply_date: Option<String>,
     lifelong_type: Option<String>,
@@ -150,9 +209,30 @@ impl<'a> StudentLifelongInformation {
                 .map(str::to_string),
         })
     }
+    
+    /// 신청일자를 반환합니다.
+    pub fn apply_date(&self) -> Option<&str> {
+        self.apply_date.as_ref().map(String::as_str)
+    }
+    
+    /// 자격구분을 반환합니다.
+    pub fn lifelong_type(&self) -> Option<&str> {
+        self.lifelong_type.as_ref().map(String::as_str)
+    }
+    
+    /// 자격증번호를 반환합니다.
+    pub fn qualification_number(&self) -> Option<&str> {
+        self.qualification_number.as_ref().map(String::as_str)
+    }
+    
+    /// 자격증 발급일자를 반환합니다.
+    pub fn qualification_date(&self) -> Option<&str> {
+        self.qualification_date.as_ref().map(String::as_str)
+    }
 }
 
 #[derive(Clone, Debug)]
+/// 7+1 프로그램 정보를 반환합니다.
 pub struct StudentForignStudyInformation {
     approval_date: Option<String>,
     authentication_number: Option<String>,
@@ -178,5 +258,20 @@ impl<'a> StudentForignStudyInformation {
             authentication_number: Self::AUTHEN_NO.from_body(body)?.value().map(str::to_string),
             issue_date: Self::ISSUEDATE.from_body(body)?.value().map(str::to_string),
         })
+    }
+    
+    /// 신청일자를 반환합니다.
+    pub fn approval_date(&self) -> Option<&str> {
+        self.approval_date.as_ref().map(String::as_str)
+    }
+    
+    /// 인증서번호를 반환합니다.
+    pub fn authentication_number(&self) -> Option<&str> {
+        self.authentication_number.as_ref().map(String::as_str)
+    }
+    
+    /// 발급일자를 반환합니다.
+    pub fn issue_date(&self) -> Option<&str> {
+        self.issue_date.as_ref().map(String::as_str)
     }
 }
