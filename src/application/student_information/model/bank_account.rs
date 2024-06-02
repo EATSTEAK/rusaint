@@ -1,9 +1,7 @@
 use crate::{
-    define_elements,
-    webdynpro::element::{
-        action::Button, layout::tab_strip::item::TabStripItem, selection::ComboBox,
-        text::InputField,
-    },
+    application::{student_information::StudentInformation, USaintClient}, define_elements, webdynpro::{command::element::layout::TabStripTabSelectCommand, element::{
+        action::Button, definition::ElementDefinition, layout::tab_strip::item::TabStripItem, selection::ComboBox, text::InputField
+    }, error::WebDynproError}
 };
 
 pub struct StudentBankAccountInformation {
@@ -23,7 +21,25 @@ impl<'a> StudentBankAccountInformation {
         BANKN: InputField<'a> = "ZCMW1001.ID_0001:VIW_TAB_BANK_CP.BANKN";
         // 예금주
         ZKOINH: InputField<'a> = "ZCMW1001.ID_0001:VIW_TAB_BANK_CP.ZKOINH";
-        BANK_CP_MODIFY_BUTTON: Button<'a> = "ZCMW1001.ID_0001:VIW_TAB_BANK_CP.MODIFY_BUTTON";
-        BANK_CP_SAVE_BUTTON: Button<'a> = "ZCMW1001.ID_0001:VIW_TAB_BANK_CP.SAVE_BUTTON";
+        MODIFY_BUTTON: Button<'a> = "ZCMW1001.ID_0001:VIW_TAB_BANK_CP.MODIFY_BUTTON";
+        SAVE_BUTTON: Button<'a> = "ZCMW1001.ID_0001:VIW_TAB_BANK_CP.SAVE_BUTTON";
+    }
+
+    pub(crate) async fn with_client(client: &mut USaintClient) -> Result<Self, WebDynproError> {
+        client
+            .send(TabStripTabSelectCommand::new(
+                StudentInformation::TAB_ADDITION,
+                Self::TAB_BANK_CP,
+                1,
+                0,
+            ))
+            .await?;
+        Ok(
+            Self {
+                bank: Self::LIST_BANKS.from_body(client.body())?.value().map(str::to_string),
+                account_number: Self::BANKN.from_body(client.body())?.value().map(str::to_string),
+                holder: Self::ZKOINH.from_body(client.body())?.value().map(str::to_string),
+            }
+        )
     }
 }

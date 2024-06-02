@@ -1,3 +1,15 @@
+use crate::{
+    define_elements,
+    webdynpro::{
+        client::body::Body,
+        element::{
+            action::Button, definition::ElementDefinition, graphic::Image, text::InputField,
+        },
+        error::WebDynproError,
+    },
+};
+
+#[derive(Clone, Debug)]
 pub struct GeneralStudentInformation {
     apply_year: u32,
     student_number: u32,
@@ -94,8 +106,34 @@ impl<'a> GeneralStudentInformation {
         // 공학인증
         CG_STEXT4: InputField<'a> = "ZCMW1001.ID_0001:VIW_DEFAULT.TC_DEFAULT_CG_STEXT4";
     }
-}
 
+    pub(super) fn from_body(body: &'a Body) -> Result<GeneralStudentInformation, WebDynproError> {
+        Ok(Self {
+            apply_year: Self::APPLY_PERYR.from_body(body)?.value_into_u32()?,
+            student_number: Self::STUDENT12.from_body(body)?.value_into_u32()?,
+            name: Self::VORNA.from_body(body)?.value_string()?,
+            rrn: Self::PRDNI.from_body(body)?.value_into_u32()?,
+            collage: Self::COLEG_TXT.from_body(body)?.value_string()?,
+            department: Self::DEPT_TXT.from_body(body)?.value_string()?,
+            major: Self::MAJOR_TXT.from_body(body)?.value().map(str::to_string),
+            division: Self::TITEL.from_body(body)?.value().map(str::to_string),
+            grade: Self::CMSTYEAR.from_body(body)?.value_into_u32()?,
+            term: Self::ZSCHTERM.from_body(body)?.value_into_u32()?,
+            image: todo!(), // TODO: Image to bytes
+            alias: Self::RUFNM.from_body(body)?.value().map(str::to_string),
+            kanji_name: Self::BIRTHNAME.from_body(body)?.value().map(str::to_string),
+            email: Self::SMTP_ADDR.from_body(body)?.value().map(str::to_string),
+            tel_number: Self::TEL_NUMBER.from_body(body)?.value().map(str::to_string),
+            mobile_number: Self::MOB_NUMBER.from_body(body)?.value().map(str::to_string),
+            post_code: Self::POST_CODE.from_body(body)?.value().map(str::to_string),
+            address: (Self::CITY1.from_body(body)?.value().map(str::to_string), Self::STREET.from_body(body)?.value().map(str::to_string)),
+            is_transfer_student: !Self::NEWINCOR_CDT.from_body(body)?.value_string()?.contains("신입학"),
+            apply_date: Self::APPLY_DT.from_body(body)?.value_string()?,
+            applied_collage: Self::COLEG_CDT.from_body(body)?.value_string()?,
+            applied_department: Self::DEPT_CDT.from_body(body)?.value_string()?,
+        })
+    }
+}
 mod academic_record;
 mod bank_account;
 mod family;
@@ -118,8 +156,3 @@ pub use religion::StudentReligionInformation;
 pub use research_bank_account::StudentResearchBankAccountInformation;
 pub use transfer::{StudentTransferInformation, StudentTransferRecord};
 pub use work::StudentWorkInformation;
-
-use crate::{
-    define_elements,
-    webdynpro::element::{action::Button, graphic::Image, text::InputField},
-};

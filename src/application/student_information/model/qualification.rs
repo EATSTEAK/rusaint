@@ -1,4 +1,11 @@
-use crate::{define_elements, webdynpro::element::text::InputField};
+use crate::{
+    define_elements,
+    webdynpro::{
+        client::body::Body,
+        element::{definition::ElementDefinition, text::InputField},
+        error::WebDynproError,
+    },
+};
 
 pub struct StudentQualificationInformation {
     teaching_major: Option<StudentTeachingMajorInformation>,
@@ -7,7 +14,16 @@ pub struct StudentQualificationInformation {
     forign_study: Option<StudentForignStudyInformation>,
 }
 
-impl<'a> StudentQualificationInformation {}
+impl<'a> StudentQualificationInformation {
+    pub(crate) fn from_body(body: &'a Body) -> StudentQualificationInformation {
+        Self {
+            teaching_major: StudentTeachingMajorInformation::from_body(body).ok(),
+            teaching_plural_major: StudentTeachingPluralMajorInformation::from_body(body).ok(),
+            lifelong: StudentLifelongInformation::from_body(body).ok(),
+            forign_study: StudentForignStudyInformation::from_body(body).ok(),
+        }
+    }
+}
 
 pub struct StudentTeachingMajorInformation {
     major_name: Option<String>,
@@ -28,6 +44,29 @@ impl<'a> StudentTeachingMajorInformation {
         // 교원자격증 발급일자
         MAJOR_QUAL_DT: InputField<'a> = "ZCMW1001.ID_0001:VIW_DEFAULT.TC_DEFAULT_MAJOR_QUAL_DT";
     }
+
+    pub(crate) fn from_body(
+        body: &'a Body,
+    ) -> Result<StudentTeachingMajorInformation, WebDynproError> {
+        Ok(Self {
+            major_name: Self::MAJOR_OTYPE
+                .from_body(body)?
+                .value()
+                .map(str::to_string),
+            qualification_number: Self::MAJOR_QUAL_NUM
+                .from_body(body)?
+                .value()
+                .map(str::to_string),
+            initiciation_date: Self::MAJOR_SELECT_DT
+                .from_body(body)?
+                .value()
+                .map(str::to_string),
+            qualification_date: Self::MAJOR_QUAL_DT
+                .from_body(body)?
+                .value()
+                .map(str::to_string),
+        })
+    }
 }
 
 pub struct StudentTeachingPluralMajorInformation {
@@ -45,6 +84,25 @@ impl<'a> StudentTeachingPluralMajorInformation {
       DOUBLE_QUAL_NUM: InputField<'a> = "ZCMW1001.ID_0001:VIW_DEFAULT.TC_DEFAULT_DOUBLE_QUAL_NUM";
       // 교원자격증 발급일자
       DOUBLEL_DT: InputField<'a> = "ZCMW1001.ID_0001:VIW_DEFAULT.TC_DEFAULT_DOUBLEL_DT";
+    }
+
+    pub(crate) fn from_body(
+        body: &'a Body,
+    ) -> Result<StudentTeachingPluralMajorInformation, WebDynproError> {
+        Ok(Self {
+            major_name: Self::DOUBLE_OTYPE
+                .from_body(body)?
+                .value()
+                .map(str::to_string),
+            qualification_number: Self::DOUBLE_QUAL_NUM
+                .from_body(body)?
+                .value()
+                .map(str::to_string),
+            qualification_date: Self::DOUBLEL_DT
+                .from_body(body)?
+                .value()
+                .map(str::to_string),
+        })
     }
 }
 
@@ -67,6 +125,27 @@ impl<'a> StudentLifelongInformation {
       // 자격증 발급일자
       CONEDU_QUAL_DT: InputField<'a> = "ZCMW1001.ID_0001:VIW_DEFAULT.TC_DEFAULT_CONEDU_QUAL_DT";
     }
+
+    pub(crate) fn from_body(body: &'a Body) -> Result<StudentLifelongInformation, WebDynproError> {
+        Ok(Self {
+            apply_date: Self::CONEDU_APP_DT
+                .from_body(body)?
+                .value()
+                .map(str::to_string),
+            lifelong_type: Self::CONEDU_TYPE
+                .from_body(body)?
+                .value()
+                .map(str::to_string),
+            qualification_number: Self::CONEDU_QUAL_NUM
+                .from_body(body)?
+                .value()
+                .map(str::to_string),
+            qualification_date: Self::CONEDU_QUAL_DT
+                .from_body(body)?
+                .value()
+                .map(str::to_string),
+        })
+    }
 }
 
 pub struct StudentForignStudyInformation {
@@ -84,5 +163,15 @@ impl<'a> StudentForignStudyInformation {
       AUTHEN_NO: InputField<'a> = "ZCMW1001.ID_0001:VIW_DEFAULT.AUTHEN_NO";
       // 발급일자
       ISSUEDATE: InputField<'a> = "ZCMW1001.ID_0001:VIW_DEFAULT.ISSUEDATE";
+    }
+
+    pub(crate) fn from_body(
+        body: &'a Body,
+    ) -> Result<StudentForignStudyInformation, WebDynproError> {
+        Ok(Self {
+            approval_date: Self::APPRODATE.from_body(body)?.value().map(str::to_string),
+            authentication_number: Self::AUTHEN_NO.from_body(body)?.value().map(str::to_string),
+            issue_date: Self::ISSUEDATE.from_body(body)?.value().map(str::to_string),
+        })
     }
 }

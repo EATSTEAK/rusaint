@@ -1,4 +1,4 @@
-use crate::{define_elements, webdynpro::element::text::InputField};
+use crate::{define_elements, webdynpro::{client::body::Body, element::{definition::ElementDefinition, text::InputField}, error::{ElementError, WebDynproError}}};
 
 pub struct StudentGraduationInformation {
   graduation_cardinal: u32,
@@ -35,5 +35,25 @@ impl<'a> StudentGraduationInformation {
       TOT_ORDER: InputField<'a> = "ZCMW1001.ID_0001:VIW_DEFAULT.TC_DEFAULT_TOT_ORDER";
       // 전체졸업인원
       TDPT_NUMBER: InputField<'a> = "ZCMW1001.ID_0001:VIW_DEFAULT.TC_DEFAULT_TDPT_NUMBER";
+  }
+
+  pub(crate) fn from_body(body: &'a Body) -> Result<StudentGraduationInformation, WebDynproError> {
+    let graduation_year = Self::GRDU_PERYR.from_body(body)?.value_into_u32()?;
+    if graduation_year == 0 {
+      Err(WebDynproError::Element(ElementError::NoSuchContent { element: Self::GRDU_NO.id().to_string(), content: "No graduation information provided. Is this student graduated?".to_string() }))
+    } else {
+      Ok(Self {
+        graduation_cardinal: Self::GRDU_NO.from_body(body)?.value_into_u32()?,
+        graduation_certification_number: Self::CERTIFY_NO.from_body(body)?.value_into_u32()?,
+        graduation_year,
+        graduation_terms: Self::GRDU_PERIDT.from_body(body)?.value_into_u32()?,
+        graduation_date: Self::GRDU_DATE.from_body(body)?.value_string()?,
+        academic_degree_number: Self::ACAD_SEQ.from_body(body)?.value_into_u32()?,
+        academic_degree_name: Self::ACAD_CDT.from_body(body)?.value_string()?,
+        early_graduation: Self::E_GRAD.from_body(body)?.value_string()?.contains("예"),
+        graduation_rank: Self::TOT_ORDER.from_body(body)?.value_into_u32()?,
+        graduation_personnel_number: Self::TDPT_NUMBER.from_body(body)?.value_into_u32()?,
+    })
+    }
   }
 }

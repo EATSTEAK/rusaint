@@ -37,47 +37,47 @@ impl<'a> StudentInformation {
     }
 
     pub fn general(&self) -> Result<GeneralStudentInformation, WebDynproError> {
-        todo!()
+        GeneralStudentInformation::from_body(self.body())
     }
 
     pub fn graduation(&self) -> Result<StudentGraduationInformation, WebDynproError> {
-        todo!()
+        StudentGraduationInformation::from_body(self.body())
     }
 
-    pub fn qualifications(&self) -> Result<StudentQualificationInformation, WebDynproError> {
-        todo!()
+    pub fn qualifications(&self) -> StudentQualificationInformation {
+        StudentQualificationInformation::from_body(self.body())
     }
 
     pub async fn work(&mut self) -> Result<StudentWorkInformation, WebDynproError> {
-        todo!()
+        StudentWorkInformation::with_client(&mut self.client).await
     }
 
     pub async fn family(&mut self) -> Result<StudentFamilyInformation, WebDynproError> {
-        todo!()
+        StudentFamilyInformation::with_client(&mut self.client).await
     }
 
     pub async fn religion(&mut self) -> Result<StudentReligionInformation, WebDynproError> {
-        todo!()
+        StudentReligionInformation::with_client(&mut self.client).await
     }
 
     pub async fn transfer(&mut self) -> Result<StudentTransferInformation, WebDynproError> {
-        todo!()
+        StudentTransferInformation::with_client(&mut self.client).await
     }
 
     pub async fn bank_account(&mut self) -> Result<StudentBankAccountInformation, WebDynproError> {
-        todo!()
+        StudentBankAccountInformation::with_client(&mut self.client).await
     }
 
     pub async fn academic_record(
         &mut self,
     ) -> Result<StudentAcademicRecordInformation, WebDynproError> {
-        todo!()
+        StudentAcademicRecordInformation::with_client(&mut self.client).await
     }
 
     pub async fn research_bank_account(
         &mut self,
     ) -> Result<StudentResearchBankAccountInformation, WebDynproError> {
-        todo!()
+        StudentResearchBankAccountInformation::with_client(&mut self.client).await
     }
 
     fn body(&self) -> &Body {
@@ -89,29 +89,4 @@ pub mod model;
 
 #[cfg(test)]
 mod test {
-    use serial_test::serial;
-
-    use crate::{
-        application::{student_information::StudentInformation, USaintClientBuilder},
-        global_test_utils::get_session,
-        webdynpro::element::ElementWrapper,
-    };
-
-    #[tokio::test]
-    #[serial]
-    async fn examine_elements() {
-        let session = get_session().await.unwrap();
-        let app = USaintClientBuilder::new()
-            .session(session)
-            .build_into::<StudentInformation>()
-            .await
-            .unwrap();
-        let ct_selector = scraper::Selector::parse("[ct]").unwrap();
-        for elem_ref in app.body().document().select(&ct_selector) {
-            let elem = ElementWrapper::dyn_element(elem_ref);
-            if let Ok(elem) = elem {
-                println!("{:?}", elem);
-            }
-        }
-    }
 }
