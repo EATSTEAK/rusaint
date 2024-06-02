@@ -289,6 +289,14 @@ macro_rules! register_elements {
                     _ => Ok(<$crate::webdynpro::element::unknown::Unknown as $crate::webdynpro::element::Element<'a>>::Def::new_dynamic(id).from_element(element)?.wrap())
                 }
             }
+
+            /// 엘리먼트의 id를 반환합니다.
+            pub fn id(&self) -> &str {
+                match self {
+                    $( ElementWrapper::$enum(element) => <$type as $crate::webdynpro::element::Element<'a>>::id(element), )*
+                    ElementWrapper::Unknown(element) => <$crate::webdynpro::element::unknown::Unknown<'a> as $crate::webdynpro::element::Element<'a>>::id(element),
+                }
+            }
         }
 
         $(
@@ -570,6 +578,18 @@ pub trait Interactable<'a>: Element<'a> {
 
 	/// 주어진 엘리먼트의 이벤트 데이터를 반환합니다.
     fn lsevents(&self) -> Option<&EventParameterMap>;
+}
+
+impl<'a> ElementWrapper<'a> {
+    /// 주어진 엘리먼트를 텍스트 형태로 변환하려고 시도합니다.
+    pub fn textise(&self) -> Result<String, WebDynproError> {
+        match self {
+            ElementWrapper::TextView(tv) => Ok(tv.text().to_string()),
+            ElementWrapper::Caption(cp) => Ok(cp.text().to_string()),
+            ElementWrapper::CheckBox(c) => Ok(format!("{}", c.checked())),
+            _ => Err(WebDynproError::Element(ElementError::InvalidContent { element: self.id().to_string(), content: "This element is cannot be textised.".to_string() }))
+        }
+    }
 }
 
 /// [`SubElement`] 트레이트 모듈
