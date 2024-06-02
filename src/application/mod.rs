@@ -155,6 +155,8 @@ pub mod course_grades;
 /// 강의시간표: [`CourseSchedule`](course_schedule::CourseSchedule)
 pub mod course_schedule;
 
-/// 졸업사정표: [`GraduationRequirements`]
+/// 졸업사정표: [`GraduationRequirements`](graduation_requirements::GraduationRequirements)
 pub mod graduation_requirements;
-mod student_information;
+
+/// 학생 정보 조회: [`StudentInformation`](student_information::StudentInformation)
+pub mod student_information;
