@@ -176,7 +176,7 @@ macro_rules! def_listbox_subset {
 
     impl<'a> ListBoxWrapper<'a> {
 
-        /// [`ElementWrapper`]에서 [`ListBoxWrapper`]로 변환을 시도합니다.
+        /// [`ElementWrapper`](crate::webdynpro::element::ElementWrapper)에서 [`ListBoxWrapper`](crate::webdynpro::element::selection::list_box::ListBoxWrapper)로 변환을 시도합니다.
         pub fn from_elements(elements: $crate::webdynpro::element::ElementWrapper<'a>) -> Option<ListBoxWrapper<'a>> {
             match elements {
                 $($crate::webdynpro::element::ElementWrapper::$name(elem) => Some(ListBoxWrapper::$name(elem)),)+

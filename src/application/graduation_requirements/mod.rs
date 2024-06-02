@@ -12,7 +12,7 @@ use crate::{
             text::{InputField, InputFieldDef},
             Element,
         },
-        error::{ElementError, WebDynproError},
+        error::WebDynproError,
     },
     RusaintError,
 };
@@ -75,51 +75,18 @@ impl<'a> GraduationRequirements {
         MAIN_TABLE: SapTable<'a> = "ZCMW8015.ID_0001:MAIN.TABLE";
     }
 
-    fn parse_str_from_inputfield(input_field: &InputField<'_>) -> Result<String, ElementError> {
-        Ok(input_field
-            .value()
-            .ok_or_else(|| ElementError::NoSuchContent {
-                element: input_field.id().to_owned(),
-                content: "value of InputField".to_string(),
-            })?
-            .to_owned())
-    }
-
-    fn parse_u32_from_inputfield(input_field: &InputField<'_>) -> Result<u32, ElementError> {
-        Self::parse_str_from_inputfield(input_field)?
-            .parse::<u32>()
-            .or_else(|_| {
-                Err(ElementError::InvalidContent {
-                    element: input_field.id().to_owned(),
-                    content: "value is not correct u32".to_string(),
-                })
-            })
-    }
-
-    fn parse_f32_from_inputfield(input_field: &InputField<'_>) -> Result<f32, ElementError> {
-        Self::parse_str_from_inputfield(input_field)?
-            .parse::<f32>()
-            .or_else(|_| {
-                Err(ElementError::InvalidContent {
-                    element: input_field.id().to_owned(),
-                    content: "value is not correct f32".to_string(),
-                })
-            })
-    }
-
     /// 학생 정보를 반환합니다.
     pub async fn student_info(&self) -> Result<GraduationStudentInfo, WebDynproError> {
-        let number = Self::parse_u32_from_inputfield(&Self::STUDENT_NUM.from_body(self.body())?)?;
-        let name = &Self::parse_str_from_inputfield(&Self::STUDENT_NAME.from_body(self.body())?)?;
-        let grade = Self::parse_u32_from_inputfield(&Self::STUDENT_GRADE.from_body(self.body())?)?;
-        let semester = Self::parse_u32_from_inputfield(&Self::PRCL.from_body(self.body())?)?;
-        let status = &Self::parse_str_from_inputfield(&Self::STATUS.from_body(self.body())?)?;
-        let apply_year =
-            Self::parse_u32_from_inputfield(&Self::APPLY_YEAR.from_body(self.body())?)?;
+        let number = Self::STUDENT_NUM.from_body(self.body())?.value_into_u32()?;
+        let name = &Self::STUDENT_NAME.from_body(self.body())?.value_string()?;
+        let grade = Self::STUDENT_GRADE.from_body(self.body())?.value_into_u32()?;
+        let semester = Self::PRCL.from_body(self.body())?.value_into_u32()?;
+        let status = &Self::STATUS.from_body(self.body())?.value_string()?;
+        let apply_year = Self::APPLY_YEAR.from_body(self.body())?.value_into_u32()?;
         let apply_type =
-            &Self::parse_str_from_inputfield(&Self::NEWINCOR_CDT.from_body(self.body())?)?;
+            &Self::NEWINCOR_CDT.from_body(self.body())?.value_string()?;
         let department =
-            &Self::parse_str_from_inputfield(&Self::CG_IDT_DEPT.from_body(self.body())?)?;
+            &Self::CG_IDT_DEPT.from_body(self.body())?.value_string()?;
         let mut majors = Vec::new();
         const IDTS: &[InputFieldDef] = &[
             GraduationRequirements::CG_IDT1,
@@ -128,7 +95,7 @@ impl<'a> GraduationRequirements {
             GraduationRequirements::CG_IDT4,
         ];
         for idt in IDTS {
-            let major = Self::parse_str_from_inputfield(&idt.from_body(self.body())?).ok();
+            let major = idt.from_body(self.body())?.value_string().ok();
             if let Some(major) = major {
                 if !major.trim().is_empty() {
                     majors.push(major);
@@ -140,11 +107,11 @@ impl<'a> GraduationRequirements {
             }
         }
         let audit_date =
-            &Self::parse_str_from_inputfield(&Self::AUDIT_DATE.from_body(self.body())?)?;
+            &Self::AUDIT_DATE.from_body(self.body())?.value_string()?;
         let graduation_points =
-            Self::parse_f32_from_inputfield(&Self::GR_CPOP.from_body(self.body())?)?;
+            Self::GR_CPOP.from_body(self.body())?.value_into_f32()?;
         let completed_points =
-            Self::parse_f32_from_inputfield(&Self::COMP_CPOP.from_body(self.body())?)?;
+            Self::COMP_CPOP.from_body(self.body())?.value_into_f32()?;
         Ok(GraduationStudentInfo::new(
             number,
             name,

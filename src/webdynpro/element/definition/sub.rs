@@ -10,7 +10,7 @@ use crate::webdynpro::{
 
 use super::ElementNodeId;
 
-/// [`SapTable`]등에서 사용하는 [`SubElement`]의 정의
+/// [`SapTable`](crate::webdynpro::element::complex::sap_table::SapTable)등에서 사용하는 [`SubElement`]의 정의
 pub trait SubElementDefinition<'body>: Sized {
     /// 부모 [`Element`]
     type Parent: Element<'body>;

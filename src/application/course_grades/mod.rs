@@ -176,19 +176,6 @@ impl<'a> CourseGrades {
         Ok(())
     }
 
-    fn value_as_f32(field: InputField<'_>) -> Result<f32, WebDynproError> {
-        let Some(value) = field.value() else {
-            return Err(ElementError::NoSuchData {
-                element: field.id().to_string(),
-                field: "value1".to_string(),
-            })?;
-        };
-        Ok(value.parse::<f32>().or(Err(ElementError::InvalidContent {
-            element: field.id().to_string(),
-            content: "value1(not an correct f32)".to_string(),
-        }))?)
-    }
-
     /// 전체 학기의 학적부 평점 정보를 가져옵니다.
     /// ### 예시
     /// ```no_run
@@ -211,12 +198,12 @@ impl<'a> CourseGrades {
         self.close_popups().await?;
         self.select_course(course_type).await?;
         let body = self.client.body();
-        let attempted_credits = Self::value_as_f32(Self::ATTM_CRD1.from_body(body)?)?;
-        let earned_credits = Self::value_as_f32(Self::EARN_CRD1.from_body(body)?)?;
-        let gpa = Self::value_as_f32(Self::GT_GPA1.from_body(body)?)?;
-        let cgpa = Self::value_as_f32(Self::CGPA1.from_body(body)?)?;
-        let avg = Self::value_as_f32(Self::AVG1.from_body(body)?)?;
-        let pf_earned_credits = Self::value_as_f32(Self::PF_EARN_CRD.from_body(body)?)?;
+        let attempted_credits = Self::ATTM_CRD1.from_body(body)?.value_into_f32()?;
+        let earned_credits = Self::EARN_CRD1.from_body(body)?.value_into_f32()?;
+        let gpa = Self::GT_GPA1.from_body(body)?.value_into_f32()?;
+        let cgpa = Self::CGPA1.from_body(body)?.value_into_f32()?;
+        let avg = Self::AVG1.from_body(body)?.value_into_f32()?;
+        let pf_earned_credits = Self::PF_EARN_CRD.from_body(body)?.value_into_f32()?;
         Ok(GradeSummary::new(
             attempted_credits,
             earned_credits,
@@ -249,12 +236,12 @@ impl<'a> CourseGrades {
         self.close_popups().await?;
         self.select_course(course_type).await?;
         let body = self.client.body();
-        let attempted_credits = Self::value_as_f32(Self::ATTM_CRD2.from_body(body)?)?;
-        let earned_credits = Self::value_as_f32(Self::EARN_CRD2.from_body(body)?)?;
-        let gpa = Self::value_as_f32(Self::GT_GPA2.from_body(body)?)?;
-        let cgpa = Self::value_as_f32(Self::CGPA2.from_body(body)?)?;
-        let avg = Self::value_as_f32(Self::AVG2.from_body(body)?)?;
-        let pf_earned_credits = Self::value_as_f32(Self::PF_EARN_CRD1.from_body(body)?)?;
+        let attempted_credits = Self::ATTM_CRD2.from_body(body)?.value_into_f32()?;
+        let earned_credits = Self::EARN_CRD2.from_body(body)?.value_into_f32()?;
+        let gpa = Self::GT_GPA2.from_body(body)?.value_into_f32()?;
+        let cgpa = Self::CGPA2.from_body(body)?.value_into_f32()?;
+        let avg = Self::AVG2.from_body(body)?.value_into_f32()?;
+        let pf_earned_credits = Self::PF_EARN_CRD1.from_body(body)?.value_into_f32()?;
         Ok(GradeSummary::new(
             attempted_credits,
             earned_credits,

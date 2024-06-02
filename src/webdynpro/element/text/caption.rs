@@ -1,6 +1,6 @@
 use std::{borrow::Cow, cell::OnceCell};
 
-use crate::webdynpro::element::{define_element_interactable, property::Visibility};
+use crate::webdynpro::element::{define_element_interactable, property::Visibility, Element};
 
 define_element_interactable! {
     #[doc = "엘리먼트 제목 부분 등에서 사용되는 캡션"]
@@ -10,6 +10,7 @@ define_element_interactable! {
     #[doc = "[`SapTableHeaderCell`]: crate::webdynpro::element::complex::sap_table::cell::SapTableHeaderCell"]
     #[doc = "[`Tray`]: crate::webdynpro::element::layout::Tray"]
     Caption<"CP", "Caption"> {
+        text: OnceCell<String>,
     },
     #[doc = "[`Caption`]의 정의"]
     CaptionDef,
@@ -42,6 +43,13 @@ impl<'a> Caption<'a> {
             element_ref,
             lsdata: OnceCell::new(),
             lsevents: OnceCell::new(),
+            text: OnceCell::new(),
         }
+    }
+
+    /// 내부 텍스트를 반환합니다.
+    pub fn text(&self) -> &str {
+        self.text
+            .get_or_init(|| self.element_ref().text().collect::<String>())
     }
 }
