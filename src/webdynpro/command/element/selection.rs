@@ -12,7 +12,7 @@ use crate::webdynpro::{
     error::{ElementError, WebDynproError},
 };
 
-/// [`ComboBox`]의 선택지를 선택하도록 함
+/// [`ComboBox`](crate::webdynpro::element::selection::ComboBox)의 선택지를 선택하도록 함
 pub struct ComboBoxSelectCommand {
     element_def: ComboBoxDef,
     key: String,
@@ -45,7 +45,7 @@ impl WebDynproCommand for ComboBoxSelectCommand {
     }
 }
 
-/// [`ComboBox`]의 내용을 바꿈
+/// [`ComboBox`](crate::webdynpro::element::selection::ComboBox)의 내용을 바꿈
 #[allow(unused)]
 pub struct ComboBoxChangeCommand {
     element_def: ComboBoxDef,
@@ -79,7 +79,7 @@ impl WebDynproCommand for ComboBoxChangeCommand {
     }
 }
 
-/// [`ComboBox`]의 선택지를 `value1`의 값을 기반으로 선택하도록 함
+/// [`ComboBox`](crate::webdynpro::element::selection::ComboBox)의 선택지를 `value1`의 값을 기반으로 선택하도록 함
 #[allow(unused)]
 pub struct ComboBoxSelectByValue1Command {
     element_def: ComboBoxDef,
@@ -168,7 +168,7 @@ impl WebDynproCommand for ReadComboBoxLSDataCommand {
     }
 }
 
-/// [`ComboBox`]의 참조 [`ListBoxDefWrapper`]를 반환
+/// [`ComboBox`](crate::webdynpro::element::selection::ComboBox)의 참조 [`ListBoxDefWrapper`]를 반환
 pub struct ReadComboBoxItemListBoxCommand {
     element_def: ComboBoxDef,
 }
@@ -195,7 +195,7 @@ impl WebDynproCommand for ReadComboBoxItemListBoxCommand {
     }
 }
 
-/// [`ListBox`]의 아이템 정보를 가져옴
+/// [`ListBox`](crate::webdynpro::element::selection::list_box::ListBox)의 아이템 정보를 가져옴
 pub struct ReadListBoxItemInfoCommand {
     element_def: ListBoxDefWrapper,
 }

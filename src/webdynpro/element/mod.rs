@@ -91,7 +91,7 @@ macro_rules! define_element_base {
         }
 
         impl $def_name {
-            /// 엘리먼트 정의를 생성합니다. 이 함수를 직접 실행하기보다는 [`define_elements`]매크로 사용을 추천합니다.
+            /// 엘리먼트 정의를 생성합니다. 이 함수를 직접 실행하기보다는 [`define_elements`](crate::webdynpro::element::define_elements)매크로 사용을 추천합니다.
             pub const fn new(id: &'static str) -> Self {
                 Self {
                     id: std::borrow::Cow::Borrowed(id),
@@ -312,7 +312,7 @@ macro_rules! register_elements {
             }
         )+
 
-        /// 다양한 [`Element`]를 대상으로 하는 [`ElementDef`]를 공통의 타입으로 취급할 수 있게 하는 Wrapper
+        /// 다양한 [`Element`]를 대상으로 하는 [`ElementDefinition`]를 공통의 타입으로 취급할 수 있게 하는 Wrapper
         #[allow(missing_docs)]
         #[derive(Clone, Debug)]
         pub enum ElementDefWrapper<'a> {
@@ -348,7 +348,7 @@ macro_rules! register_elements {
                 }
             }
 
-            /// [`Body`](rusaint::webdynpro::client::body::Body)에서 [`ElementWrapper`]를 반환합니다.
+            /// [`Body`](crate::webdynpro::client::body::Body)에서 [`ElementWrapper`]를 반환합니다.
             pub fn from_body(&self, body: &'a $crate::webdynpro::client::body::Body) -> Result<$crate::webdynpro::element::ElementWrapper<'a>, WebDynproError> {
                 let selector = &self.selector()?;
                 let element = body
@@ -592,5 +592,5 @@ impl<'a> ElementWrapper<'a> {
     }
 }
 
-/// [`SubElement`] 트레이트 모듈
+/// [`SubElement`](crate::webdynpro::element::sub::SubElement) 트레이트 모듈
 pub mod sub;

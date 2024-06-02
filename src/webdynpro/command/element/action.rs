@@ -5,7 +5,7 @@ use crate::webdynpro::{
     error::WebDynproError,
 };
 
-/// 주어진 [`Button`]을 누름
+/// 주어진 [`Button`](crate::webdynpro::element::action::Button)을 누름
 pub struct ButtonPressCommand {
     element_def: ButtonDef,
 }

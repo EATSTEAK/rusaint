@@ -21,7 +21,7 @@
 //! 엘리먼트의 종류나 렌더링 방법에 따라 엘리먼트 자체를 감싸는 태그가 있을 수 있습니다. 이런 태그는 보통 해당 엘리먼트의 ID 뒤에 `-r` 접미사가 붙는것으로 확인할 수 있습니다.
 //!
 //! ## 애플리케이션 정의 예시
-//! [`USaintClient`]를 활용하여 [예시](https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/ZCMW2100?sap-wd-stableids=x&sap-language=ko) 애플리케이션 상단의 "담당자문의 정보" 텍스트를 파싱하는 예시 애플리케이션입니다.
+//! [`USaintClient`](crate::application::USaintClient)를 활용하여 [예시](https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/ZCMW2100?sap-wd-stableids=x&sap-language=ko) 애플리케이션 상단의 "담당자문의 정보" 텍스트를 파싱하는 예시 애플리케이션입니다.
 //!
 //! [`WebDynproClient`](crate::webdynpro::client::WebDynproClient)을 활용하여 u-saint 외의 다른 사이트에 대한 정의를 만들 수 있으나, [`LoadingPlaceholder`] 로딩이나 [`ClientInspector`] 처리 등 추가적인 처리가 필요할 수 있습니다.
 //! 추가 정보는 [`LoadingPlaceholder`], [`ClientInspector`] 와 [`Custom`] 엘리먼트를 참고하십시오.

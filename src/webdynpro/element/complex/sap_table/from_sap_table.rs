@@ -8,7 +8,7 @@ use crate::webdynpro::{
 
 use super::{cell::SapTableCell, SapTableHeader, SapTableRow};
 
-/// [`SapTable`]의 내부 데이터로 표현될 수 있는 형에 구현하는 트레이트
+/// [`SapTable`](super::SapTable)의 내부 데이터로 표현될 수 있는 형에 구현하는 트레이트
 pub trait FromSapTable<'body>: Sized {
     /// [`SapTableRow`]를 해당 형으로 변환하고자 시도하는 함수
     fn from_table(
