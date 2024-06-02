@@ -11,9 +11,10 @@ impl<'a> InputField<'a> {
     }
 
     pub(crate) fn value_into_u32(&self) -> Result<u32, ElementError> {
-        self.value_string()?
+        self.value_string()?.trim()
             .parse::<u32>()
-            .or_else(|_| {
+            .or_else(|e| {
+                eprintln!("{:?}", e);
                 Err(ElementError::InvalidContent {
                     element: self.id().to_owned(),
                     content: "value is not correct u32".to_string(),
@@ -22,7 +23,7 @@ impl<'a> InputField<'a> {
     }
 
     pub(crate) fn value_into_f32(&self) -> Result<f32, ElementError> {
-        self.value_string()?
+        self.value_string()?.trim()
             .parse::<f32>()
             .or_else(|_| {
                 Err(ElementError::InvalidContent {
