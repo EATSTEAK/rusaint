@@ -11,6 +11,7 @@ use crate::{
     },
 };
 
+#[derive(Clone, Debug)]
 pub struct StudentResearchBankAccountInformation {
     bank: Option<String>,
     account_number: Option<String>,

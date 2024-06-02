@@ -6,6 +6,7 @@ use crate::{
     application::{student_information::StudentInformation, USaintClient}, define_elements, webdynpro::{command::element::layout::TabStripTabSelectCommand, element::{complex::{sap_table::FromSapTable, SapTable}, definition::ElementDefinition, layout::tab_strip::item::TabStripItem}, error::{ElementError, WebDynproError}}
 };
 
+#[derive(Clone, Debug)]
 pub struct StudentAcademicRecordInformation {
     records: Vec<StudentAcademicRecord>,
 }

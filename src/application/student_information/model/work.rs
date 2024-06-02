@@ -1,9 +1,17 @@
 use crate::{
-    application::{student_information::StudentInformation, USaintClient}, define_elements, webdynpro::{command::element::layout::TabStripTabSelectCommand, element::{
-        action::Button, definition::ElementDefinition, layout::tab_strip::item::TabStripItem, selection::ComboBox, text::InputField
-    }, error::WebDynproError}
+    application::{student_information::StudentInformation, USaintClient},
+    define_elements,
+    webdynpro::{
+        command::element::layout::TabStripTabSelectCommand,
+        element::{
+            action::Button, definition::ElementDefinition, layout::tab_strip::item::TabStripItem,
+            selection::ComboBox, text::InputField,
+        },
+        error::WebDynproError,
+    },
 };
 
+#[derive(Clone, Debug)]
 pub struct StudentWorkInformation {
     job: Option<String>,
     public_official: Option<String>,

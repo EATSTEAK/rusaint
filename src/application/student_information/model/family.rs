@@ -1,15 +1,26 @@
-use serde::Deserialize;
+use std::collections::HashMap;
+
+use serde::{
+    de::{value::MapDeserializer, IntoDeserializer},
+    Deserialize,
+};
 
 use crate::{
-    application::{student_information::StudentInformation, USaintClient}, define_elements, webdynpro::{
-        command::element::layout::TabStripTabSelectCommand, element::{
+    application::{student_information::StudentInformation, USaintClient},
+    define_elements,
+    utils::de_with::{deserialize_bool_string, deserialize_optional_string},
+    webdynpro::{
+        command::element::layout::TabStripTabSelectCommand,
+        element::{
             complex::{sap_table::FromSapTable, SapTable},
             definition::ElementDefinition,
             layout::tab_strip::item::TabStripItem,
-        }, error::WebDynproError
-    }
+        },
+        error::{ElementError, WebDynproError},
+    },
 };
 
+#[derive(Clone, Debug)]
 pub struct StudentFamilyInformation {
     members: Vec<StudentFamilyMember>,
 }

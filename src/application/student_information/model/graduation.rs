@@ -1,5 +1,6 @@
 use crate::{define_elements, webdynpro::{client::body::Body, element::{definition::ElementDefinition, text::InputField}, error::{ElementError, WebDynproError}}};
 
+#[derive(Clone, Debug)]
 pub struct StudentGraduationInformation {
   graduation_cardinal: u32,
   graduation_certification_number: u32,

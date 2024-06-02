@@ -7,6 +7,7 @@ use crate::{
     },
 };
 
+#[derive(Clone, Debug)]
 pub struct StudentQualificationInformation {
     teaching_major: Option<StudentTeachingMajorInformation>,
     teaching_plural_major: Option<StudentTeachingPluralMajorInformation>,
@@ -25,6 +26,7 @@ impl<'a> StudentQualificationInformation {
     }
 }
 
+#[derive(Clone, Debug)]
 pub struct StudentTeachingMajorInformation {
     major_name: Option<String>,
     qualification_number: Option<String>,
@@ -69,6 +71,7 @@ impl<'a> StudentTeachingMajorInformation {
     }
 }
 
+#[derive(Clone, Debug)]
 pub struct StudentTeachingPluralMajorInformation {
     major_name: Option<String>,
     qualification_number: Option<String>,
@@ -106,6 +109,7 @@ impl<'a> StudentTeachingPluralMajorInformation {
     }
 }
 
+#[derive(Clone, Debug)]
 pub struct StudentLifelongInformation {
     apply_date: Option<String>,
     lifelong_type: Option<String>,
@@ -148,6 +152,7 @@ impl<'a> StudentLifelongInformation {
     }
 }
 
+#[derive(Clone, Debug)]
 pub struct StudentForignStudyInformation {
     approval_date: Option<String>,
     authentication_number: Option<String>,

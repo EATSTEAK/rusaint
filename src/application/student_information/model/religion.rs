@@ -11,6 +11,7 @@ use crate::{
     },
 };
 
+#[derive(Clone, Debug)]
 pub struct StudentReligionInformation {
     religion_type: Option<String>,
     start_date: Option<String>,
@@ -64,7 +65,7 @@ impl<'a> StudentReligionInformation {
         MODIFY_BUTTON: Button<'a> = "ZCMW1001.ID_0001:VIW_TAB_RELIGION.MODIFY_BUTTON";
         SAVE_BUTTON: Button<'a> = "ZCMW1001.ID_0001:VIW_TAB_RELIGION.SAVE_BUTTON";
     }
-    
+
     pub(crate) async fn with_client(client: &mut USaintClient) -> Result<Self, WebDynproError> {
         client
             .send(TabStripTabSelectCommand::new(

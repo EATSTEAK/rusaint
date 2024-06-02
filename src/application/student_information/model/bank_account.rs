@@ -4,6 +4,7 @@ use crate::{
     }, error::WebDynproError}
 };
 
+#[derive(Clone, Debug)]
 pub struct StudentBankAccountInformation {
     bank: Option<String>,
     account_number: Option<String>,

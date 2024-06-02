@@ -119,7 +119,7 @@ impl<'a> GeneralStudentInformation {
             division: Self::TITEL.from_body(body)?.value().map(str::to_string),
             grade: Self::CMSTYEAR.from_body(body)?.value_into_u32()?,
             term: Self::ZSCHTERM.from_body(body)?.value_into_u32()?,
-            image: todo!(), // TODO: Image to bytes
+            image: Vec::with_capacity(0), // TODO: Image to bytes
             alias: Self::RUFNM.from_body(body)?.value().map(str::to_string),
             kanji_name: Self::BIRTHNAME.from_body(body)?.value().map(str::to_string),
             email: Self::SMTP_ADDR.from_body(body)?.value().map(str::to_string),
