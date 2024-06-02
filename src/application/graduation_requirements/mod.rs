@@ -12,7 +12,7 @@ use crate::{
             text::{InputField, InputFieldDef},
             Element,
         },
-        error::{ElementError, WebDynproError},
+        error::WebDynproError,
     },
     RusaintError,
 };
