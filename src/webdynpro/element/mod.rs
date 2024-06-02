@@ -3,6 +3,7 @@ use std::{collections::HashMap, hash::{DefaultHasher, Hash, Hasher}};
 
 use regex::Regex;
 use scraper::ElementRef;
+use selection::CheckBox;
 use serde_json::{Map, Value};
 
 use self::{action::{Button, Link}, complex::SapTable, definition::ElementDefinition, graphic::Image, layout::{grid_layout::cell::GridLayoutCell, tab_strip::item::TabStripItem, ButtonRow, Container, FlowLayout, Form, GridLayout, PopupWindow, ScrollContainer, Scrollbar, TabStrip, Tray}, selection::{list_box::{item::{ListBoxActionItem, ListBoxItem}, ListBoxMultiple, ListBoxPopup, ListBoxPopupFiltered, ListBoxPopupJson, ListBoxPopupJsonFiltered, ListBoxSingle}, ComboBox}, system::{ClientInspector, Custom, LoadingPlaceholder}, text::{Caption, InputField, Label, TextView}};
@@ -338,6 +339,7 @@ macro_rules! register_elements {
 register_elements![
     Button: Button<'a>,
     ButtonRow: ButtonRow<'a>,
+    CheckBox: CheckBox<'a>,
     ClientInspector: ClientInspector<'a>,
     ComboBox: ComboBox<'a>,
     Container: Container<'a>,
