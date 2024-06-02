@@ -13,7 +13,7 @@ use super::{
     SapTableDef, SapTableHeader,
 };
 
-/// [`SapTable`] 내부 테이블
+/// [`SapTable`](super::SapTable) 내부 테이블
 #[derive(Clone, custom_debug_derive::Debug)]
 #[allow(unused)]
 pub struct SapTableBody<'a> {

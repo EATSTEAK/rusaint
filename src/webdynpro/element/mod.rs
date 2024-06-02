@@ -3,6 +3,7 @@ use std::{collections::HashMap, hash::{DefaultHasher, Hash, Hasher}};
 
 use regex::Regex;
 use scraper::ElementRef;
+use selection::CheckBox;
 use serde_json::{Map, Value};
 
 use self::{action::{Button, Link}, complex::SapTable, definition::ElementDefinition, graphic::Image, layout::{grid_layout::cell::GridLayoutCell, tab_strip::item::TabStripItem, ButtonRow, Container, FlowLayout, Form, GridLayout, PopupWindow, ScrollContainer, Scrollbar, TabStrip, Tray}, selection::{list_box::{item::{ListBoxActionItem, ListBoxItem}, ListBoxMultiple, ListBoxPopup, ListBoxPopupFiltered, ListBoxPopupJson, ListBoxPopupJsonFiltered, ListBoxSingle}, ComboBox}, system::{ClientInspector, Custom, LoadingPlaceholder}, text::{Caption, InputField, Label, TextView}};
@@ -90,7 +91,7 @@ macro_rules! define_element_base {
         }
 
         impl $def_name {
-            /// 엘리먼트 정의를 생성합니다. 이 함수를 직접 실행하기보다는 [`define_elements`]매크로 사용을 추천합니다.
+            /// 엘리먼트 정의를 생성합니다. 이 함수를 직접 실행하기보다는 [`define_elements`](crate::webdynpro::element::define_elements)매크로 사용을 추천합니다.
             pub const fn new(id: &'static str) -> Self {
                 Self {
                     id: std::borrow::Cow::Borrowed(id),
@@ -288,6 +289,14 @@ macro_rules! register_elements {
                     _ => Ok(<$crate::webdynpro::element::unknown::Unknown as $crate::webdynpro::element::Element<'a>>::Def::new_dynamic(id).from_element(element)?.wrap())
                 }
             }
+
+            /// 엘리먼트의 id를 반환합니다.
+            pub fn id(&self) -> &str {
+                match self {
+                    $( ElementWrapper::$enum(element) => <$type as $crate::webdynpro::element::Element<'a>>::id(element), )*
+                    ElementWrapper::Unknown(element) => <$crate::webdynpro::element::unknown::Unknown<'a> as $crate::webdynpro::element::Element<'a>>::id(element),
+                }
+            }
         }
 
         $(
@@ -303,7 +312,7 @@ macro_rules! register_elements {
             }
         )+
 
-        /// 다양한 [`Element`]를 대상으로 하는 [`ElementDef`]를 공통의 타입으로 취급할 수 있게 하는 Wrapper
+        /// 다양한 [`Element`]를 대상으로 하는 [`ElementDefinition`]를 공통의 타입으로 취급할 수 있게 하는 Wrapper
         #[allow(missing_docs)]
         #[derive(Clone, Debug)]
         pub enum ElementDefWrapper<'a> {
@@ -330,6 +339,25 @@ macro_rules! register_elements {
                     ElementDefWrapper::Unknown(element_def) => <$crate::webdynpro::element::unknown::Unknown<'a> as $crate::webdynpro::element::Element<'a>>::Def::id(element_def),
                 }
             }
+
+            /// 엘리먼트의 [`scraper::Selector`]를 반환합니다.
+            pub fn selector(&self) -> Result<scraper::Selector, WebDynproError> {
+                match self {
+                    $( ElementDefWrapper::$enum(element_def) => <$type as $crate::webdynpro::element::Element<'a>>::Def::selector(element_def), )*
+                    ElementDefWrapper::Unknown(element_def) => <$crate::webdynpro::element::unknown::Unknown<'a> as $crate::webdynpro::element::Element<'a>>::Def::selector(element_def),
+                }
+            }
+
+            /// [`Body`](crate::webdynpro::client::body::Body)에서 [`ElementWrapper`]를 반환합니다.
+            pub fn from_body(&self, body: &'a $crate::webdynpro::client::body::Body) -> Result<$crate::webdynpro::element::ElementWrapper<'a>, WebDynproError> {
+                let selector = &self.selector()?;
+                let element = body
+                    .document()
+                    .select(selector)
+                    .next()
+                    .ok_or(ElementError::InvalidId(self.id().to_owned()))?;
+                $crate::webdynpro::element::ElementWrapper::dyn_element(element)
+            }
         }
         
     };
@@ -338,6 +366,7 @@ macro_rules! register_elements {
 register_elements![
     Button: Button<'a>,
     ButtonRow: ButtonRow<'a>,
+    CheckBox: CheckBox<'a>,
     ClientInspector: ClientInspector<'a>,
     ComboBox: ComboBox<'a>,
     Container: Container<'a>,
@@ -551,5 +580,17 @@ pub trait Interactable<'a>: Element<'a> {
     fn lsevents(&self) -> Option<&EventParameterMap>;
 }
 
-/// [`SubElement`] 트레이트 모듈
+impl<'a> ElementWrapper<'a> {
+    /// 주어진 엘리먼트를 텍스트 형태로 변환하려고 시도합니다.
+    pub fn textise(&self) -> Result<String, WebDynproError> {
+        match self {
+            ElementWrapper::TextView(tv) => Ok(tv.text().to_string()),
+            ElementWrapper::Caption(cp) => Ok(cp.text().to_string()),
+            ElementWrapper::CheckBox(c) => Ok(format!("{}", c.checked())),
+            _ => Err(WebDynproError::Element(ElementError::InvalidContent { element: self.id().to_string(), content: "This element is cannot be textised.".to_string() }))
+        }
+    }
+}
+
+/// [`SubElement`](crate::webdynpro::element::sub::SubElement) 트레이트 모듈
 pub mod sub;

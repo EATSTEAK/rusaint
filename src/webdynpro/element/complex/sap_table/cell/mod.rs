@@ -88,7 +88,7 @@ impl<'a> SapTableCellWrapper<'a> {
     }
 }
 
-/// [`SapTable`] 셀에 대한 [`SubElementDef`] Wrapper
+/// [`SapTable`] 셀에 대한 [`SubElementDefinition`] Wrapper
 #[derive(Clone, Debug)]
 pub enum SapTableCellDefWrapper {
     /// 일반 셀 정의

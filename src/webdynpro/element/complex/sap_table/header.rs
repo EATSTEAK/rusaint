@@ -14,7 +14,7 @@ use super::{
     SapTableDef,
 };
 
-/// [`SapTable`]의 행
+/// [`SapTable`](super::SapTable)의 행
 #[derive(Clone, custom_debug_derive::Debug)]
 #[allow(unused)]
 pub struct SapTableHeader<'a> {
@@ -126,7 +126,7 @@ impl<'a> SapTableHeader<'a> {
         vec
     }
 
-    /// 원본 [`SapTable`]의 [`ElementDef`]를 반환합니다.
+    /// 원본 [`SapTable`](super::SapTable)의 [`ElementDefinition`]를 반환합니다.
     pub fn table_def(&self) -> SapTableDef {
         self.table_def.clone()
     }

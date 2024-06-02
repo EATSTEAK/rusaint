@@ -8,7 +8,7 @@ use crate::webdynpro::{
     error::WebDynproError,
 };
 
-/// [`TabStrip`]의 탭을 선택하도록 함
+/// [`TabStrip`](crate::webdynpro::element::layout::TabStrip)의 탭을 선택하도록 함
 pub struct TabStripTabSelectCommand {
     element_def: TabStripDef,
     item_id: String,
