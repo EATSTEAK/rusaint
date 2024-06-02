@@ -331,6 +331,25 @@ macro_rules! register_elements {
                     ElementDefWrapper::Unknown(element_def) => <$crate::webdynpro::element::unknown::Unknown<'a> as $crate::webdynpro::element::Element<'a>>::Def::id(element_def),
                 }
             }
+
+            /// 엘리먼트의 [`scraper::Selector`]를 반환합니다.
+            pub fn selector(&self) -> Result<scraper::Selector, WebDynproError> {
+                match self {
+                    $( ElementDefWrapper::$enum(element_def) => <$type as $crate::webdynpro::element::Element<'a>>::Def::selector(element_def), )*
+                    ElementDefWrapper::Unknown(element_def) => <$crate::webdynpro::element::unknown::Unknown<'a> as $crate::webdynpro::element::Element<'a>>::Def::selector(element_def),
+                }
+            }
+
+            /// [`Body`](rusaint::webdynpro::client::body::Body)에서 [`ElementWrapper`]를 반환합니다.
+            pub fn from_body(&self, body: &'a $crate::webdynpro::client::body::Body) -> Result<$crate::webdynpro::element::ElementWrapper<'a>, WebDynproError> {
+                let selector = &self.selector()?;
+                let element = body
+                    .document()
+                    .select(selector)
+                    .next()
+                    .ok_or(ElementError::InvalidId(self.id().to_owned()))?;
+                $crate::webdynpro::element::ElementWrapper::dyn_element(element)
+            }
         }
         
     };
