@@ -120,4 +120,9 @@ impl<'a> ComboBox<'a> {
         parameters.insert("Value".to_string(), value.to_string());
         self.fire_event("Change".to_string(), parameters)
     }
+
+    /// 이 [`ComboBox`]의 값을 가져옵니다.
+    pub fn value(&self) -> Option<&str> {
+        self.element_ref.attr("value")
+    }
 }
