@@ -4,14 +4,14 @@ pub(crate) fn deserialize_u32_string<'de, D: Deserializer<'de>>(
     deserializer: D,
 ) -> Result<u32, D::Error> {
     let value = String::deserialize(deserializer)?;
-    value.parse().map_err(serde::de::Error::custom)
+    value.trim().parse().map_err(serde::de::Error::custom)
 }
 
 pub(crate) fn deserialize_f32_string<'de, D: Deserializer<'de>>(
     deserializer: D,
 ) -> Result<f32, D::Error> {
     let value = String::deserialize(deserializer)?;
-    value.parse().map_err(serde::de::Error::custom)
+    value.trim().parse().map_err(serde::de::Error::custom)
 }
 
 pub(crate) fn deserialize_with_trim<'de, D: Deserializer<'de>>(
