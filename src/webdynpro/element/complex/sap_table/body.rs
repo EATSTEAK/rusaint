@@ -55,8 +55,14 @@ impl<'a> SapTableBody {
                 .attr("rt")
                 .and_then(|s| Some(s.into()))
                 .unwrap_or(SapTableRowType::default());
+            let row_count = row_ref.value().attr("rr").and_then(|s| s.parse::<u32>().ok());
             if matches!(row_type, SapTableRowType::Header) {
                 continue;
+            }
+
+            // If it meets empty row(zero-index), instantly terminate repetition
+            if row_count.is_some_and(|c| c == 0) {
+                break;
             }
             let subct_selector = scraper::Selector::parse("[subct]").unwrap();
             let subcts = row_ref.select(&subct_selector);
