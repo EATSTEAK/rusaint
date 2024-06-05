@@ -15,12 +15,10 @@ use super::{
 };
 
 /// [`SapTable`](super::SapTable)의 행
-#[derive(Clone, custom_debug_derive::Debug)]
+#[derive(Clone, Debug)]
 #[allow(unused)]
-pub struct SapTableHeader<'a> {
+pub struct SapTableHeader {
     table_def: SapTableDef,
-    #[debug(skip)]
-    elem_ref: ElementRef<'a>,
     cells: Vec<SapTableCellDefWrapper>,
     row_index: Option<u32>,
     user_data: Option<String>,
@@ -30,11 +28,11 @@ pub struct SapTableHeader<'a> {
     selection_state: SapTableSelectionState,
 }
 
-impl<'a> SapTableHeader<'a> {
+impl<'a> SapTableHeader {
     pub(super) fn new(
         table_def: SapTableDef,
         header_ref: ElementRef<'a>,
-    ) -> Result<SapTableHeader<'a>, ElementError> {
+    ) -> Result<SapTableHeader, ElementError> {
         let row = header_ref.value();
         let subct_selector = scraper::Selector::parse("[subct]").unwrap();
         let subcts = header_ref.select(&subct_selector);
@@ -55,7 +53,6 @@ impl<'a> SapTableHeader<'a> {
         }
         Ok(SapTableHeader {
             table_def,
-            elem_ref: header_ref,
             cells,
             row_index: row.attr("rr").and_then(|s| s.parse::<u32>().ok()),
             user_data: row.attr("uDat").and_then(|s| Some(s.to_owned())),
@@ -162,7 +159,7 @@ impl<'a> SapTableHeader<'a> {
     }
 }
 
-impl<'a> Index<usize> for SapTableHeader<'a> {
+impl<'a> Index<usize> for SapTableHeader {
     type Output = SapTableCellDefWrapper;
 
     fn index(&self, index: usize) -> &Self::Output {

@@ -1,6 +1,6 @@
 use crate::webdynpro::{
     client::EventProcessResult,
-    command::WebDynproCommand,
+    command::{WebDynproCommand, WebDynproReadCommand},
     element::{
         definition::ElementDefinition,
         selection::{
@@ -156,6 +156,13 @@ impl ReadComboBoxLSDataCommand {
     }
 }
 
+impl WebDynproReadCommand for ReadComboBoxLSDataCommand {
+    fn read(&self, body: &crate::webdynpro::client::body::Body) -> Result<Self::Result, WebDynproError> {
+        let lsdata = self.element_def.from_body(body)?.lsdata().clone();
+        Ok(lsdata)
+    }
+}
+
 impl WebDynproCommand for ReadComboBoxLSDataCommand {
     type Result = ComboBoxLSData;
 
@@ -163,8 +170,7 @@ impl WebDynproCommand for ReadComboBoxLSDataCommand {
         &self,
         client: &mut crate::webdynpro::client::WebDynproClient,
     ) -> Result<Self::Result, WebDynproError> {
-        let lsdata = self.element_def.from_body(client.body())?.lsdata().clone();
-        Ok(lsdata)
+        self.read(client.body())
     }
 }
 
@@ -180,6 +186,16 @@ impl ReadComboBoxItemListBoxCommand {
     }
 }
 
+impl WebDynproReadCommand for ReadComboBoxItemListBoxCommand {
+    fn read(&self, body: &crate::webdynpro::client::body::Body) -> Result<Self::Result, WebDynproError> {
+        let listbox_def = self
+            .element_def
+            .from_body(body)?
+            .item_list_box(body)?;
+        Ok(listbox_def)
+    }
+}
+
 impl WebDynproCommand for ReadComboBoxItemListBoxCommand {
     type Result = ListBoxDefWrapper;
 
@@ -187,11 +203,7 @@ impl WebDynproCommand for ReadComboBoxItemListBoxCommand {
         &self,
         client: &mut crate::webdynpro::client::WebDynproClient,
     ) -> Result<Self::Result, WebDynproError> {
-        let listbox_def = self
-            .element_def
-            .from_body(client.body())?
-            .item_list_box(client.body())?;
-        Ok(listbox_def)
+        self.read(client.body())
     }
 }
 
@@ -207,14 +219,9 @@ impl ReadListBoxItemInfoCommand {
     }
 }
 
-impl WebDynproCommand for ReadListBoxItemInfoCommand {
-    type Result = Vec<ListBoxItemInfo>;
-
-    async fn dispatch(
-        &self,
-        client: &mut crate::webdynpro::client::WebDynproClient,
-    ) -> Result<Self::Result, WebDynproError> {
-        let element = self.element_def.from_body(client.body())?;
+impl WebDynproReadCommand for ReadListBoxItemInfoCommand {
+    fn read(&self, body: &crate::webdynpro::client::body::Body) -> Result<Self::Result, WebDynproError> {
+        let element = self.element_def.from_body(body)?;
         match element {
             ListBoxWrapper::ListBoxPopup(list_box) => Ok(list_box
                 .list_box()
@@ -241,5 +248,16 @@ impl WebDynproCommand for ReadListBoxItemInfoCommand {
                 .item_infos()?
                 .collect::<Vec<ListBoxItemInfo>>()),
         }
+    }
+}
+
+impl WebDynproCommand for ReadListBoxItemInfoCommand {
+    type Result = Vec<ListBoxItemInfo>;
+
+    async fn dispatch(
+        &self,
+        client: &mut crate::webdynpro::client::WebDynproClient,
+    ) -> Result<Self::Result, WebDynproError> {
+        self.read(client.body())
     }
 }

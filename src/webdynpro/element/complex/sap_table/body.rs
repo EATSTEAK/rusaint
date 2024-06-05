@@ -14,21 +14,19 @@ use super::{
 };
 
 /// [`SapTable`](super::SapTable) 내부 테이블
-#[derive(Clone, custom_debug_derive::Debug)]
+#[derive(Clone, Debug)]
 #[allow(unused)]
-pub struct SapTableBody<'a> {
+pub struct SapTableBody {
     table_def: SapTableDef,
-    #[debug(skip)]
-    elem_ref: ElementRef<'a>,
-    header: SapTableHeader<'a>,
-    rows: Vec<SapTableRow<'a>>,
+    header: SapTableHeader,
+    rows: Vec<SapTableRow>,
 }
 
-impl<'a> SapTableBody<'a> {
+impl<'a> SapTableBody {
     pub(super) fn new(
         table_def: SapTableDef,
         elem_ref: ElementRef<'a>,
-    ) -> Result<SapTableBody<'a>, ElementError> {
+    ) -> Result<SapTableBody, ElementError> {
         let ref_iter = elem_ref
             .children()
             .filter_map(|node| scraper::ElementRef::wrap(node));
@@ -47,7 +45,7 @@ impl<'a> SapTableBody<'a> {
                 content: "Multiple header in table".to_owned(),
             });
         }
-        let mut rows: Vec<SapTableRow<'a>> = Vec::new();
+        let mut rows: Vec<SapTableRow> = Vec::new();
         // Def, rowsize, colsize
         type CellSpanInfo = (SapTableCellDefWrapper, u32, u32);
         let mut spans: HashMap<u32, CellSpanInfo> = HashMap::new();
@@ -57,8 +55,14 @@ impl<'a> SapTableBody<'a> {
                 .attr("rt")
                 .and_then(|s| Some(s.into()))
                 .unwrap_or(SapTableRowType::default());
+            let row_count = row_ref.value().attr("rr").and_then(|s| s.parse::<u32>().ok());
             if matches!(row_type, SapTableRowType::Header) {
                 continue;
+            }
+
+            // If it meets empty row(zero-index), instantly terminate repetition
+            if row_count.is_some_and(|c| c == 0) {
+                break;
             }
             let subct_selector = scraper::Selector::parse("[subct]").unwrap();
             let subcts = row_ref.select(&subct_selector);
@@ -118,7 +122,6 @@ impl<'a> SapTableBody<'a> {
         }
         Ok(SapTableBody {
             table_def,
-            elem_ref,
             header,
             rows,
         })
@@ -147,7 +150,7 @@ impl<'a> SapTableBody<'a> {
     }
 
     /// 헤더 행을 반환합니다.
-    pub fn header(&self) -> &SapTableHeader<'a> {
+    pub fn header(&self) -> &SapTableHeader {
         &self.header
     }
 
@@ -162,8 +165,8 @@ impl<'a> SapTableBody<'a> {
     }
 }
 
-impl<'a> Index<usize> for SapTableBody<'a> {
-    type Output = SapTableRow<'a>;
+impl<'a> Index<usize> for SapTableBody {
+    type Output = SapTableRow;
 
     fn index(&self, index: usize) -> &Self::Output {
         &self.rows[index]
