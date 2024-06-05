@@ -13,7 +13,7 @@ use self::property::AccessType;
 define_element_interactable! {
     #[doc = "테이블"]
     SapTable<"ST", "SapTable"> {
-        table: OnceCell<Option<SapTableBody<'a>>>,
+        table: OnceCell<Option<SapTableBody>>,
     },
     #[doc = "[`SapTable`]의 정의"]
     SapTableDef,
@@ -39,7 +39,7 @@ impl<'a> SapTable<'a> {
     }
 
     /// 테이블 내부 컨텐츠를 반환합니다.
-    pub fn table(&self) -> Result<&SapTableBody<'a>, WebDynproError> {
+    pub fn table(&self) -> Result<&SapTableBody, WebDynproError> {
         self.table
             .get_or_init(|| self.parse_table().ok())
             .as_ref()
@@ -49,7 +49,7 @@ impl<'a> SapTable<'a> {
             }))
     }
 
-    fn parse_table(&self) -> Result<SapTableBody<'a>, WebDynproError> {
+    fn parse_table(&self) -> Result<SapTableBody, WebDynproError> {
         let def: SapTableDef = {
             if let Cow::Borrowed(id) = self.id {
                 SapTableDef::new(id)
