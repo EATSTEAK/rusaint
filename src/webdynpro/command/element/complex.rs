@@ -1,4 +1,4 @@
-use crate::webdynpro::{command::WebDynproCommand, element::{complex::{sap_table::SapTableBody, SapTableDef}, definition::ElementDefinition}, error::WebDynproError};
+use crate::webdynpro::{command::{WebDynproCommand, WebDynproReadCommand}, element::{complex::{sap_table::SapTableBody, SapTableDef}, definition::ElementDefinition}, error::WebDynproError};
 
 /// [`SapTableBody`]를 반환
 pub struct ReadSapTableBodyCommand {
@@ -12,6 +12,13 @@ impl ReadSapTableBodyCommand {
     }
 }
 
+impl WebDynproReadCommand for ReadSapTableBodyCommand {
+    fn read(&self, body: &crate::webdynpro::client::body::Body) -> Result<Self::Result, WebDynproError> {
+        let body = self.element_def.from_body(body)?.table()?.clone();
+        Ok(body)
+    }
+}
+
 impl WebDynproCommand for ReadSapTableBodyCommand {
     type Result = SapTableBody;
 
@@ -19,7 +26,6 @@ impl WebDynproCommand for ReadSapTableBodyCommand {
         &self,
         client: &mut crate::webdynpro::client::WebDynproClient,
     ) -> Result<Self::Result, WebDynproError> {
-        let body = self.element_def.from_body(client.body())?.table()?.clone();
-        Ok(body)
+        self.read(client.body())
     }
 }
