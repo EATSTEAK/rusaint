@@ -7,14 +7,26 @@ use serde::{
 
 use crate::{
     define_elements,
+    error::ApplicationError,
     model::SemesterType,
     utils::de_with::deserialize_u32_string,
     webdynpro::{
-        client::body::Body, command::element::complex::ReadSapTableBodyCommand, element::{
-            complex::{sap_table::FromSapTable, SapTable},
+        client::body::Body,
+        command::element::complex::ReadSapTableBodyCommand,
+        element::{
+            complex::{
+                sap_table::{
+                    cell::{SapTableCell, SapTableCellWrapper},
+                    FromSapTable,
+                },
+                SapTable,
+            },
             definition::ElementDefinition,
-        }, error::{ElementError, WebDynproError}
+            ElementDefWrapper,
+        },
+        error::{ElementError, WebDynproError},
     },
+    RusaintError,
 };
 
 #[derive(Clone, Debug)]
@@ -105,9 +117,21 @@ impl<'a> GeneralChapelInformation {
         TABLE: SapTable<'a> = "ZCMW3681.ID_0001:V_MAIN.TABLE";
     }
 
-    pub(crate) fn from_body(body: &'a Body) -> Result<Vec<Self>, WebDynproError> {
+    pub(crate) fn from_body(body: &'a Body) -> Result<Vec<Self>, RusaintError> {
         let table = body.read(ReadSapTableBodyCommand::new(Self::TABLE))?;
-        table.try_table_into::<Self>(body)
+        let Some(first_row) = table.iter().next() else {
+            return Err(ApplicationError::NoChapelInformation.into());
+        };
+        if let Some(Ok(SapTableCellWrapper::Normal(cell))) = first_row.iter_value(body).next() {
+            if let Some(ElementDefWrapper::TextView(tv_def)) = cell.content() {
+                if let Ok(tv) = tv_def.from_body(body) {
+                    if tv.text().contains("없습니다.") {
+                        return Err(ApplicationError::NoChapelInformation.into());
+                    }
+                }
+            }
+        }
+        Ok(table.try_table_into::<Self>(body)?)
     }
 
     /// 분반 번호를 반환합니다.
@@ -201,6 +225,18 @@ impl<'a> ChapelAttendance {
 
     pub(crate) fn from_body(body: &'a Body) -> Result<Vec<Self>, WebDynproError> {
         let table = body.read(ReadSapTableBodyCommand::new(Self::TABLE_A))?;
+        let Some(first_row) = table.iter().next() else {
+            return Ok(Vec::with_capacity(0));
+        };
+        if let Some(Ok(SapTableCellWrapper::Normal(cell))) = first_row.iter_value(body).next() {
+            if let Some(ElementDefWrapper::TextView(tv_def)) = cell.content() {
+                if let Ok(tv) = tv_def.from_body(body) {
+                    if tv.text().contains("채플 출결 상세내용") {
+                        return Ok(Vec::with_capacity(0));
+                    }
+                }
+            }
+        }
         table.try_table_into::<Self>(body)
     }
 
@@ -317,9 +353,22 @@ impl<'a> ChapelAbsenceRequest {
     define_elements! {
         TABLE02_CP_CP: SapTable<'a> = "ZCMW3681.ID_0001:V_MAIN.TABLE02_CP_CP";
     }
-    pub(crate) fn from_body(body: &'a Body) -> Result<Vec<Self>, WebDynproError> {
+    pub(crate) fn from_body(body: &'a Body) -> Result<Vec<Self>, RusaintError> {
         let table = body.read(ReadSapTableBodyCommand::new(Self::TABLE02_CP_CP))?;
-        table.try_table_into::<Self>(body)
+        let Some(first_row) = table.iter().next() else {
+            return Ok(Vec::with_capacity(0));
+        };
+        if let Some(Ok(SapTableCellWrapper::Normal(cell))) = first_row.iter_value(body).next() {
+            if let Some(ElementDefWrapper::TextView(tv_def)) = cell.content() {
+                if let Ok(tv) = tv_def.from_body(body) {
+                    if tv.text().contains("없습니다.") {
+                        return Ok(Vec::with_capacity(0));
+                    }
+                }
+            }
+        }
+
+        Ok(table.try_table_into::<Self>(body)?)
     }
 
     /// 신청 학년도를 반환합니다.

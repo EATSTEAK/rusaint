@@ -14,6 +14,9 @@ pub enum RusaintError {
     /// 숭실대학교 SSO 로그인 오류
     #[error("Failed to login with ssu sso: {0}")]
     SsoLoginError(#[from] SsuSsoError),
+    /// 각 애플리케이션에서 반환하는 오류
+    #[error("Error from application: {0}")]
+    ApplicationError(#[from] ApplicationError)
 }
 
 /// 숭실대학교 SSO 로그인 실패 시 반환하는 오류
@@ -28,4 +31,11 @@ pub enum SsuSsoError {
     /// 페이지 로그인이 실패하여 토큰이 응답에 포함되지 않음
     #[error("Token is not included in response: {0}")]
     CantFindToken(String),
+}
+
+/// 특정 애플리케이션에서 반환하는 오류
+#[derive(Error, Debug)]
+pub enum ApplicationError {
+    #[error("No chapel information provided")]
+    NoChapelInformation
 }
