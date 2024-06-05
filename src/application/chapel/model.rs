@@ -10,12 +10,10 @@ use crate::{
     model::SemesterType,
     utils::de_with::deserialize_u32_string,
     webdynpro::{
-        client::body::Body,
-        element::{
+        client::body::Body, command::element::complex::ReadSapTableBodyCommand, element::{
             complex::{sap_table::FromSapTable, SapTable},
             definition::ElementDefinition,
-        },
-        error::{ElementError, WebDynproError},
+        }, error::{ElementError, WebDynproError}
     },
 };
 
@@ -108,8 +106,7 @@ impl<'a> GeneralChapelInformation {
     }
 
     pub(crate) fn from_body(body: &'a Body) -> Result<Vec<Self>, WebDynproError> {
-        let table_element = Self::TABLE.from_body(body)?;
-        let table = table_element.table()?;
+        let table = body.read(ReadSapTableBodyCommand::new(Self::TABLE))?;
         table.try_table_into::<Self>(body)
     }
 
@@ -203,8 +200,7 @@ impl<'a> ChapelAttendance {
     }
 
     pub(crate) fn from_body(body: &'a Body) -> Result<Vec<Self>, WebDynproError> {
-        let table_element = Self::TABLE_A.from_body(body)?;
-        let table = table_element.table()?;
+        let table = body.read(ReadSapTableBodyCommand::new(Self::TABLE_A))?;
         table.try_table_into::<Self>(body)
     }
 
@@ -322,8 +318,7 @@ impl<'a> ChapelAbsenceRequest {
         TABLE02_CP_CP: SapTable<'a> = "ZCMW3681.ID_0001:V_MAIN.TABLE02_CP_CP";
     }
     pub(crate) fn from_body(body: &'a Body) -> Result<Vec<Self>, WebDynproError> {
-        let table_element = Self::TABLE02_CP_CP.from_body(body)?;
-        let table = table_element.table()?;
+        let table = body.read(ReadSapTableBodyCommand::new(Self::TABLE02_CP_CP))?;
         table.try_table_into::<Self>(body)
     }
 
