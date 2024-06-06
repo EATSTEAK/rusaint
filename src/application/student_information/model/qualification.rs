@@ -9,15 +9,15 @@ use crate::{
 
 #[derive(Clone, Debug)]
 /// 학생의 자격(교직이수, 평생교육사, 7+1 프로그램) 정보
-pub struct StudentQualificationInformation {
+pub struct StudentQualification {
     teaching_major: Option<StudentTeachingMajorInformation>,
     teaching_plural_major: Option<StudentTeachingPluralMajorInformation>,
     lifelong: Option<StudentLifelongInformation>,
     forign_study: Option<StudentForignStudyInformation>,
 }
 
-impl<'a> StudentQualificationInformation {
-    pub(crate) fn from_body(body: &'a Body) -> StudentQualificationInformation {
+impl<'a> StudentQualification {
+    pub(crate) fn from_body(body: &'a Body) -> StudentQualification {
         Self {
             teaching_major: StudentTeachingMajorInformation::from_body(body).ok(),
             teaching_plural_major: StudentTeachingPluralMajorInformation::from_body(body).ok(),

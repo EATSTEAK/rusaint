@@ -15,7 +15,7 @@ use crate::{
 
 #[derive(Debug)]
 /// 졸업 학생 정보
-pub struct GraduationStudentInfo {
+pub struct GraduationStudent {
     number: u32,
     name: String,
     grade: u32,
@@ -30,7 +30,7 @@ pub struct GraduationStudentInfo {
     completed_points: f32,
 }
 
-impl GraduationStudentInfo {
+impl GraduationStudent {
     pub(super) fn new(
         number: u32,
         name: &str,
@@ -124,12 +124,12 @@ impl GraduationStudentInfo {
 
 #[derive(Debug)]
 /// 전체 졸업 요건 정보
-pub struct GraduationRequirementsInfo {
+pub struct GraduationRequirements {
     is_graduatable: bool,
     requirements: HashMap<String, GraduationRequirement>,
 }
 
-impl GraduationRequirementsInfo {
+impl GraduationRequirements {
     pub(super) fn new(
         is_graduatable: bool,
         requirements: HashMap<String, GraduationRequirement>,

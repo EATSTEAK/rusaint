@@ -1,5 +1,5 @@
 use crate::{
-    application::{student_information::StudentInformation, USaintClient},
+    application::{student_information::StudentInformationApplication, USaintClient},
     define_elements,
     webdynpro::{
         command::element::layout::TabStripTabSelectCommand,
@@ -61,7 +61,7 @@ impl<'a> StudentWorkInformation {
     ) -> Result<StudentWorkInformation, WebDynproError> {
         client
             .send(TabStripTabSelectCommand::new(
-                StudentInformation::TAB_ADDITION,
+                StudentInformationApplication::TAB_ADDITION,
                 Self::TAB_WORK,
                 0,
                 0,

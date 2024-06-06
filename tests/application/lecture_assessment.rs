@@ -1,5 +1,5 @@
 use rusaint::{
-    application::{lecture_assessment::LectureAssessment, USaintClientBuilder},
+    application::{lecture_assessment::LectureAssessmentApplication, USaintClientBuilder},
     model::SemesterType,
 };
 use serial_test::serial;
@@ -12,7 +12,7 @@ async fn lecture_assessment() {
     let session = get_session().await.unwrap();
     let mut app = USaintClientBuilder::new()
         .session(session)
-        .build_into::<LectureAssessment>()
+        .build_into::<LectureAssessmentApplication>()
         .await
         .unwrap();
     let info = app

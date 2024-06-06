@@ -1,7 +1,7 @@
 use model::{
-    GeneralStudentInformation, StudentAcademicRecordInformation, StudentBankAccountInformation,
-    StudentFamilyInformation, StudentGraduationInformation, StudentQualificationInformation,
-    StudentReligionInformation, StudentResearchBankAccountInformation, StudentTransferInformation,
+    StudentInformation, StudentAcademicRecords, StudentBankAccount,
+    StudentFamily, StudentGraduation, StudentQualification,
+    StudentReligion, StudentResearchBankAccount, StudentTransferRecords,
     StudentWorkInformation,
 };
 
@@ -14,11 +14,11 @@ use crate::{
 use super::{USaintApplication, USaintClient};
 
 /// [학생 정보 수정 및 조회](https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/ZCMW1001n)
-pub struct StudentInformation {
+pub struct StudentInformationApplication {
     client: USaintClient,
 }
 
-impl USaintApplication for StudentInformation {
+impl USaintApplication for StudentInformationApplication {
     const APP_NAME: &'static str = "ZCMW1001n";
 
     fn from_client(client: USaintClient) -> Result<Self, RusaintError> {
@@ -30,25 +30,25 @@ impl USaintApplication for StudentInformation {
     }
 }
 
-impl<'a> StudentInformation {
+impl<'a> StudentInformationApplication {
     // 부가정보 탭
     define_elements! {
         TAB_ADDITION: TabStrip<'a> = "ZCMW1001.ID_0001:VIW_MAIN.TAB_ADDITION";
     }
 
     /// 일반 학생 정보를 반환합니다.
-    pub fn general(&self) -> Result<GeneralStudentInformation, WebDynproError> {
-        GeneralStudentInformation::from_body(self.body())
+    pub fn general(&self) -> Result<StudentInformation, WebDynproError> {
+        StudentInformation::from_body(self.body())
     }
 
     /// 학생의 졸업과 관련된 정보를 반환합니다.
-    pub fn graduation(&self) -> Result<StudentGraduationInformation, WebDynproError> {
-        StudentGraduationInformation::from_body(self.body())
+    pub fn graduation(&self) -> Result<StudentGraduation, WebDynproError> {
+        StudentGraduation::from_body(self.body())
     }
 
     /// 학생의 교직, 평생교육사, 7+1 프로그램 등 자격 관련 정보를 반환합니다.
-    pub fn qualifications(&self) -> StudentQualificationInformation {
-        StudentQualificationInformation::from_body(self.body())
+    pub fn qualifications(&self) -> StudentQualification {
+        StudentQualification::from_body(self.body())
     }
 
     /// 학생의 직장 정보를 반환합니다.
@@ -57,37 +57,37 @@ impl<'a> StudentInformation {
     }
 
     /// 학생의 가족관계 정보를 반환합니다.
-    pub async fn family(&mut self) -> Result<StudentFamilyInformation, WebDynproError> {
-        StudentFamilyInformation::with_client(&mut self.client).await
+    pub async fn family(&mut self) -> Result<StudentFamily, WebDynproError> {
+        StudentFamily::with_client(&mut self.client).await
     }
 
     /// 학생의 종교 정보를 반환합니다.
-    pub async fn religion(&mut self) -> Result<StudentReligionInformation, WebDynproError> {
-        StudentReligionInformation::with_client(&mut self.client).await
+    pub async fn religion(&mut self) -> Result<StudentReligion, WebDynproError> {
+        StudentReligion::with_client(&mut self.client).await
     }
 
     /// 학생의 편입정보를 반환합니다.
-    pub async fn transfer(&mut self) -> Result<StudentTransferInformation, WebDynproError> {
-        StudentTransferInformation::with_client(&mut self.client).await
+    pub async fn transfer(&mut self) -> Result<StudentTransferRecords, WebDynproError> {
+        StudentTransferRecords::with_client(&mut self.client).await
     }
 
     /// 학생의 은행계좌 정보를 반환합니다.
-    pub async fn bank_account(&mut self) -> Result<StudentBankAccountInformation, WebDynproError> {
-        StudentBankAccountInformation::with_client(&mut self.client).await
+    pub async fn bank_account(&mut self) -> Result<StudentBankAccount, WebDynproError> {
+        StudentBankAccount::with_client(&mut self.client).await
     }
 
     /// 학생의 학적상태 정보를 반환합니다.
     pub async fn academic_record(
         &mut self,
-    ) -> Result<StudentAcademicRecordInformation, WebDynproError> {
-        StudentAcademicRecordInformation::with_client(&mut self.client).await
+    ) -> Result<StudentAcademicRecords, WebDynproError> {
+        StudentAcademicRecords::with_client(&mut self.client).await
     }
 
     /// 학생의 연구비 입금 계좌를 반환합니다.
     pub async fn research_bank_account(
         &mut self,
-    ) -> Result<StudentResearchBankAccountInformation, WebDynproError> {
-        StudentResearchBankAccountInformation::with_client(&mut self.client).await
+    ) -> Result<StudentResearchBankAccount, WebDynproError> {
+        StudentResearchBankAccount::with_client(&mut self.client).await
     }
 
     fn body(&self) -> &Body {

@@ -1,5 +1,5 @@
 use crate::{
-    application::{student_information::StudentInformation, USaintClient},
+    application::{student_information::StudentInformationApplication, USaintClient},
     define_elements,
     webdynpro::{
         command::element::layout::TabStripTabSelectCommand,
@@ -13,7 +13,7 @@ use crate::{
 
 #[derive(Clone, Debug)]
 /// 학생의 종교 정보
-pub struct StudentReligionInformation {
+pub struct StudentReligion {
     religion_type: Option<String>,
     start_date: Option<String>,
     church: Option<String>,
@@ -30,7 +30,7 @@ pub struct StudentReligionInformation {
     church_grp: Option<String>,
 }
 
-impl<'a> StudentReligionInformation {
+impl<'a> StudentReligion {
     // 종교
     define_elements! {
         // 종교 탭
@@ -72,7 +72,7 @@ impl<'a> StudentReligionInformation {
     pub(crate) async fn with_client(client: &mut USaintClient) -> Result<Self, WebDynproError> {
         client
             .send(TabStripTabSelectCommand::new(
-                StudentInformation::TAB_ADDITION,
+                StudentInformationApplication::TAB_ADDITION,
                 Self::TAB_RELIGION,
                 2,
                 0,

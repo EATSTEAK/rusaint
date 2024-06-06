@@ -1,10 +1,10 @@
 /// 개인의 수업 시간표 정보를 조회합니다.
 #[derive(Clone, Debug)]
-pub struct PersonalCourseScheduleInformation {
+pub struct PersonalCourseSchedule {
     schedule: [[String; 10]; 7],
 }
 
-impl PersonalCourseScheduleInformation {
+impl PersonalCourseSchedule {
     pub(super) fn new(schedule: [[String; 10]; 7]) -> Self {
         Self { schedule }
     }

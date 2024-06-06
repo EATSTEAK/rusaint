@@ -1,5 +1,5 @@
 use rusaint::{
-    application::{chapel::Chapel, USaintClientBuilder},
+    application::{chapel::ChapelApplication, USaintClientBuilder},
     model::SemesterType,
     ApplicationError, RusaintError,
 };
@@ -13,7 +13,7 @@ async fn chapel() {
     let session = get_session().await.unwrap();
     let mut app = USaintClientBuilder::new()
         .session(session)
-        .build_into::<Chapel>()
+        .build_into::<ChapelApplication>()
         .await
         .unwrap();
     let info = app.information(2022, SemesterType::Two).await.unwrap();
@@ -26,7 +26,7 @@ async fn no_chapel() {
     let session = get_session().await.unwrap();
     let mut app = USaintClientBuilder::new()
         .session(session)
-        .build_into::<Chapel>()
+        .build_into::<ChapelApplication>()
         .await
         .unwrap();
     let info = app.information(2024, SemesterType::Two).await.unwrap_err();

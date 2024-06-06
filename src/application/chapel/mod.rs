@@ -18,11 +18,11 @@ use crate::{
 use super::{USaintApplication, USaintClient};
 
 /// [채플정보조회](https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/ZCMW3681)
-pub struct Chapel {
+pub struct ChapelApplication {
     client: USaintClient,
 }
 
-impl USaintApplication for Chapel {
+impl USaintApplication for ChapelApplication {
     const APP_NAME: &'static str = "ZCMW3681";
 
     fn from_client(client: USaintClient) -> Result<Self, RusaintError> {
@@ -34,7 +34,7 @@ impl USaintApplication for Chapel {
     }
 }
 
-impl<'a> Chapel {
+impl<'a> ChapelApplication {
     define_elements! {
         SEL_PERYR: ComboBox<'a> = "ZCMW3681.ID_0001:V_MAIN.TC_SEL_PERYR";
         SEL_PERID: ComboBox<'a> = "ZCMW3681.ID_0001:V_MAIN.TC_SEL_PERID";

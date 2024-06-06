@@ -1,5 +1,5 @@
 use crate::{
-    application::{student_information::StudentInformation, USaintClient},
+    application::{student_information::StudentInformationApplication, USaintClient},
     define_elements,
     webdynpro::{
         command::element::layout::TabStripTabSelectCommand,
@@ -13,13 +13,13 @@ use crate::{
 
 #[derive(Clone, Debug)]
 /// 연구비 입급 계좌 정보
-pub struct StudentResearchBankAccountInformation {
+pub struct StudentResearchBankAccount {
     bank: Option<String>,
     account_number: Option<String>,
     holder: Option<String>,
 }
 
-impl<'a> StudentResearchBankAccountInformation {
+impl<'a> StudentResearchBankAccount {
     // 연구비 입금 계좌
     define_elements! {
         // 연구비 입금 계좌 탭
@@ -39,7 +39,7 @@ impl<'a> StudentResearchBankAccountInformation {
     pub(crate) async fn with_client(client: &mut USaintClient) -> Result<Self, WebDynproError> {
         client
             .send(TabStripTabSelectCommand::new(
-                StudentInformation::TAB_ADDITION,
+                StudentInformationApplication::TAB_ADDITION,
                 Self::TAB_RES_ACCOUNT,
                 6,
                 0,
