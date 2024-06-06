@@ -2,9 +2,12 @@ use crate::{
     application::{student_information::StudentInformationApplication, USaintClient},
     define_elements,
     webdynpro::{
-        command::element::layout::TabStripTabSelectCommand,
+        command::element::{
+            layout::TabStripTabSelectCommand, selection::ReadComboBoxValueCommand,
+            text::ReadInputFieldValueCommand,
+        },
         element::{
-            action::Button, definition::ElementDefinition, layout::tab_strip::item::TabStripItem,
+            action::Button, layout::tab_strip::item::TabStripItem,
             selection::ComboBox, text::InputField,
         },
         error::WebDynproError,
@@ -68,90 +71,81 @@ impl<'a> StudentWorkInformation {
             ))
             .await?;
         Ok(Self {
-            job: Self::COJOB
-                .from_body(client.body())?
-                .value()
-                .map(str::to_string),
-            public_official: Self::COMPANY_ORGR
-                .from_body(client.body())?
-                .value()
-                .map(str::to_string),
-            company_name: Self::COMPANY_NAM
-                .from_body(client.body())?
-                .value()
-                .map(str::to_string),
-            department_name: Self::COMPANY_DEPT_NAM
-                .from_body(client.body())?
-                .value()
-                .map(str::to_string),
-            title: Self::COMPANY_TITLE
-                .from_body(client.body())?
-                .value()
-                .map(str::to_string),
-            zip_code: Self::COMPANY_ZIP_COD
-                .from_body(client.body())?
-                .value()
-                .map(str::to_string),
+            job: client.read(ReadComboBoxValueCommand::new(Self::COJOB)).ok(),
+            public_official: client
+                .read(ReadComboBoxValueCommand::new(Self::COMPANY_ORGR))
+                .ok(),
+            company_name: client
+                .read(ReadInputFieldValueCommand::new(Self::COMPANY_NAM))
+                .ok(),
+            department_name: client
+                .read(ReadInputFieldValueCommand::new(Self::COMPANY_DEPT_NAM))
+                .ok(),
+            title: client
+                .read(ReadInputFieldValueCommand::new(Self::COMPANY_TITLE))
+                .ok(),
+            zip_code: client
+                .read(ReadInputFieldValueCommand::new(Self::COMPANY_ZIP_COD))
+                .ok(),
             address: (
-                Self::COMPANY_ADDRESS
-                    .from_body(client.body())?
-                    .value()
-                    .map(str::to_string),
-                Self::COMPANY_ADDRESS2
-                    .from_body(client.body())?
-                    .value()
-                    .map(str::to_string),
+                client
+                    .read(ReadInputFieldValueCommand::new(Self::COMPANY_ADDRESS))
+                    .ok(),
+                client
+                    .read(ReadInputFieldValueCommand::new(Self::COMPANY_ADDRESS2))
+                    .ok(),
             ),
-            tel_number: Self::COMPANY_TEL1
-                .from_body(client.body())?
-                .value()
-                .map(str::to_string),
-            fax_number: Self::COMPANY_TEL2
-                .from_body(client.body())?
-                .value()
-                .map(str::to_string),
+            tel_number: client
+                .read(ReadInputFieldValueCommand::new(Self::COMPANY_TEL1))
+                .ok(),
+            fax_number: client
+                .read(ReadInputFieldValueCommand::new(Self::COMPANY_TEL2))
+                .ok(),
         })
     }
     /// 직업을 반환합니다.
     pub fn job(&self) -> Option<&str> {
         self.job.as_ref().map(String::as_str)
     }
-    
+
     /// 공무원 구분을 반환합니다.
     pub fn public_official(&self) -> Option<&str> {
         self.public_official.as_ref().map(String::as_str)
     }
-    
+
     /// 직장명을 반환합니다.
     pub fn company_name(&self) -> Option<&str> {
         self.company_name.as_ref().map(String::as_str)
     }
-    
+
     /// 부서명을 반환합니다.
     pub fn department_name(&self) -> Option<&str> {
         self.department_name.as_ref().map(String::as_str)
     }
-    
+
     /// 직위를 반환합니다.
     pub fn title(&self) -> Option<&str> {
         self.title.as_ref().map(String::as_str)
     }
-    
+
     /// 우편번호를 반환합니다.
     pub fn zip_code(&self) -> Option<&str> {
         self.zip_code.as_ref().map(String::as_str)
     }
-    
+
     /// 주소를 반환합니다.
     pub fn address(&self) -> (Option<&str>, Option<&str>) {
-        (self.address.0.as_ref().map(String::as_str), self.address.1.as_ref().map(String::as_str))
+        (
+            self.address.0.as_ref().map(String::as_str),
+            self.address.1.as_ref().map(String::as_str),
+        )
     }
-    
+
     /// 전화번호를 반환합니다.
     pub fn tel_number(&self) -> Option<&str> {
         self.tel_number.as_ref().map(String::as_str)
     }
-    
+
     /// 팩스 번호를 반환합니다.
     pub fn fax_number(&self) -> Option<&str> {
         self.fax_number.as_ref().map(String::as_str)

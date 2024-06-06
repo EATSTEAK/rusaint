@@ -2,6 +2,7 @@ use crate::{
     define_elements,
     webdynpro::{
         client::body::Body,
+        command::element::text::ReadInputFieldValueCommand,
         element::{
             action::Button, definition::ElementDefinition, graphic::Image, text::InputField,
         },
@@ -120,42 +121,42 @@ impl<'a> StudentInformation {
         Ok(Self {
             apply_year: Self::APPLY_PERYR.from_body(body)?.value_into_u32()?,
             student_number: Self::STUDENT12.from_body(body)?.value_into_u32()?,
-            name: Self::VORNA.from_body(body)?.value_string()?,
+            name: body.read(ReadInputFieldValueCommand::new(Self::VORNA))?,
             rrn: Self::PRDNI.from_body(body)?.value_into_u32()?,
-            collage: Self::COLEG_TXT.from_body(body)?.value_string()?,
-            department: Self::DEPT_TXT.from_body(body)?.value_string()?,
-            major: Self::MAJOR_TXT.from_body(body)?.value().map(str::to_string),
-            division: Self::TITEL.from_body(body)?.value().map(str::to_string),
+            collage: body.read(ReadInputFieldValueCommand::new(Self::COLEG_TXT))?,
+            department: body.read(ReadInputFieldValueCommand::new(Self::DEPT_TXT))?,
+            major: body.read(ReadInputFieldValueCommand::new(Self::MAJOR_TXT)).ok(),
+            division: body.read(ReadInputFieldValueCommand::new(Self::TITEL)).ok(),
             grade: Self::CMSTYEAR.from_body(body)?.value_into_u32()?,
             term: Self::ZSCHTERM.from_body(body)?.value_into_u32()?,
             image: Vec::with_capacity(0), // TODO: Image to bytes
-            alias: Self::RUFNM.from_body(body)?.value().map(str::to_string),
-            kanji_name: Self::BIRTHNAME.from_body(body)?.value().map(str::to_string),
-            email: Self::SMTP_ADDR.from_body(body)?.value().map(str::to_string),
-            tel_number: Self::TEL_NUMBER
-                .from_body(body)?
-                .value()
-                .map(str::to_string),
-            mobile_number: Self::MOB_NUMBER
-                .from_body(body)?
-                .value()
-                .map(str::to_string),
-            post_code: Self::POST_CODE.from_body(body)?.value().map(str::to_string),
+            alias: body.read(ReadInputFieldValueCommand::new(Self::RUFNM)).ok(),
+            kanji_name: body.read(ReadInputFieldValueCommand::new(Self::BIRTHNAME)).ok(),
+            email: body.read(ReadInputFieldValueCommand::new(Self::SMTP_ADDR)).ok(),
+            tel_number: body
+                .read(ReadInputFieldValueCommand::new(Self::TEL_NUMBER))
+                .ok(),
+            mobile_number: body
+                .read(ReadInputFieldValueCommand::new(Self::MOB_NUMBER))
+                .ok(),
+            post_code: body
+                .read(ReadInputFieldValueCommand::new(Self::POST_CODE))
+                .ok(),
             address: (
-                Self::CITY1.from_body(body)?.value().map(str::to_string),
-                Self::STREET.from_body(body)?.value().map(str::to_string),
+                body.read(ReadInputFieldValueCommand::new(Self::CITY1)).ok(),
+                body.read(ReadInputFieldValueCommand::new(Self::STREET))
+                    .ok(),
             ),
-            is_transfer_student: !Self::NEWINCOR_CDT
-                .from_body(body)?
-                .value_string()?
+            is_transfer_student: !body
+                .read(ReadInputFieldValueCommand::new(Self::NEWINCOR_CDT))?
                 .contains("신입학"),
-            apply_date: Self::APPLY_DT.from_body(body)?.value_string()?,
-            applied_collage: Self::COLEG_CDT.from_body(body)?.value_string()?,
-            applied_department: Self::DEPT_CDT.from_body(body)?.value_string()?,
-            plural_major: Self::CG_STEXT1.from_body(body)?.value().map(str::to_string),
-            sub_major: Self::CG_STEXT2.from_body(body)?.value().map(str::to_string),
-            connected_major: Self::CG_STEXT3.from_body(body)?.value().map(str::to_string),
-            abeek: Self::CG_STEXT4.from_body(body)?.value().map(str::to_string),
+            apply_date: body.read(ReadInputFieldValueCommand::new(Self::APPLY_DT))?,
+            applied_collage: body.read(ReadInputFieldValueCommand::new(Self::COLEG_CDT))?,
+            applied_department: body.read(ReadInputFieldValueCommand::new(Self::DEPT_CDT))?,
+            plural_major: body.read(ReadInputFieldValueCommand::new(Self::CG_STEXT1)).ok(),
+            sub_major: body.read(ReadInputFieldValueCommand::new(Self::CG_STEXT2)).ok(),
+            connected_major: body.read(ReadInputFieldValueCommand::new(Self::CG_STEXT3)).ok(),
+            abeek: body.read(ReadInputFieldValueCommand::new(Self::CG_STEXT4)).ok(),
         })
     }
 
@@ -271,22 +272,22 @@ impl<'a> StudentInformation {
     pub fn applied_department(&self) -> &str {
         &self.applied_department
     }
-    
+
     /// 복수전공을 반환합니다.
     pub fn plural_major(&self) -> Option<&str> {
         self.plural_major.as_ref().map(String::as_str)
     }
-    
+
     /// 부전공을 반환합니다.
     pub fn sub_major(&self) -> Option<&str> {
         self.sub_major.as_ref().map(String::as_str)
     }
-    
+
     /// 연계전공을 반환합니다.
     pub fn connected_major(&self) -> Option<&str> {
         self.connected_major.as_ref().map(String::as_str)
     }
-    
+
     /// 공학인증을 반환합니다.
     pub fn abeek(&self) -> Option<&str> {
         self.abeek.as_ref().map(String::as_str)
@@ -312,5 +313,5 @@ pub use qualification::{
 };
 pub use religion::StudentReligion;
 pub use research_bank_account::StudentResearchBankAccount;
-pub use transfer::{StudentTransferRecords, StudentTransferRecord};
+pub use transfer::{StudentTransferRecord, StudentTransferRecords};
 pub use work::StudentWorkInformation;

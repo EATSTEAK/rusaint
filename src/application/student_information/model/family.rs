@@ -10,7 +10,7 @@ use crate::{
     define_elements,
     utils::de_with::{deserialize_bool_string, deserialize_optional_string},
     webdynpro::{
-        command::element::layout::TabStripTabSelectCommand,
+        command::element::{complex::ReadSapTableBodyCommand, layout::TabStripTabSelectCommand},
         element::{
             complex::{sap_table::FromSapTable, SapTable},
             definition::ElementDefinition,
@@ -44,8 +44,7 @@ impl<'a> StudentFamily {
                 0,
             ))
             .await?;
-        let table_element = Self::TABLE_FAMILY.from_body(client.body())?;
-        let table = table_element.table()?;
+        let table = client.read(ReadSapTableBodyCommand::new(Self::TABLE_FAMILY))?;
         let members = table.try_table_into::<StudentFamilyMember>(client.body())?;
         Ok(Self { members })
     }

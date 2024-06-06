@@ -4,7 +4,7 @@ use crate::{
     define_elements,
     webdynpro::{
         client::body::Body,
-        command::element::{action::ButtonPressCommand, text::ReadInputFieldValueCommand},
+        command::element::{action::ButtonPressCommand, complex::ReadSapTableBodyCommand, text::ReadInputFieldValueCommand},
         element::{
             action::Button,
             complex::SapTable,
@@ -133,8 +133,7 @@ impl<'a> GraduationRequirementsApplication {
             .client
             .read(ReadInputFieldValueCommand::new(Self::AUDIT_RESULT))
             .is_ok_and(|str| str == "가능");
-        let table_element = Self::MAIN_TABLE.from_body(self.body())?;
-        let table = table_element.table()?;
+        let table = self.client.read(ReadSapTableBodyCommand::new(Self::MAIN_TABLE))?;
         let requirements = table
             .try_table_into::<GraduationRequirement>(self.body())?
             .into_iter()
@@ -158,7 +157,7 @@ mod test {
     use crate::{
         application::{graduation_requirements::GraduationRequirementsApplication, USaintClientBuilder},
         global_test_utils::get_session,
-        webdynpro::element::definition::ElementDefinition,
+        webdynpro::command::element::complex::ReadSapTableBodyCommand,
     };
 
     #[tokio::test]
@@ -170,12 +169,7 @@ mod test {
             .build_into::<GraduationRequirementsApplication>()
             .await
             .unwrap();
-        let table_element = GraduationRequirementsApplication::MAIN_TABLE
-            .from_body(app.body())
-            .unwrap();
-        let table = table_element
-            .table()
-            .unwrap()
+        let table = app.body().read(ReadSapTableBodyCommand::new(GraduationRequirementsApplication::MAIN_TABLE)).unwrap()
             .try_table_into::<Vec<(String, String)>>(app.body())
             .unwrap();
         dbg!(table);

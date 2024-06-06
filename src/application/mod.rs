@@ -6,10 +6,9 @@ use crate::{
     utils::DEFAULT_USER_AGENT,
     webdynpro::{
         client::{body::Body, EventProcessResult, WebDynproClient, WebDynproClientBuilder},
-        command::{WebDynproCommand, WebDynproReadCommand},
+        command::{element::system::{ClientInspectorNotifyCommand, CustomClientInfoCommand, LoadingPlaceholderLoadCommand}, WebDynproCommand, WebDynproReadCommand},
         element::{
             define_elements,
-            definition::ElementDefinition,
             system::{ClientInspector, Custom, CustomClientInfo, LoadingPlaceholder},
         },
         error::WebDynproError,
@@ -82,26 +81,22 @@ impl<'a> USaintClient {
     }
 
     async fn load_placeholder(&mut self) -> Result<(), WebDynproError> {
-        let events = {
-            let body = self.body();
-            let wd01 = Self::CLIENT_INSPECTOR_WD01.from_body(body)?;
-            let wd02 = Self::CLIENT_INSPECTOR_WD02.from_body(body)?;
-            let load_ph = Self::LOADING_PLACEHOLDER.from_body(body)?;
-            let client_infos = Self::CUSTOM.client_infos(CustomClientInfo {
+        self.send(
+            ClientInspectorNotifyCommand::new(Self::CLIENT_INSPECTOR_WD01, INITIAL_CLIENT_DATA_WD01)
+        ).await?;
+        self.send(
+            ClientInspectorNotifyCommand::new(Self::CLIENT_INSPECTOR_WD02, INITIAL_CLIENT_DATA_WD02)
+        ).await?;
+        self.send(
+            LoadingPlaceholderLoadCommand::new(Self::LOADING_PLACEHOLDER)
+        ).await?;
+        self.send(
+            CustomClientInfoCommand::new(Self::CUSTOM, CustomClientInfo {
                 client_url: self.client_url(),
                 document_domain: "ssu.ac.kr".to_owned(),
                 ..CustomClientInfo::default()
-            });
-            vec![
-                wd01.notify(INITIAL_CLIENT_DATA_WD01)?,
-                wd02.notify(INITIAL_CLIENT_DATA_WD02)?,
-                load_ph.load()?,
-                client_infos,
-            ]
-        };
-        for event in events {
-            self.process_event(false, event).await?;
-        }
+            })
+        ).await?;
         Ok(())
     }
 }
