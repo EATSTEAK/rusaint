@@ -5,10 +5,19 @@ use crate::{
     webdynpro::{
         client::body::Body,
         command::element::{complex::ReadSapTableBodyCommand, selection::ComboBoxSelectCommand},
-        element::{complex::SapTable, layout::TabStrip, selection::ComboBox},
+        element::{
+            complex::{
+                sap_table::cell::{SapTableCell, SapTableCellWrapper},
+                SapTable,
+            },
+            definition::ElementDefinition,
+            layout::TabStrip,
+            selection::ComboBox,
+            ElementDefWrapper,
+        },
         error::WebDynproError,
     },
-    RusaintError,
+    ApplicationError, RusaintError,
 };
 
 use super::{USaintApplication, USaintClient};
@@ -89,15 +98,29 @@ impl<'a> CourseSchedule {
         year: u32,
         period: SemesterType,
         lecture_category: LectureCategory,
-    ) -> Result<impl Iterator<Item = Lecture>, WebDynproError> {
+    ) -> Result<impl Iterator<Item = Lecture>, RusaintError> {
         let year_str = format!("{}", year);
         self.select_rows(500).await?;
         self.select_period(&year_str, period).await?;
         lecture_category.request_query(&mut self.client.0).await?;
-        let lectures = self
+        let table = self
             .client
-            .read(ReadSapTableBodyCommand::new(Self::MAIN_TABLE))?
-            .try_table_into::<Lecture>(self.client.body())?;
+            .read(ReadSapTableBodyCommand::new(Self::MAIN_TABLE))?;
+        let Some(first_row) = table.iter().next() else {
+            return Err(ApplicationError::NoLectureResult.into());
+        };
+        if let Some(Ok(SapTableCellWrapper::Normal(cell))) =
+            first_row.iter_value(self.body()).next()
+        {
+            if let Some(ElementDefWrapper::TextView(tv_def)) = cell.content() {
+                if let Ok(tv) = tv_def.from_body(self.body()) {
+                    if tv.text().contains("없습니다.") {
+                        return Err(ApplicationError::NoLectureResult.into());
+                    }
+                }
+            }
+        }
+        let lectures = table.try_table_into::<Lecture>(self.client.body())?;
         Ok(lectures.into_iter())
     }
 

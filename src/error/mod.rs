@@ -45,4 +45,7 @@ pub enum ApplicationError {
     /// 찾고자 하는 강의의 강의평가 정보가 없음
     #[error("No Lecture assessment found")]
     NoLectureAssessments,
+    /// 조건에 맞는 강의를 찾을 수 없음
+    #[error("No lecture found")]
+    NoLectureResult,
 }
