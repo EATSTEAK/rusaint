@@ -82,7 +82,6 @@ impl<'a> Chapel {
         Ok(())
     }
 
-    // TODO: 정보가 없을 때 올바른 오류 반환
     /// 해당 학기의 채플 정보를 가져옵니다.
     pub async fn information(
         &mut self,
