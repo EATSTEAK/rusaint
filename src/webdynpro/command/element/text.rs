@@ -4,7 +4,7 @@ use crate::webdynpro::{
     error::{ElementError, WebDynproError},
 };
 
-/// [`InputField`]의 값을 반환
+/// [`InputField`](crate::webdynpro::element::text::InputField)의 값을 반환
 pub struct ReadInputFieldValueCommand {
     element_def: InputFieldDef,
 }
