@@ -42,4 +42,7 @@ pub enum ApplicationError {
     /// 학생의 해당 학기 시간표 정보가 없음
     #[error("No schedule information provided")]
     NoScheduleInformation,
+    /// 찾고자 하는 강의의 강의평가 정보가 없음
+    #[error("No Lecture assessment found")]
+    NoLectureAssessments,
 }

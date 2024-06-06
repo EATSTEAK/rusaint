@@ -13,11 +13,18 @@ use crate::{
             selection::{ComboBoxChangeCommand, ComboBoxSelectCommand, ReadComboBoxLSDataCommand},
         },
         element::{
-            action::Button, complex::SapTable, definition::ElementDefinition, selection::ComboBox,
+            action::Button,
+            complex::{
+                sap_table::cell::{SapTableCell, SapTableCellWrapper},
+                SapTable,
+            },
+            definition::ElementDefinition,
+            selection::ComboBox,
+            ElementDefWrapper,
         },
         error::{ElementError, WebDynproError},
     },
-    RusaintError,
+    ApplicationError, RusaintError,
 };
 
 use super::{USaintApplication, USaintClient};
@@ -147,11 +154,27 @@ impl<'a> LectureAssessment {
             })?
             .try_into()
             .unwrap();
+        let mut table = self
+            .body()
+            .read(ReadSapTableBodyCommand::new(Self::TABLE))?;
+        if row_count == 1 {
+            let Some(first_row) = table.iter().next() else {
+                return Err(ApplicationError::NoLectureAssessments.into());
+            };
+            if let Some(Ok(SapTableCellWrapper::Normal(cell))) =
+                first_row.iter_value(self.body()).next()
+            {
+                if let Some(ElementDefWrapper::TextView(tv_def)) = cell.content() {
+                    if let Ok(tv) = tv_def.from_body(self.body()) {
+                        if tv.text().contains("없습니다.") {
+                            return Err(ApplicationError::NoLectureAssessments.into());
+                        }
+                    }
+                }
+            }
+        }
         let mut results: Vec<LectureAssessmentResult> = Vec::with_capacity(row_count);
         while results.len() < row_count {
-            let table = self
-                .body()
-                .read(ReadSapTableBodyCommand::new(Self::TABLE))?;
             let mut partial_results =
                 table.try_table_into::<LectureAssessmentResult>(self.body())?;
             if results.len() + partial_results.len() > row_count {
@@ -172,6 +195,9 @@ impl<'a> LectureAssessment {
                         false,
                     ))
                     .await?;
+                table = self
+                    .body()
+                    .read(ReadSapTableBodyCommand::new(Self::TABLE))?;
             }
         }
         Ok(results)
