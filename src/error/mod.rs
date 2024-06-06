@@ -16,7 +16,7 @@ pub enum RusaintError {
     SsoLoginError(#[from] SsuSsoError),
     /// 각 애플리케이션에서 반환하는 오류
     #[error("Error from application: {0}")]
-    ApplicationError(#[from] ApplicationError)
+    ApplicationError(#[from] ApplicationError),
 }
 
 /// 숭실대학교 SSO 로그인 실패 시 반환하는 오류
@@ -37,5 +37,7 @@ pub enum SsuSsoError {
 #[derive(Error, Debug)]
 pub enum ApplicationError {
     #[error("No chapel information provided")]
-    NoChapelInformation
+    NoChapelInformation,
+    #[error("No schedule information provided")]
+    NoScheduleInformation,
 }

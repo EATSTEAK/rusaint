@@ -168,3 +168,6 @@ pub mod student_information;
 
 /// 채플 정보 조회: [`Chapel`](chapel::Chapel)
 pub mod chapel;
+
+/// 개인 수업 시간표 조회: [`PersonalCourseSchedule`](personal_course_schedule::PersonalCourseSchedule)
+pub mod personal_course_schedule;
