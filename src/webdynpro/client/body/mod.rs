@@ -5,7 +5,7 @@ use lol_html::{element, html_content::ContentType, rewrite_str, RewriteStrSettin
 use roxmltree::Node;
 use scraper::{Html, Selector};
 
-use crate::webdynpro::error::{BodyError, UpdateBodyError};
+use crate::webdynpro::{command::WebDynproReadCommand, error::{BodyError, UpdateBodyError, WebDynproError}};
 
 use super::SapSsrClient;
 
@@ -158,6 +158,11 @@ impl Body {
     /// 도큐먼트 파싱을 위한 `scraper::Html` 구조체를 반환합니다.
     pub fn document(&self) -> &Html {
         &self.document
+    }
+
+    /// WebDynpro 바디에 읽기 명령을 전송합니다.
+    pub fn read<T: WebDynproReadCommand>(&self, command: T) -> Result<T::Result, WebDynproError> {
+        command.read(self)
     }
 
     pub(crate) fn ssr_client(&self) -> &SapSsrClient {

@@ -1,17 +1,19 @@
 use serde::{Deserialize, Deserializer};
 
+use crate::model::SemesterType;
+
 pub(crate) fn deserialize_u32_string<'de, D: Deserializer<'de>>(
     deserializer: D,
 ) -> Result<u32, D::Error> {
     let value = String::deserialize(deserializer)?;
-    value.parse().map_err(serde::de::Error::custom)
+    value.trim().parse().map_err(serde::de::Error::custom)
 }
 
 pub(crate) fn deserialize_f32_string<'de, D: Deserializer<'de>>(
     deserializer: D,
 ) -> Result<f32, D::Error> {
     let value = String::deserialize(deserializer)?;
-    value.parse().map_err(serde::de::Error::custom)
+    value.trim().parse().map_err(serde::de::Error::custom)
 }
 
 pub(crate) fn deserialize_with_trim<'de, D: Deserializer<'de>>(
@@ -35,7 +37,6 @@ pub(crate) fn deserialize_bool_string<'de, D: Deserializer<'de>>(
     Ok(value.trim() == "true")
 }
 
-
 pub(crate) fn deserialize_optional_string<'de, D: Deserializer<'de>>(
     deserializer: D,
 ) -> Result<Option<String>, D::Error> {
@@ -45,5 +46,18 @@ pub(crate) fn deserialize_optional_string<'de, D: Deserializer<'de>>(
         Ok(None)
     } else {
         Ok(Some(value.to_string()))
+    }
+}
+
+pub(crate) fn deserialize_semester_type<'de, D: Deserializer<'de>>(
+    deserializer: D,
+) -> Result<SemesterType, D::Error> {
+    let value = String::deserialize(deserializer)?;
+    match value.trim() {
+        "1 학기" => Ok(SemesterType::One),
+        "여름 학기" => Ok(SemesterType::Summer),
+        "2 학기" => Ok(SemesterType::Two),
+        "겨울 학기" => Ok(SemesterType::Winter),
+        _ => Err(serde::de::Error::custom("Unknown SemesterType varient")),
     }
 }

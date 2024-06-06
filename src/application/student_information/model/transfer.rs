@@ -94,8 +94,8 @@ impl StudentTransferRecord {
 impl<'a> FromSapTable<'a> for StudentTransferRecord {
     fn from_table(
         body: &'a crate::webdynpro::client::body::Body,
-        header: &'a crate::webdynpro::element::complex::sap_table::SapTableHeader<'a>,
-        row: &'a crate::webdynpro::element::complex::sap_table::SapTableRow<'a>,
+        header: &'a crate::webdynpro::element::complex::sap_table::SapTableHeader,
+        row: &'a crate::webdynpro::element::complex::sap_table::SapTableRow,
     ) -> Result<Self, crate::webdynpro::error::WebDynproError> {
         let map_string = row.try_row_into::<HashMap<String, String>>(header, body)?;
             let map_de: MapDeserializer<_, serde::de::value::Error> = map_string.into_deserializer();

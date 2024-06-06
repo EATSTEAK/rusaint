@@ -12,7 +12,7 @@ use reqwest::{cookie::Jar, header::*, RequestBuilder};
 use std::sync::Arc;
 use url::Url;
 
-use super::{command::WebDynproCommand, element::definition::ElementDefinition};
+use super::{command::{WebDynproCommand, WebDynproReadCommand}, element::definition::ElementDefinition};
 
 /// WebDynpro 애플리케이션의 웹 요청 및 페이지 문서 처리를 담당하는 클라이언트
 pub struct WebDynproClient {
@@ -109,6 +109,11 @@ impl<'a> WebDynproClient {
         command: T,
     ) -> Result<T::Result, WebDynproError> {
         command.dispatch(self).await
+    }
+
+    /// WebDynpro 클라이언트에 읽기 명령을 전송합니다.
+    pub fn read<T: WebDynproReadCommand>(&self, command: T) -> Result<T::Result, WebDynproError> {
+        command.read(self.body())
     }
 
     #[allow(dead_code)]

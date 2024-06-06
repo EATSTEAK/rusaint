@@ -4,13 +4,12 @@ use crate::{
     define_elements,
     webdynpro::{
         client::body::Body,
-        command::element::action::ButtonPressCommand,
+        command::element::{action::ButtonPressCommand, text::ReadInputFieldValueCommand},
         element::{
             action::Button,
             complex::SapTable,
             definition::ElementDefinition,
             text::{InputField, InputFieldDef},
-            Element,
         },
         error::WebDynproError,
     },
@@ -79,14 +78,14 @@ impl<'a> GraduationRequirements {
     pub async fn student_info(&self) -> Result<GraduationStudentInfo, WebDynproError> {
         let number = Self::STUDENT_NUM.from_body(self.body())?.value_into_u32()?;
         let name = &Self::STUDENT_NAME.from_body(self.body())?.value_string()?;
-        let grade = Self::STUDENT_GRADE.from_body(self.body())?.value_into_u32()?;
+        let grade = Self::STUDENT_GRADE
+            .from_body(self.body())?
+            .value_into_u32()?;
         let semester = Self::PRCL.from_body(self.body())?.value_into_u32()?;
         let status = &Self::STATUS.from_body(self.body())?.value_string()?;
         let apply_year = Self::APPLY_YEAR.from_body(self.body())?.value_into_u32()?;
-        let apply_type =
-            &Self::NEWINCOR_CDT.from_body(self.body())?.value_string()?;
-        let department =
-            &Self::CG_IDT_DEPT.from_body(self.body())?.value_string()?;
+        let apply_type = &Self::NEWINCOR_CDT.from_body(self.body())?.value_string()?;
+        let department = &Self::CG_IDT_DEPT.from_body(self.body())?.value_string()?;
         let mut majors = Vec::new();
         const IDTS: &[InputFieldDef] = &[
             GraduationRequirements::CG_IDT1,
@@ -106,12 +105,9 @@ impl<'a> GraduationRequirements {
                 break;
             }
         }
-        let audit_date =
-            &Self::AUDIT_DATE.from_body(self.body())?.value_string()?;
-        let graduation_points =
-            Self::GR_CPOP.from_body(self.body())?.value_into_f32()?;
-        let completed_points =
-            Self::COMP_CPOP.from_body(self.body())?.value_into_f32()?;
+        let audit_date = &Self::AUDIT_DATE.from_body(self.body())?.value_string()?;
+        let graduation_points = Self::GR_CPOP.from_body(self.body())?.value_into_f32()?;
+        let completed_points = Self::COMP_CPOP.from_body(self.body())?.value_into_f32()?;
         Ok(GraduationStudentInfo::new(
             number,
             name,
@@ -133,12 +129,10 @@ impl<'a> GraduationRequirements {
         self.client
             .send(ButtonPressCommand::new(Self::SHOW_DETAILS))
             .await?;
-        let audit_result = Self::AUDIT_RESULT
-            .from_body(self.body())?
-            .lsdata()
-            .value()
-            .and_then(|str| Some(str == "가능"))
-            .unwrap_or(false);
+        let audit_result = self
+            .client
+            .read(ReadInputFieldValueCommand::new(Self::AUDIT_RESULT))
+            .is_ok_and(|str| str == "가능");
         let table_element = Self::MAIN_TABLE.from_body(self.body())?;
         let table = table_element.table()?;
         let requirements = table

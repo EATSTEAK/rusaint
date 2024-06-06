@@ -51,6 +51,8 @@ pub mod application;
 #[cfg(feature = "application")]
 mod error;
 #[cfg(feature = "application")]
+pub use error::ApplicationError;
+#[cfg(feature = "application")]
 pub use error::RusaintError;
 #[cfg(feature = "application")]
 pub use error::SsuSsoError;

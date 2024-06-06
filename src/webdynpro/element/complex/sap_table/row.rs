@@ -14,12 +14,10 @@ use super::{
 };
 
 /// [`SapTable`](super::SapTable)의 행
-#[derive(Clone, custom_debug_derive::Debug)]
+#[derive(Clone, Debug)]
 #[allow(unused)]
-pub struct SapTableRow<'a> {
+pub struct SapTableRow {
     table_def: SapTableDef,
-    #[debug(skip)]
-    elem_ref: ElementRef<'a>,
     cells: Vec<SapTableCellDefWrapper>,
     row_index: Option<u32>,
     user_data: Option<String>,
@@ -30,16 +28,15 @@ pub struct SapTableRow<'a> {
     row_type: SapTableRowType,
 }
 
-impl<'a> SapTableRow<'a> {
+impl<'a> SapTableRow {
     pub(super) fn new(
         table_def: SapTableDef,
         row_ref: ElementRef<'a>,
         cells: Vec<SapTableCellDefWrapper>,
-    ) -> Result<SapTableRow<'a>, ElementError> {
+    ) -> Result<SapTableRow, ElementError> {
         let row = row_ref.value();
         Ok(SapTableRow {
             table_def,
-            elem_ref: row_ref,
             cells,
             row_index: row.attr("rr").and_then(|s| s.parse::<u32>().ok()),
             user_data: row.attr("uDat").and_then(|s| Some(s.to_owned())),
@@ -119,14 +116,14 @@ impl<'a> SapTableRow<'a> {
     /// 행을 [`FromSapTable`]을 구현하는 형으로 변환합니다.
     pub fn try_row_into<T: FromSapTable<'a>>(
         &'a self,
-        header: &'a SapTableHeader<'a>,
+        header: &'a SapTableHeader,
         body: &'a Body,
     ) -> Result<T, WebDynproError> {
         T::from_table(body, header, self)
     }
 }
 
-impl<'a> Index<usize> for SapTableRow<'a> {
+impl<'a> Index<usize> for SapTableRow {
     type Output = SapTableCellDefWrapper;
 
     fn index(&self, index: usize) -> &Self::Output {

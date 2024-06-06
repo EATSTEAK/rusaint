@@ -2,7 +2,6 @@ use std::collections::HashMap;
 
 use crate::webdynpro::{
     client::body::Body,
-    element::{definition::ElementDefinition, Element, ElementDefWrapper},
     error::{ElementError, WebDynproError},
 };
 
@@ -13,37 +12,27 @@ pub trait FromSapTable<'body>: Sized {
     /// [`SapTableRow`]를 해당 형으로 변환하고자 시도하는 함수
     fn from_table(
         body: &'body Body,
-        header: &'body SapTableHeader<'body>,
-        row: &'body SapTableRow<'body>,
+        header: &'body SapTableHeader,
+        row: &'body SapTableRow,
     ) -> Result<Self, WebDynproError>;
 }
 
 impl<'body> FromSapTable<'body> for Vec<Option<String>> {
     fn from_table(
         body: &'body Body,
-        _header: &'body SapTableHeader<'body>,
-        row: &'body SapTableRow<'body>,
+        _header: &'body SapTableHeader,
+        row: &'body SapTableRow,
     ) -> Result<Self, WebDynproError> {
         let iter = row.iter_value(body);
         let vec = iter
             .map(|val| match val {
                 Ok(cell) => match cell.content() {
-                    Some(ElementDefWrapper::TextView(tv)) => {
-                        Some(tv.from_body(body).ok()?.text().to_owned())
-                    }
-                    Some(ElementDefWrapper::Caption(cap)) => Some(
-                        cap.from_body(body)
-                            .ok()?
-                            .lsdata()
-                            .text()
-                            .unwrap_or(&String::default())
-                            .to_owned(),
-                    ),
-                    _ => None,
+                    Some(wrapper) => Ok(wrapper.from_body(body)?.textise().ok()),
+                    None => Ok(None),
                 },
-                Err(_err) => None,
+                Err(err) => Err(err),
             })
-            .collect::<Vec<Option<String>>>();
+            .collect::<Result<Vec<Option<String>>, WebDynproError>>()?;
         Ok(vec)
     }
 }
@@ -51,22 +40,16 @@ impl<'body> FromSapTable<'body> for Vec<Option<String>> {
 impl<'body> FromSapTable<'body> for Vec<String> {
     fn from_table(
         body: &'body Body,
-        _header: &'body SapTableHeader<'body>,
-        row: &'body SapTableRow<'body>,
+        _header: &'body SapTableHeader,
+        row: &'body SapTableRow,
     ) -> Result<Self, WebDynproError> {
         let iter = row.iter_value(body);
         iter.map(|val| match val {
             Ok(cell) => match cell.content() {
-                Some(ElementDefWrapper::TextView(tv)) => Ok(tv.from_body(body)?.text().to_owned()),
-                Some(ElementDefWrapper::Caption(cap)) => Ok(cap
-                    .from_body(body)?
-                    .lsdata()
-                    .text()
-                    .unwrap_or(&String::default())
-                    .to_owned()),
-                _ => Err(ElementError::InvalidContent {
+                Some(wrapper) => Ok(wrapper.from_body(body)?.textise()?),
+                None => Err(ElementError::NoSuchContent {
                     element: "Cell Content".to_string(),
-                    content: "Cannot convert to string".to_string(),
+                    content: "No content provided".to_string(),
                 })?,
             },
             Err(err) => Err(err),
@@ -78,8 +61,8 @@ impl<'body> FromSapTable<'body> for Vec<String> {
 impl<'body> FromSapTable<'body> for Vec<(String, Option<String>)> {
     fn from_table(
         body: &'body Body,
-        header: &'body SapTableHeader<'body>,
-        row: &'body SapTableRow<'body>,
+        header: &'body SapTableHeader,
+        row: &'body SapTableRow,
     ) -> Result<Self, WebDynproError> {
         let header_iter = header.iter_value(body);
         let header_string = header_iter
@@ -95,12 +78,10 @@ impl<'body> FromSapTable<'body> for Vec<(String, Option<String>)> {
         let row_string = iter
             .map(|val| match val {
                 Ok(cell) => match cell.content() {
-                    Some(wrapper) => Ok(wrapper
-                        .from_body(body)?
-                        .textise().ok()),
-                    None => Ok(None)
+                    Some(wrapper) => Ok(wrapper.from_body(body)?.textise().ok()),
+                    None => Ok(None),
                 },
-                Err(err) => Err(err)
+                Err(err) => Err(err),
             })
             .collect::<Result<Vec<Option<String>>, WebDynproError>>()?;
         let zip = header_string
@@ -114,8 +95,8 @@ impl<'body> FromSapTable<'body> for Vec<(String, Option<String>)> {
 impl<'body> FromSapTable<'body> for Vec<(String, String)> {
     fn from_table(
         body: &'body Body,
-        header: &'body SapTableHeader<'body>,
-        row: &'body SapTableRow<'body>,
+        header: &'body SapTableHeader,
+        row: &'body SapTableRow,
     ) -> Result<Self, WebDynproError> {
         let header_iter = header.iter_value(body);
         let header_string = header_iter
@@ -151,8 +132,8 @@ impl<'body> FromSapTable<'body> for Vec<(String, String)> {
 impl<'body> FromSapTable<'body> for HashMap<String, String> {
     fn from_table(
         body: &'body Body,
-        header: &'body SapTableHeader<'body>,
-        row: &'body SapTableRow<'body>,
+        header: &'body SapTableHeader,
+        row: &'body SapTableRow,
     ) -> Result<Self, WebDynproError> {
         let vec = row.try_row_into::<Vec<(String, String)>>(header, body)?;
         Ok(vec.into_iter().collect())
@@ -162,8 +143,8 @@ impl<'body> FromSapTable<'body> for HashMap<String, String> {
 impl<'body> FromSapTable<'body> for HashMap<String, Option<String>> {
     fn from_table(
         body: &'body Body,
-        header: &'body SapTableHeader<'body>,
-        row: &'body SapTableRow<'body>,
+        header: &'body SapTableHeader,
+        row: &'body SapTableRow,
     ) -> Result<Self, WebDynproError> {
         let vec = row.try_row_into::<Vec<(String, Option<String>)>>(header, body)?;
         Ok(vec.into_iter().collect())
