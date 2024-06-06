@@ -38,7 +38,12 @@ impl<'a> TextView<'a> {
 
     /// 내부 텍스트를 반환합니다.
     pub fn text(&self) -> &str {
-        self.text
-            .get_or_init(|| self.element_ref().text().collect::<String>())
+        self.text.get_or_init(|| {
+            self.element_ref()
+                .text()
+                .flat_map(|str| ["\n", str])
+                .skip(1)
+                .collect::<String>()
+        })
     }
 }
