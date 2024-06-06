@@ -9,3 +9,6 @@ pub mod selection;
 
 /// 레이아웃 분류의 엘리먼트를 위한 명령
 pub mod layout;
+
+/// 텍스트 분류의 엘리먼트([`Caption`](crate::webdynpro::element::text::Caption), [`InputField`](crate::webdynpro::element::text::InputField), [`Label`](crate::webdynpro::element::text::Label), [`TextView`](crate::webdynpro::element::text::TextView)를 위한 명령)
+pub mod text;

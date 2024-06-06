@@ -109,14 +109,10 @@ impl WebDynproCommand for ComboBoxSelectByValue1Command {
         &self,
         client: &mut crate::webdynpro::client::WebDynproClient,
     ) -> Result<Self::Result, WebDynproError> {
-        let listbox_def = client
-            .send(ReadComboBoxItemListBoxCommand::new(
-                self.element_def.clone(),
-            ))
-            .await?;
-        let items = client
-            .send(ReadListBoxItemInfoCommand::new(listbox_def))
-            .await?;
+        let listbox_def = client.read(ReadComboBoxItemListBoxCommand::new(
+            self.element_def.clone(),
+        ))?;
+        let items = client.read(ReadListBoxItemInfoCommand::new(listbox_def))?;
         let item_key = items
             .iter()
             .find_map(|info| match info {
@@ -157,7 +153,10 @@ impl ReadComboBoxLSDataCommand {
 }
 
 impl WebDynproReadCommand for ReadComboBoxLSDataCommand {
-    fn read(&self, body: &crate::webdynpro::client::body::Body) -> Result<Self::Result, WebDynproError> {
+    fn read(
+        &self,
+        body: &crate::webdynpro::client::body::Body,
+    ) -> Result<Self::Result, WebDynproError> {
         let lsdata = self.element_def.from_body(body)?.lsdata().clone();
         Ok(lsdata)
     }
@@ -187,11 +186,11 @@ impl ReadComboBoxItemListBoxCommand {
 }
 
 impl WebDynproReadCommand for ReadComboBoxItemListBoxCommand {
-    fn read(&self, body: &crate::webdynpro::client::body::Body) -> Result<Self::Result, WebDynproError> {
-        let listbox_def = self
-            .element_def
-            .from_body(body)?
-            .item_list_box(body)?;
+    fn read(
+        &self,
+        body: &crate::webdynpro::client::body::Body,
+    ) -> Result<Self::Result, WebDynproError> {
+        let listbox_def = self.element_def.from_body(body)?.item_list_box(body)?;
         Ok(listbox_def)
     }
 }
@@ -220,7 +219,10 @@ impl ReadListBoxItemInfoCommand {
 }
 
 impl WebDynproReadCommand for ReadListBoxItemInfoCommand {
-    fn read(&self, body: &crate::webdynpro::client::body::Body) -> Result<Self::Result, WebDynproError> {
+    fn read(
+        &self,
+        body: &crate::webdynpro::client::body::Body,
+    ) -> Result<Self::Result, WebDynproError> {
         let element = self.element_def.from_body(body)?;
         match element {
             ListBoxWrapper::ListBoxPopup(list_box) => Ok(list_box
