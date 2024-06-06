@@ -1,20 +1,21 @@
 use std::{collections::HashMap, num::ParseIntError, str::FromStr};
 
-use getset::{CopyGetters, Getters};
 use serde::{
     de::{value::MapDeserializer, IntoDeserializer},
     Deserialize, Deserializer,
 };
 
-use crate::{utils::de_with::{deserialize_empty, deserialize_f32_string, deserialize_u32_string}, webdynpro::{
-    element::{complex::sap_table::FromSapTable, definition::ElementDefinition},
-    error::{ElementError, WebDynproError},
-}};
+use crate::{
+    utils::de_with::{deserialize_empty, deserialize_f32_string, deserialize_u32_string},
+    webdynpro::{
+        element::{complex::sap_table::FromSapTable, definition::ElementDefinition},
+        error::{ElementError, WebDynproError},
+    },
+};
 
 /// 전체 성적(학적부, 증명)
-#[derive(Getters, CopyGetters, Debug)]
+#[derive(Debug)]
 #[allow(unused)]
-#[get_copy = "pub"]
 pub struct GradeSummary {
     /// 신청학점
     attempted_credits: f32,
@@ -47,12 +48,41 @@ impl GradeSummary {
             pf_earned_credits,
         }
     }
+
+    /// 신청학점
+    pub fn attempted_credits(&self) -> f32 {
+        self.attempted_credits
+    }
+
+    /// 취득학점
+    pub fn earned_credits(&self) -> f32 {
+        self.earned_credits
+    }
+
+    /// 평점계
+    pub fn grade_points_sum(&self) -> f32 {
+        self.grade_points_sum
+    }
+
+    /// 평점평균
+    pub fn grade_points_avarage(&self) -> f32 {
+        self.grade_points_avarage
+    }
+
+    /// 산술평균
+    pub fn arithmetic_mean(&self) -> f32 {
+        self.arithmetic_mean
+    }
+
+    /// P/F 학점계
+    pub fn pf_earned_credits(&self) -> f32 {
+        self.pf_earned_credits
+    }
 }
 
 /// 학기별 성적
-#[derive(Debug, Deserialize, Getters, CopyGetters)]
+#[derive(Debug, Deserialize)]
 #[allow(unused)]
-#[get_copy = "pub"]
 pub struct SemesterGrade {
     /// 학년도
     #[serde(
@@ -61,7 +91,6 @@ pub struct SemesterGrade {
     )]
     year: u32,
     /// 학기
-    #[getset(skip)]
     #[serde(rename(deserialize = "학기"))]
     semester: String,
     /// 신청학점
@@ -151,9 +180,64 @@ fn deserialize_rank<'de, D: Deserializer<'de>>(deserializer: D) -> Result<(u32, 
 }
 
 impl SemesterGrade {
+    /// 학년도
+    pub fn year(&self) -> u32 {
+        self.year
+    }
+
     /// 학기
     pub fn semester(&self) -> &str {
         self.semester.as_ref()
+    }
+
+    /// 취득학점
+    pub fn earned_credits(&self) -> f32 {
+        self.earned_credits
+    }
+
+    /// P/F학점
+    pub fn pf_earned_credits(&self) -> f32 {
+        self.pf_earned_credits
+    }
+
+    /// 평점평균
+    pub fn grade_points_avarage(&self) -> f32 {
+        self.grade_points_avarage
+    }
+
+    /// 평점계
+    pub fn grade_points_sum(&self) -> f32 {
+        self.grade_points_sum
+    }
+
+    /// 산술평균
+    pub fn arithmetic_mean(&self) -> f32 {
+        self.arithmetic_mean
+    }
+
+    /// 학기별석차
+    pub fn semester_rank(&self) -> (u32, u32) {
+        self.semester_rank
+    }
+
+    /// 전체석차
+    pub fn general_rank(&self) -> (u32, u32) {
+        self.general_rank
+    }
+
+    /// 학사경고
+    pub fn academic_probation(&self) -> bool {
+        self.academic_probation
+    }
+
+    /// 상담여부
+    pub fn consult(&self) -> bool {
+        self.consult
+    }
+
+    /// 유급
+    pub fn flunked(&self) -> bool {
+        self.flunked
     }
 }
 
@@ -175,7 +259,7 @@ impl<'body> FromSapTable<'body> for SemesterGrade {
 }
 
 /// 과목별 성적
-#[derive(Debug, CopyGetters)]
+#[derive(Debug)]
 #[allow(unused)]
 pub struct ClassGrade {
     /// 이수학년도
@@ -187,10 +271,8 @@ pub struct ClassGrade {
     /// 과목명
     class_name: String,
     /// 과목학점
-    #[getset(get_copy = "pub")]
     grade_points: f32,
     /// 성적
-    #[get_copy = "pub"]
     score: ClassScore,
     /// 등급
     rank: String,
@@ -243,6 +325,16 @@ impl ClassGrade {
     /// 과목명
     pub fn class_name(&self) -> &str {
         self.class_name.as_ref()
+    }
+
+    /// 과목학점
+    pub fn grade_points(&self) -> f32 {
+        self.grade_points
+    }
+
+    /// 성적
+    pub fn score(&self) -> ClassScore {
+        self.score
     }
 
     /// 등급
