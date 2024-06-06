@@ -1,6 +1,6 @@
 use rusaint::{
     application::{
-        course_grades::{model::CourseType, CourseGrades},
+        course_grades::{model::CourseType, CourseGradesApplication},
         USaintClientBuilder,
     },
     model::SemesterType,
@@ -15,7 +15,7 @@ async fn recorded_summary() {
     let session = get_session().await.unwrap();
     let mut app = USaintClientBuilder::new()
         .session(session)
-        .build_into::<CourseGrades>()
+        .build_into::<CourseGradesApplication>()
         .await
         .unwrap();
     let recorded_summary = app.recorded_summary(CourseType::Bachelor).await.unwrap();
@@ -33,7 +33,7 @@ async fn certificated_summary() {
     let session = get_session().await.unwrap();
     let mut app = USaintClientBuilder::new()
         .session(session)
-        .build_into::<CourseGrades>()
+        .build_into::<CourseGradesApplication>()
         .await
         .unwrap();
     let certificated_summary = app
@@ -49,7 +49,7 @@ async fn semesters() {
     let session = get_session().await.unwrap();
     let mut app = USaintClientBuilder::new()
         .session(session)
-        .build_into::<CourseGrades>()
+        .build_into::<CourseGradesApplication>()
         .await
         .unwrap();
     let semesters = app.semesters(CourseType::Bachelor).await.unwrap();
@@ -63,7 +63,7 @@ async fn classes_with_detail() {
     let session = get_session().await.unwrap();
     let mut app = USaintClientBuilder::new()
         .session(session)
-        .build_into::<CourseGrades>()
+        .build_into::<CourseGradesApplication>()
         .await
         .unwrap();
     let details = app

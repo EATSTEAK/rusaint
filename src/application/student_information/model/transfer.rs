@@ -3,16 +3,16 @@ use std::collections::HashMap;
 use serde::{de::{value::MapDeserializer, IntoDeserializer}, Deserialize};
 
 use crate::{
-    application::{student_information::StudentInformation, USaintClient}, define_elements, webdynpro::{command::element::layout::TabStripTabSelectCommand, element::{complex::{sap_table::FromSapTable, SapTable}, definition::ElementDefinition, layout::tab_strip::item::TabStripItem}, error::{ElementError, WebDynproError}}
+    application::{student_information::StudentInformationApplication, USaintClient}, define_elements, webdynpro::{command::element::layout::TabStripTabSelectCommand, element::{complex::{sap_table::FromSapTable, SapTable}, definition::ElementDefinition, layout::tab_strip::item::TabStripItem}, error::{ElementError, WebDynproError}}
 };
 
 #[derive(Clone, Debug)]
 /// 학생 편입 정보
-pub struct StudentTransferInformation {
+pub struct StudentTransferRecords {
     records: Vec<StudentTransferRecord>,
 }
 
-impl<'a> StudentTransferInformation {
+impl<'a> StudentTransferRecords {
     // 편입정보
     define_elements! {
         // 편입정보 탭
@@ -24,7 +24,7 @@ impl<'a> StudentTransferInformation {
     pub(crate) async fn with_client(client: &mut USaintClient) -> Result<Self, WebDynproError> {
         client
             .send(TabStripTabSelectCommand::new(
-                StudentInformation::TAB_ADDITION,
+                StudentInformationApplication::TAB_ADDITION,
                 Self::TAB_TRANSFER,
                 3,
                 0,

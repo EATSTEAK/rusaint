@@ -11,7 +11,7 @@ use crate::{
 
 #[derive(Clone, Debug)]
 /// 기본 학생 정보
-pub struct GeneralStudentInformation {
+pub struct StudentInformation {
     apply_year: u32,
     student_number: u32,
     name: String,
@@ -41,7 +41,7 @@ pub struct GeneralStudentInformation {
     abeek: Option<String>,
 }
 
-impl<'a> GeneralStudentInformation {
+impl<'a> StudentInformation {
     define_elements! {
         // 입학 년도
         APPLY_PERYR: InputField<'a> = "ZCMW1001.ID_0001:VIW_DEFAULT.APPLY_PERYR";
@@ -116,7 +116,7 @@ impl<'a> GeneralStudentInformation {
         CG_STEXT4: InputField<'a> = "ZCMW1001.ID_0001:VIW_DEFAULT.TC_DEFAULT_CG_STEXT4";
     }
 
-    pub(super) fn from_body(body: &'a Body) -> Result<GeneralStudentInformation, WebDynproError> {
+    pub(super) fn from_body(body: &'a Body) -> Result<StudentInformation, WebDynproError> {
         Ok(Self {
             apply_year: Self::APPLY_PERYR.from_body(body)?.value_into_u32()?,
             student_number: Self::STUDENT12.from_body(body)?.value_into_u32()?,
@@ -302,15 +302,15 @@ mod research_bank_account;
 mod transfer;
 mod work;
 
-pub use academic_record::{StudentAcademicRecord, StudentAcademicRecordInformation};
-pub use bank_account::StudentBankAccountInformation;
-pub use family::{StudentFamilyInformation, StudentFamilyMember};
-pub use graduation::StudentGraduationInformation;
+pub use academic_record::{StudentAcademicRecord, StudentAcademicRecords};
+pub use bank_account::StudentBankAccount;
+pub use family::{StudentFamily, StudentFamilyMember};
+pub use graduation::StudentGraduation;
 pub use qualification::{
-    StudentForignStudyInformation, StudentLifelongInformation, StudentQualificationInformation,
+    StudentForignStudyInformation, StudentLifelongInformation, StudentQualification,
     StudentTeachingMajorInformation, StudentTeachingPluralMajorInformation,
 };
-pub use religion::StudentReligionInformation;
-pub use research_bank_account::StudentResearchBankAccountInformation;
-pub use transfer::{StudentTransferInformation, StudentTransferRecord};
+pub use religion::StudentReligion;
+pub use research_bank_account::StudentResearchBankAccount;
+pub use transfer::{StudentTransferRecords, StudentTransferRecord};
 pub use work::StudentWorkInformation;

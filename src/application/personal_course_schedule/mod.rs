@@ -1,4 +1,4 @@
-use model::PersonalCourseScheduleInformation;
+use model::PersonalCourseSchedule;
 
 use crate::{
     define_elements,
@@ -16,11 +16,11 @@ use crate::{
 use super::{USaintApplication, USaintClient};
 
 /// [개인수업시간표](https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/ZCMW2102)
-pub struct PersonalCourseSchedule {
+pub struct PersonalCourseScheduleApplication {
     client: USaintClient,
 }
 
-impl USaintApplication for PersonalCourseSchedule {
+impl USaintApplication for PersonalCourseScheduleApplication {
     const APP_NAME: &'static str = "ZCMW2102";
 
     fn from_client(client: USaintClient) -> Result<Self, RusaintError> {
@@ -32,7 +32,7 @@ impl USaintApplication for PersonalCourseSchedule {
     }
 }
 
-impl<'a> PersonalCourseSchedule {
+impl<'a> PersonalCourseScheduleApplication {
     define_elements! {
         PERYR: ComboBox<'a> = "ZCMW_PERIOD_RE.ID_D8FB9BECD84FD622F5EAED9E0BE35D27:VIW_MAIN.PERYR";
         PERID: ComboBox<'a> = "ZCMW_PERIOD_RE.ID_D8FB9BECD84FD622F5EAED9E0BE35D27:VIW_MAIN.PERID";
@@ -82,7 +82,7 @@ impl<'a> PersonalCourseSchedule {
         &mut self,
         year: u32,
         semester: SemesterType,
-    ) -> Result<PersonalCourseScheduleInformation, RusaintError> {
+    ) -> Result<PersonalCourseSchedule, RusaintError> {
         self.select_semester(&year.to_string(), semester).await?;
         match Self::TABLE.from_body(self.body()) {
             Ok(table) => {
@@ -100,7 +100,7 @@ impl<'a> PersonalCourseSchedule {
                         })
                         .for_each(|(col_idx, str)| schedule[col_idx][row_idx] = str);
                 }
-                Ok(PersonalCourseScheduleInformation::new(schedule))
+                Ok(PersonalCourseSchedule::new(schedule))
             }
             Err(err) => match err {
                 WebDynproError::Element(ElementError::InvalidId(_id)) => Err(

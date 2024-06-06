@@ -1,4 +1,4 @@
-use model::{GraduationRequirement, GraduationRequirementsInfo, GraduationStudentInfo};
+use model::{GraduationRequirement, GraduationRequirements, GraduationStudent};
 
 use crate::{
     define_elements,
@@ -19,11 +19,11 @@ use crate::{
 use super::{USaintApplication, USaintClient};
 
 /// [졸업사정표](https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/ZCMW8015)
-pub struct GraduationRequirements {
+pub struct GraduationRequirementsApplication {
     client: USaintClient,
 }
 
-impl USaintApplication for GraduationRequirements {
+impl USaintApplication for GraduationRequirementsApplication {
     const APP_NAME: &'static str = "ZCMW8015";
 
     fn from_client(client: USaintClient) -> Result<Self, RusaintError> {
@@ -35,7 +35,7 @@ impl USaintApplication for GraduationRequirements {
     }
 }
 
-impl<'a> GraduationRequirements {
+impl<'a> GraduationRequirementsApplication {
     // 학생정보
     define_elements! {
         // 학번
@@ -75,7 +75,7 @@ impl<'a> GraduationRequirements {
     }
 
     /// 학생 정보를 반환합니다.
-    pub async fn student_info(&self) -> Result<GraduationStudentInfo, WebDynproError> {
+    pub async fn student_info(&self) -> Result<GraduationStudent, WebDynproError> {
         let number = Self::STUDENT_NUM.from_body(self.body())?.value_into_u32()?;
         let name = &Self::STUDENT_NAME.from_body(self.body())?.value_string()?;
         let grade = Self::STUDENT_GRADE
@@ -88,10 +88,10 @@ impl<'a> GraduationRequirements {
         let department = &Self::CG_IDT_DEPT.from_body(self.body())?.value_string()?;
         let mut majors = Vec::new();
         const IDTS: &[InputFieldDef] = &[
-            GraduationRequirements::CG_IDT1,
-            GraduationRequirements::CG_IDT2,
-            GraduationRequirements::CG_IDT3,
-            GraduationRequirements::CG_IDT4,
+            GraduationRequirementsApplication::CG_IDT1,
+            GraduationRequirementsApplication::CG_IDT2,
+            GraduationRequirementsApplication::CG_IDT3,
+            GraduationRequirementsApplication::CG_IDT4,
         ];
         for idt in IDTS {
             let major = idt.from_body(self.body())?.value_string().ok();
@@ -108,7 +108,7 @@ impl<'a> GraduationRequirements {
         let audit_date = &Self::AUDIT_DATE.from_body(self.body())?.value_string()?;
         let graduation_points = Self::GR_CPOP.from_body(self.body())?.value_into_f32()?;
         let completed_points = Self::COMP_CPOP.from_body(self.body())?.value_into_f32()?;
-        Ok(GraduationStudentInfo::new(
+        Ok(GraduationStudent::new(
             number,
             name,
             grade,
@@ -125,7 +125,7 @@ impl<'a> GraduationRequirements {
     }
 
     /// 졸업사정 결과와 졸업 필요 요건별 충족 여부와 세부 정보를 반환합니다.
-    pub async fn requirements(&mut self) -> Result<GraduationRequirementsInfo, WebDynproError> {
+    pub async fn requirements(&mut self) -> Result<GraduationRequirements, WebDynproError> {
         self.client
             .send(ButtonPressCommand::new(Self::SHOW_DETAILS))
             .await?;
@@ -140,7 +140,7 @@ impl<'a> GraduationRequirements {
             .into_iter()
             .map(|req| (req.name().to_owned(), req))
             .collect();
-        Ok(GraduationRequirementsInfo::new(audit_result, requirements))
+        Ok(GraduationRequirements::new(audit_result, requirements))
     }
     fn body(&self) -> &Body {
         self.client.body()
@@ -156,7 +156,7 @@ mod test {
     use serial_test::serial;
 
     use crate::{
-        application::{graduation_requirements::GraduationRequirements, USaintClientBuilder},
+        application::{graduation_requirements::GraduationRequirementsApplication, USaintClientBuilder},
         global_test_utils::get_session,
         webdynpro::element::definition::ElementDefinition,
     };
@@ -167,10 +167,10 @@ mod test {
         let session = get_session().await.unwrap();
         let app = USaintClientBuilder::new()
             .session(session)
-            .build_into::<GraduationRequirements>()
+            .build_into::<GraduationRequirementsApplication>()
             .await
             .unwrap();
-        let table_element = GraduationRequirements::MAIN_TABLE
+        let table_element = GraduationRequirementsApplication::MAIN_TABLE
             .from_body(app.body())
             .unwrap();
         let table = table_element

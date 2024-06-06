@@ -30,11 +30,11 @@ use self::model::{ClassGrade, CourseType, GradeSummary, SemesterGrade};
 use super::{USaintApplication, USaintClient};
 
 /// [학생 성적 조회](https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/ZCMB3W0017)
-pub struct CourseGrades {
+pub struct CourseGradesApplication {
     client: USaintClient,
 }
 
-impl USaintApplication for CourseGrades {
+impl USaintApplication for CourseGradesApplication {
     const APP_NAME: &'static str = "ZCMB3W0017";
 
     fn from_client(client: USaintClient) -> Result<Self, RusaintError> {
@@ -47,7 +47,7 @@ impl USaintApplication for CourseGrades {
 }
 
 #[allow(unused)]
-impl<'a> CourseGrades {
+impl<'a> CourseGradesApplication {
     // Elements for Grade Summaries
     define_elements!(
         // Grade summaries by semester
@@ -88,7 +88,7 @@ impl<'a> CourseGrades {
     );
 
     async fn close_popups(&mut self) -> Result<(), WebDynproError> {
-        fn make_close_event(app: &CourseGrades) -> Option<Event> {
+        fn make_close_event(app: &CourseGradesApplication) -> Option<Event> {
             let body = app.client.body();
             let popup_selector =
                 scraper::Selector::parse(format!(r#"[ct="{}"]"#, PopupWindow::CONTROL_ID).as_str())
@@ -495,7 +495,7 @@ impl<'a> CourseGrades {
     }
 }
 
-/// [`CourseGrades`]에서 사용하는 데이터
+/// [`CourseGradesApplication`]에서 사용하는 데이터
 pub mod model;
 
 #[cfg(test)]
@@ -503,7 +503,7 @@ mod test {
     use serial_test::serial;
 
     use crate::{
-        application::{course_grades::CourseGrades, USaintClientBuilder},
+        application::{course_grades::CourseGradesApplication, USaintClientBuilder},
         global_test_utils::get_session,
         webdynpro::element::{layout::PopupWindow, Element},
     };
@@ -514,7 +514,7 @@ mod test {
         let session = get_session().await.unwrap();
         let mut app = USaintClientBuilder::new()
             .session(session)
-            .build_into::<CourseGrades>()
+            .build_into::<CourseGradesApplication>()
             .await
             .unwrap();
         app.close_popups().await.unwrap();

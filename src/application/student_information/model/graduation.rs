@@ -2,7 +2,7 @@ use crate::{define_elements, webdynpro::{client::body::Body, element::{definitio
 
 #[derive(Clone, Debug)]
 /// 학생의 졸업 정보를 반환합니다. 졸업하지 않았다면 반환되지 않습니다.
-pub struct StudentGraduationInformation {
+pub struct StudentGraduation {
   graduation_cardinal: u32,
   graduation_certification_number: u32,
   graduation_year: u32,
@@ -15,7 +15,7 @@ pub struct StudentGraduationInformation {
   graduation_personnel_number: u32,
 }
 
-impl<'a> StudentGraduationInformation {
+impl<'a> StudentGraduation {
   define_elements! {
       // 졸업회수
       GRDU_NO: InputField<'a> = "ZCMW1001.ID_0001:VIW_DEFAULT.TC_DEFAULT_GRDU_NO";
@@ -39,7 +39,7 @@ impl<'a> StudentGraduationInformation {
       TDPT_NUMBER: InputField<'a> = "ZCMW1001.ID_0001:VIW_DEFAULT.TC_DEFAULT_TDPT_NUMBER";
   }
 
-  pub(crate) fn from_body(body: &'a Body) -> Result<StudentGraduationInformation, WebDynproError> {
+  pub(crate) fn from_body(body: &'a Body) -> Result<StudentGraduation, WebDynproError> {
     let graduation_year = Self::GRDU_PERYR.from_body(body)?.value_into_u32()?;
     if graduation_year == 0 {
       Err(WebDynproError::Element(ElementError::NoSuchContent { element: Self::GRDU_NO.id().to_string(), content: "No graduation information provided. Is this student graduated?".to_string() }))
