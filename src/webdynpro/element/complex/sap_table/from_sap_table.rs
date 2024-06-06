@@ -2,7 +2,6 @@ use std::collections::HashMap;
 
 use crate::webdynpro::{
     client::body::Body,
-    element::{definition::ElementDefinition, Element, ElementDefWrapper},
     error::{ElementError, WebDynproError},
 };
 
@@ -28,22 +27,12 @@ impl<'body> FromSapTable<'body> for Vec<Option<String>> {
         let vec = iter
             .map(|val| match val {
                 Ok(cell) => match cell.content() {
-                    Some(ElementDefWrapper::TextView(tv)) => {
-                        Some(tv.from_body(body).ok()?.text().to_owned())
-                    }
-                    Some(ElementDefWrapper::Caption(cap)) => Some(
-                        cap.from_body(body)
-                            .ok()?
-                            .lsdata()
-                            .text()
-                            .unwrap_or(&String::default())
-                            .to_owned(),
-                    ),
-                    _ => None,
+                    Some(wrapper) => Ok(wrapper.from_body(body)?.textise().ok()),
+                    None => Ok(None),
                 },
-                Err(_err) => None,
+                Err(err) => Err(err),
             })
-            .collect::<Vec<Option<String>>>();
+            .collect::<Result<Vec<Option<String>>, WebDynproError>>()?;
         Ok(vec)
     }
 }
@@ -57,16 +46,10 @@ impl<'body> FromSapTable<'body> for Vec<String> {
         let iter = row.iter_value(body);
         iter.map(|val| match val {
             Ok(cell) => match cell.content() {
-                Some(ElementDefWrapper::TextView(tv)) => Ok(tv.from_body(body)?.text().to_owned()),
-                Some(ElementDefWrapper::Caption(cap)) => Ok(cap
-                    .from_body(body)?
-                    .lsdata()
-                    .text()
-                    .unwrap_or(&String::default())
-                    .to_owned()),
-                _ => Err(ElementError::InvalidContent {
+                Some(wrapper) => Ok(wrapper.from_body(body)?.textise()?),
+                None => Err(ElementError::NoSuchContent {
                     element: "Cell Content".to_string(),
-                    content: "Cannot convert to string".to_string(),
+                    content: "No content provided".to_string(),
                 })?,
             },
             Err(err) => Err(err),
@@ -95,12 +78,10 @@ impl<'body> FromSapTable<'body> for Vec<(String, Option<String>)> {
         let row_string = iter
             .map(|val| match val {
                 Ok(cell) => match cell.content() {
-                    Some(wrapper) => Ok(wrapper
-                        .from_body(body)?
-                        .textise().ok()),
-                    None => Ok(None)
+                    Some(wrapper) => Ok(wrapper.from_body(body)?.textise().ok()),
+                    None => Ok(None),
                 },
-                Err(err) => Err(err)
+                Err(err) => Err(err),
             })
             .collect::<Result<Vec<Option<String>>, WebDynproError>>()?;
         let zip = header_string

@@ -2,14 +2,14 @@ use std::collections::HashMap;
 
 use serde::{
     de::{value::MapDeserializer, IntoDeserializer},
-    Deserialize, Deserializer,
+    Deserialize,
 };
 
 use crate::{
     define_elements,
     error::ApplicationError,
     model::SemesterType,
-    utils::de_with::deserialize_u32_string,
+    utils::de_with::{deserialize_semester_type, deserialize_u32_string},
     webdynpro::{
         client::body::Body,
         command::element::complex::ReadSapTableBodyCommand,
@@ -334,19 +334,6 @@ pub struct ChapelAbsenceRequest {
     denial_reason: String,
     #[serde(rename(deserialize = "상태"))]
     status: String,
-}
-
-fn deserialize_semester_type<'de, D: Deserializer<'de>>(
-    deserializer: D,
-) -> Result<SemesterType, D::Error> {
-    let value = String::deserialize(deserializer)?;
-    match value.trim() {
-        "1 학기" => Ok(SemesterType::One),
-        "여름 학기" => Ok(SemesterType::Summer),
-        "2 학기" => Ok(SemesterType::Two),
-        "겨울 학기" => Ok(SemesterType::Winter),
-        _ => Err(serde::de::Error::custom("Unknown SemesterType varient")),
-    }
 }
 
 impl<'a> ChapelAbsenceRequest {

@@ -1,5 +1,5 @@
 use rusaint::{
-    application::{chapel::Chapel, USaintClientBuilder},
+    application::{personal_course_schedule::PersonalCourseSchedule, USaintClientBuilder},
     model::SemesterType,
     ApplicationError, RusaintError,
 };
@@ -9,31 +9,30 @@ use crate::get_session;
 
 #[tokio::test]
 #[serial]
-async fn chapel() {
+async fn schedule() {
     let session = get_session().await.unwrap();
     let mut app = USaintClientBuilder::new()
         .session(session)
-        .build_into::<Chapel>()
+        .build_into::<PersonalCourseSchedule>()
         .await
         .unwrap();
-    let info = app.information(2022, SemesterType::Two).await.unwrap();
+    let info = app.schedule(2022, SemesterType::Two).await.unwrap();
     println!("{:?}", info);
 }
 
 #[tokio::test]
 #[serial]
-async fn no_chapel() {
+async fn no_schedule() {
     let session = get_session().await.unwrap();
     let mut app = USaintClientBuilder::new()
         .session(session)
-        .build_into::<Chapel>()
+        .build_into::<PersonalCourseSchedule>()
         .await
         .unwrap();
-    let info = app.information(2024, SemesterType::Two).await.unwrap_err();
+    let info = app.schedule(2024, SemesterType::Two).await.unwrap_err();
     assert!(matches!(
         info,
-        RusaintError::ApplicationError(ApplicationError::NoChapelInformation)
+        RusaintError::ApplicationError(ApplicationError::NoScheduleInformation)
     ));
-    println!("{:?}", info);
     println!("{:?}", info);
 }

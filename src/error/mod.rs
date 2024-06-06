@@ -16,7 +16,7 @@ pub enum RusaintError {
     SsoLoginError(#[from] SsuSsoError),
     /// 각 애플리케이션에서 반환하는 오류
     #[error("Error from application: {0}")]
-    ApplicationError(#[from] ApplicationError)
+    ApplicationError(#[from] ApplicationError),
 }
 
 /// 숭실대학교 SSO 로그인 실패 시 반환하는 오류
@@ -36,6 +36,16 @@ pub enum SsuSsoError {
 /// 특정 애플리케이션에서 반환하는 오류
 #[derive(Error, Debug)]
 pub enum ApplicationError {
+    /// 학생의 해당 학기 채플 정보가 없음
     #[error("No chapel information provided")]
-    NoChapelInformation
+    NoChapelInformation,
+    /// 학생의 해당 학기 시간표 정보가 없음
+    #[error("No schedule information provided")]
+    NoScheduleInformation,
+    /// 찾고자 하는 강의의 강의평가 정보가 없음
+    #[error("No Lecture assessment found")]
+    NoLectureAssessments,
+    /// 조건에 맞는 강의를 찾을 수 없음
+    #[error("No lecture found")]
+    NoLectureResult,
 }
