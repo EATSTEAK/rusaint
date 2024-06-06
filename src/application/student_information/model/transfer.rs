@@ -1,9 +1,22 @@
 use std::collections::HashMap;
 
-use serde::{de::{value::MapDeserializer, IntoDeserializer}, Deserialize};
+use serde::{
+    de::{value::MapDeserializer, IntoDeserializer},
+    Deserialize,
+};
 
 use crate::{
-    application::{student_information::StudentInformationApplication, USaintClient}, define_elements, webdynpro::{command::element::layout::TabStripTabSelectCommand, element::{complex::{sap_table::FromSapTable, SapTable}, definition::ElementDefinition, layout::tab_strip::item::TabStripItem}, error::{ElementError, WebDynproError}}
+    application::{student_information::StudentInformationApplication, USaintClient},
+    define_elements,
+    webdynpro::{
+        command::element::{complex::ReadSapTableBodyCommand, layout::TabStripTabSelectCommand},
+        element::{
+            complex::{sap_table::FromSapTable, SapTable},
+            definition::ElementDefinition,
+            layout::tab_strip::item::TabStripItem,
+        },
+        error::{ElementError, WebDynproError},
+    },
 };
 
 #[derive(Clone, Debug)]
@@ -30,12 +43,11 @@ impl<'a> StudentTransferRecords {
                 0,
             ))
             .await?;
-        let table_element = Self::TABLE_TRANSFER.from_body(client.body())?;
-        let table = table_element.table()?;
+        let table = client.read(ReadSapTableBodyCommand::new(Self::TABLE_TRANSFER))?;
         let records = table.try_table_into::<StudentTransferRecord>(client.body())?;
         Ok(Self { records })
     }
-    
+
     /// 편입정보 기록을 반환합니다.
     pub fn records(&self) -> &[StudentTransferRecord] {
         &self.records
@@ -98,12 +110,12 @@ impl<'a> FromSapTable<'a> for StudentTransferRecord {
         row: &'a crate::webdynpro::element::complex::sap_table::SapTableRow,
     ) -> Result<Self, crate::webdynpro::error::WebDynproError> {
         let map_string = row.try_row_into::<HashMap<String, String>>(header, body)?;
-            let map_de: MapDeserializer<_, serde::de::value::Error> = map_string.into_deserializer();
-            Ok(StudentTransferRecord::deserialize(map_de).map_err(|e| {
-                ElementError::InvalidContent {
-                    element: row.table_def().id().to_string(),
-                    content: e.to_string(),
-                }
-            })?)
+        let map_de: MapDeserializer<_, serde::de::value::Error> = map_string.into_deserializer();
+        Ok(StudentTransferRecord::deserialize(map_de).map_err(|e| {
+            ElementError::InvalidContent {
+                element: row.table_def().id().to_string(),
+                content: e.to_string(),
+            }
+        })?)
     }
 }

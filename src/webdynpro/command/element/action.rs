@@ -12,8 +12,8 @@ pub struct ButtonPressCommand {
 
 impl ButtonPressCommand {
     /// 새로운 명령 객체를 생성합니다.
-    pub fn new(element_def: ButtonDef) -> ButtonPressCommand {
-        ButtonPressCommand { element_def }
+    pub fn new(element_def: ButtonDef) -> Self {
+        Self { element_def }
     }
 }
 

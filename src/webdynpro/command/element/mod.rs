@@ -12,3 +12,6 @@ pub mod layout;
 
 /// 텍스트 분류의 엘리먼트([`Caption`](crate::webdynpro::element::text::Caption), [`InputField`](crate::webdynpro::element::text::InputField), [`Label`](crate::webdynpro::element::text::Label), [`TextView`](crate::webdynpro::element::text::TextView)를 위한 명령)
 pub mod text;
+
+/// 시스템 분류의 엘리먼트([`ClientInspector`](crate::webdynpro::element::system::ClientInspector), [`Custom`](crate::webdynpro::element::system::Custom), [`LoadingPlaceholder`](crate::webdynpro::element::system::LoadingPlaceholder))를 위한 명령
+pub mod system;
