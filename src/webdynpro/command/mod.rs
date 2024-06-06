@@ -6,6 +6,7 @@ pub trait WebDynproCommand {
     type Result;
 
     /// 해당 명령을 주어진 클라이언트에 대해 실행합니다.
+    #[allow(async_fn_in_trait)]
     async fn dispatch(&self, client: &mut WebDynproClient) -> Result<Self::Result, WebDynproError>;
 }
 
