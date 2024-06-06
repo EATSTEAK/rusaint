@@ -204,5 +204,5 @@ impl<'a> LectureAssessmentApplication {
     }
 }
 
-/// [`LectureAssessment`] 애플리케이션에 사용되는 데이터
+/// [`LectureAssessmentApplication`] 애플리케이션에 사용되는 데이터
 pub mod model;

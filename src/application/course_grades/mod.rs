@@ -495,7 +495,7 @@ impl<'a> CourseGradesApplication {
     }
 }
 
-/// [`CourseGrades`]에서 사용하는 데이터
+/// [`CourseGradesApplication`]에서 사용하는 데이터
 pub mod model;
 
 #[cfg(test)]

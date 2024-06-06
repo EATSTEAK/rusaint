@@ -111,5 +111,5 @@ impl<'a> ChapelApplication {
     }
 }
 
-/// [`Chapel`] 애플리케이션에 사용되는 데이터
+/// [`ChapelApplication`] 애플리케이션에 사용되는 데이터
 pub mod model;
