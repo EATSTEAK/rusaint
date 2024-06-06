@@ -36,8 +36,10 @@ pub enum SsuSsoError {
 /// 특정 애플리케이션에서 반환하는 오류
 #[derive(Error, Debug)]
 pub enum ApplicationError {
+    /// 학생의 해당 학기 채플 정보가 없음
     #[error("No chapel information provided")]
     NoChapelInformation,
+    /// 학생의 해당 학기 시간표 정보가 없음
     #[error("No schedule information provided")]
     NoScheduleInformation,
 }
