@@ -1,5 +1,7 @@
 use std::{borrow::Cow, cell::OnceCell};
 
+use scraper::Node;
+
 use crate::webdynpro::element::{define_element_interactable, property::Visibility, Element};
 
 define_element_interactable! {
@@ -51,9 +53,18 @@ impl<'a> Caption<'a> {
     pub fn text(&self) -> &str {
         self.text.get_or_init(|| {
             self.element_ref()
-                .text()
-                .flat_map(|str| ["\n", str])
-                .skip(1)
+                .children()
+                .filter_map(|node| match node.value() {
+                    Node::Text(text) => Some(text.to_string()),
+                    Node::Element(elem) => {
+                        if elem.name() == "br" {
+                            Some("\n".to_string())
+                        } else {
+                            None
+                        }
+                    }
+                    _ => None,
+                })
                 .collect::<String>()
         })
     }
