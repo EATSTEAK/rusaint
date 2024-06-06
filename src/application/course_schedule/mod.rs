@@ -4,10 +4,8 @@ use crate::{
     model::SemesterType,
     webdynpro::{
         client::body::Body,
-        command::element::selection::ComboBoxSelectCommand,
-        element::{
-            complex::SapTable, definition::ElementDefinition, layout::TabStrip, selection::ComboBox,
-        },
+        command::element::{complex::ReadSapTableBodyCommand, selection::ComboBoxSelectCommand},
+        element::{complex::SapTable, layout::TabStrip, selection::ComboBox},
         error::WebDynproError,
     },
     RusaintError,
@@ -96,9 +94,9 @@ impl<'a> CourseSchedule {
         self.select_rows(500).await?;
         self.select_period(&year_str, period).await?;
         lecture_category.request_query(&mut self.client.0).await?;
-        let lectures = Self::MAIN_TABLE
-            .from_body(self.client.body())?
-            .table()?
+        let lectures = self
+            .client
+            .read(ReadSapTableBodyCommand::new(Self::MAIN_TABLE))?
             .try_table_into::<Lecture>(self.client.body())?;
         Ok(lectures.into_iter())
     }

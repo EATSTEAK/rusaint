@@ -7,6 +7,7 @@ use crate::{
         client::body::Body,
         command::element::{
             action::ButtonPressCommand,
+            complex::ReadSapTableBodyCommand,
             selection::{ComboBoxSelectCommand, ReadComboBoxLSDataCommand},
         },
         element::{
@@ -131,8 +132,7 @@ impl<'a> CourseGrades {
         let course = Self::course_type_to_key(course);
         let combobox_lsdata = self
             .client
-            .send(ReadComboBoxLSDataCommand::new(Self::PROGRESS_TYPE))
-            .await?;
+            .read(ReadComboBoxLSDataCommand::new(Self::PROGRESS_TYPE))?;
         if (|| Some(combobox_lsdata.key()?.as_str()))() != Some(course) {
             self.client
                 .send(ComboBoxSelectCommand::new(
@@ -153,12 +153,10 @@ impl<'a> CourseGrades {
         let semester = Self::semester_to_key(semester);
         let year_combobox_lsdata = self
             .client
-            .send(ReadComboBoxLSDataCommand::new(Self::PERIOD_YEAR))
-            .await?;
+            .read(ReadComboBoxLSDataCommand::new(Self::PERIOD_YEAR))?;
         let semester_combobox_lsdata = self
             .client
-            .send(ReadComboBoxLSDataCommand::new(Self::PERIOD_SEMESTER))
-            .await?;
+            .read(ReadComboBoxLSDataCommand::new(Self::PERIOD_SEMESTER))?;
         if (|| Some(year_combobox_lsdata.key()?.as_str()))() != Some(year) {
             self.client
                 .send(ComboBoxSelectCommand::new(Self::PERIOD_YEAR, &year, false))
@@ -274,8 +272,9 @@ impl<'a> CourseGrades {
         self.close_popups().await?;
         self.select_course(course_type).await?;
 
-        let table_elem = Self::GRADES_SUMMARY_TABLE.from_body(self.client.body())?;
-        let table = table_elem.table()?;
+        let table = self
+            .client
+            .read(ReadSapTableBodyCommand::new(Self::GRADES_SUMMARY_TABLE))?;
         let ret = table.try_table_into::<SemesterGrade>(self.client.body())?;
         Ok(ret)
     }
@@ -370,8 +369,9 @@ impl<'a> CourseGrades {
         self.select_course(course_type).await?;
         self.select_semester(year, semester).await?;
         let class_grades: Vec<(Option<String>, HashMap<String, String>)> = {
-            let grade_table_elem = Self::GRADE_BY_CLASSES_TABLE.from_body(self.client.body())?;
-            let grade_table_body = grade_table_elem.table()?;
+            let grade_table_body = self
+                .client
+                .read(ReadSapTableBodyCommand::new(Self::GRADE_BY_CLASSES_TABLE))?;
             let iter = grade_table_body.iter();
             iter.map(|row| {
                 let btn_id = row[4]
@@ -457,8 +457,9 @@ impl<'a> CourseGrades {
         self.close_popups().await?;
         self.select_course(course_type).await?;
         self.select_semester(year, semester).await?;
-        let table_elem = Self::GRADE_BY_CLASSES_TABLE.from_body(self.client.body())?;
-        let table = table_elem.table()?;
+        let table = self
+            .client
+            .read(ReadSapTableBodyCommand::new(Self::GRADE_BY_CLASSES_TABLE))?;
         let Some(btn) = ({
             table
                 .iter()
@@ -486,7 +487,7 @@ impl<'a> CourseGrades {
                 })
         }) else {
             return Err(ElementError::NoSuchData {
-                element: table_elem.id().to_string(),
+                element: Self::GRADE_BY_CLASSES_TABLE.id().to_string(),
                 field: format!("details of class {}", code),
             })?;
         };

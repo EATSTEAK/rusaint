@@ -62,12 +62,10 @@ impl<'a> Chapel {
         let semester = Self::semester_to_key(semester);
         let year_combobox_lsdata = self
             .client
-            .send(ReadComboBoxLSDataCommand::new(Self::SEL_PERYR))
-            .await?;
+            .read(ReadComboBoxLSDataCommand::new(Self::SEL_PERYR))?;
         let semester_combobox_lsdata = self
             .client
-            .send(ReadComboBoxLSDataCommand::new(Self::SEL_PERID))
-            .await?;
+            .read(ReadComboBoxLSDataCommand::new(Self::SEL_PERID))?;
         if (|| Some(year_combobox_lsdata.key()?.as_str()))() != Some(year) {
             self.client
                 .send(ComboBoxSelectCommand::new(Self::SEL_PERYR, &year, false))
@@ -95,12 +93,12 @@ impl<'a> Chapel {
         let general_information = GeneralChapelInformation::from_body(self.body())?
             .pop()
             .ok_or_else(|| {
-                Into::<RusaintError>::into(
-                    Into::<WebDynproError>::into(ElementError::NoSuchContent {
+                Into::<RusaintError>::into(Into::<WebDynproError>::into(
+                    ElementError::NoSuchContent {
                         element: "General Chapel Information".to_string(),
                         content: "No data provided".to_string(),
-                    }),
-                )
+                    },
+                ))
             })?;
         let attendances = ChapelAttendance::from_body(self.body())?;
         let absence_requests = ChapelAbsenceRequest::from_body(self.body())?;
