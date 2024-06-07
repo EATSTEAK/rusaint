@@ -1,0 +1,18 @@
+[package]
+name = "rusaint-ffi"
+version = "0.5.0"
+edition = "2021"
+authors = ["Hyomin Koo <me@eatsteak.dev>"]
+license = "MIT"
+repository = "https://github.com/EATSTEAK/rusaint"
+
+[lib]
+crate-type = [ "cdylib", "staticlib" ]
+name = "rusaint"
+
+[dependencies]
+uniffi = { version = "0.27.3" }
+
+[build-dependencies]
+uniffi = { version = "0.27.3", features = [ "build" ] }
+
