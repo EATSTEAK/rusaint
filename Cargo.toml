@@ -1,3 +1,7 @@
 [workspace]
 members = [ "rusaint", "rusaint-ffi" ]
 resolver = "2"
+
+[workspace.dependencies]
+thiserror = "1.0.44"
+tokio = { version = "1.29.1" }

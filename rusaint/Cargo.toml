@@ -22,8 +22,8 @@ reqwest = { version = "0.12.4", features = [
     "brotli",
     "deflate",
 ] }
-thiserror = "1.0.44"
-tokio = { version = "1.29.1", features = ["macros", "test-util"] }
+thiserror = { workspace = true }
+tokio ={ workspace = true, features = ["macros", "test-util"] }
 html-escape = "0.2.13"
 url = "2.4.1"
 roxmltree = "0.20.0"

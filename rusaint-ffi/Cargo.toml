@@ -12,6 +12,8 @@ name = "rusaint"
 
 [dependencies]
 uniffi = { version = "0.27.3" }
+rusaint = { path = "../rusaint" }
+thiserror = { workspace = true }
 
 [build-dependencies]
 uniffi = { version = "0.27.3", features = [ "build" ] }
