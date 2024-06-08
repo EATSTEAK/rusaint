@@ -39,7 +39,7 @@ impl USaintSession {
     }
 
     /// SSO 로그인 토큰과 학번으로 인증된 세션을 반환합니다.
-    pub async fn with_token(id: &str, token: &str) -> Result<USaintSession, ClientError> {
+    pub async fn with_token(id: &str, token: &str) -> Result<USaintSession, RusaintError> {
         let session_store = Self::anonymous();
         let client = reqwest::Client::builder()
             .user_agent(DEFAULT_USER_AGENT)
@@ -51,11 +51,12 @@ impl USaintSession {
             .headers(default_header())
             .header(HOST, "saint.ssu.ac.kr".parse::<HeaderValue>().unwrap())
             .send()
-            .await?;
+            .await
+            .map_err(|e| WebDynproError::from(ClientError::from(e)))?;
         let waf = portal
             .cookies()
             .find(|cookie| cookie.name() == "WAF")
-            .ok_or(ClientError::NoSuchCookie("WAF".to_string()))?;
+            .ok_or_else(|| WebDynproError::from(ClientError::NoSuchCookie("WAF".to_string())))?;
         let waf_cookie_str = format!("WAF={}; domain=saint.ssu.ac.kr; path=/;", waf.value());
         session_store.set_cookies(
             portal
@@ -91,8 +92,12 @@ impl USaintSession {
             )
             .header(COOKIE, token_cookie_str.parse::<HeaderValue>().unwrap())
             .header(HOST, "saint.ssu.ac.kr".parse::<HeaderValue>().unwrap())
-            .build()?;
-        let res = client.execute(req).await?;
+            .build()
+            .map_err(|e| WebDynproError::from(ClientError::from(e)))?;
+        let res = client
+            .execute(req)
+            .await
+            .map_err(|e| WebDynproError::from(ClientError::from(e)))?;
         let mut new_cookies = res.headers().iter().filter_map(|header| {
             if header.0 == SET_COOKIE {
                 Some(header.1)
@@ -104,23 +109,24 @@ impl USaintSession {
         if let Some(sapsso_cookies) = session_store.cookies(res.url()) {
             let str = sapsso_cookies
                 .to_str()
-                .or(Err(ClientError::NoCookies(res.url().to_string())))?;
+                .or(Err(ClientError::NoCookies(res.url().to_string())))
+                .map_err(WebDynproError::from)?;
             if str.contains("MYSAPSSO2") {
                 Ok(session_store)
             } else {
-                Err(ClientError::NoSuchCookie("MYSAPSSO2".to_string()))?
+                Err(ClientError::NoSuchCookie("MYSAPSSO2".to_string()))
+                    .map_err(WebDynproError::from)?
             }
         } else {
-            Err(ClientError::NoCookies(res.url().to_string()))?
+            Err(ClientError::NoCookies(res.url().to_string())).map_err(WebDynproError::from)?
         }
     }
 
     /// 학번과 비밀번호로 인증된 세션을 반환합니다.
     pub async fn with_password(id: &str, password: &str) -> Result<USaintSession, RusaintError> {
         let token = obtain_ssu_sso_token(id, password).await?;
-        Ok(Self::with_token(id, &token)
+        Self::with_token(id, &token)
             .await
-            .or_else(|e| Err(WebDynproError::Client(e)))?)
     }
 
     /// 세션의 내부 [`reqwest::cookie::Jar`]의 레퍼런스를 반환합니다.
