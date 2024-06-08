@@ -125,8 +125,7 @@ impl USaintSession {
     /// 학번과 비밀번호로 인증된 세션을 반환합니다.
     pub async fn with_password(id: &str, password: &str) -> Result<USaintSession, RusaintError> {
         let token = obtain_ssu_sso_token(id, password).await?;
-        Self::with_token(id, &token)
-            .await
+        Self::with_token(id, &token).await
     }
 
     /// 세션의 내부 [`reqwest::cookie::Jar`]의 레퍼런스를 반환합니다.
@@ -151,26 +150,10 @@ pub async fn obtain_ssu_sso_token(id: &str, password: &str) -> Result<String, Ss
         .await?
         .text()
         .await?;
-    let document = scraper::Html::parse_document(&body);
-    let in_tp_bit_selector = scraper::Selector::parse(r#"input[name="in_tp_bit"]"#).unwrap();
-    let rqst_caus_cd_selector = scraper::Selector::parse(r#"input[name="rqst_caus_cd"]"#).unwrap();
-    let in_tp_bit = document
-        .select(&in_tp_bit_selector)
-        .next()
-        .ok_or(SsuSsoError::CantLoadForm)?
-        .value()
-        .attr("value")
-        .ok_or(SsuSsoError::CantLoadForm)?;
-    let rqst_caus_cd = document
-        .select(&rqst_caus_cd_selector)
-        .next()
-        .ok_or(SsuSsoError::CantLoadForm)?
-        .value()
-        .attr("value")
-        .ok_or(SsuSsoError::CantLoadForm)?;
+    let (in_tp_bit, rqst_caus_cd) = parse_login_form(&body)?;
     let params = [
-        ("in_tp_bit", in_tp_bit),
-        ("rqst_caus_cd", rqst_caus_cd),
+        ("in_tp_bit", in_tp_bit.as_str()),
+        ("rqst_caus_cd", rqst_caus_cd.as_str()),
         ("userid", id),
         ("pwd", password),
     ];
@@ -198,4 +181,25 @@ pub async fn obtain_ssu_sso_token(id: &str, password: &str) -> Result<String, Ss
     Ok(cookie_token.ok_or(SsuSsoError::CantFindToken(
         message.unwrap_or("Internal Error".to_string()),
     ))?)
+}
+
+fn parse_login_form(body: &str) -> Result<(String, String), SsuSsoError> {
+    let document = scraper::Html::parse_document(&body);
+    let in_tp_bit_selector = scraper::Selector::parse(r#"input[name="in_tp_bit"]"#).unwrap();
+    let rqst_caus_cd_selector = scraper::Selector::parse(r#"input[name="rqst_caus_cd"]"#).unwrap();
+    let in_tp_bit = document
+        .select(&in_tp_bit_selector)
+        .next()
+        .ok_or(SsuSsoError::CantLoadForm)?
+        .value()
+        .attr("value")
+        .ok_or(SsuSsoError::CantLoadForm)?;
+    let rqst_caus_cd = document
+        .select(&rqst_caus_cd_selector)
+        .next()
+        .ok_or(SsuSsoError::CantLoadForm)?
+        .value()
+        .attr("value")
+        .ok_or(SsuSsoError::CantLoadForm)?;
+    Ok((in_tp_bit.to_owned(), rqst_caus_cd.to_owned()))
 }
