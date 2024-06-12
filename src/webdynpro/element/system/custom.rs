@@ -16,7 +16,7 @@ use crate::webdynpro::element::Element;
 
 /// 페이지 최초 로드시 서버에 전송하는 클라이언트 정보 값입니다.
 #[allow(missing_docs)]
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct CustomClientInfo {
     pub window_opener_exists: bool,
     pub client_url: String,

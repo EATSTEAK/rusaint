@@ -6,11 +6,11 @@ use serde::{
 };
 
 use crate::{
-    application::{student_information::StudentInformation, USaintClient},
+    application::{student_information::StudentInformationApplication, USaintClient},
     define_elements,
     utils::de_with::{deserialize_bool_string, deserialize_optional_string},
     webdynpro::{
-        command::element::layout::TabStripTabSelectCommand,
+        command::element::{complex::ReadSapTableBodyCommand, layout::TabStripTabSelectCommand},
         element::{
             complex::{sap_table::FromSapTable, SapTable},
             definition::ElementDefinition,
@@ -22,11 +22,11 @@ use crate::{
 
 #[derive(Clone, Debug)]
 /// 학생의 가족관계 정보
-pub struct StudentFamilyInformation {
+pub struct StudentFamily {
     members: Vec<StudentFamilyMember>,
 }
 
-impl<'a> StudentFamilyInformation {
+impl<'a> StudentFamily {
     // 가족사항
     define_elements! {
         // 가족사항 탭
@@ -38,14 +38,13 @@ impl<'a> StudentFamilyInformation {
     pub(crate) async fn with_client(client: &mut USaintClient) -> Result<Self, WebDynproError> {
         client
             .send(TabStripTabSelectCommand::new(
-                StudentInformation::TAB_ADDITION,
+                StudentInformationApplication::TAB_ADDITION,
                 Self::TAB_FAMILY,
                 1,
                 0,
             ))
             .await?;
-        let table_element = Self::TABLE_FAMILY.from_body(client.body())?;
-        let table = table_element.table()?;
+        let table = client.read(ReadSapTableBodyCommand::new(Self::TABLE_FAMILY))?;
         let members = table.try_table_into::<StudentFamilyMember>(client.body())?;
         Ok(Self { members })
     }

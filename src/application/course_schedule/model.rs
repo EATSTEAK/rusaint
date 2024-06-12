@@ -54,12 +54,8 @@ pub enum LectureCategory {
         /// 과목명
         lecture_name: String,
     },
-    /// 교직이수
+    /// 교직
     Education,
-    /// 평생교육사
-    LifelongLearning,
-    /// 일반선택
-    StandardSelection,
     /// 대학원
     Graduated {
         /// 단과대명
@@ -96,8 +92,6 @@ pub enum LectureCategory {
         /// 전공명
         major: Option<String>,
     },
-    /// 듀얼리스팅 과목
-    DualListing,
     /// 숭실사이버대
     Cyber,
 }
@@ -140,16 +134,6 @@ impl LectureCategory {
     /// 교직 분류의 [`LectureCategory`]를 만듭니다.
     pub fn education() -> Self {
         Self::Education
-    }
-
-    /// 평생교육사 분류의 [`LectureCategory`]를 만듭니다.
-    pub fn lifelong_learning() -> Self {
-        Self::LifelongLearning
-    }
-
-    /// 일반선택 분류의 [`LectureCategory`]를 만듭니다.
-    pub fn standard_selection() -> Self {
-        Self::StandardSelection
     }
 
     /// 대학원 분류의 [`LectureCategory`]를 만듭니다.
@@ -195,11 +179,6 @@ impl LectureCategory {
             department: department.to_string(),
             major: major.map(|str| str.to_string()),
         }
-    }
-
-    /// 듀얼리스팅 과목 분류의 [`LectureCategory`]를 만듭니다.
-    pub fn dual_listing() -> Self {
-        Self::DualListing
     }
 
     /// 숭실사이버대 분류의 [`LectureCategory`]를 만듭니다.
@@ -312,22 +291,6 @@ impl LectureCategory {
                 }
                 Self::request(client, TAB_EDU, 4, SEARCH_EDU).await?;
             }
-            LectureCategory::LifelongLearning => {
-                // 평생교육사
-                define_elements! {
-                    TAB_LIFELONG: TabStripItem<'_> = "ZCMW2100.ID_0001:VIW_MAIN.TAB_LIFELONG";
-                    SEARCH_LIFELONG: Button<'_> = "ZCMW2100.ID_0001:VIW_MAIN.BUTTON_LIFELONG";
-                }
-                Self::request(client, TAB_LIFELONG, 5, SEARCH_LIFELONG).await?;
-            }
-            LectureCategory::StandardSelection => {
-                // 일반선택
-                define_elements! {
-                    TAB_ROTC_CYBER: TabStripItem<'_> = "ZCMW2100.ID_0001:VIW_MAIN.TAB_ROTC_CYBER";
-                    SEARCH_ROTC_CYBER: Button<'_> = "ZCMW2100.ID_0001:VIW_MAIN.BUTTON_ROTC_CYBER";
-                }
-                Self::request(client, TAB_ROTC_CYBER, 6, SEARCH_ROTC_CYBER).await?;
-            }
             LectureCategory::Graduated {
                 collage,
                 department,
@@ -436,14 +399,6 @@ impl LectureCategory {
                     )
                     .await?;
                 }
-            }
-            LectureCategory::DualListing => {
-                // 듀얼리스팅과목
-                define_elements! {
-                    TAB_DUALLT_SM: TabStripItem<'_> = "ZCMW2100.ID_0001:VIW_MAIN.TAB_DUALLT_SM";
-                    SEARCH_DUALLT: Button<'_> = "ZCMW2100.ID_0001:VIW_TAB_DUALLT_SM.BTN_DUALLT_SM";
-                }
-                Self::request(client, TAB_DUALLT_SM, 13, SEARCH_DUALLT).await?;
             }
             LectureCategory::Cyber => {
                 // 숭실사이버대
@@ -600,8 +555,8 @@ pub struct Lecture {
     #[serde(rename(deserialize = "공학인증"), default, deserialize_with = "deserialize_optional_string")]
     abeek_info: Option<String>,
     /// 교과영역
-    #[serde(rename(deserialize = "교과영역"))]
-    field: String,
+    #[serde(rename(deserialize = "교과영역"), default, deserialize_with = "deserialize_optional_string")]
+    field: Option<String>,
     /// 과목번호
     #[serde(rename(deserialize = "과목번호"))]
     code: String,

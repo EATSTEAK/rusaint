@@ -30,11 +30,11 @@ use crate::{
 use super::{USaintApplication, USaintClient};
 
 /// [강의평가조회](https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/ZCMB2W1010)
-pub struct LectureAssessment {
+pub struct LectureAssessmentApplication {
     client: USaintClient,
 }
 
-impl USaintApplication for LectureAssessment {
+impl USaintApplication for LectureAssessmentApplication {
     const APP_NAME: &'static str = "ZCMB2W1010";
 
     fn from_client(client: USaintClient) -> Result<Self, RusaintError> {
@@ -46,7 +46,7 @@ impl USaintApplication for LectureAssessment {
     }
 }
 
-impl<'a> LectureAssessment {
+impl<'a> LectureAssessmentApplication {
     define_elements! {
         DDLB_01: ComboBox<'a> = "ZCMB2W1010.ID_0001:MAIN.DDLB_01";
         DDLB_02: ComboBox<'a> = "ZCMB2W1010.ID_0001:MAIN.DDLB_02";
@@ -204,5 +204,5 @@ impl<'a> LectureAssessment {
     }
 }
 
-/// [`LectureAssessment`] 애플리케이션에 사용되는 데이터
+/// [`LectureAssessmentApplication`] 애플리케이션에 사용되는 데이터
 pub mod model;

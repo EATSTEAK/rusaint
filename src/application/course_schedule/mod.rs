@@ -23,11 +23,11 @@ use crate::{
 use super::{USaintApplication, USaintClient};
 
 /// [강의시간표](https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/ZCMW2100)
-pub struct CourseSchedule {
+pub struct CourseScheduleApplication {
     client: USaintClient,
 }
 
-impl USaintApplication for CourseSchedule {
+impl USaintApplication for CourseScheduleApplication {
     const APP_NAME: &'static str = "ZCMW2100";
 
     fn from_client(client: USaintClient) -> Result<Self, RusaintError> {
@@ -40,7 +40,7 @@ impl USaintApplication for CourseSchedule {
 }
 
 #[allow(unused)]
-impl<'a> CourseSchedule {
+impl<'a> CourseScheduleApplication {
     // 메인 요소
     define_elements! {
         PERIOD_YEAR: ComboBox<'a> = "ZCMW_PERIOD_RE.ID_A61C4ED604A2BFC2A8F6C6038DE6AF18:VIW_MAIN.PERYR";

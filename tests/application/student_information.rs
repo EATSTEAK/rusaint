@@ -1,4 +1,4 @@
-use rusaint::{application::{student_information::StudentInformation, USaintClientBuilder}, webdynpro::error::{ElementError, WebDynproError}};
+use rusaint::{application::{student_information::StudentInformationApplication, USaintClientBuilder}, webdynpro::error::{ElementError, WebDynproError}};
 use serial_test::serial;
 
 use crate::get_session;
@@ -9,7 +9,7 @@ async fn general() {
     let session = get_session().await.unwrap();
     let app = USaintClientBuilder::new()
         .session(session)
-        .build_into::<StudentInformation>()
+        .build_into::<StudentInformationApplication>()
         .await
         .unwrap();
     let student_info = app.general().unwrap();
@@ -22,7 +22,7 @@ async fn graduation() {
     let session = get_session().await.unwrap();
     let app = USaintClientBuilder::new()
         .session(session)
-        .build_into::<StudentInformation>()
+        .build_into::<StudentInformationApplication>()
         .await
         .unwrap();
     let student_info = app.graduation();
@@ -42,7 +42,7 @@ async fn qualifications() {
     let session = get_session().await.unwrap();
     let app = USaintClientBuilder::new()
         .session(session)
-        .build_into::<StudentInformation>()
+        .build_into::<StudentInformationApplication>()
         .await
         .unwrap();
     let student_info = app.qualifications();
@@ -55,7 +55,7 @@ async fn work() {
     let session = get_session().await.unwrap();
     let mut app = USaintClientBuilder::new()
         .session(session)
-        .build_into::<StudentInformation>()
+        .build_into::<StudentInformationApplication>()
         .await
         .unwrap();
     let student_info = app.work().await.unwrap();
@@ -68,7 +68,7 @@ async fn family() {
     let session = get_session().await.unwrap();
     let mut app = USaintClientBuilder::new()
         .session(session)
-        .build_into::<StudentInformation>()
+        .build_into::<StudentInformationApplication>()
         .await
         .unwrap();
     let student_info = app.family().await.unwrap();
@@ -81,7 +81,7 @@ async fn religion() {
     let session = get_session().await.unwrap();
     let mut app = USaintClientBuilder::new()
         .session(session)
-        .build_into::<StudentInformation>()
+        .build_into::<StudentInformationApplication>()
         .await
         .unwrap();
     let student_info = app.religion().await.unwrap();
@@ -94,7 +94,7 @@ async fn transfer() {
     let session = get_session().await.unwrap();
     let mut app = USaintClientBuilder::new()
         .session(session)
-        .build_into::<StudentInformation>()
+        .build_into::<StudentInformationApplication>()
         .await
         .unwrap();
     let student_info = app.transfer().await.unwrap();
@@ -107,7 +107,7 @@ async fn bank_account() {
     let session = get_session().await.unwrap();
     let mut app = USaintClientBuilder::new()
         .session(session)
-        .build_into::<StudentInformation>()
+        .build_into::<StudentInformationApplication>()
         .await
         .unwrap();
     let student_info = app.bank_account().await.unwrap();
@@ -120,7 +120,7 @@ async fn academic_record() {
     let session = get_session().await.unwrap();
     let mut app = USaintClientBuilder::new()
         .session(session)
-        .build_into::<StudentInformation>()
+        .build_into::<StudentInformationApplication>()
         .await
         .unwrap();
     let student_info = app.academic_record().await.unwrap();
@@ -133,7 +133,7 @@ async fn research_bank_account() {
     let session = get_session().await.unwrap();
     let mut app = USaintClientBuilder::new()
         .session(session)
-        .build_into::<StudentInformation>()
+        .build_into::<StudentInformationApplication>()
         .await
         .unwrap();
     let student_info = app.research_bank_account().await.unwrap();

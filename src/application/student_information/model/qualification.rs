@@ -1,23 +1,22 @@
 use crate::{
     define_elements,
     webdynpro::{
-        client::body::Body,
-        element::{definition::ElementDefinition, text::InputField},
-        error::WebDynproError,
+        client::body::Body, command::element::text::ReadInputFieldValueCommand,
+        element::text::InputField, error::WebDynproError,
     },
 };
 
 #[derive(Clone, Debug)]
 /// 학생의 자격(교직이수, 평생교육사, 7+1 프로그램) 정보
-pub struct StudentQualificationInformation {
+pub struct StudentQualification {
     teaching_major: Option<StudentTeachingMajorInformation>,
     teaching_plural_major: Option<StudentTeachingPluralMajorInformation>,
     lifelong: Option<StudentLifelongInformation>,
     forign_study: Option<StudentForignStudyInformation>,
 }
 
-impl<'a> StudentQualificationInformation {
-    pub(crate) fn from_body(body: &'a Body) -> StudentQualificationInformation {
+impl<'a> StudentQualification {
+    pub(crate) fn from_body(body: &'a Body) -> StudentQualification {
         Self {
             teaching_major: StudentTeachingMajorInformation::from_body(body).ok(),
             teaching_plural_major: StudentTeachingPluralMajorInformation::from_body(body).ok(),
@@ -25,22 +24,22 @@ impl<'a> StudentQualificationInformation {
             forign_study: StudentForignStudyInformation::from_body(body).ok(),
         }
     }
-    
+
     /// 교직(주전공) 정보를 반환합니다.
     pub fn teaching_major(&self) -> Option<&StudentTeachingMajorInformation> {
         self.teaching_major.as_ref()
     }
-    
+
     /// 교직(복수전공) 정보를 반환합니다.
     pub fn teaching_plural_major(&self) -> Option<&StudentTeachingPluralMajorInformation> {
         self.teaching_plural_major.as_ref()
     }
-    
+
     /// 평생교육사 정보를 반환합니다.
     pub fn lifelong(&self) -> Option<&StudentLifelongInformation> {
         self.lifelong.as_ref()
     }
-    
+
     /// 7+1 프로그램 정보를 반환합니다.
     pub fn forign_study(&self) -> Option<&StudentForignStudyInformation> {
         self.forign_study.as_ref()
@@ -73,40 +72,36 @@ impl<'a> StudentTeachingMajorInformation {
         body: &'a Body,
     ) -> Result<StudentTeachingMajorInformation, WebDynproError> {
         Ok(Self {
-            major_name: Self::MAJOR_OTYPE
-                .from_body(body)?
-                .value()
-                .map(str::to_string),
-            qualification_number: Self::MAJOR_QUAL_NUM
-                .from_body(body)?
-                .value()
-                .map(str::to_string),
-            initiation_date: Self::MAJOR_SELECT_DT
-                .from_body(body)?
-                .value()
-                .map(str::to_string),
-            qualification_date: Self::MAJOR_QUAL_DT
-                .from_body(body)?
-                .value()
-                .map(str::to_string),
+            major_name: body
+                .read(ReadInputFieldValueCommand::new(Self::MAJOR_OTYPE))
+                .ok(),
+            qualification_number: body
+                .read(ReadInputFieldValueCommand::new(Self::MAJOR_QUAL_NUM))
+                .ok(),
+            initiation_date: body
+                .read(ReadInputFieldValueCommand::new(Self::MAJOR_SELECT_DT))
+                .ok(),
+            qualification_date: body
+                .read(ReadInputFieldValueCommand::new(Self::MAJOR_QUAL_DT))
+                .ok(),
         })
     }
-    
+
     /// 표시과목을 반환합니다.
     pub fn major_name(&self) -> Option<&str> {
         self.major_name.as_ref().map(String::as_str)
     }
-    
+
     /// 교원자격증번호를 반환합니다.
     pub fn qualification_number(&self) -> Option<&str> {
         self.qualification_number.as_ref().map(String::as_str)
     }
-    
+
     /// 선발일자를 반환합니다.
     pub fn initiation_date(&self) -> Option<&str> {
         self.initiation_date.as_ref().map(String::as_str)
     }
-    
+
     /// 교원자격증 발급일자를 반환합니다.
     pub fn qualification_date(&self) -> Option<&str> {
         self.qualification_date.as_ref().map(String::as_str)
@@ -136,31 +131,28 @@ impl<'a> StudentTeachingPluralMajorInformation {
         body: &'a Body,
     ) -> Result<StudentTeachingPluralMajorInformation, WebDynproError> {
         Ok(Self {
-            major_name: Self::DOUBLE_OTYPE
-                .from_body(body)?
-                .value()
-                .map(str::to_string),
-            qualification_number: Self::DOUBLE_QUAL_NUM
-                .from_body(body)?
-                .value()
-                .map(str::to_string),
-            qualification_date: Self::DOUBLEL_DT
-                .from_body(body)?
-                .value()
-                .map(str::to_string),
+            major_name: body
+                .read(ReadInputFieldValueCommand::new(Self::DOUBLE_OTYPE))
+                .ok(),
+            qualification_number: body
+                .read(ReadInputFieldValueCommand::new(Self::DOUBLE_QUAL_NUM))
+                .ok(),
+            qualification_date: body
+                .read(ReadInputFieldValueCommand::new(Self::DOUBLEL_DT))
+                .ok(),
         })
     }
-    
+
     /// 표시과목을 반환합니다.
     pub fn major_name(&self) -> Option<&str> {
         self.major_name.as_ref().map(String::as_str)
     }
-    
+
     /// 교원자격증번호를 반환합니다.
     pub fn qualification_number(&self) -> Option<&str> {
         self.qualification_number.as_ref().map(String::as_str)
     }
-    
+
     /// 교원자격증 발급일자를 반환합니다.
     pub fn qualification_date(&self) -> Option<&str> {
         self.qualification_date.as_ref().map(String::as_str)
@@ -191,40 +183,36 @@ impl<'a> StudentLifelongInformation {
 
     pub(crate) fn from_body(body: &'a Body) -> Result<StudentLifelongInformation, WebDynproError> {
         Ok(Self {
-            apply_date: Self::CONEDU_APP_DT
-                .from_body(body)?
-                .value()
-                .map(str::to_string),
-            lifelong_type: Self::CONEDU_TYPE
-                .from_body(body)?
-                .value()
-                .map(str::to_string),
-            qualification_number: Self::CONEDU_QUAL_NUM
-                .from_body(body)?
-                .value()
-                .map(str::to_string),
-            qualification_date: Self::CONEDU_QUAL_DT
-                .from_body(body)?
-                .value()
-                .map(str::to_string),
+            apply_date: body
+                .read(ReadInputFieldValueCommand::new(Self::CONEDU_APP_DT))
+                .ok(),
+            lifelong_type: body
+                .read(ReadInputFieldValueCommand::new(Self::CONEDU_TYPE))
+                .ok(),
+            qualification_number: body
+                .read(ReadInputFieldValueCommand::new(Self::CONEDU_QUAL_NUM))
+                .ok(),
+            qualification_date: body
+                .read(ReadInputFieldValueCommand::new(Self::CONEDU_QUAL_DT))
+                .ok(),
         })
     }
-    
+
     /// 신청일자를 반환합니다.
     pub fn apply_date(&self) -> Option<&str> {
         self.apply_date.as_ref().map(String::as_str)
     }
-    
+
     /// 자격구분을 반환합니다.
     pub fn lifelong_type(&self) -> Option<&str> {
         self.lifelong_type.as_ref().map(String::as_str)
     }
-    
+
     /// 자격증번호를 반환합니다.
     pub fn qualification_number(&self) -> Option<&str> {
         self.qualification_number.as_ref().map(String::as_str)
     }
-    
+
     /// 자격증 발급일자를 반환합니다.
     pub fn qualification_date(&self) -> Option<&str> {
         self.qualification_date.as_ref().map(String::as_str)
@@ -254,22 +242,28 @@ impl<'a> StudentForignStudyInformation {
         body: &'a Body,
     ) -> Result<StudentForignStudyInformation, WebDynproError> {
         Ok(Self {
-            approval_date: Self::APPRODATE.from_body(body)?.value().map(str::to_string),
-            authentication_number: Self::AUTHEN_NO.from_body(body)?.value().map(str::to_string),
-            issue_date: Self::ISSUEDATE.from_body(body)?.value().map(str::to_string),
+            approval_date: body
+                .read(ReadInputFieldValueCommand::new(Self::APPRODATE))
+                .ok(),
+            authentication_number: body
+                .read(ReadInputFieldValueCommand::new(Self::AUTHEN_NO))
+                .ok(),
+            issue_date: body
+                .read(ReadInputFieldValueCommand::new(Self::ISSUEDATE))
+                .ok(),
         })
     }
-    
+
     /// 신청일자를 반환합니다.
     pub fn approval_date(&self) -> Option<&str> {
         self.approval_date.as_ref().map(String::as_str)
     }
-    
+
     /// 인증서번호를 반환합니다.
     pub fn authentication_number(&self) -> Option<&str> {
         self.authentication_number.as_ref().map(String::as_str)
     }
-    
+
     /// 발급일자를 반환합니다.
     pub fn issue_date(&self) -> Option<&str> {
         self.issue_date.as_ref().map(String::as_str)

@@ -1,18 +1,31 @@
 use std::collections::HashMap;
 
-use serde::{de::{value::MapDeserializer, IntoDeserializer}, Deserialize};
+use serde::{
+    de::{value::MapDeserializer, IntoDeserializer},
+    Deserialize,
+};
 
 use crate::{
-    application::{student_information::StudentInformation, USaintClient}, define_elements, webdynpro::{command::element::layout::TabStripTabSelectCommand, element::{complex::{sap_table::FromSapTable, SapTable}, definition::ElementDefinition, layout::tab_strip::item::TabStripItem}, error::{ElementError, WebDynproError}}
+    application::{student_information::StudentInformationApplication, USaintClient},
+    define_elements,
+    webdynpro::{
+        command::element::{complex::ReadSapTableBodyCommand, layout::TabStripTabSelectCommand},
+        element::{
+            complex::{sap_table::FromSapTable, SapTable},
+            definition::ElementDefinition,
+            layout::tab_strip::item::TabStripItem,
+        },
+        error::{ElementError, WebDynproError},
+    },
 };
 
 #[derive(Clone, Debug)]
 /// 학생의 학적상태 정보
-pub struct StudentAcademicRecordInformation {
+pub struct StudentAcademicRecords {
     records: Vec<StudentAcademicRecord>,
 }
 
-impl<'a> StudentAcademicRecordInformation {
+impl<'a> StudentAcademicRecords {
     // 학적상태
     define_elements! {
         // 학적상태 탭
@@ -24,18 +37,17 @@ impl<'a> StudentAcademicRecordInformation {
     pub(crate) async fn with_client(client: &mut USaintClient) -> Result<Self, WebDynproError> {
         client
             .send(TabStripTabSelectCommand::new(
-                StudentInformation::TAB_ADDITION,
+                StudentInformationApplication::TAB_ADDITION,
                 Self::TAB_READ_9600,
                 5,
                 0,
             ))
             .await?;
-        let table_element = Self::TABLE_9600.from_body(client.body())?;
-        let table = table_element.table()?;
+        let table = client.read(ReadSapTableBodyCommand::new(Self::TABLE_9600))?;
         let records = table.try_table_into::<StudentAcademicRecord>(client.body())?;
         Ok(Self { records })
     }
-    
+
     /// 학생의 학적상태 기록들을 반환합니다.
     pub fn records(&self) -> &[StudentAcademicRecord] {
         &self.records
@@ -91,7 +103,7 @@ impl StudentAcademicRecord {
     pub fn process_date(&self) -> &str {
         &self.process_date
     }
-    
+
     /// 시작일을 반환합니다.
     pub fn start_date(&self) -> &str {
         &self.start_date
@@ -105,13 +117,12 @@ impl<'a> FromSapTable<'a> for StudentAcademicRecord {
         row: &'a crate::webdynpro::element::complex::sap_table::SapTableRow,
     ) -> Result<Self, crate::webdynpro::error::WebDynproError> {
         let map_string = row.try_row_into::<HashMap<String, String>>(header, body)?;
-            let map_de: MapDeserializer<_, serde::de::value::Error> = map_string.into_deserializer();
-            Ok(StudentAcademicRecord::deserialize(map_de).map_err(|e| {
-                ElementError::InvalidContent {
-                    element: row.table_def().id().to_string(),
-                    content: e.to_string(),
-                }
-            })?)
+        let map_de: MapDeserializer<_, serde::de::value::Error> = map_string.into_deserializer();
+        Ok(StudentAcademicRecord::deserialize(map_de).map_err(|e| {
+            ElementError::InvalidContent {
+                element: row.table_def().id().to_string(),
+                content: e.to_string(),
+            }
+        })?)
     }
 }
-
