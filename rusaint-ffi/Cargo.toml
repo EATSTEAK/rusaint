@@ -14,6 +14,7 @@ name = "rusaint"
 uniffi = { version = "0.28.0" }
 rusaint = { path = "../rusaint" }
 thiserror = { workspace = true }
+tokio = { workspace = true, features = ["sync"] }
 
 [build-dependencies]
 uniffi = { version = "0.28.0", features = [ "build" ] }
