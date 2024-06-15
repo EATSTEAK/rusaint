@@ -13,6 +13,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Publish
-        run: cargo publish --verbose --token ${CRATES_TOKEN}
+        run: cargo publish --package rusaint --verbose --token ${CRATES_TOKEN}
         env:
           CRATES_TOKEN: ${{ secrets.CRATES_TOKEN }}

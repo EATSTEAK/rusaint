@@ -1,0 +1,21 @@
+[package]
+name = "rusaint-ffi"
+version = "0.5.1"
+edition = "2021"
+authors = ["Hyomin Koo <me@eatsteak.dev>"]
+license = "MIT"
+repository = "https://github.com/EATSTEAK/rusaint"
+
+[lib]
+crate-type = [ "cdylib", "staticlib" ]
+name = "rusaint"
+
+[dependencies]
+uniffi = { version = "0.28.0" }
+rusaint = { path = "../rusaint" }
+thiserror = { workspace = true }
+tokio = { workspace = true, features = ["sync"] }
+
+[build-dependencies]
+uniffi = { version = "0.28.0", features = [ "build" ] }
+
