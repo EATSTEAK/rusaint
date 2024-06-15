@@ -1,13 +1,15 @@
 [package]
 name = "rusaint"
-version = "0.5.1"
 description = "Easy-to-use SSU u-saint client"
-keywords = ["ssu", "u-saint", "scraping", "parser"]
 categories = ["web-programming"]
-authors = ["Hyomin Koo <me@eatsteak.dev>"]
-license = "MIT"
-repository = "https://github.com/EATSTEAK/rusaint"
-edition = "2021"
+
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+homepage.workspace = true
+repository.workspace = true
+license.workspace = true
+keywords.workspace = true
 
 [features]
 default = ["application", "model"]
