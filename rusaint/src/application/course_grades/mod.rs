@@ -192,9 +192,13 @@ impl<'a> CourseGradesApplication {
     pub async fn recorded_summary(
         &mut self,
         course_type: CourseType,
-    ) -> Result<GradeSummary, WebDynproError> {
+    ) -> Result<GradeSummary, RusaintError> {
         self.close_popups().await?;
         self.select_course(course_type).await?;
+        self.read_recorded_summary()
+    }
+
+    fn read_recorded_summary(&self) -> Result<GradeSummary, RusaintError> {
         let body = self.client.body();
         let attempted_credits = Self::ATTM_CRD1.from_body(body)?.value_into_f32()?;
         let earned_credits = Self::EARN_CRD1.from_body(body)?.value_into_f32()?;
@@ -230,7 +234,7 @@ impl<'a> CourseGradesApplication {
     pub async fn certificated_summary(
         &mut self,
         course_type: CourseType,
-    ) -> Result<GradeSummary, WebDynproError> {
+    ) -> Result<GradeSummary, RusaintError> {
         self.close_popups().await?;
         self.select_course(course_type).await?;
         let body = self.client.body();
@@ -268,7 +272,7 @@ impl<'a> CourseGradesApplication {
     pub async fn semesters(
         &mut self,
         course_type: CourseType,
-    ) -> Result<Vec<SemesterGrade>, WebDynproError> {
+    ) -> Result<Vec<SemesterGrade>, RusaintError> {
         self.close_popups().await?;
         self.select_course(course_type).await?;
 
@@ -282,7 +286,7 @@ impl<'a> CourseGradesApplication {
     async fn class_detail_in_popup(
         &mut self,
         open_button: ButtonDef,
-    ) -> Result<HashMap<String, f32>, WebDynproError> {
+    ) -> Result<HashMap<String, f32>, RusaintError> {
         self.client
             .send(ButtonPressCommand::new(open_button))
             .await?;
@@ -364,7 +368,7 @@ impl<'a> CourseGradesApplication {
         year: &str,
         semester: SemesterType,
         include_details: bool,
-    ) -> Result<Vec<ClassGrade>, WebDynproError> {
+    ) -> Result<Vec<ClassGrade>, RusaintError> {
         self.close_popups().await?;
         self.select_course(course_type).await?;
         self.select_semester(year, semester).await?;
@@ -453,7 +457,7 @@ impl<'a> CourseGradesApplication {
         year: &str,
         semester: SemesterType,
         code: &str,
-    ) -> Result<HashMap<String, f32>, WebDynproError> {
+    ) -> Result<HashMap<String, f32>, RusaintError> {
         self.close_popups().await?;
         self.select_course(course_type).await?;
         self.select_semester(year, semester).await?;
@@ -486,12 +490,12 @@ impl<'a> CourseGradesApplication {
                     Err(_) => None,
                 })
         }) else {
-            return Err(ElementError::NoSuchData {
+            return Err(WebDynproError::from(ElementError::NoSuchData {
                 element: Self::GRADE_BY_CLASSES_TABLE.id().to_string(),
                 field: format!("details of class {}", code),
-            })?;
+            }))?;
         };
-        self.class_detail_in_popup(btn).await
+        Ok(self.class_detail_in_popup(btn).await?)
     }
 }
 
