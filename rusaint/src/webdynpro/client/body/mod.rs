@@ -133,6 +133,9 @@ pub struct Body {
     sap_ssr_client: SapSsrClient,
 }
 
+unsafe impl Send for Body {}
+unsafe impl Sync for Body {}
+
 impl Hash for Body {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.raw_body.hash(state);
