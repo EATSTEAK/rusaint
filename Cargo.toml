@@ -1,6 +1,16 @@
 [workspace]
-members = [ "rusaint", "rusaint-ffi" ]
+members = [ "rusaint", "rusaint-ffi", "uniffi-bindgen" ]
 resolver = "2"
+
+[workspace.package]
+version = "0.5.1"
+
+keywords = ["ssu", "u-saint", "scraping", "parser"]
+authors = ["Hyomin Koo <me@eatsteak.dev>"]
+license = "MIT"
+homepage = "https://eatsteak.dev"
+repository = "https://github.com/EATSTEAK/rusaint"
+edition = "2021"
 
 [workspace.dependencies]
 thiserror = "1.0.44"

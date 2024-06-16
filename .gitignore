@@ -32,3 +32,6 @@ Cargo.lock
 
 # reference
 /reference
+
+# uniffi bindings
+out/

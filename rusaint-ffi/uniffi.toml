@@ -1,0 +1,10 @@
+[bindings.kotlin]
+package_name = "dev.eatsteak.rusaint"
+cdylib_name = "rusaint_ffi"
+generate_immutable_records = true
+android = true
+
+[bindings.swift]
+ffi_module_name = "RusaintFFI"
+module_name = "Rusaint"
+generate_immutable_records = true
