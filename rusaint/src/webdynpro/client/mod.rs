@@ -9,6 +9,7 @@ use crate::{
 };
 use body::{Body, BodyUpdate};
 use reqwest::{cookie::Jar, header::*, RequestBuilder};
+use tokio::sync::Mutex;
 use std::sync::Arc;
 use url::Url;
 
@@ -20,7 +21,7 @@ pub struct WebDynproClient {
     name: String,
     body: Body,
     client: reqwest::Client,
-    event_queue: EventQueue,
+    event_queue: Mutex<EventQueue>,
 }
 
 fn wd_xhr_header() -> HeaderMap {
@@ -99,7 +100,7 @@ impl<'a> WebDynproClient {
             name: name.to_owned(),
             body: Body::new(raw_body)?,
             client,
-            event_queue: EventQueue::new(),
+            event_queue: Mutex::new(EventQueue::new()),
         })
     }
 
@@ -158,7 +159,7 @@ impl<'a> WebDynproClient {
 
     /// 이벤트를 이벤트 큐에 추가합니다.
     fn add_event(&mut self, event: Event) {
-        self.event_queue.add(event)
+        self.event_queue.try_lock().unwrap().add(event)
     }
 
     /// 이벤트 큐 내의 이벤트를 전송하고 그 결과를 `BodyUpdate`로 반환합니다.
@@ -169,12 +170,13 @@ impl<'a> WebDynproClient {
 
     /// 이벤트 큐 내부 내용을 서버에 전송하고 응답을 받습니다.
     async fn event_request(&mut self) -> Result<String, ClientError> {
+        let mut event_queue = self.event_queue.lock().await;
         let res = self
             .client
             .wd_xhr(
                 &self.base_url,
                 self.body.ssr_client(),
-                &mut self.event_queue,
+                &event_queue.serialize_and_clear(),
             )?
             .send()
             .await?;
@@ -230,7 +232,7 @@ trait Requests {
         &self,
         base_url: &Url,
         ssr_client: &SapSsrClient,
-        event_queue: &mut EventQueue,
+        event_queue: &str,
     ) -> Result<RequestBuilder, ClientError>;
 }
 
@@ -250,7 +252,7 @@ impl Requests for reqwest::Client {
         &self,
         base_url: &Url,
         ssr_client: &SapSsrClient,
-        event_queue: &mut EventQueue,
+        event_queue: &str,
     ) -> Result<RequestBuilder, ClientError> {
         let mut url = "".to_owned();
         url.push_str(base_url.scheme());
@@ -265,7 +267,6 @@ impl Requests for reqwest::Client {
             url.push_str(port.to_string().as_str());
         }
         url.push_str(ssr_client.action.as_str());
-        let serialized = event_queue.serialize_and_clear();
         let params = [
             ("sap-charset", ssr_client.charset.as_str()),
             ("sap-wd-secure-id", ssr_client.wd_secure_id.as_str()),
@@ -278,7 +279,7 @@ impl Requests for reqwest::Client {
                     "false"
                 }),
             ),
-            ("SAPEVENTQUEUE", &serialized),
+            ("SAPEVENTQUEUE", event_queue),
         ];
         Ok(self.post(url).headers(wd_xhr_header()).form(&params))
     }
