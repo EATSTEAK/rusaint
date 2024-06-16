@@ -11,7 +11,6 @@ use crate::{
             definition::ElementDefinition,
             text::{InputField, InputFieldDef},
         },
-        error::WebDynproError,
     },
     RusaintError,
 };

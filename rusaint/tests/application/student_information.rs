@@ -1,4 +1,4 @@
-use rusaint::{application::{student_information::StudentInformationApplication, USaintClientBuilder}, webdynpro::error::{ElementError, WebDynproError}};
+use rusaint::{application::{student_information::StudentInformationApplication, USaintClientBuilder}, webdynpro::error::{ElementError, WebDynproError}, RusaintError};
 use serial_test::serial;
 
 use crate::get_session;
@@ -27,7 +27,7 @@ async fn graduation() {
         .unwrap();
     let student_info = app.graduation();
     match student_info {
-        Err(WebDynproError::Element(ElementError::NoSuchContent { element: _, content: _ })) => assert!(true),
+        Err(RusaintError::WebDynproError(WebDynproError::Element(ElementError::NoSuchContent { element: _, content: _ }))) => assert!(true),
         Err(err) => {
             panic!("{:?}", err);
         },
