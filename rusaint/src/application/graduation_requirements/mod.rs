@@ -75,7 +75,7 @@ impl<'a> GraduationRequirementsApplication {
     }
 
     /// 학생 정보를 반환합니다.
-    pub async fn student_info(&self) -> Result<GraduationStudent, WebDynproError> {
+    pub async fn student_info(&self) -> Result<GraduationStudent, RusaintError> {
         let number = Self::STUDENT_NUM.from_body(self.body())?.value_into_u32()?;
         let name = &Self::STUDENT_NAME.from_body(self.body())?.value_string()?;
         let grade = Self::STUDENT_GRADE
@@ -125,7 +125,7 @@ impl<'a> GraduationRequirementsApplication {
     }
 
     /// 졸업사정 결과와 졸업 필요 요건별 충족 여부와 세부 정보를 반환합니다.
-    pub async fn requirements(&mut self) -> Result<GraduationRequirements, WebDynproError> {
+    pub async fn requirements(&mut self) -> Result<GraduationRequirements, RusaintError> {
         self.client
             .send(ButtonPressCommand::new(Self::SHOW_DETAILS))
             .await?;
