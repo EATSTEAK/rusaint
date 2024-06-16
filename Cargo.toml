@@ -1,44 +1,17 @@
-[package]
-name = "rusaint"
-version = "0.5.1"
-description = "Easy-to-use SSU u-saint client"
+[workspace]
+members = [ "rusaint", "rusaint-ffi", "uniffi-bindgen" ]
+resolver = "2"
+
+[workspace.package]
+version = "0.6.0"
+
 keywords = ["ssu", "u-saint", "scraping", "parser"]
-categories = ["web-programming"]
 authors = ["Hyomin Koo <me@eatsteak.dev>"]
 license = "MIT"
+homepage = "https://eatsteak.dev"
 repository = "https://github.com/EATSTEAK/rusaint"
 edition = "2021"
 
-[features]
-default = ["application", "model"]
-application = []
-model = ["application"]
-
-[dependencies]
-derive_builder = "0.20.0"
-reqwest = { version = "0.12.4", features = [
-    "cookies",
-    "gzip",
-    "brotli",
-    "deflate",
-] }
+[workspace.dependencies]
 thiserror = "1.0.44"
-tokio = { version = "1.29.1", features = ["macros", "test-util"] }
-html-escape = "0.2.13"
-url = "2.4.1"
-roxmltree = "0.20.0"
-lol_html = "1.2.1"
-scraper = "0.19.0"
-serde = { version = "1", features = ["derive"] }
-serde_json = "1"
-regex = "1.9.5"
-custom_debug_derive = "0.6.1"
-ego-tree = "0.6.2"
-
-
-[dev-dependencies]
-anyhow = "1.0.75"
-dotenv = "0.15.0"
-futures = "0.3.28"
-serial_test = "3.0.0"
-tokio-test = "0.4.3"
+tokio = { version = "1.29.1" }

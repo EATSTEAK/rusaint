@@ -7,7 +7,7 @@ use model::{
 
 use crate::{
     define_elements,
-    webdynpro::{client::body::Body, element::layout::TabStrip, error::WebDynproError},
+    webdynpro::{client::body::Body, element::layout::TabStrip},
     RusaintError,
 };
 
@@ -37,13 +37,13 @@ impl<'a> StudentInformationApplication {
     }
 
     /// 일반 학생 정보를 반환합니다.
-    pub fn general(&self) -> Result<StudentInformation, WebDynproError> {
-        StudentInformation::from_body(self.body())
+    pub fn general(&self) -> Result<StudentInformation, RusaintError> {
+        Ok(StudentInformation::from_body(self.body())?)
     }
 
     /// 학생의 졸업과 관련된 정보를 반환합니다.
-    pub fn graduation(&self) -> Result<StudentGraduation, WebDynproError> {
-        StudentGraduation::from_body(self.body())
+    pub fn graduation(&self) -> Result<StudentGraduation, RusaintError> {
+        Ok(StudentGraduation::from_body(self.body())?)
     }
 
     /// 학생의 교직, 평생교육사, 7+1 프로그램 등 자격 관련 정보를 반환합니다.
@@ -52,42 +52,42 @@ impl<'a> StudentInformationApplication {
     }
 
     /// 학생의 직장 정보를 반환합니다.
-    pub async fn work(&mut self) -> Result<StudentWorkInformation, WebDynproError> {
-        StudentWorkInformation::with_client(&mut self.client).await
+    pub async fn work(&mut self) -> Result<StudentWorkInformation, RusaintError> {
+        Ok(StudentWorkInformation::with_client(&mut self.client).await?)
     }
 
     /// 학생의 가족관계 정보를 반환합니다.
-    pub async fn family(&mut self) -> Result<StudentFamily, WebDynproError> {
-        StudentFamily::with_client(&mut self.client).await
+    pub async fn family(&mut self) -> Result<StudentFamily, RusaintError> {
+        Ok(StudentFamily::with_client(&mut self.client).await?)
     }
 
     /// 학생의 종교 정보를 반환합니다.
-    pub async fn religion(&mut self) -> Result<StudentReligion, WebDynproError> {
-        StudentReligion::with_client(&mut self.client).await
+    pub async fn religion(&mut self) -> Result<StudentReligion, RusaintError> {
+        Ok(StudentReligion::with_client(&mut self.client).await?)
     }
 
     /// 학생의 편입정보를 반환합니다.
-    pub async fn transfer(&mut self) -> Result<StudentTransferRecords, WebDynproError> {
-        StudentTransferRecords::with_client(&mut self.client).await
+    pub async fn transfer(&mut self) -> Result<StudentTransferRecords, RusaintError> {
+        Ok(StudentTransferRecords::with_client(&mut self.client).await?)
     }
 
     /// 학생의 은행계좌 정보를 반환합니다.
-    pub async fn bank_account(&mut self) -> Result<StudentBankAccount, WebDynproError> {
-        StudentBankAccount::with_client(&mut self.client).await
+    pub async fn bank_account(&mut self) -> Result<StudentBankAccount, RusaintError> {
+        Ok(StudentBankAccount::with_client(&mut self.client).await?)
     }
 
     /// 학생의 학적상태 정보를 반환합니다.
     pub async fn academic_record(
         &mut self,
-    ) -> Result<StudentAcademicRecords, WebDynproError> {
-        StudentAcademicRecords::with_client(&mut self.client).await
+    ) -> Result<StudentAcademicRecords, RusaintError> {
+        Ok(StudentAcademicRecords::with_client(&mut self.client).await?)
     }
 
     /// 학생의 연구비 입금 계좌를 반환합니다.
     pub async fn research_bank_account(
         &mut self,
-    ) -> Result<StudentResearchBankAccount, WebDynproError> {
-        StudentResearchBankAccount::with_client(&mut self.client).await
+    ) -> Result<StudentResearchBankAccount, RusaintError> {
+        Ok(StudentResearchBankAccount::with_client(&mut self.client).await?)
     }
 
     fn body(&self) -> &Body {

@@ -58,7 +58,7 @@ impl<'a> ChapelApplication {
         &mut self,
         year: &str,
         semester: SemesterType,
-    ) -> Result<(), WebDynproError> {
+    ) -> Result<(), RusaintError> {
         let semester = Self::semester_to_key(semester);
         let year_combobox_lsdata = self
             .client

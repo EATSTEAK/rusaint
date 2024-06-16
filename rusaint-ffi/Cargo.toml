@@ -1,0 +1,23 @@
+[package]
+name = "rusaint-ffi"
+
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+homepage.workspace = true
+repository.workspace = true
+license.workspace = true
+keywords.workspace = true
+
+[lib]
+crate-type = [ "cdylib", "staticlib" ]
+
+[dependencies]
+uniffi = { version = "0.28.0" }
+rusaint = { path = "../rusaint" }
+thiserror = { workspace = true }
+tokio = { workspace = true, features = ["sync"] }
+
+[build-dependencies]
+uniffi = { version = "0.28.0", features = [ "build" ] }
+

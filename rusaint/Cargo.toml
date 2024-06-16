@@ -1,0 +1,46 @@
+[package]
+name = "rusaint"
+description = "Easy-to-use SSU u-saint client"
+categories = ["web-programming"]
+
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+homepage.workspace = true
+repository.workspace = true
+license.workspace = true
+keywords.workspace = true
+
+[features]
+default = ["application", "model"]
+application = []
+model = ["application"]
+
+[dependencies]
+derive_builder = "0.20.0"
+reqwest = { version = "0.12.4", features = [
+    "cookies",
+    "gzip",
+    "brotli",
+    "deflate",
+] }
+thiserror = { workspace = true }
+tokio = { workspace = true, features = ["macros", "test-util", "sync"] }
+html-escape = "0.2.13"
+url = "2.4.1"
+roxmltree = "0.20.0"
+lol_html = "1.2.1"
+scraper = { version = "0.19.0", features = ["atomic"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+regex = "1.9.5"
+custom_debug_derive = "0.6.1"
+ego-tree = "0.6.2"
+
+
+[dev-dependencies]
+anyhow = "1.0.75"
+dotenv = "0.15.0"
+futures = "0.3.28"
+serial_test = "3.0.0"
+tokio-test = "0.4.3"
