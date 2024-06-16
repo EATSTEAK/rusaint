@@ -133,6 +133,7 @@ pub struct Body {
     sap_ssr_client: SapSsrClient,
 }
 
+// This is safe since body doesn't mutate `scraper::Html` directly
 unsafe impl Send for Body {}
 unsafe impl Sync for Body {}
 
