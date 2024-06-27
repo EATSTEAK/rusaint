@@ -11,6 +11,7 @@ use crate::{
 };
 
 #[derive(Clone, Debug)]
+#[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
 /// 기본 학생 정보
 pub struct StudentInformation {
     apply_year: u32,

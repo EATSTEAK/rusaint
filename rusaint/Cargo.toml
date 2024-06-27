@@ -12,11 +12,12 @@ license.workspace = true
 keywords.workspace = true
 
 [features]
-default = ["application", "model"]
+default = ["application", "uniffi"]
 application = []
-model = ["application"]
+uniffi = ["application"]
 
 [dependencies]
+uniffi = { version = "0.28.0" }
 derive_builder = "0.20.0"
 reqwest = { version = "0.12.4", features = [
     "cookies",
@@ -44,3 +45,7 @@ dotenv = "0.15.0"
 futures = "0.3.28"
 serial_test = "3.0.0"
 tokio-test = "0.4.3"
+
+[build-dependencies]
+uniffi = { version = "0.28.0", features = [ "build" ] }
+

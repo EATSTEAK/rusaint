@@ -29,6 +29,7 @@ use crate::{
 
 /// 강의를 찾을 때 사용하는 강의 카테고리
 #[allow(unused)]
+#[cfg_attr(feature = "uniffi", derive(uniffi::Enum))]
 pub enum LectureCategory {
     /// 전공 강의
     Major {
@@ -541,6 +542,7 @@ impl LectureCategory {
 /// 과목 정보
 #[allow(unused)]
 #[derive(Debug, Deserialize)]
+#[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
 pub struct Lecture {
     /// 계획
     #[serde(rename(deserialize = "계획"), default, deserialize_with = "deserialize_optional_string")]

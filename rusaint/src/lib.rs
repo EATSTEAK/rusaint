@@ -65,13 +65,16 @@ pub use session::obtain_ssu_sso_token;
 #[cfg(feature = "application")]
 pub use session::USaintSession;
 
-#[cfg(feature = "model")]
+#[cfg(feature = "application")]
 /// u-saint 애플리케이션에서 공통으로 사용하는 데이터
 pub mod model;
 
 pub(crate) mod utils;
 /// SAP WebDynpro 클라이언트를 파싱, 모방하는 클라이언트 엔진
 pub mod webdynpro;
+
+#[cfg(feature = "uniffi")]
+uniffi::setup_scaffolding!();
 
 #[cfg(test)]
 pub mod global_test_utils {

@@ -15,6 +15,7 @@ use crate::{
 };
 
 #[derive(Clone, Debug)]
+#[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
 /// 학생의 직업 정보
 pub struct StudentWorkInformation {
     job: Option<String>,

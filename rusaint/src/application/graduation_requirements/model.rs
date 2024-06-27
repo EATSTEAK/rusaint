@@ -14,6 +14,7 @@ use crate::{
 };
 
 #[derive(Debug)]
+#[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
 /// 졸업 학생 정보
 pub struct GraduationStudent {
     number: u32,
@@ -123,6 +124,7 @@ impl GraduationStudent {
 }
 
 #[derive(Debug)]
+#[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
 /// 전체 졸업 요건 정보
 pub struct GraduationRequirements {
     is_graduatable: bool,
@@ -152,6 +154,7 @@ impl GraduationRequirements {
 }
 
 #[derive(Deserialize, Debug)]
+#[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
 /// 졸업 요건
 pub struct GraduationRequirement {
     #[serde(

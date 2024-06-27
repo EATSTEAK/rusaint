@@ -30,6 +30,7 @@ use crate::{
 };
 
 #[derive(Clone, Debug)]
+#[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
 /// 학기별 채플 정보
 pub struct ChapelInformation {
     year: u32,
@@ -83,6 +84,7 @@ impl ChapelInformation {
 }
 
 #[derive(Clone, Debug, Deserialize)]
+#[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
 /// 채플 기본 정보(좌석번호, 결석현황, 성적결과)
 pub struct GeneralChapelInformation {
     #[serde(
@@ -193,6 +195,7 @@ impl<'body> FromSapTable<'body> for GeneralChapelInformation {
 }
 
 #[derive(Clone, Debug, Deserialize)]
+#[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
 /// 채플 수업별 출석정보
 pub struct ChapelAttendance {
     #[serde(
@@ -304,6 +307,7 @@ impl<'body> FromSapTable<'body> for ChapelAttendance {
 }
 
 #[derive(Clone, Debug, Deserialize)]
+#[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
 /// 채플 결석신청 정보
 pub struct ChapelAbsenceRequest {
     #[serde(
