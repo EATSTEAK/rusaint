@@ -14,7 +14,7 @@ crate-type = [ "cdylib", "staticlib" ]
 
 [dependencies]
 uniffi = { version = "0.28.0" }
-rusaint = { path = "../rusaint" }
+rusaint = { path = "../rusaint", features = ["uniffi"] }
 thiserror = { workspace = true }
 tokio = { workspace = true, features = ["sync"] }
 
