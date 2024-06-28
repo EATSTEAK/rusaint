@@ -76,6 +76,10 @@ pub mod webdynpro;
 #[cfg(feature = "uniffi")]
 uniffi::setup_scaffolding!();
 
+#[cfg(feature = "uniffi")]
+/// `uniffi` 지원을 위한 모듈
+pub mod uniffi_support;
+
 #[cfg(test)]
 pub mod global_test_utils {
     use anyhow::{Error, Result};

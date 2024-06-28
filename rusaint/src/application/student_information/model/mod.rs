@@ -32,7 +32,8 @@ pub struct StudentInformation {
     tel_number: Option<String>,
     mobile_number: Option<String>,
     post_code: Option<String>,
-    address: (Option<String>, Option<String>),
+    address: Option<String>,
+    specific_address: Option<String>,
     is_transfer_student: bool,
     apply_date: String,
     applied_collage: String,
@@ -126,14 +127,20 @@ impl<'a> StudentInformation {
             rrn: Self::PRDNI.from_body(body)?.value_into_u32()?,
             collage: body.read(ReadInputFieldValueCommand::new(Self::COLEG_TXT))?,
             department: body.read(ReadInputFieldValueCommand::new(Self::DEPT_TXT))?,
-            major: body.read(ReadInputFieldValueCommand::new(Self::MAJOR_TXT)).ok(),
+            major: body
+                .read(ReadInputFieldValueCommand::new(Self::MAJOR_TXT))
+                .ok(),
             division: body.read(ReadInputFieldValueCommand::new(Self::TITEL)).ok(),
             grade: Self::CMSTYEAR.from_body(body)?.value_into_u32()?,
             term: Self::ZSCHTERM.from_body(body)?.value_into_u32()?,
             image: Vec::with_capacity(0), // TODO: Image to bytes
             alias: body.read(ReadInputFieldValueCommand::new(Self::RUFNM)).ok(),
-            kanji_name: body.read(ReadInputFieldValueCommand::new(Self::BIRTHNAME)).ok(),
-            email: body.read(ReadInputFieldValueCommand::new(Self::SMTP_ADDR)).ok(),
+            kanji_name: body
+                .read(ReadInputFieldValueCommand::new(Self::BIRTHNAME))
+                .ok(),
+            email: body
+                .read(ReadInputFieldValueCommand::new(Self::SMTP_ADDR))
+                .ok(),
             tel_number: body
                 .read(ReadInputFieldValueCommand::new(Self::TEL_NUMBER))
                 .ok(),
@@ -143,21 +150,28 @@ impl<'a> StudentInformation {
             post_code: body
                 .read(ReadInputFieldValueCommand::new(Self::POST_CODE))
                 .ok(),
-            address: (
-                body.read(ReadInputFieldValueCommand::new(Self::CITY1)).ok(),
-                body.read(ReadInputFieldValueCommand::new(Self::STREET))
-                    .ok(),
-            ),
+            address: body.read(ReadInputFieldValueCommand::new(Self::CITY1)).ok(),
+            specific_address: body
+                .read(ReadInputFieldValueCommand::new(Self::STREET))
+                .ok(),
             is_transfer_student: !body
                 .read(ReadInputFieldValueCommand::new(Self::NEWINCOR_CDT))?
                 .contains("신입학"),
             apply_date: body.read(ReadInputFieldValueCommand::new(Self::APPLY_DT))?,
             applied_collage: body.read(ReadInputFieldValueCommand::new(Self::COLEG_CDT))?,
             applied_department: body.read(ReadInputFieldValueCommand::new(Self::DEPT_CDT))?,
-            plural_major: body.read(ReadInputFieldValueCommand::new(Self::CG_STEXT1)).ok(),
-            sub_major: body.read(ReadInputFieldValueCommand::new(Self::CG_STEXT2)).ok(),
-            connected_major: body.read(ReadInputFieldValueCommand::new(Self::CG_STEXT3)).ok(),
-            abeek: body.read(ReadInputFieldValueCommand::new(Self::CG_STEXT4)).ok(),
+            plural_major: body
+                .read(ReadInputFieldValueCommand::new(Self::CG_STEXT1))
+                .ok(),
+            sub_major: body
+                .read(ReadInputFieldValueCommand::new(Self::CG_STEXT2))
+                .ok(),
+            connected_major: body
+                .read(ReadInputFieldValueCommand::new(Self::CG_STEXT3))
+                .ok(),
+            abeek: body
+                .read(ReadInputFieldValueCommand::new(Self::CG_STEXT4))
+                .ok(),
         })
     }
 
@@ -249,8 +263,8 @@ impl<'a> StudentInformation {
     /// 주소를 반환합니다.
     pub fn address(&self) -> (Option<&str>, Option<&str>) {
         (
-            self.address.0.as_ref().map(String::as_str),
-            self.address.1.as_ref().map(String::as_str),
+            self.address.as_ref().map(String::as_str),
+            self.specific_address.as_ref().map(String::as_str),
         )
     }
 

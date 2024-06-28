@@ -7,8 +7,8 @@ use crate::{
             text::ReadInputFieldValueCommand,
         },
         element::{
-            action::Button, layout::tab_strip::item::TabStripItem,
-            selection::ComboBox, text::InputField,
+            action::Button, layout::tab_strip::item::TabStripItem, selection::ComboBox,
+            text::InputField,
         },
         error::WebDynproError,
     },
@@ -24,7 +24,8 @@ pub struct StudentWorkInformation {
     department_name: Option<String>,
     title: Option<String>,
     zip_code: Option<String>,
-    address: (Option<String>, Option<String>),
+    address: Option<String>,
+    specific_address: Option<String>,
     tel_number: Option<String>,
     fax_number: Option<String>,
 }
@@ -88,14 +89,12 @@ impl<'a> StudentWorkInformation {
             zip_code: client
                 .read(ReadInputFieldValueCommand::new(Self::COMPANY_ZIP_COD))
                 .ok(),
-            address: (
-                client
-                    .read(ReadInputFieldValueCommand::new(Self::COMPANY_ADDRESS))
-                    .ok(),
-                client
-                    .read(ReadInputFieldValueCommand::new(Self::COMPANY_ADDRESS2))
-                    .ok(),
-            ),
+            address: client
+                .read(ReadInputFieldValueCommand::new(Self::COMPANY_ADDRESS))
+                .ok(),
+            specific_address: client
+                .read(ReadInputFieldValueCommand::new(Self::COMPANY_ADDRESS2))
+                .ok(),
             tel_number: client
                 .read(ReadInputFieldValueCommand::new(Self::COMPANY_TEL1))
                 .ok(),
@@ -137,8 +136,8 @@ impl<'a> StudentWorkInformation {
     /// 주소를 반환합니다.
     pub fn address(&self) -> (Option<&str>, Option<&str>) {
         (
-            self.address.0.as_ref().map(String::as_str),
-            self.address.1.as_ref().map(String::as_str),
+            self.address.as_ref().map(String::as_str),
+            self.specific_address.as_ref().map(String::as_str),
         )
     }
 
