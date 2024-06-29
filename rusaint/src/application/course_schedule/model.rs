@@ -6,7 +6,9 @@ use serde::{
 };
 
 use crate::{
-    define_elements, utils::de_with::deserialize_optional_string, webdynpro::{
+    define_elements,
+    utils::de_with::deserialize_optional_string,
+    webdynpro::{
         client::WebDynproClient,
         command::element::{
             action::ButtonPressCommand,
@@ -24,7 +26,7 @@ use crate::{
             selection::{ComboBox, ComboBoxDef},
         },
         error::{ElementError, WebDynproError},
-    }
+    },
 };
 
 /// 강의를 찾을 때 사용하는 강의 카테고리
@@ -545,19 +547,35 @@ impl LectureCategory {
 #[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
 pub struct Lecture {
     /// 계획
-    #[serde(rename(deserialize = "계획"), default, deserialize_with = "deserialize_optional_string")]
+    #[serde(
+        rename(deserialize = "계획"),
+        default,
+        deserialize_with = "deserialize_optional_string"
+    )]
     syllabus: Option<String>,
     /// 이수구분(주전공)
     #[serde(rename(deserialize = "이수구분(주전공)"))]
     category: String,
     /// 이수구분(다전공)
-    #[serde(rename(deserialize = "이수구분(다전공)"), default, deserialize_with = "deserialize_optional_string")]
+    #[serde(
+        rename(deserialize = "이수구분(다전공)"),
+        default,
+        deserialize_with = "deserialize_optional_string"
+    )]
     sub_category: Option<String>,
     /// 공학인증
-    #[serde(rename(deserialize = "공학인증"), default, deserialize_with = "deserialize_optional_string")]
+    #[serde(
+        rename(deserialize = "공학인증"),
+        default,
+        deserialize_with = "deserialize_optional_string"
+    )]
     abeek_info: Option<String>,
     /// 교과영역
-    #[serde(rename(deserialize = "교과영역"), default, deserialize_with = "deserialize_optional_string")]
+    #[serde(
+        rename(deserialize = "교과영역"),
+        default,
+        deserialize_with = "deserialize_optional_string"
+    )]
     field: Option<String>,
     /// 과목번호
     #[serde(rename(deserialize = "과목번호"))]
@@ -566,7 +584,11 @@ pub struct Lecture {
     #[serde(rename(deserialize = "과목명"))]
     name: String,
     /// 분반
-    #[serde(rename(deserialize = "분반"), default, deserialize_with = "deserialize_optional_string")]
+    #[serde(
+        rename(deserialize = "분반"),
+        default,
+        deserialize_with = "deserialize_optional_string"
+    )]
     division: Option<String>,
     /// 교수명
     #[serde(rename(deserialize = "교수명"))]
@@ -605,5 +627,94 @@ impl<'body> FromSapTable<'body> for Lecture {
                 content: e.to_string(),
             })?,
         )
+    }
+}
+
+#[cfg(feature = "uniffi")]
+#[cfg_attr(feature = "uniffi", derive(uniffi::Object))]
+/// 새로운 `LectureCategory`를 만드는 빌더입니다.
+pub struct LectureCategoryBuilder {}
+
+#[cfg(feature = "uniffi")]
+#[cfg_attr(feature = "uniffi", uniffi::export)]
+impl LectureCategoryBuilder {
+    #[uniffi::constructor]
+    /// `LectureCategoryBuilder`를 만듭니다.
+    pub fn new() -> Self {
+        Self {}
+    }
+
+    /// 전공과목 분류의 [`LectureCategory`]를 만듭니다.
+    pub fn major(
+        &self,
+        collage: &str,
+        department: &str,
+        major: &Option<String>,
+    ) -> LectureCategory {
+        LectureCategory::major(collage, department, major.as_ref().map(String::as_str))
+    }
+
+    /// 교양필수 분류의 [`LectureCategory`]를 만듭니다.
+    pub fn required_elective(&self, lecture_name: &str) -> LectureCategory {
+        LectureCategory::required_elective(lecture_name)
+    }
+
+    /// 교양선택 분류의 [`LectureCategory`]를 만듭니다.
+    pub fn optional_elective(&self, category: &str) -> LectureCategory {
+        LectureCategory::optional_elective(category)
+    }
+
+    /// 채플 분류의 [`LectureCategory`]를 만듭니다.
+    pub fn chapel(&self, lecture_name: &str) -> LectureCategory {
+        LectureCategory::chapel(lecture_name)
+    }
+
+    /// 교직 분류의 [`LectureCategory`]를 만듭니다.
+    pub fn education(&self) -> LectureCategory {
+        LectureCategory::education()
+    }
+
+    /// 대학원 분류의 [`LectureCategory`]를 만듭니다.
+    pub fn graduated(&self, collage: &str, department: &str) -> LectureCategory {
+        LectureCategory::graduated(collage, department)
+    }
+
+    /// 연계전공 분류의 [`LectureCategory`]를 만듭니다.
+    pub fn connected_major(&self, major: &str) -> LectureCategory {
+        LectureCategory::connected_major(major)
+    }
+
+    /// 융합전공 분류의 [`LectureCategory`]를 만듭니다.
+    pub fn united_major(&self, major: &str) -> LectureCategory {
+        LectureCategory::united_major(major)
+    }
+
+    /// 교수명으로 찾기 위한 [`LectureCategory`]를 만듭니다.
+    pub fn find_by_professor(&self, keyword: &str) -> LectureCategory {
+        LectureCategory::find_by_professor(keyword)
+    }
+
+    /// 과목명으로 찾기 위한 [`LectureCategory`]를 만듭니다.
+    pub fn find_by_lecture(&self, keyword: &str) -> LectureCategory {
+        LectureCategory::find_by_lecture(keyword)
+    }
+
+    /// 타전공인정과목 분류의 [`LectureCategory`]를 만듭니다.
+    pub fn recognized_other_major(
+        &self,
+        collage: &str,
+        department: &str,
+        major: &Option<String>,
+    ) -> LectureCategory {
+        LectureCategory::recognized_other_major(
+            collage,
+            department,
+            major.as_ref().map(String::as_str),
+        )
+    }
+
+    /// 숭실사이버대 분류의 [`LectureCategory`]를 만듭니다.
+    pub fn cyber(&self) -> LectureCategory {
+        LectureCategory::cyber()
     }
 }

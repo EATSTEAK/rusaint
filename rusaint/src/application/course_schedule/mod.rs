@@ -97,7 +97,7 @@ impl<'a> CourseScheduleApplication {
         &mut self,
         year: u32,
         period: SemesterType,
-        lecture_category: LectureCategory,
+        lecture_category: &LectureCategory,
     ) -> Result<impl Iterator<Item = Lecture>, RusaintError> {
         let year_str = format!("{}", year);
         self.select_rows(500).await?;
