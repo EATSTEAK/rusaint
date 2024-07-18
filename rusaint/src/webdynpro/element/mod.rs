@@ -8,7 +8,7 @@ use serde_json::{Map, Value};
 
 use self::{action::{Button, Link}, complex::SapTable, definition::ElementDefinition, graphic::Image, layout::{grid_layout::cell::GridLayoutCell, tab_strip::item::TabStripItem, ButtonRow, Container, FlowLayout, Form, GridLayout, PopupWindow, ScrollContainer, Scrollbar, TabStrip, Tray}, selection::{list_box::{item::{ListBoxActionItem, ListBoxItem}, ListBoxMultiple, ListBoxPopup, ListBoxPopupFiltered, ListBoxPopupJson, ListBoxPopupJsonFiltered, ListBoxSingle}, ComboBox}, system::{ClientInspector, Custom, LoadingPlaceholder}, text::{Caption, InputField, Label, TextView}};
 
-use super::{event::{ucf_parameters::UcfParameters, Event}, error::{ElementError, BodyError, WebDynproError}, client::body::Body};
+use super::{event::{ucf_parameters::UcfParameters, Event, EventBuilder}, error::{ElementError, BodyError, WebDynproError}, client::body::Body};
 
 /// 엘리먼트의 정의를 다루는 모듈
 pub mod definition;
@@ -534,7 +534,14 @@ pub trait Interactable<'a>: Element<'a> {
 	/// 엘리먼트가 이벤트를 발생시킬 수 있는가와 관계 없이 이벤트를 발생시킵니다.
     /// > | **주의** | 엘리먼트가 이벤트를 발생시킬 수 있는지 여부를 확인하지 않으므로 예상치 않은 오류가 발생할 수 있습니다.
     unsafe fn fire_event_unchecked(event: String, parameters: HashMap<String, String>, ucf_params: UcfParameters, custom_params: HashMap<String, String>) -> Event {
-        Event::new(event, Self::ELEMENT_NAME.to_owned(), parameters, ucf_params, custom_params)
+        EventBuilder::default()
+        .control(Self::ELEMENT_NAME.to_owned())
+        .event(event)
+        .parameters(parameters)
+        .ucf_parameters(ucf_params)
+        .custom_parameters(custom_params)
+        .build()
+        .unwrap()
     }
 
 	/// 엘리먼트가 발생시킬 수 있는 이벤트와 파라메터를 가져옵니다.
