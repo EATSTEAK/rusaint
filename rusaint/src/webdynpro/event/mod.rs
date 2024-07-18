@@ -1,5 +1,4 @@
 use self::ucf_parameters::UcfParameters;
-use derive_builder::Builder;
 
 use std::{borrow::Cow, collections::HashMap, num::ParseIntError};
 
@@ -12,7 +11,7 @@ const EVENT_DATA_COLON: &str = "~E004";
 const EVENT_DATA_COMMA: &str = "~E005";
 
 /// 일반 문자열을 이벤트 큐에서 전송하는 형태로 변환합니다.
-pub fn escape_str<'a>(text: &'a str) -> String {
+pub fn escape_str(text: &str) -> String {
     let chars = text.chars();
 
     let mut owned: Vec<u8> = vec![];
@@ -45,7 +44,7 @@ fn decode_hex(s: &str) -> Result<Vec<u16>, ParseIntError> {
 }
 
 /// 이벤트 큐의 문자열을 일반 문자열으로 변환합니다.
-pub fn unescape_str<'a>(text: &'a str) -> Result<Cow<'a, str>, EventStrUnescapeError> {
+pub fn unescape_str(text: &str) -> Result<Cow<str>, EventStrUnescapeError> {
     let bytes = text.as_bytes();
 
     let mut owned = None;
@@ -87,7 +86,7 @@ pub fn unescape_str<'a>(text: &'a str) -> Result<Cow<'a, str>, EventStrUnescapeE
 
 /// 엘리먼트에서 전송하는 이벤트
 #[allow(missing_docs)]
-#[derive(Builder, Clone, Debug)]
+#[derive(Clone, Debug)]
 pub struct Event {
     event: String,
     control: String,
@@ -131,6 +130,11 @@ impl ToString for Event {
 }
 
 impl Event {
+
+    /// 새로운 이벤트를 생성합니다.
+    pub(crate) fn new(event: String, control: String, parameters: HashMap<String, String>, ucf_parameters: UcfParameters, custom_parameters: HashMap<String, String>) -> Self {
+        Self { event, control, parameters, ucf_parameters, custom_parameters }
+    }
     /// 이벤트를 웹 리퀘스트에서 전송할 수 있는 형태의 문자열로 변환합니다.
     pub fn serialize(&self) -> String {
         self.to_string()
@@ -145,6 +149,8 @@ impl Event {
     pub fn is_submitable(&self) -> bool {
         self.ucf_parameters.is_submitable()
     }
+
+
 }
 
 pub(crate) mod event_queue;
