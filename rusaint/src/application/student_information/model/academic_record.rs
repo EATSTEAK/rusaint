@@ -20,6 +20,7 @@ use crate::{
 };
 
 #[derive(Clone, Debug)]
+#[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
 /// 학생의 학적상태 정보
 pub struct StudentAcademicRecords {
     records: Vec<StudentAcademicRecord>,
@@ -55,6 +56,7 @@ impl<'a> StudentAcademicRecords {
 }
 
 #[derive(Clone, Debug, Deserialize)]
+#[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
 /// 학생의 학적상태 기록
 pub struct StudentAcademicRecord {
     #[serde(rename(deserialize = "시작일"))]

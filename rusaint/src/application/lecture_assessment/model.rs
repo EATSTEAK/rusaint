@@ -16,6 +16,7 @@ use crate::{
 
 /// 강의평가 결과
 #[derive(Clone, Debug, Deserialize)]
+#[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
 pub struct LectureAssessmentResult {
     #[serde(rename(deserialize = "년도"))]
     year: String,

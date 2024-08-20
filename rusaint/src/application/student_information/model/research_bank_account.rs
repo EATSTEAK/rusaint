@@ -15,7 +15,8 @@ use crate::{
 };
 
 #[derive(Clone, Debug)]
-/// 연구비 입급 계좌 정보
+#[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
+/// 연구비 입금 계좌 정보
 pub struct StudentResearchBankAccount {
     bank: Option<String>,
     account_number: Option<String>,

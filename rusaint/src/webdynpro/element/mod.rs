@@ -1,7 +1,7 @@
 use std::{collections::HashMap, hash::{DefaultHasher, Hash, Hasher}};
 
 
-use regex::Regex;
+use regex_lite::Regex;
 use scraper::ElementRef;
 use selection::CheckBox;
 use serde_json::{Map, Value};

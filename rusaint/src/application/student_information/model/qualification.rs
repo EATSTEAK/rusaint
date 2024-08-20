@@ -7,6 +7,7 @@ use crate::{
 };
 
 #[derive(Clone, Debug)]
+#[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
 /// 학생의 자격(교직이수, 평생교육사, 7+1 프로그램) 정보
 pub struct StudentQualification {
     teaching_major: Option<StudentTeachingMajorInformation>,
@@ -47,6 +48,7 @@ impl<'a> StudentQualification {
 }
 
 #[derive(Clone, Debug)]
+#[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
 /// 교직이수(주전공) 정보
 pub struct StudentTeachingMajorInformation {
     major_name: Option<String>,
@@ -109,6 +111,7 @@ impl<'a> StudentTeachingMajorInformation {
 }
 
 #[derive(Clone, Debug)]
+#[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
 /// 교직이수(복수전공) 정보
 pub struct StudentTeachingPluralMajorInformation {
     major_name: Option<String>,
@@ -160,6 +163,7 @@ impl<'a> StudentTeachingPluralMajorInformation {
 }
 
 #[derive(Clone, Debug)]
+#[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
 /// 평생교육사 정보
 pub struct StudentLifelongInformation {
     apply_date: Option<String>,
@@ -220,6 +224,7 @@ impl<'a> StudentLifelongInformation {
 }
 
 #[derive(Clone, Debug)]
+#[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
 /// 7+1 프로그램 정보를 반환합니다.
 pub struct StudentForignStudyInformation {
     approval_date: Option<String>,

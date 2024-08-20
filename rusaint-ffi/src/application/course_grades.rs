@@ -1,0 +1,105 @@
+use std::{collections::HashMap, sync::Arc};
+
+use rusaint::{
+    application::course_grades::model::{ClassGrade, CourseType, GradeSummary, SemesterGrade},
+    model::SemesterType,
+};
+use tokio::sync::RwLock;
+
+use crate::{error::RusaintError, session::USaintSession};
+
+#[derive(uniffi::Object)]
+pub struct CourseGradesApplication(
+    RwLock<rusaint::application::course_grades::CourseGradesApplication>,
+);
+
+#[uniffi::export]
+impl CourseGradesApplication {
+    
+    /// 전체 학기의 학적부 평점 정보를 가져옵니다.
+    pub async fn recorded_summary(
+        &self,
+        course_type: CourseType,
+    ) -> Result<GradeSummary, RusaintError> {
+        Ok(self.0.write().await.recorded_summary(course_type).await?)
+    }
+
+    /// 전체 학기의 증명 평점 정보를 가져옵니다.
+    pub async fn certificated_summary(
+        &self,
+        course_type: CourseType,
+    ) -> Result<GradeSummary, RusaintError> {
+        Ok(self
+            .0
+            .write()
+            .await
+            .certificated_summary(course_type)
+            .await?)
+    }
+
+    /// 학기별 평점 정보를 가져옵니다.
+    pub async fn semesters(
+        &self,
+        course_type: CourseType,
+    ) -> Result<Vec<SemesterGrade>, RusaintError> {
+        Ok(self.0.write().await.semesters(course_type).await?)
+    }
+
+    /// 주어진 학기의 수업별 성적을 가져옵니다. `include_details`가 `true`인 경우 수업의 상세 성적도 가져옵니다.
+    /// 수업의 상세 성적까지 가져올 경우 상세 성적이 있는 수업의 수 만큼 서버에 요청을 보내므로 반드시 상세 성적도 한번에 가져와야 할 때에만 사용하십시오.
+    ///
+    /// 수업 성적을 가져온 이후 상세 성적 또한 가져오려면 `[class_detail()]`함수를 이용하십시오.
+    pub async fn classes(
+        &self,
+        course_type: CourseType,
+        year: &str,
+        semester: SemesterType,
+        include_details: bool,
+    ) -> Result<Vec<ClassGrade>, RusaintError> {
+        Ok(self
+            .0
+            .write()
+            .await
+            .classes(course_type, year, semester, include_details)
+            .await?)
+    }
+
+    /// 주어진 수업의 상세 성적 정보를 가져옵니다.
+    pub async fn class_detail(
+        &self,
+        course_type: CourseType,
+        year: &str,
+        semester: SemesterType,
+        code: &str,
+    ) -> Result<HashMap<String, f32>, RusaintError> {
+        Ok(self
+            .0
+            .write()
+            .await
+            .class_detail(course_type, year, semester, code)
+            .await?)
+    }
+}
+
+#[derive(uniffi::Object)]
+pub struct CourseGradesApplicationBuilder {}
+
+#[uniffi::export]
+impl CourseGradesApplicationBuilder {
+    #[uniffi::constructor]
+    pub fn new() -> Self {
+        Self {}
+    }
+
+    pub async fn build(
+        &self,
+        session: Arc<USaintSession>,
+    ) -> Result<CourseGradesApplication, RusaintError> {
+        let mut original_builder = rusaint::application::USaintClientBuilder::new();
+        original_builder = original_builder.session(session.original());
+        let original_app = original_builder
+            .build_into::<rusaint::application::course_grades::CourseGradesApplication>()
+            .await?;
+        Ok(CourseGradesApplication(RwLock::new(original_app)))
+    }
+}

@@ -14,8 +14,8 @@
 //!
 //! - **JS 런타임 없음** — JS 런타임 없이 자체적으로 요청과 응답에 따른 처리를 수행하므로 HTTPS 요청이 가능한 모든 환경에서 실행 가능합니다.
 //! - **빠른 속도** — 네이티브 환경으로 컴파일되는 Rust를 이용하고, 휴리스틱 없이 요청이 완료되면 곧바로 실행되어 빠르게 u-saint 를 조작 및 파싱 가능합니다.
-//! - **멀티플랫폼 지원(예정)** — UniFFI를 통한 Kotlin, Swift, Python 지원 및 Node.js 용 WASM Wrapper 를 제공하여 다양한 플랫폼에서 간편하게 이용할 수 있습니다.
-//! - **간편한 기능 정의(예정)** — rusaint 에서 지원하지 않는 u-saint 애플리케이션에 대한 파싱 및 지원을 제공하는 API를 이용해 간편하게 정의할 수 있습니다.
+//! - **멀티플랫폼 지원** — UniFFI를 통한 Kotlin, Swift, Python(예정) 지원 및 Node.js 용 WASM Wrapper(예정)를 제공하여 다양한 플랫폼에서 간편하게 이용할 수 있습니다.
+//! - **간편한 기능 정의** — rusaint 에서 지원하지 않는 u-saint 애플리케이션에 대한 파싱 및 지원을 제공하는 API를 이용해 간편하게 정의할 수 있습니다.
 //! ## 예시
 //!
 //! ```no_run
@@ -65,13 +65,20 @@ pub use session::obtain_ssu_sso_token;
 #[cfg(feature = "application")]
 pub use session::USaintSession;
 
-#[cfg(feature = "model")]
+#[cfg(feature = "application")]
 /// u-saint 애플리케이션에서 공통으로 사용하는 데이터
 pub mod model;
 
 pub(crate) mod utils;
 /// SAP WebDynpro 클라이언트를 파싱, 모방하는 클라이언트 엔진
 pub mod webdynpro;
+
+#[cfg(feature = "uniffi")]
+uniffi::setup_scaffolding!();
+
+#[cfg(feature = "uniffi")]
+/// `uniffi` 지원을 위한 모듈
+pub mod uniffi_support;
 
 #[cfg(test)]
 pub mod global_test_utils {
