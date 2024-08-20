@@ -3,4 +3,4 @@ cargo run -p uniffi-bindgen generate \
 --library \
 --language kotlin \
 --no-format \
---out-dir sdk/src/main/kotlin
+--out-dir lib/src/main/kotlin
