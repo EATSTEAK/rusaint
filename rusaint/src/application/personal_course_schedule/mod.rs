@@ -1,4 +1,6 @@
-use model::PersonalCourseSchedule;
+use std::collections::HashMap;
+
+use model::{CourseScheduleInformation, PersonalCourseSchedule, Weekday};
 
 use crate::{
     define_elements,
@@ -89,8 +91,8 @@ impl<'a> PersonalCourseScheduleApplication {
                 let table_body = table.table()?;
                 let row_string: Vec<Vec<Option<String>>> =
                     table_body.try_table_into::<Vec<Option<String>>>(self.body())?;
-                let mut schedule: [[String; 10]; 7] = Default::default();
-                for (row_idx, row) in row_string.into_iter().skip(1).enumerate() {
+                let mut schedule: HashMap<Weekday, Vec<CourseScheduleInformation>> = Default::default();
+                for (_row_idx, row) in row_string.into_iter().skip(1).enumerate() {
                     row.into_iter()
                         .skip(1)
                         .enumerate()
@@ -98,7 +100,33 @@ impl<'a> PersonalCourseScheduleApplication {
                             Some(str) => Some((col_idx, str)),
                             None => None,
                         })
-                        .for_each(|(col_idx, str)| schedule[col_idx][row_idx] = str);
+                        .for_each(|(col_idx, str)| match col_idx {
+                            0 => {
+                                if !schedule.contains_key(&Weekday::Mon) { schedule.insert(Weekday::Mon, Vec::new()); }
+                                str.split("\n\n").for_each(|str| schedule.get_mut(&Weekday::Mon).unwrap().push(CourseScheduleInformation::from_string(str)));
+                            },
+                            1 => {
+                                if !schedule.contains_key(&Weekday::Tue) { schedule.insert(Weekday::Tue, Vec::new()); }
+                                str.split("\n\n").for_each(|str| schedule.get_mut(&Weekday::Tue).unwrap().push(CourseScheduleInformation::from_string(str)));
+                            },
+                            2 => {
+                                if !schedule.contains_key(&Weekday::Wed) { schedule.insert(Weekday::Wed, Vec::new()); }
+                                str.split("\n\n").for_each(|str| schedule.get_mut(&Weekday::Wed).unwrap().push(CourseScheduleInformation::from_string(str)));
+                            },
+                            3 => {
+                                if !schedule.contains_key(&Weekday::Thu) { schedule.insert(Weekday::Thu, Vec::new()); }
+                                str.split("\n\n").for_each(|str| schedule.get_mut(&Weekday::Thu).unwrap().push(CourseScheduleInformation::from_string(str)));
+                            },
+                            4 => {
+                                if !schedule.contains_key(&Weekday::Fri) { schedule.insert(Weekday::Fri, Vec::new()); }
+                                str.split("\n\n").for_each(|str| schedule.get_mut(&Weekday::Fri).unwrap().push(CourseScheduleInformation::from_string(str)));
+                            },
+                            5 => {
+                                if !schedule.contains_key(&Weekday::Sat) { schedule.insert(Weekday::Sat, Vec::new()); }
+                                str.split("\n\n").for_each(|str| schedule.get_mut(&Weekday::Sat).unwrap().push(CourseScheduleInformation::from_string(str)));
+                            },
+                            _ => {},
+                        });
                 }
                 Ok(PersonalCourseSchedule::new(schedule))
             }

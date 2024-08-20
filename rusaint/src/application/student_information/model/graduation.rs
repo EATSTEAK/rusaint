@@ -1,6 +1,7 @@
 use crate::{define_elements, webdynpro::{client::body::Body, element::{definition::ElementDefinition, text::InputField}, error::{ElementError, WebDynproError}}};
 
 #[derive(Clone, Debug)]
+#[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
 /// 학생의 졸업 정보를 반환합니다. 졸업하지 않았다면 반환되지 않습니다.
 pub struct StudentGraduation {
   graduation_cardinal: u32,

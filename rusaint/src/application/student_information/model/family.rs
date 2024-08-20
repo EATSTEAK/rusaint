@@ -21,6 +21,7 @@ use crate::{
 };
 
 #[derive(Clone, Debug)]
+#[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
 /// 학생의 가족관계 정보
 pub struct StudentFamily {
     members: Vec<StudentFamilyMember>,
@@ -56,6 +57,7 @@ impl<'a> StudentFamily {
 }
 
 #[derive(Clone, Deserialize, Debug)]
+#[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
 /// 학생의 가족 구성원
 pub struct StudentFamilyMember {
     #[serde(

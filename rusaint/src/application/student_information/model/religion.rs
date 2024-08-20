@@ -15,6 +15,7 @@ use crate::{
 };
 
 #[derive(Clone, Debug)]
+#[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
 /// 학생의 종교 정보
 pub struct StudentReligion {
     religion_type: Option<String>,

@@ -16,6 +16,7 @@ use crate::{
 /// 전체 성적(학적부, 증명)
 #[derive(Debug)]
 #[allow(unused)]
+#[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
 pub struct GradeSummary {
     /// 신청학점
     attempted_credits: f32,
@@ -83,6 +84,7 @@ impl GradeSummary {
 /// 학기별 성적
 #[derive(Debug, Deserialize)]
 #[allow(unused)]
+#[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
 pub struct SemesterGrade {
     /// 학년도
     #[serde(
@@ -261,6 +263,7 @@ impl<'body> FromSapTable<'body> for SemesterGrade {
 /// 과목별 성적
 #[derive(Debug)]
 #[allow(unused)]
+#[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
 pub struct ClassGrade {
     /// 이수학년도
     year: String,
@@ -356,6 +359,7 @@ impl ClassGrade {
 /// 학위과정
 #[derive(Debug, Clone, Copy)]
 #[allow(unused)]
+#[cfg_attr(feature = "uniffi", derive(uniffi::Enum))]
 pub enum CourseType {
     /// 박사과정
     Phd, // DR
@@ -372,6 +376,7 @@ pub enum CourseType {
 /// 과목 점수
 #[derive(Debug, Clone, Copy)]
 #[allow(unused)]
+#[cfg_attr(feature = "uniffi", derive(uniffi::Enum))]
 pub enum ClassScore {
     /// P/F 과목의 Pass
     Pass,
