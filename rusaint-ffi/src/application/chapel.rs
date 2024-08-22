@@ -11,7 +11,7 @@ pub struct ChapelApplication(
 );
 
 
-#[uniffi::export]
+#[uniffi::export(async_runtime = "tokio")]
 impl ChapelApplication {
     pub async fn information(
         &self,
@@ -26,7 +26,7 @@ impl ChapelApplication {
 pub struct ChapelApplicationBuilder {}
 
 
-#[uniffi::export]
+#[uniffi::export(async_runtime = "tokio")]
 impl ChapelApplicationBuilder {
     #[uniffi::constructor]
     pub fn new() -> Self {
