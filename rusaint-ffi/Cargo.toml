@@ -18,7 +18,6 @@ uniffi = { version = "0.28.1", features = ["tokio"] }
 rusaint = { path = "../rusaint", features = ["uniffi"] }
 thiserror = { workspace = true }
 tokio = { workspace = true, features = ["sync"] }
-openssl = { version = "0.10", features = ["vendored"] }
 
 [build-dependencies]
 uniffi = { version = "0.28.1", features = ["build"] }
