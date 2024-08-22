@@ -19,12 +19,14 @@ uniffi = ["application"]
 [dependencies]
 uniffi = { version = "0.28.0" }
 derive_builder = "0.20.0"
-reqwest = { version = "0.12.4", features = [
+reqwest = { version = "0.12.7", features = [
+    "charset",
+    "http2",
+    "macos-system-configuration",
+    "rustls-tls",
     "cookies",
     "gzip",
-    "brotli",
-    "deflate",
-] }
+], default-features = false }
 thiserror = { workspace = true }
 tokio = { workspace = true, features = ["macros", "test-util", "sync"] }
 html-escape = "0.2.13"
