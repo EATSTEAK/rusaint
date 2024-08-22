@@ -6,7 +6,7 @@ commons-math3 = "3.6.1"
 guava = "33.2.1-jre"
 junit-jupiter-engine = "5.10.3"
 agp = "8.2.0"
-kotlin = "1.9.0"
+kotlin = "1.9.23"
 core-ktx = "1.13.1"
 junit = "4.13.2"
 junit-version = "1.2.1"
@@ -41,5 +41,6 @@ material = { group = "com.google.android.material", name = "material", version.r
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version = "2.0.0" }
 android-application = { id = "com.android.application", version.ref = "agp" }
-jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 android-library = { id = "com.android.library", version.ref = "agp" }
+jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+jetbrains-kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
