@@ -9,9 +9,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import dev.eatsteak.rusaint.android.ui.theme.RusaintTheme
+import dev.eatsteak.rusaint.core.CourseType
+import dev.eatsteak.rusaint.ffi.CourseGradesApplicationBuilder
+import dev.eatsteak.rusaint.ffi.USaintSessionBuilder
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -19,6 +23,11 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             RusaintTheme {
+                LaunchedEffect(Unit) {
+                    val session = USaintSessionBuilder().withPassword(id = "20220000", password = "password")
+                    val semesterGrades = CourseGradesApplicationBuilder().build(session).semesters(
+                        CourseType.BACHELOR)
+                }
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Greeting(
                         name = "Android",
