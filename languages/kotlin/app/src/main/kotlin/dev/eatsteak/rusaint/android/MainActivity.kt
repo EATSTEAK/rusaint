@@ -22,12 +22,14 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
+            LaunchedEffect(Unit) {
+                val session =
+                    USaintSessionBuilder().withPassword(id = "20220000", password = "password")
+                val semesterGrades =
+                    CourseGradesApplicationBuilder().build(session).semesters(CourseType.BACHELOR)
+                println(semesterGrades)
+            }
             RusaintTheme {
-                LaunchedEffect(Unit) {
-                    val session = USaintSessionBuilder().withPassword(id = "20220000", password = "password")
-                    val semesterGrades = CourseGradesApplicationBuilder().build(session).semesters(
-                        CourseType.BACHELOR)
-                }
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Greeting(
                         name = "Android",
