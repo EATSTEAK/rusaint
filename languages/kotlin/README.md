@@ -3,7 +3,6 @@ Created with reference to https://github.com/bitwarden/sdk/blob/main/languages/k
 # Android
 
 ```bash
-cargo install cross
 cargo install cross --locked --git https://github.com/cross-rs/cross.git --rev 185398b1b885820515a212de720a306b08e2c8c9
 ```
 
@@ -19,5 +18,5 @@ mv ../../target/x86_64-linux-android/release/librusaint_ffi.so ./lib/src/main/jn
 ```
 
 ```bash
-./build-binginds.sh
+./build-binding.sh
 ```
