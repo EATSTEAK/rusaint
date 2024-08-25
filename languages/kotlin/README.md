@@ -7,6 +7,7 @@ cargo install cross --locked --git https://github.com/cross-rs/cross.git --rev 1
 ```
 
 ## building
+
 ```bash
 mkdir -p ./lib/src/main/jniLibs/{arm64-v8a,x86_64}
 
@@ -18,5 +19,5 @@ mv ../../target/x86_64-linux-android/release/librusaint_ffi.so ./lib/src/main/jn
 ```
 
 ```bash
-./build-binding.sh
+./build-bindings.sh
 ```
