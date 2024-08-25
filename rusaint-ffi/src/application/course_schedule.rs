@@ -13,7 +13,7 @@ pub struct CourseScheduleApplication(
     RwLock<rusaint::application::course_schedule::CourseScheduleApplication>,
 );
 
-#[uniffi::export]
+#[uniffi::export(async_runtime = "tokio")]
 impl CourseScheduleApplication {
     /// 학기, 학년도, 강의 분류를 통해 강의를 찾습니다.
     pub async fn find_lectures(
@@ -35,7 +35,7 @@ impl CourseScheduleApplication {
 #[derive(uniffi::Object)]
 pub struct CourseScheduleApplicationBuilder {}
 
-#[uniffi::export]
+#[uniffi::export(async_runtime = "tokio")]
 impl CourseScheduleApplicationBuilder {
     #[uniffi::constructor]
     pub fn new() -> Self {

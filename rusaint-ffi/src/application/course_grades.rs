@@ -13,7 +13,7 @@ pub struct CourseGradesApplication(
     RwLock<rusaint::application::course_grades::CourseGradesApplication>,
 );
 
-#[uniffi::export]
+#[uniffi::export(async_runtime = "tokio")]
 impl CourseGradesApplication {
     
     /// 전체 학기의 학적부 평점 정보를 가져옵니다.
@@ -84,7 +84,7 @@ impl CourseGradesApplication {
 #[derive(uniffi::Object)]
 pub struct CourseGradesApplicationBuilder {}
 
-#[uniffi::export]
+#[uniffi::export(async_runtime = "tokio")]
 impl CourseGradesApplicationBuilder {
     #[uniffi::constructor]
     pub fn new() -> Self {
