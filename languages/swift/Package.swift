@@ -19,7 +19,7 @@ let package = Package(
         .target(
         name: "Rusaint",
         dependencies: ["RusaintFFI"],
-        swiftSettings: [.unsafeFlags(["-suppress-warnings"])]),
+        swiftSettings: []),
         .testTarget(
             name: "RusaintTests",
             dependencies: ["Rusaint"]),
