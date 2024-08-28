@@ -20,7 +20,7 @@ impl USaintSession {
 #[derive(Debug, uniffi::Object)]
 pub struct USaintSessionBuilder();
 
-#[uniffi::export]
+#[uniffi::export(async_runtime = "tokio")]
 impl USaintSessionBuilder {
     #[uniffi::constructor]
     pub fn new() -> Self {

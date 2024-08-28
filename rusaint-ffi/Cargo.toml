@@ -14,10 +14,10 @@ crate-type = ["lib", "cdylib", "staticlib"]
 name = "rusaint_ffi"
 
 [dependencies]
-uniffi = { version = "0.28.0" }
+uniffi = { version = "0.28.1", features = ["tokio"] }
 rusaint = { path = "../rusaint", features = ["uniffi"] }
 thiserror = { workspace = true }
 tokio = { workspace = true, features = ["sync"] }
 
 [build-dependencies]
-uniffi = { version = "0.28.0", features = ["build"] }
+uniffi = { version = "0.28.1", features = ["build"] }
