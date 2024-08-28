@@ -285,6 +285,7 @@ impl Requests for reqwest::Client {
     }
 }
 
+#[derive(Debug)]
 pub(crate) struct SapSsrClient {
     action: String,
     charset: String,
