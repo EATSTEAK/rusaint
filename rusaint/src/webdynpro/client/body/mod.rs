@@ -3,7 +3,7 @@ use std::hash::Hash;
 
 use lol_html::{element, html_content::ContentType, rewrite_str, RewriteStrSettings};
 use roxmltree::Node;
-use scraper::{Html, Selector};
+use scraper::{Html};
 
 use crate::webdynpro::{command::WebDynproReadCommand, error::{BodyError, UpdateBodyError, WebDynproError}};
 
@@ -145,8 +145,8 @@ impl Hash for Body {
 
 impl Body {
     pub(crate) fn new(body: String) -> Result<Body, BodyError> {
+        let sap_ssr_client = parse_sap_ssr_client(&body)?;
         let document = Html::parse_document(&body);
-        let sap_ssr_client = Self::parse_sap_ssr_client(&document)?;
         Ok(Body {
             raw_body: body,
             document,
@@ -171,67 +171,6 @@ impl Body {
 
     pub(crate) fn ssr_client(&self) -> &SapSsrClient {
         &self.sap_ssr_client
-    }
-
-    fn parse_sap_ssr_client(document: &Html) -> Result<SapSsrClient, BodyError> {
-        let selector = Selector::parse(r#"#sap\.client\.SsrClient\.form"#).unwrap();
-        let client_form = document.select(&selector).next().ok_or(BodyError::Invalid(
-            "Cannot find SSR Client form".to_string(),
-        ))?;
-        let mut data = HashMap::<String, String>::new();
-        data.insert(
-            "action".to_owned(),
-            client_form
-                .value()
-                .attr("action")
-                .expect("Attribute not found or malformed")
-                .to_string(),
-        );
-        let children_iter = client_form.children();
-        children_iter.for_each(|item| {
-            let item_tag = item.value().as_element().expect("Not a valid tag");
-            let id = item_tag
-                .id()
-                .expect("id Attribute not found or malformed")
-                .to_string();
-            let value = item_tag
-                .attr("value")
-                .expect("value Attribute not found or malformed")
-                .to_string();
-            data.insert(id, value);
-        });
-        Ok(SapSsrClient {
-            action: html_escape::decode_html_entities(data.get("action").ok_or(
-                BodyError::NoSuchAttribute("'action' field of SSR Form".to_string()),
-            )?)
-            .to_string(),
-            charset: data
-                .get("sap-charset")
-                .ok_or(BodyError::NoSuchAttribute(
-                    "'sap-charset' field of SSR Form".to_string(),
-                ))?
-                .to_owned(),
-            wd_secure_id: data
-                .get("sap-wd-secure-id")
-                .ok_or(BodyError::NoSuchAttribute(
-                    "'sap-wd-secure-id' field of SSR Form".to_string(),
-                ))?
-                .to_owned(),
-            app_name: data
-                .get("fesrAppName")
-                .ok_or(BodyError::NoSuchAttribute(
-                    "'fesrAppName' field of SSR Form".to_string(),
-                ))?
-                .to_owned(),
-            use_beacon: (data
-                .get("fesrUseBeacon")
-                .ok_or(BodyError::NoSuchAttribute(
-                    "'fesrUseBeacon' field of SSR Form".to_string(),
-                ))?
-                .to_owned()
-                .as_str()
-                == "true"),
-        })
     }
 
     pub(super) fn apply(&mut self, updates: BodyUpdate) -> Result<(), UpdateBodyError> {
@@ -277,5 +216,96 @@ impl Body {
             self.raw_body = output;
         }
         Ok(())
+    }
+}
+
+fn parse_sap_ssr_client(document: &str) -> Result<SapSsrClient, BodyError> {
+    let form_regex = regex_lite::Regex::new(r"<form\b[^>]*>(.|\n)*?<\/form>").unwrap();
+    let mut forms = form_regex.find_iter(document);
+    let form_match = forms.find(|form| form.as_str().contains("sap.client.SsrClient.form")).ok_or(BodyError::Invalid(
+        "Cannot find SSR Client form".to_string(),
+    ))?.as_str();
+
+    // Create closing tag to match xml structures
+    let input_regex = regex_lite::Regex::new(r"(<input\b[^>]*)(/?>)").unwrap();
+    let form_xml = input_regex.replace_all(form_match, "$1></input>");
+
+    let client_form = roxmltree::Document::parse(&form_xml).unwrap();
+
+    let mut data = HashMap::<String, String>::new();
+    data.insert(
+        "action".to_owned(),
+        client_form.root_element().attribute("action")
+            .expect("Attribute not found or malformed")
+            .to_string(),
+    );
+
+    let children_iter = client_form.root_element().children();
+    children_iter.for_each(|item| {
+        let id = item.attribute("id")
+            .expect("id Attribute not found or malformed")
+            .to_string();
+        let value = item
+            .attribute("value")
+            .expect("value Attribute not found or malformed")
+            .to_string();
+        data.insert(id, value);
+    });
+    Ok(SapSsrClient {
+        action: html_escape::decode_html_entities(data.get("action").ok_or(
+            BodyError::NoSuchAttribute("'action' field of SSR Form".to_string()),
+        )?)
+            .to_string(),
+        charset: data
+            .get("sap-charset")
+            .ok_or(BodyError::NoSuchAttribute(
+                "'sap-charset' field of SSR Form".to_string(),
+            ))?
+            .to_owned(),
+        wd_secure_id: data
+            .get("sap-wd-secure-id")
+            .ok_or(BodyError::NoSuchAttribute(
+                "'sap-wd-secure-id' field of SSR Form".to_string(),
+            ))?
+            .to_owned(),
+        app_name: data
+            .get("fesrAppName")
+            .ok_or(BodyError::NoSuchAttribute(
+                "'fesrAppName' field of SSR Form".to_string(),
+            ))?
+            .to_owned(),
+        use_beacon: (data
+            .get("fesrUseBeacon")
+            .ok_or(BodyError::NoSuchAttribute(
+                "'fesrUseBeacon' field of SSR Form".to_string(),
+            ))?
+            .to_owned()
+            .as_str()
+            == "true"),
+    })
+}
+
+#[cfg(test)]
+mod test {
+    use std::sync::Arc;
+    use reqwest::cookie::Jar;
+    use url::Url;
+    use crate::utils::DEFAULT_USER_AGENT;
+    use crate::webdynpro::client::body::parse_sap_ssr_client;
+    use crate::webdynpro::client::Requests;
+
+    #[tokio::test]
+    async fn test_ssr_form() {
+        let jar = Arc::new(Jar::default());
+        let client = reqwest::Client::builder()
+            .cookie_provider(jar)
+            .cookie_store(true)
+            .user_agent(DEFAULT_USER_AGENT)
+            .build()
+            .unwrap();
+        let result = client.wd_navigate(&Url::parse("https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/").unwrap(), "ZCMW2100").send().await.unwrap();
+        let ssr_client = parse_sap_ssr_client(&result.text().await.unwrap()).unwrap();
+        dbg!(ssr_client);
+        assert!(true);
     }
 }
