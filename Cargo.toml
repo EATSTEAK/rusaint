@@ -3,7 +3,7 @@ members = [ "rusaint", "rusaint-ffi", "uniffi-bindgen" ]
 resolver = "2"
 
 [workspace.package]
-version = "0.6.1"
+version = "0.6.2"
 
 keywords = ["ssu", "u-saint", "scraping", "parser"]
 authors = ["Hyomin Koo <me@eatsteak.dev>"]
@@ -11,6 +11,7 @@ license = "MIT"
 homepage = "https://eatsteak.dev"
 repository = "https://github.com/EATSTEAK/rusaint"
 edition = "2021"
+readme = "README.md"
 
 [workspace.dependencies]
 thiserror = "1.0.44"
