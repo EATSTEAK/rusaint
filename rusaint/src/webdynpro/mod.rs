@@ -87,9 +87,11 @@
 
 /// WebDynpro 페이지의 기본 클라이언트
 pub mod client;
+#[cfg(feature = "element")]
 /// WebDynpro 페이지를 구성하는 엘리먼트
 pub mod element;
 
+#[cfg(feature = "element")]
 /// WebDynpro 클라이언트를 조작하는 명령
 pub mod command;
 
