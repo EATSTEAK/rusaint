@@ -5,6 +5,7 @@ use reqwest::{
     header::{HeaderValue, COOKIE, HOST, SET_COOKIE},
     Client,
 };
+use tl::{Bytes, Node, NodeHandle, ParserOptions};
 use url::Url;
 
 use crate::{
@@ -183,22 +184,32 @@ pub async fn obtain_ssu_sso_token(id: &str, password: &str) -> Result<String, Ss
 }
 
 fn parse_login_form(body: &str) -> Result<(String, String), SsuSsoError> {
-    let document = scraper::Html::parse_document(&body);
-    let in_tp_bit_selector = scraper::Selector::parse(r#"input[name="in_tp_bit"]"#).unwrap();
-    let rqst_caus_cd_selector = scraper::Selector::parse(r#"input[name="rqst_caus_cd"]"#).unwrap();
+    let document = tl::parse(body, ParserOptions::default()).or_else(|err| Err(SsuSsoError::CantLoadForm))?;
     let in_tp_bit = document
-        .select(&in_tp_bit_selector)
+        .query_selector(r#"input[name="in_tp_bit"]"#)
+        .into_iter()
+        .flatten()
         .next()
+        .and_then(NodeHandle::get)
+        .and_then(Node::as_tag)
         .ok_or(SsuSsoError::CantLoadForm)?
-        .value()
-        .attr("value")
+        .attributes()
+        .get("value")
+        .flatten()
+        .and_then(Bytes::try_as_utf8_str)
         .ok_or(SsuSsoError::CantLoadForm)?;
     let rqst_caus_cd = document
-        .select(&rqst_caus_cd_selector)
+        .query_selector(r#"input[name="rqst_caus_cd"]"#)
+        .into_iter()
+        .flatten()
         .next()
+        .and_then(NodeHandle::get)
+        .and_then(Node::as_tag)
         .ok_or(SsuSsoError::CantLoadForm)?
-        .value()
-        .attr("value")
+        .attributes()
+        .get("value")
+        .flatten()
+        .and_then(Bytes::try_as_utf8_str)
         .ok_or(SsuSsoError::CantLoadForm)?;
     Ok((in_tp_bit.to_owned(), rqst_caus_cd.to_owned()))
 }
