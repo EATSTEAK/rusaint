@@ -12,6 +12,7 @@ use crate::{
         error::{ElementError, WebDynproError},
     },
 };
+use crate::webdynpro::element::parser::ElementParser;
 
 /// 전체 성적(학적부, 증명)
 #[derive(Debug)]
@@ -245,11 +246,11 @@ impl SemesterGrade {
 
 impl<'body> FromSapTable<'body> for SemesterGrade {
     fn from_table(
-        body: &'body crate::webdynpro::client::body::Body,
         header: &'body crate::webdynpro::element::complex::sap_table::SapTableHeader,
         row: &'body crate::webdynpro::element::complex::sap_table::SapTableRow,
+        parser: &'body ElementParser,
     ) -> Result<Self, WebDynproError> {
-        let map_string = row.try_row_into::<HashMap<String, String>>(header, body)?;
+        let map_string = row.try_row_into::<HashMap<String, String>>(header, parser)?;
         let map_de: MapDeserializer<_, serde::de::value::Error> = map_string.into_deserializer();
         Ok(
             SemesterGrade::deserialize(map_de).map_err(|e| ElementError::InvalidContent {

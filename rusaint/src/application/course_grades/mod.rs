@@ -1,5 +1,7 @@
-use std::collections::HashMap;
-
+use self::model::{ClassGrade, CourseType, GradeSummary, SemesterGrade};
+use super::{USaintApplication, USaintClient};
+use crate::webdynpro::element::complex::sap_table::cell::SapTableCellWrapper;
+use crate::webdynpro::element::parser::ElementParser;
 use crate::{
     define_elements,
     model::SemesterType,
@@ -24,10 +26,8 @@ use crate::{
     },
     RusaintError,
 };
-
-use self::model::{ClassGrade, CourseType, GradeSummary, SemesterGrade};
-
-use super::{USaintApplication, USaintClient};
+use std::collections::HashMap;
+use tl::{Bytes, Node};
 
 /// [학생 성적 조회](https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/ZCMB3W0017)
 pub struct CourseGradesApplication {
@@ -87,23 +87,19 @@ impl<'a> CourseGradesApplication {
         GRADE_BY_CLASSES_TABLE: SapTable<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.TABLE_1";
     );
 
-    async fn close_popups(&mut self) -> Result<(), WebDynproError> {
-        fn make_close_event(app: &CourseGradesApplication) -> Option<Event> {
-            let body = app.client.body();
-            let popup_selector =
-                scraper::Selector::parse(format!(r#"[ct="{}"]"#, PopupWindow::CONTROL_ID).as_str())
-                    .unwrap();
-            let mut popup_iter = body.document().select(&popup_selector);
-            popup_iter.next().and_then(|elem| {
-                let elem_wrapped = ElementWrapper::dyn_element(elem).ok()?;
-                if let ElementWrapper::PopupWindow(popup) = elem_wrapped {
-                    popup.close().ok()
-                } else {
-                    None
-                }
-            })
-        }
-        while let Some(event) = make_close_event(self) {
+    async fn close_popups(&mut self, parser: &ElementParser) -> Result<(), WebDynproError> {
+        let mut popup_iter = parser
+            .dom()
+            .query_selector(format!(r#"[ct="{}"]"#, PopupWindow::CONTROL_ID).as_str())
+            .into_iter()
+            .flatten()
+            .filter_map(|handle| handle.get(parser.dom().parser()).and_then(Node::as_tag))
+            .filter_map(|tag| {
+                let id = tag.attributes().id().and_then(Bytes::try_as_utf8_str)?;
+                PopupWindow::new(id.into(), tag.clone()).close().ok()
+            });
+
+        while let Some(event) = popup_iter.next() {
             self.client.process_event(false, event).await?;
         }
         Ok(())
@@ -128,47 +124,48 @@ impl<'a> CourseGradesApplication {
         }
     }
 
-    async fn select_course(&mut self, course: CourseType) -> Result<(), WebDynproError> {
+    async fn select_course(
+        &mut self,
+        parser: &ElementParser,
+        course: CourseType,
+    ) -> Result<(), WebDynproError> {
         let course = Self::course_type_to_key(course);
-        let combobox_lsdata = self
-            .client
-            .read(ReadComboBoxLSDataCommand::new(Self::PROGRESS_TYPE))?;
+        let combobox_lsdata = parser.read(ReadComboBoxLSDataCommand::new(Self::PROGRESS_TYPE))?;
         if (|| Some(combobox_lsdata.key()?.as_str()))() != Some(course) {
-            self.client
-                .send(ComboBoxSelectCommand::new(
-                    Self::PROGRESS_TYPE,
-                    course,
-                    false,
-                ))
-                .await?;
+            let select_event = parser.read(ComboBoxSelectCommand::new(
+                Self::PROGRESS_TYPE,
+                course,
+                false,
+            ))?;
+            self.client.process_event(false, select_event).await?;
         }
         Ok(())
     }
 
     async fn select_semester(
         &mut self,
+        parser: &ElementParser,
         year: &str,
         semester: SemesterType,
     ) -> Result<(), WebDynproError> {
         let semester = Self::semester_to_key(semester);
-        let year_combobox_lsdata = self
-            .client
-            .read(ReadComboBoxLSDataCommand::new(Self::PERIOD_YEAR))?;
-        let semester_combobox_lsdata = self
-            .client
-            .read(ReadComboBoxLSDataCommand::new(Self::PERIOD_SEMESTER))?;
+        let year_combobox_lsdata =
+            parser.read(ReadComboBoxLSDataCommand::new(Self::PERIOD_YEAR))?;
+        let semester_combobox_lsdata =
+            parser.read(ReadComboBoxLSDataCommand::new(Self::PERIOD_SEMESTER))?;
         if (|| Some(year_combobox_lsdata.key()?.as_str()))() != Some(year) {
-            self.client
-                .send(ComboBoxSelectCommand::new(Self::PERIOD_YEAR, &year, false))
-                .await?;
+            let year_select_event =
+                parser.read(ComboBoxSelectCommand::new(Self::PERIOD_YEAR, &year, false))?;
+            self.client.process_event(false, year_select_event).await?;
         }
         if (|| Some(semester_combobox_lsdata.key()?.as_str()))() != Some(semester) {
+            let semester_select_event = parser.read(ComboBoxSelectCommand::new(
+                Self::PERIOD_SEMESTER,
+                semester,
+                false,
+            ))?;
             self.client
-                .send(ComboBoxSelectCommand::new(
-                    Self::PERIOD_SEMESTER,
-                    semester,
-                    false,
-                ))
+                .process_event(false, semester_select_event)
                 .await?;
         }
         Ok(())
@@ -193,19 +190,26 @@ impl<'a> CourseGradesApplication {
         &mut self,
         course_type: CourseType,
     ) -> Result<GradeSummary, RusaintError> {
-        self.close_popups().await?;
-        self.select_course(course_type).await?;
+        let parser = ElementParser::new(self.client.body())?;
+        self.close_popups(&parser).await?;
+        self.select_course(&parser, course_type).await?;
         self.read_recorded_summary()
     }
 
     fn read_recorded_summary(&self) -> Result<GradeSummary, RusaintError> {
-        let body = self.client.body();
-        let attempted_credits = Self::ATTM_CRD1.from_body(body)?.value_into_f32()?;
-        let earned_credits = Self::EARN_CRD1.from_body(body)?.value_into_f32()?;
-        let gpa = Self::GT_GPA1.from_body(body)?.value_into_f32()?;
-        let cgpa = Self::CGPA1.from_body(body)?.value_into_f32()?;
-        let avg = Self::AVG1.from_body(body)?.value_into_f32()?;
-        let pf_earned_credits = Self::PF_EARN_CRD.from_body(body)?.value_into_f32()?;
+        let parser = ElementParser::new(self.client.body())?;
+        let attempted_credits = parser
+            .element_from_def(&Self::ATTM_CRD1)?
+            .value_into_f32()?;
+        let earned_credits = parser
+            .element_from_def(&Self::EARN_CRD1)?
+            .value_into_f32()?;
+        let gpa = parser.element_from_def(&Self::GT_GPA1)?.value_into_f32()?;
+        let cgpa = parser.element_from_def(&Self::CGPA1)?.value_into_f32()?;
+        let avg = parser.element_from_def(&Self::AVG1)?.value_into_f32()?;
+        let pf_earned_credits = parser
+            .element_from_def(&Self::PF_EARN_CRD)?
+            .value_into_f32()?;
         Ok(GradeSummary::new(
             attempted_credits,
             earned_credits,
@@ -235,15 +239,26 @@ impl<'a> CourseGradesApplication {
         &mut self,
         course_type: CourseType,
     ) -> Result<GradeSummary, RusaintError> {
-        self.close_popups().await?;
-        self.select_course(course_type).await?;
-        let body = self.client.body();
-        let attempted_credits = Self::ATTM_CRD2.from_body(body)?.value_into_f32()?;
-        let earned_credits = Self::EARN_CRD2.from_body(body)?.value_into_f32()?;
-        let gpa = Self::GT_GPA2.from_body(body)?.value_into_f32()?;
-        let cgpa = Self::CGPA2.from_body(body)?.value_into_f32()?;
-        let avg = Self::AVG2.from_body(body)?.value_into_f32()?;
-        let pf_earned_credits = Self::PF_EARN_CRD1.from_body(body)?.value_into_f32()?;
+        let parser = ElementParser::new(self.client.body())?;
+        self.close_popups(&parser).await?;
+        self.select_course(&parser, course_type).await?;
+        self.read_certificated_summary()
+    }
+
+    fn read_certificated_summary(&self) -> Result<GradeSummary, RusaintError> {
+        let parser = ElementParser::new(self.client.body())?;
+        let attempted_credits = parser
+            .element_from_def(&Self::ATTM_CRD2)?
+            .value_into_f32()?;
+        let earned_credits = parser
+            .element_from_def(&Self::EARN_CRD2)?
+            .value_into_f32()?;
+        let gpa = parser.element_from_def(&Self::GT_GPA2)?.value_into_f32()?;
+        let cgpa = parser.element_from_def(&Self::CGPA2)?.value_into_f32()?;
+        let avg = parser.element_from_def(&Self::AVG2)?.value_into_f32()?;
+        let pf_earned_credits = parser
+            .element_from_def(&Self::PF_EARN_CRD1)?
+            .value_into_f32()?;
         Ok(GradeSummary::new(
             attempted_credits,
             earned_credits,
@@ -273,9 +288,14 @@ impl<'a> CourseGradesApplication {
         &mut self,
         course_type: CourseType,
     ) -> Result<Vec<SemesterGrade>, RusaintError> {
-        self.close_popups().await?;
-        self.select_course(course_type).await?;
+        let parser = ElementParser::new(self.client.body())?;
+        self.close_popups(&parser).await?;
+        self.select_course(&parser, course_type).await?;
+        self.read_semesters()
+    }
 
+    fn read_semesters(&self) -> Result<Vec<SemesterGrade>, RusaintError> {
+        let parser = ElementParser::new(self.client.body())?;
         let table = self
             .client
             .read(ReadSapTableBodyCommand::new(Self::GRADES_SUMMARY_TABLE))?;
@@ -285,45 +305,49 @@ impl<'a> CourseGradesApplication {
 
     async fn class_detail_in_popup(
         &mut self,
-        open_button: ButtonDef,
+        press_event: Event,
     ) -> Result<HashMap<String, f32>, RusaintError> {
-        self.client
-            .send(ButtonPressCommand::new(open_button))
-            .await?;
-
-        let parse_table_in_popup = |body: &Body| -> Result<HashMap<String, f32>, WebDynproError> {
-            let table_inside_popup_selector =
-                scraper::Selector::parse(r#"[ct="PW"] [ct="ST"]"#).unwrap();
-            let mut table_inside_popup = body.document().select(&table_inside_popup_selector);
-            let table_ref = table_inside_popup
-                .next()
-                .ok_or(BodyError::NoSuchElement("Table in popup".to_string()))?;
-            let table_elem: SapTable<'_> = ElementWrapper::dyn_element(table_ref)?.try_into()?;
-            let table_body = table_elem.table()?;
-            let zip = table_body
-                .iter()
-                .next()
-                .ok_or(ElementError::InvalidContent {
-                    element: table_elem.id().to_string(),
-                    content: "header and first row".to_string(),
-                })?
-                .try_row_into::<Vec<(String, String)>>(table_body.header(), body)?
-                .into_iter();
-            zip.skip(4)
-                .map(|(key, val)| {
-                    let float =
-                        val.trim()
-                            .parse::<f32>()
-                            .or(Err(ElementError::InvalidContent {
-                                element: format!("TABLE: {}, key: {}", table_elem.id(), key),
-                                content: "(not an correct f32)".to_string(),
-                            }))?;
-                    Ok((key, float))
-                })
-                .collect::<Result<HashMap<String, f32>, WebDynproError>>()
-        };
-        let table = parse_table_in_popup(self.client.body())?;
-        self.close_popups().await?;
+        self.client.process_event(false, press_event).await?;
+        let parse_table_in_popup =
+            |parser: &ElementParser| -> Result<HashMap<String, f32>, WebDynproError> {
+                let mut table_inside_popup = parser
+                    .dom()
+                    .query_selector(r#"[ct="PW"] [ct="ST"]"#)
+                    .into_iter()
+                    .flatten()
+                    .filter_map(|handle| handle.get(parser.dom().parser()))
+                    .filter_map(Node::as_tag);
+                let table_tag = table_inside_popup
+                    .next()
+                    .ok_or(BodyError::NoSuchElement("Table in popup".to_string()))?;
+                let table_elem: SapTable<'_> =
+                    ElementWrapper::from_tag(table_tag.clone())?.try_into()?;
+                let table_body = table_elem.table(parser)?;
+                let zip = table_body
+                    .iter()
+                    .next()
+                    .ok_or(ElementError::InvalidContent {
+                        element: table_elem.id().to_string(),
+                        content: "header and first row".to_string(),
+                    })?
+                    .try_row_into::<Vec<(String, String)>>(table_body.header(), parser)?
+                    .into_iter();
+                zip.skip(4)
+                    .map(|(key, val)| {
+                        let float =
+                            val.trim()
+                                .parse::<f32>()
+                                .or(Err(ElementError::InvalidContent {
+                                    element: format!("TABLE: {}, key: {}", table_elem.id(), key),
+                                    content: "(not an correct f32)".to_string(),
+                                }))?;
+                        Ok((key, float))
+                    })
+                    .collect::<Result<HashMap<String, f32>, WebDynproError>>()
+            };
+        let parser = ElementParser::new(self.client.body())?;
+        let table = parse_table_in_popup(&parser)?;
+        self.close_popups(&parser).await?;
         Ok(HashMap::from_iter(table))
     }
 
@@ -369,44 +393,41 @@ impl<'a> CourseGradesApplication {
         semester: SemesterType,
         include_details: bool,
     ) -> Result<Vec<ClassGrade>, RusaintError> {
-        self.close_popups().await?;
-        self.select_course(course_type).await?;
-        self.select_semester(year, semester).await?;
-        let class_grades: Vec<(Option<String>, HashMap<String, String>)> = {
-            let grade_table_body = self
-                .client
-                .read(ReadSapTableBodyCommand::new(Self::GRADE_BY_CLASSES_TABLE))?;
+        {
+            let parser = ElementParser::new(self.client.body())?;
+            self.close_popups(&parser).await?;
+            self.select_course(&parser, course_type).await?;
+            self.select_semester(&parser, year, semester).await?;
+        }
+        let parser = ElementParser::new(self.client.body())?;
+        let class_grades: Vec<(Option<Event>, HashMap<String, String>)> = {
+            let grade_table_body =
+                parser.read(ReadSapTableBodyCommand::new(Self::GRADE_BY_CLASSES_TABLE))?;
             let iter = grade_table_body.iter();
             iter.map(|row| {
-                let btn_id = row[4]
-                    .clone()
-                    .from_body(self.client.body())
+                let btn_event = SapTableCellWrapper::from_def(&row[4], &parser)
                     .ok()
                     .and_then(|cell| {
-                        if let Some(ElementDefWrapper::Button(btn)) = cell.content() {
-                            Some(btn.id().to_owned())
+                        if let Some(ElementDefWrapper::Button(btn)) = cell.content(&parser) {
+                            parser.element_from_def(&btn).ok()?.press().ok()
                         } else {
                             None
                         }
                     });
-                (btn_id, row)
+                (btn_event, row)
             })
-            .filter_map(|(btn_id, row)| {
-                row.try_row_into::<HashMap<String, String>>(
-                    grade_table_body.header(),
-                    self.client.body(),
-                )
-                .ok()
-                .and_then(|row| Some((btn_id, row)))
+            .filter_map(|(btn_event, row)| {
+                row.try_row_into::<HashMap<String, String>>(grade_table_body.header(), &parser)
+                    .ok()
+                    .and_then(|row| Some((btn_event, row)))
             })
             .collect()
         };
         let mut ret: Vec<ClassGrade> = vec![];
-        for (btn_id, values) in class_grades {
-            let detail: Option<HashMap<String, f32>> = if let Some(btn_id) = btn_id {
+        for (btn_event, values) in class_grades {
+            let detail: Option<HashMap<String, f32>> = if let Some(btn_event) = btn_event {
                 if include_details {
-                    let btn_def = ButtonDef::new_dynamic(btn_id);
-                    Some(self.class_detail_in_popup(btn_def).await?)
+                    Some(self.class_detail_in_popup(btn_event).await?)
                 } else {
                     None
                 }
@@ -458,31 +479,37 @@ impl<'a> CourseGradesApplication {
         semester: SemesterType,
         code: &str,
     ) -> Result<HashMap<String, f32>, RusaintError> {
-        self.close_popups().await?;
-        self.select_course(course_type).await?;
-        self.select_semester(year, semester).await?;
-        let table = self
-            .client
-            .read(ReadSapTableBodyCommand::new(Self::GRADE_BY_CLASSES_TABLE))?;
+        {
+            let parser = ElementParser::new(self.client.body())?;
+            self.close_popups(&parser).await?;
+            self.select_course(&parser, course_type).await?;
+            self.select_semester(&parser, year, semester).await?;
+        }
+        let parser = ElementParser::new(self.client.body())?;
+        let table = parser.read(ReadSapTableBodyCommand::new(Self::GRADE_BY_CLASSES_TABLE))?;
         let Some(btn) = ({
             table
                 .iter()
-                .find(|row| match row[8].clone().from_body(self.client.body()) {
-                    Ok(cell) => {
-                        if let Some(ElementDefWrapper::TextView(code_elem)) = cell.content() {
-                            code_elem
-                                .from_body(self.client.body())
-                                .is_ok_and(|elem| elem.text() == code)
-                        } else {
-                            false
+                .find(
+                    |row| match SapTableCellWrapper::from_def(&row[8], &parser) {
+                        Ok(cell) => {
+                            if let Some(ElementDefWrapper::TextView(code_elem)) =
+                                cell.content(&parser)
+                            {
+                                parser
+                                    .element_from_def(&code_elem)
+                                    .is_ok_and(|elem| elem.text(&parser) == code)
+                            } else {
+                                false
+                            }
                         }
-                    }
-                    Err(_) => false,
-                })
-                .and_then(|row| match row[4].clone().from_body(self.client.body()) {
+                        Err(_) => false,
+                    },
+                )
+                .and_then(|row| match SapTableCellWrapper::from_def(&row[4], &parser) {
                     Ok(cell) => {
-                        if let Some(ElementDefWrapper::Button(btn)) = cell.content() {
-                            Some(ButtonDef::new_dynamic(btn.id().to_owned()))
+                        if let Some(ElementDefWrapper::Button(btn)) = cell.content(&parser) {
+                            parser.element_from_def(&btn).ok()?.press().ok()
                         } else {
                             None
                         }
@@ -511,6 +538,7 @@ mod test {
         global_test_utils::get_session,
         webdynpro::element::{layout::PopupWindow, Element},
     };
+    use crate::webdynpro::element::parser::ElementParser;
 
     #[tokio::test]
     #[serial]
@@ -521,12 +549,8 @@ mod test {
             .build_into::<CourseGradesApplication>()
             .await
             .unwrap();
-        app.close_popups().await.unwrap();
-        let body = app.client.body();
-        let popup_selector =
-            scraper::Selector::parse(format!(r#"[ct="{}"]"#, PopupWindow::CONTROL_ID).as_str())
-                .unwrap();
-        let mut result = body.document().select(&popup_selector);
+        app.close_popups(&ElementParser::new(app.client.body())?).await.unwrap();
+        let mut result = ElementParser::new(app.client.body())?.dom().query_selector(format!(r#"[ct="{}"]"#, PopupWindow::CONTROL_ID).as_str()).into_iter().flatten();
         assert!(result.next().is_none());
     }
 }
