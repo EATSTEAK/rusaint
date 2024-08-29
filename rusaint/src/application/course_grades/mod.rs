@@ -6,14 +6,11 @@ use crate::{
     define_elements,
     model::SemesterType,
     webdynpro::{
-        client::body::Body,
         command::element::{
-            action::ButtonPressCommand,
             complex::ReadSapTableBodyCommand,
             selection::{ComboBoxSelectCommand, ReadComboBoxLSDataCommand},
         },
         element::{
-            action::ButtonDef,
             complex::sap_table::{cell::SapTableCell, SapTable},
             definition::ElementDefinition,
             layout::PopupWindow,
@@ -296,10 +293,8 @@ impl<'a> CourseGradesApplication {
 
     fn read_semesters(&self) -> Result<Vec<SemesterGrade>, RusaintError> {
         let parser = ElementParser::new(self.client.body())?;
-        let table = self
-            .client
-            .read(ReadSapTableBodyCommand::new(Self::GRADES_SUMMARY_TABLE))?;
-        let ret = table.try_table_into::<SemesterGrade>(self.client.body())?;
+        let table = parser.read(ReadSapTableBodyCommand::new(Self::GRADES_SUMMARY_TABLE))?;
+        let ret = table.try_table_into::<SemesterGrade>(&parser)?;
         Ok(ret)
     }
 
@@ -533,12 +528,12 @@ pub mod model;
 mod test {
     use serial_test::serial;
 
+    use crate::webdynpro::element::parser::ElementParser;
     use crate::{
         application::{course_grades::CourseGradesApplication, USaintClientBuilder},
         global_test_utils::get_session,
         webdynpro::element::{layout::PopupWindow, Element},
     };
-    use crate::webdynpro::element::parser::ElementParser;
 
     #[tokio::test]
     #[serial]
@@ -549,8 +544,8 @@ mod test {
             .build_into::<CourseGradesApplication>()
             .await
             .unwrap();
-        app.close_popups(&ElementParser::new(app.client.body())?).await.unwrap();
-        let mut result = ElementParser::new(app.client.body())?.dom().query_selector(format!(r#"[ct="{}"]"#, PopupWindow::CONTROL_ID).as_str()).into_iter().flatten();
+        app.close_popups(&ElementParser::new(app.client.body()).unwrap()).await.unwrap();
+        let mut result = ElementParser::new(app.client.body()).unwrap().dom().query_selector(format!(r#"[ct="{}"]"#, PopupWindow::CONTROL_ID).as_str()).into_iter().flatten();
         assert!(result.next().is_none());
     }
 }
