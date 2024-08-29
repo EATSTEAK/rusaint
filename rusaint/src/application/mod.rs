@@ -6,7 +6,7 @@ use crate::{
     utils::DEFAULT_USER_AGENT,
     webdynpro::{
         client::{body::Body, EventProcessResult, WebDynproClient, WebDynproClientBuilder},
-        command::{element::system::{ClientInspectorNotifyCommand, CustomClientInfoCommand, LoadingPlaceholderLoadCommand}, WebDynproCommand, WebDynproReadCommand},
+        command::{element::system::{ClientInspectorNotifyCommand, CustomClientInfoCommand, LoadingPlaceholderLoadCommand}, WebDynproCommand},
         element::{
             define_elements,
             system::{ClientInspector, Custom, CustomClientInfo, LoadingPlaceholder},
@@ -16,6 +16,7 @@ use crate::{
     },
     RusaintError,
 };
+use crate::webdynpro::element::parser::ElementParser;
 
 const SSU_WEBDYNPRO_BASE_URL: &str = "https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/";
 const INITIAL_CLIENT_DATA_WD01: &str = "ClientWidth:1920px;ClientHeight:1000px;ScreenWidth:1920px;ScreenHeight:1080px;ScreenOrientation:landscape;ThemedTableRowHeight:33px;ThemedFormLayoutRowHeight:32px;ThemedSvgLibUrls:{\"SAPGUI-icons\":\"https://ecc.ssu.ac.kr:8443/sap/public/bc/ur/nw5/themes/~cache-20210223121230/Base/baseLib/sap_fiori_3/svg/libs/SAPGUI-icons.svg\",\"SAPWeb-icons\":\"https://ecc.ssu.ac.kr:8443/sap/public/bc/ur/nw5/themes/~cache-20210223121230/Base/baseLib/sap_fiori_3/svg/libs/SAPWeb-icons.svg\"};ThemeTags:Fiori_3,Touch;ThemeID:sap_fiori_3;SapThemeID:sap_fiori_3;DeviceType:DESKTOP";
@@ -58,18 +59,6 @@ impl<'a> USaintClient {
         self.0.client_url()
     }
 
-    /// WebDynpro 클라이언트에 명령을 전송합니다.
-    pub async fn send<T: WebDynproCommand>(
-        &mut self,
-        command: T,
-    ) -> Result<T::Result, WebDynproError> {
-        self.0.send(command).await
-    }
-
-    /// WebDynpro 클라이언트에 읽기 명령을 전송합니다.
-    pub fn read<T: WebDynproReadCommand>(&self, command: T) -> Result<T::Result, WebDynproError> {
-        self.0.read(command)
-    }
 
     /// 이벤트를 처리합니다. [`process_event()`](crate::webdynpro::client::WebDynproClient::process_event)를 참조하세요.
     pub async fn process_event(
@@ -81,22 +70,19 @@ impl<'a> USaintClient {
     }
 
     async fn load_placeholder(&mut self) -> Result<(), WebDynproError> {
-        self.send(
-            ClientInspectorNotifyCommand::new(Self::CLIENT_INSPECTOR_WD01, INITIAL_CLIENT_DATA_WD01)
-        ).await?;
-        self.send(
-            ClientInspectorNotifyCommand::new(Self::CLIENT_INSPECTOR_WD02, INITIAL_CLIENT_DATA_WD02)
-        ).await?;
-        self.send(
-            LoadingPlaceholderLoadCommand::new(Self::LOADING_PLACEHOLDER)
-        ).await?;
-        self.send(
-            CustomClientInfoCommand::new(Self::CUSTOM, CustomClientInfo {
-                client_url: self.client_url(),
-                document_domain: "ssu.ac.kr".to_owned(),
-                ..CustomClientInfo::default()
-            })
-        ).await?;
+        let parser = ElementParser::new(self.body())?;
+        let notify_wd01 = parser.read(ClientInspectorNotifyCommand::new(Self::CLIENT_INSPECTOR_WD01, INITIAL_CLIENT_DATA_WD01))?;
+        let notify_wd02 = parser.read(ClientInspectorNotifyCommand::new(Self::CLIENT_INSPECTOR_WD02, INITIAL_CLIENT_DATA_WD02))?;
+        let load = parser.read(LoadingPlaceholderLoadCommand::new(Self::LOADING_PLACEHOLDER))?;
+        let custom = parser.read(CustomClientInfoCommand::new(Self::CUSTOM, CustomClientInfo {
+            client_url: self.client_url(),
+            document_domain: "ssu.ac.kr".to_owned(),
+            ..CustomClientInfo::default()
+        }))?;
+        self.process_event(false, notify_wd01).await?;
+        self.process_event(false, notify_wd02).await?;
+        self.process_event(false, load).await?;
+        self.process_event(false, custom).await?;
         Ok(())
     }
 }
