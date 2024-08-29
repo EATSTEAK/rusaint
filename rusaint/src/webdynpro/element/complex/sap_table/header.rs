@@ -1,18 +1,15 @@
-use std::ops::Index;
-
-use scraper::ElementRef;
-
-use crate::webdynpro::{
-    client::body::Body,
-    element::{definition::ElementDefinition, Element, ElementDefWrapper},
-    error::{ElementError, WebDynproError},
-};
-
 use super::{
     cell::{SapTableCell, SapTableCellDefWrapper, SapTableCellWrapper},
     property::{SapTableRowType, SapTableSelectionState},
     SapTableDef,
 };
+use crate::webdynpro::element::parser::ElementParser;
+use crate::webdynpro::{
+    element::{definition::ElementDefinition, Element, ElementDefWrapper},
+    error::{ElementError, WebDynproError},
+};
+use std::ops::Index;
+use tl::Bytes;
 
 /// [`SapTable`](super::SapTable)의 행
 #[derive(Clone, Debug)]
@@ -31,18 +28,23 @@ pub struct SapTableHeader {
 impl<'a> SapTableHeader {
     pub(super) fn new(
         table_def: SapTableDef,
-        header_ref: ElementRef<'a>,
+        tag: tl::HTMLTag<'a>,
+        parser: &'a ElementParser,
     ) -> Result<SapTableHeader, ElementError> {
-        let row = header_ref.value();
-        let subct_selector = scraper::Selector::parse("[subct]").unwrap();
-        let subcts = header_ref.select(&subct_selector);
+        let subcts = tag
+            .query_selector(parser.dom().parser(), "[subct]")
+            .into_iter()
+            .flatten()
+            .filter_map(|handle| handle.get(parser.dom().parser()))
+            .filter_map(|node| node.as_tag());
         let cells = subcts
-            .filter_map(|subct_ref| {
-                SapTableCellDefWrapper::dyn_cell_def(table_def.clone(), subct_ref)
-            })
+            .filter_map(|subct_tag| SapTableCellDefWrapper::from_tag(table_def.clone(), subct_tag))
             .collect::<Vec<SapTableCellDefWrapper>>();
-        let row_type = row
-            .attr("rt")
+        let row_type = tag
+            .attributes()
+            .get("rt")
+            .flatten()
+            .and_then(Bytes::try_as_utf8_str)
             .and_then(|s| Some(s.into()))
             .unwrap_or(SapTableRowType::default());
         if !matches!(row_type, SapTableRowType::Header) {
@@ -54,13 +56,41 @@ impl<'a> SapTableHeader {
         Ok(SapTableHeader {
             table_def,
             cells,
-            row_index: row.attr("rr").and_then(|s| s.parse::<u32>().ok()),
-            user_data: row.attr("uDat").and_then(|s| Some(s.to_owned())),
-            drag_data: row.attr("ddData").and_then(|s| Some(s.to_owned())),
-            drop_target_info: row.attr("ddDti").and_then(|s| Some(s.to_owned())),
-            parent_drop_target_info: row.attr("ddPDti").and_then(|s| Some(s.to_owned())),
-            selection_state: row
-                .attr("sst")
+            row_index: tag
+                .attributes()
+                .get("rr")
+                .flatten()
+                .and_then(Bytes::try_as_utf8_str)
+                .and_then(|s| s.parse::<u32>().ok()),
+            user_data: tag
+                .attributes()
+                .get("uDat")
+                .flatten()
+                .and_then(Bytes::try_as_utf8_str)
+                .and_then(|s| Some(s.to_owned())),
+            drag_data: tag
+                .attributes()
+                .get("ddData")
+                .flatten()
+                .and_then(Bytes::try_as_utf8_str)
+                .and_then(|s| Some(s.to_owned())),
+            drop_target_info: tag
+                .attributes()
+                .get("ddDti")
+                .flatten()
+                .and_then(Bytes::try_as_utf8_str)
+                .and_then(|s| Some(s.to_owned())),
+            parent_drop_target_info: tag
+                .attributes()
+                .get("ddPDti")
+                .flatten()
+                .and_then(Bytes::try_as_utf8_str)
+                .and_then(|s| Some(s.to_owned())),
+            selection_state: tag
+                .attributes()
+                .get("sst")
+                .flatten()
+                .and_then(Bytes::try_as_utf8_str)
                 .and_then(|s| Some(s.into()))
                 .unwrap_or(SapTableSelectionState::default()),
         })
@@ -79,23 +109,25 @@ impl<'a> SapTableHeader {
     /// 행 내부 셀 엘리먼트의 [`Iterator`]를 반환합니다.
     pub fn iter_value(
         &'a self,
-        body: &'a Body,
+        parser: &'a ElementParser,
     ) -> impl Iterator<Item = Result<SapTableCellWrapper<'a>, WebDynproError>> + ExactSizeIterator
     {
-        self.cells.iter().map(|def| def.clone().from_body(body))
+        self.cells
+            .iter()
+            .map(|def| SapTableCellWrapper::from_def(def, parser))
     }
 
     /// 헤더 행 제목들의 [`Vec`]를 반환합니다.
-    pub fn titles(&'a self, body: &'a Body) -> Result<Vec<String>, WebDynproError> {
+    pub fn titles(&'a self, parser: &'a ElementParser) -> Result<Vec<String>, WebDynproError> {
         let vec = self
             .iter()
             .map(|def| -> Result<String, WebDynproError> {
-                let cell_wrapper = def.clone().from_body(body)?;
+                let cell_wrapper = SapTableCellWrapper::from_def(def, parser)?;
                 if let SapTableCellWrapper::Header(header_cell) = cell_wrapper {
-                    if let Some(def_wrapper) = header_cell.content() {
+                    if let Some(def_wrapper) = header_cell.content(parser) {
                         if let ElementDefWrapper::Caption(caption_def) = def_wrapper {
-                            Ok(caption_def
-                                .from_body(body)?
+                            Ok(parser
+                                .element_from_def(&caption_def)?
                                 .lsdata()
                                 .text()
                                 .unwrap_or(&String::default())

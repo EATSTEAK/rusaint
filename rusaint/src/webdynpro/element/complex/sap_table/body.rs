@@ -1,17 +1,14 @@
-use std::{collections::HashMap, ops::Index};
-
-use scraper::ElementRef;
-
-use crate::webdynpro::{
-    client::body::Body,
-    element::definition::ElementDefinition,
-    error::{ElementError, WebDynproError},
-};
-
 use super::{
     cell::SapTableCellDefWrapper, property::SapTableRowType, row::SapTableRow, FromSapTable,
     SapTableDef, SapTableHeader,
 };
+use crate::webdynpro::element::parser::ElementParser;
+use crate::webdynpro::{
+    element::definition::ElementDefinition,
+    error::{ElementError, WebDynproError},
+};
+use std::{collections::HashMap, ops::Index};
+use tl::Bytes;
 
 /// [`SapTable`](super::SapTable) 내부 테이블
 #[derive(Clone, Debug)]
@@ -25,14 +22,17 @@ pub struct SapTableBody {
 impl<'a> SapTableBody {
     pub(super) fn new(
         table_def: SapTableDef,
-        elem_ref: ElementRef<'a>,
+        tag: tl::HTMLTag<'a>,
+        parser: &'a ElementParser,
     ) -> Result<SapTableBody, ElementError> {
-        let ref_iter = elem_ref
+        let tag_iter = tag
             .children()
-            .filter_map(|node| scraper::ElementRef::wrap(node));
-        let mut header_iter = ref_iter
+            .all(parser.dom().parser())
+            .into_iter()
+            .filter_map(|node| node.as_tag());
+        let mut header_iter = tag_iter
             .clone()
-            .filter_map(|row_ref| SapTableHeader::new(table_def.clone(), row_ref).ok());
+            .filter_map(|tag| SapTableHeader::new(table_def.clone(), tag.clone(), parser).ok());
         let Some(header) = header_iter.next() else {
             return Err(ElementError::NoSuchContent {
                 element: table_def.id().to_owned(),
@@ -49,13 +49,20 @@ impl<'a> SapTableBody {
         // Def, rowsize, colsize
         type CellSpanInfo = (SapTableCellDefWrapper, u32, u32);
         let mut spans: HashMap<u32, CellSpanInfo> = HashMap::new();
-        for row_ref in ref_iter.clone() {
-            let row_type = row_ref
-                .value()
-                .attr("rt")
+        for row_tag in tag_iter.clone() {
+            let row_type = row_tag
+                .attributes()
+                .get("rt")
+                .flatten()
+                .and_then(Bytes::try_as_utf8_str)
                 .and_then(|s| Some(s.into()))
                 .unwrap_or(SapTableRowType::default());
-            let row_count = row_ref.value().attr("rr").and_then(|s| s.parse::<u32>().ok());
+            let row_count = row_tag
+                .attributes()
+                .get("rr")
+                .flatten()
+                .and_then(Bytes::try_as_utf8_str)
+                .and_then(|s| s.parse::<u32>().ok());
             if matches!(row_type, SapTableRowType::Header) {
                 continue;
             }
@@ -64,12 +71,16 @@ impl<'a> SapTableBody {
             if row_count.is_some_and(|c| c == 0) {
                 break;
             }
-            let subct_selector = scraper::Selector::parse("[subct]").unwrap();
-            let subcts = row_ref.select(&subct_selector);
+            let subcts = row_tag
+                .query_selector(parser.dom().parser(), "[subct]")
+                .into_iter()
+                .flatten()
+                .filter_map(|handle| handle.get(parser.dom().parser()))
+                .filter_map(|node| node.as_tag());
             let mut cells: Vec<SapTableCellDefWrapper> = Vec::new();
             let mut col_counter: u32 = 0;
-            for cell_ref in subcts {
-                let cell = SapTableCellDefWrapper::dyn_cell_def(table_def.clone(), cell_ref);
+            for cell_tag in subcts {
+                let cell = SapTableCellDefWrapper::from_tag(table_def.clone(), cell_tag);
                 if let Some(cell) = cell {
                     if spans.contains_key(&col_counter) {
                         let spanned_cell = spans.remove(&col_counter).unwrap();
@@ -79,18 +90,24 @@ impl<'a> SapTableBody {
                                 (spanned_cell.0.clone(), spanned_cell.1 - 1, spanned_cell.2),
                             );
                         }
-                        for _ in 0..(spanned_cell.2) {
+                        for _ in 0..spanned_cell.2 {
                             col_counter += 1;
                             cells.push(spanned_cell.0.clone());
                         }
                     }
-                    let cell_value = cell_ref.value();
-                    let rowspan = cell_value
-                        .attr("rowspan")
+                    // TODO: Remove boilerplate to get attribute str from tag
+                    let rowspan = cell_tag
+                        .attributes()
+                        .get("rowspan")
+                        .flatten()
+                        .and_then(Bytes::try_as_utf8_str)
                         .and_then(|str| str.parse::<u32>().ok())
                         .unwrap_or(1);
-                    let colspan = cell_value
-                        .attr("colspan")
+                    let colspan = cell_tag
+                        .attributes()
+                        .get("colspan")
+                        .flatten()
+                        .and_then(Bytes::try_as_utf8_str)
                         .and_then(|str| str.parse::<u32>().ok())
                         .unwrap_or(1);
                     if rowspan > 1 {
@@ -111,12 +128,12 @@ impl<'a> SapTableBody {
                         (spanned_cell.0.clone(), spanned_cell.1 - 1, spanned_cell.2),
                     );
                 }
-                for _ in 0..(spanned_cell.2) {
+                for _ in 0..spanned_cell.2 {
                     col_counter += 1;
                     cells.push(spanned_cell.0.clone());
                 }
             }
-            if let Ok(row) = SapTableRow::new(table_def.clone(), row_ref, cells) {
+            if let Ok(row) = SapTableRow::new(table_def.clone(), row_tag.clone(), cells) {
                 rows.push(row);
             }
         }
@@ -157,10 +174,10 @@ impl<'a> SapTableBody {
     /// 테이블을 [`FromSapTable`]을 구현하는 형의 [`Vec`]으로 변환합니다.
     pub fn try_table_into<T: FromSapTable<'a>>(
         &'a self,
-        body: &'a Body,
+        parser: &'a ElementParser,
     ) -> Result<Vec<T>, WebDynproError> {
         self.iter()
-            .map(|row| T::from_table(body, self.header(), row))
+            .map(|row| T::from_table(self.header(), row, parser))
             .collect::<Result<Vec<T>, WebDynproError>>()
     }
 }

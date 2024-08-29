@@ -1,8 +1,9 @@
-use crate::webdynpro::client::body::Body;
-use crate::webdynpro::element::definition::sub::SubElementDefinition;
+use crate::webdynpro::element::parser::ElementParser;
+use crate::webdynpro::element::sub::definition::SubElementDefinition;
 use crate::webdynpro::element::sub::SubElement;
 use crate::webdynpro::element::{Element, ElementDefWrapper};
 use crate::webdynpro::error::WebDynproError;
+use tl::Bytes;
 
 /// [`SapTable`] 셀의 Wrapper
 #[derive(Debug)]
@@ -21,59 +22,92 @@ pub enum SapTableCellWrapper<'a> {
 
 impl<'a> SapTableCellWrapper<'a> {
     /// 셀을 표현하는 HTML 엘리먼트로부터 [`SapTableCellWrapper`]를 생성합니다.
-    pub fn dyn_cell(
+    pub fn from_tag(
         table_def: <SapTable<'a> as Element<'a>>::Def,
-        elem_ref: scraper::ElementRef<'a>,
+        tag: &tl::HTMLTag<'a>,
+        parser: &'a ElementParser,
     ) -> Option<SapTableCellWrapper<'a>> {
-        let subct_value = elem_ref.value();
-        match subct_value.attr("subct") {
+        let subct_id = tag
+            .attributes()
+            .get("subct")
+            .flatten()
+            .and_then(Bytes::try_as_utf8_str);
+        let tag_id = tag.attributes().id().and_then(Bytes::try_as_utf8_str)?;
+        match subct_id {
             Some(SapTableNormalCell::SUBCONTROL_ID) => Some(
-                <SapTableNormalCell<'_> as SubElement>::Def::new_dynamic(
-                    table_def,
-                    subct_value.id()?.to_owned(),
-                )
-                .from_element(elem_ref)
-                .ok()?
-                .wrap(),
+                parser
+                    .subelement_from_def(&<SapTableNormalCell<'_> as SubElement>::Def::new_dynamic(
+                        table_def,
+                        tag_id.to_owned(),
+                    ))
+                    .ok()?
+                    .wrap(),
             ),
             Some(SapTableHeaderCell::SUBCONTROL_ID) => Some(
-                <SapTableHeaderCell<'_> as SubElement>::Def::new_dynamic(
-                    table_def,
-                    subct_value.id()?.to_owned(),
-                )
-                .from_element(elem_ref)
-                .ok()?
-                .wrap(),
+                parser
+                    .subelement_from_def(&<SapTableHeaderCell<'_> as SubElement>::Def::new_dynamic(
+                        table_def,
+                        tag_id.to_owned(),
+                    ))
+                    .ok()?
+                    .wrap(),
             ),
             Some(SapTableHierarchicalCell::SUBCONTROL_ID) => Some(
-                <SapTableHierarchicalCell<'_> as SubElement>::Def::new_dynamic(
-                    table_def,
-                    subct_value.id()?.to_owned(),
-                )
-                .from_element(elem_ref)
-                .ok()?
-                .wrap(),
+                parser
+                    .subelement_from_def(
+                        &<SapTableHierarchicalCell<'_> as SubElement>::Def::new_dynamic(
+                            table_def,
+                            tag_id.to_owned(),
+                        ),
+                    )
+                    .ok()?
+                    .wrap(),
             ),
             Some(SapTableMatrixCell::SUBCONTROL_ID) => Some(
-                <SapTableMatrixCell<'_> as SubElement>::Def::new_dynamic(
-                    table_def,
-                    subct_value.id()?.to_owned(),
-                )
-                .from_element(elem_ref)
-                .ok()?
-                .wrap(),
+                parser
+                    .subelement_from_def(&<SapTableMatrixCell<'_> as SubElement>::Def::new_dynamic(
+                        table_def,
+                        tag_id.to_owned(),
+                    ))
+                    .ok()?
+                    .wrap(),
             ),
             Some(SapTableSelectionCell::SUBCONTROL_ID) => Some(
-                <SapTableSelectionCell<'_> as SubElement>::Def::new_dynamic(
-                    table_def,
-                    subct_value.id()?.to_owned(),
-                )
-                .from_element(elem_ref)
-                .ok()?
-                .wrap(),
+                parser
+                    .subelement_from_def(
+                        &<SapTableSelectionCell<'_> as SubElement>::Def::new_dynamic(
+                            table_def,
+                            tag_id.to_owned(),
+                        ),
+                    )
+                    .ok()?
+                    .wrap(),
             ),
             _ => None,
         }
+    }
+
+    pub fn from_def(
+        wrapper: &SapTableCellDefWrapper,
+        parser: &'a ElementParser,
+    ) -> Result<SapTableCellWrapper<'a>, WebDynproError> {
+        Ok(match wrapper {
+            SapTableCellDefWrapper::Normal(def) => {
+                SapTableCellWrapper::Normal(parser.subelement_from_def(def)?)
+            }
+            SapTableCellDefWrapper::Header(def) => {
+                SapTableCellWrapper::Header(parser.subelement_from_def(def)?)
+            }
+            SapTableCellDefWrapper::Hierarchical(def) => {
+                SapTableCellWrapper::Hierarchical(parser.subelement_from_def(def)?)
+            }
+            SapTableCellDefWrapper::Matrix(def) => {
+                SapTableCellWrapper::Matrix(parser.subelement_from_def(def)?)
+            }
+            SapTableCellDefWrapper::Selection(def) => {
+                SapTableCellWrapper::Selection(parser.subelement_from_def(def)?)
+            }
+        })
     }
 
     /// 셀의 id를 반환합니다.
@@ -104,58 +138,36 @@ pub enum SapTableCellDefWrapper {
 }
 
 impl SapTableCellDefWrapper {
-    // TODO: include node id in def to improve performance
     /// 셀을 표현하는 HTML 엘리먼트로부터 [`SapTableCellDefWrapper`]를 생성합니다.
-    pub fn dyn_cell_def(
+    pub fn from_tag(
         table_def: SapTableDef,
-        elem_ref: scraper::ElementRef<'_>,
+        tag: &tl::HTMLTag<'_>,
     ) -> Option<SapTableCellDefWrapper> {
-        let subct_value = elem_ref.value();
-        match subct_value.attr("subct") {
+        let subct_id = tag
+            .attributes()
+            .get("subct")
+            .flatten()
+            .and_then(Bytes::try_as_utf8_str);
+        let tag_id = tag.attributes().id().and_then(Bytes::try_as_utf8_str)?;
+        match subct_id {
             Some(SapTableNormalCell::SUBCONTROL_ID) => Some(SapTableCellDefWrapper::Normal(
-                SapTableNormalCellDef::new_dynamic(table_def, subct_value.id()?.to_owned()),
+                SapTableNormalCellDef::new_dynamic(table_def, tag_id.to_owned()),
             )),
             Some(SapTableHeaderCell::SUBCONTROL_ID) => Some(SapTableCellDefWrapper::Header(
-                SapTableHeaderCellDef::new_dynamic(table_def, subct_value.id()?.to_owned()),
+                SapTableHeaderCellDef::new_dynamic(table_def, tag_id.to_owned()),
             )),
-            Some(SapTableHierarchicalCell::SUBCONTROL_ID) => Some(
-                SapTableCellDefWrapper::Hierarchical(SapTableHierarchicalCellDef::new_dynamic(
-                    table_def,
-                    subct_value.id()?.to_owned(),
-                )),
-            ),
+            Some(SapTableHierarchicalCell::SUBCONTROL_ID) => {
+                Some(SapTableCellDefWrapper::Hierarchical(
+                    SapTableHierarchicalCellDef::new_dynamic(table_def, tag_id.to_owned()),
+                ))
+            }
             Some(SapTableMatrixCell::SUBCONTROL_ID) => Some(SapTableCellDefWrapper::Matrix(
-                SapTableMatrixCellDef::new_dynamic(table_def, subct_value.id()?.to_owned()),
+                SapTableMatrixCellDef::new_dynamic(table_def, tag_id.to_owned()),
             )),
             Some(SapTableSelectionCell::SUBCONTROL_ID) => Some(SapTableCellDefWrapper::Selection(
-                SapTableSelectionCellDef::new_dynamic(table_def, subct_value.id()?.to_owned()),
+                SapTableSelectionCellDef::new_dynamic(table_def, tag_id.to_owned()),
             )),
             _ => None,
-        }
-    }
-
-    /// [`Body`]에서 서브 엘리먼트를 가져옵니다.
-    pub fn from_body(self, body: &Body) -> Result<SapTableCellWrapper, WebDynproError> {
-        match self {
-            Self::Normal(def) => Ok(def.from_body(body)?.wrap()),
-            Self::Header(def) => Ok(def.from_body(body)?.wrap()),
-            Self::Hierarchical(def) => Ok(def.from_body(body)?.wrap()),
-            Self::Matrix(def) => Ok(def.from_body(body)?.wrap()),
-            Self::Selection(def) => Ok(def.from_body(body)?.wrap()),
-        }
-    }
-
-    /// [`scraper::ElementRef`]에서 서브 엘리먼트를 가져옵니다.
-    pub fn from_element(
-        self,
-        element: scraper::ElementRef<'_>,
-    ) -> Result<SapTableCellWrapper, WebDynproError> {
-        match self {
-            Self::Normal(def) => Ok(def.from_element(element)?.wrap()),
-            Self::Header(def) => Ok(def.from_element(element)?.wrap()),
-            Self::Hierarchical(def) => Ok(def.from_element(element)?.wrap()),
-            Self::Matrix(def) => Ok(def.from_element(element)?.wrap()),
-            Self::Selection(def) => Ok(def.from_element(element)?.wrap()),
         }
     }
 }
@@ -163,17 +175,17 @@ impl SapTableCellDefWrapper {
 /// [`SapTable`]의 공통된 셀 기능
 pub trait SapTableCell<'a> {
     /// 셀 내부 컨텐츠 엘리먼트를 반환합니다.
-    fn content(&self) -> Option<ElementDefWrapper<'a>>;
+    fn content(&self, parser: &'a ElementParser) -> Option<ElementDefWrapper<'a>>;
 }
 
 impl<'a> SapTableCell<'a> for SapTableCellWrapper<'a> {
-    fn content(&self) -> Option<ElementDefWrapper<'a>> {
+    fn content(&self, parser: &'a ElementParser) -> Option<ElementDefWrapper<'a>> {
         match self {
-            SapTableCellWrapper::Normal(elem) => elem.content(),
-            SapTableCellWrapper::Header(elem) => elem.content(),
-            SapTableCellWrapper::Hierarchical(elem) => elem.content(),
-            SapTableCellWrapper::Matrix(elem) => elem.content(),
-            SapTableCellWrapper::Selection(elem) => elem.content(),
+            SapTableCellWrapper::Normal(elem) => elem.content(parser),
+            SapTableCellWrapper::Header(elem) => elem.content(parser),
+            SapTableCellWrapper::Hierarchical(elem) => elem.content(parser),
+            SapTableCellWrapper::Matrix(elem) => elem.content(parser),
+            SapTableCellWrapper::Selection(elem) => elem.content(parser),
         }
     }
 }

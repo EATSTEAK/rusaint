@@ -40,8 +40,7 @@ macro_rules! define_subelement {
           fn new_dynamic(parent: <Self::Parent as $crate::webdynpro::element::Element<'body>>::Def, id: String) -> Self {
               Self {
                   id: id.into(),
-                  parent,
-                  node_id: None
+                  parent
               }
           }
 
@@ -81,7 +80,7 @@ macro_rules! define_subelement {
           fn lsdata(&self) -> &Self::SubElementLSData {
               self.lsdata
                   .get_or_init(|| {
-                      let Ok(lsdata_obj) = Self::lsdata_element(self.element_ref) else {
+                      let Ok(lsdata_obj) = $crate::webdynpro::element::lsdata_tag(&self.tag) else {
                           return $lsdata::default();
                       };
                       serde_json::from_value::<Self::SubElementLSData>(lsdata_obj).ok().unwrap_or($lsdata::default())

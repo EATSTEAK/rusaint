@@ -1,14 +1,12 @@
-use std::{borrow::Cow, cell::OnceCell, collections::HashMap};
-
-use scraper::Selector;
-
+use self::property::AccessType;
+use crate::webdynpro::element::parser::ElementParser;
 use crate::webdynpro::{
-    element::{define_element_interactable, definition::ElementDefinition, Interactable},
-    error::{BodyError, ElementError, WebDynproError},
+    element::{definition::ElementDefinition, macros::define_element_interactable, Interactable},
+    error::{ElementError, WebDynproError},
     event::Event,
 };
-
-use self::property::AccessType;
+use std::{borrow::Cow, cell::OnceCell, collections::HashMap};
+use tl::{Bytes, Node};
 
 define_element_interactable! {
     #[doc = "테이블"]
@@ -28,10 +26,10 @@ define_element_interactable! {
 
 impl<'a> SapTable<'a> {
     /// HTML 엘리먼트로부터 새로운 [`SapTable`] 엘리먼트를 생성합니다.
-    pub const fn new(id: Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {
+    pub const fn new(id: Cow<'static, str>, tag: tl::HTMLTag<'a>) -> Self {
         Self {
             id,
-            element_ref,
+            tag,
             lsdata: OnceCell::new(),
             lsevents: OnceCell::new(),
             table: OnceCell::new(),
@@ -39,9 +37,9 @@ impl<'a> SapTable<'a> {
     }
 
     /// 테이블 내부 컨텐츠를 반환합니다.
-    pub fn table(&self) -> Result<&SapTableBody, WebDynproError> {
+    pub fn table(&self, parser: &'a ElementParser) -> Result<&SapTableBody, WebDynproError> {
         self.table
-            .get_or_init(|| self.parse_table().ok())
+            .get_or_init(|| self.parse_table(parser).ok())
             .as_ref()
             .ok_or(WebDynproError::Element(ElementError::NoSuchContent {
                 element: self.id.to_string(),
@@ -49,7 +47,7 @@ impl<'a> SapTable<'a> {
             }))
     }
 
-    fn parse_table(&self) -> Result<SapTableBody, WebDynproError> {
+    fn parse_table(&self, parser: &'a ElementParser) -> Result<SapTableBody, WebDynproError> {
         let def: SapTableDef = {
             if let Cow::Borrowed(id) = self.id {
                 SapTableDef::new(id)
@@ -57,25 +55,32 @@ impl<'a> SapTable<'a> {
                 SapTableDef::new_dynamic((&self.id).to_string())
             }
         };
-        let element = self.element_ref;
-        let tbody_selector = Selector::parse(
-            format!(
-                r#"[id="{}-contentTBody"]"#,
-                element.value().id().ok_or(ElementError::NoSuchData {
+        let element = &self.tag;
+        let tbody_selector = format!(
+            r#"[id="{}-contentTBody"]"#,
+            element
+                .attributes()
+                .id()
+                .and_then(Bytes::try_as_utf8_str)
+                .ok_or(ElementError::NoSuchData {
                     element: self.id.clone().into_owned(),
                     field: "id".to_string()
                 })?
-            )
-            .as_str(),
-        )
-        .or(Err(BodyError::InvalidSelector))?;
-        let Some(tbody) = element.select(&tbody_selector).next() else {
+        );
+        let Some(tbody) = element
+            .query_selector(parser.dom().parser(), &tbody_selector)
+            .into_iter()
+            .flatten()
+            .next()
+            .and_then(|handle| handle.get(parser.dom().parser()))
+            .and_then(Node::as_tag)
+        else {
             return Err(ElementError::NoSuchContent {
                 element: self.id.clone().into_owned(),
                 content: "Table body".to_string(),
             })?;
         };
-        Ok(SapTableBody::new(def, tbody)?)
+        Ok(SapTableBody::new(def, tbody.clone(), parser)?)
     }
 
     /// 테이블의 행을 선택하는 이벤트를 반환합니다.
