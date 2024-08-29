@@ -14,7 +14,7 @@ readme.workspace = true
 
 [features]
 default = ["application", "element"]
-element = ["dep:ego-tree", "dep:scraper", "dep:tl"]
+element = ["dep:tl"]
 application = ["element"]
 uniffi = ["dep:uniffi", "application"]
 
@@ -36,8 +36,6 @@ html-escape = "0.2.13"
 url = "2.5.2"
 roxmltree = "0.20.0"
 lol_html = "1.2.1"
-ego-tree = { version = "0.6.3", optional = true }
-scraper = { version = "0.20.0", features = ["atomic"], optional = true }
 tl = { version = "0.7.8", optional = true }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
