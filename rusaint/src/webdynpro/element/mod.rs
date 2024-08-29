@@ -593,5 +593,7 @@ impl<'a> ElementWrapper<'a> {
 }
 
 /// [`SubElement`](crate::webdynpro::element::sub::SubElement) 트레이트 모듈
+/// 엘리먼트를 파싱하기 위한 [`ElementParser`]를 위한 모듈
+pub mod parser;
 pub mod sub;
 mod parser;
