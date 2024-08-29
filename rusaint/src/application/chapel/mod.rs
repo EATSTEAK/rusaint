@@ -1,5 +1,8 @@
 use model::{ChapelAbsenceRequest, ChapelAttendance, ChapelInformation, GeneralChapelInformation};
 
+use super::{USaintApplication, USaintClient};
+use crate::webdynpro::command::WebDynproCommandExecutor;
+use crate::webdynpro::element::parser::ElementParser;
 use crate::{
     define_elements,
     model::SemesterType,
@@ -14,8 +17,6 @@ use crate::{
     },
     RusaintError,
 };
-
-use super::{USaintApplication, USaintClient};
 
 /// [채플정보조회](https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/ZCMW3681)
 pub struct ChapelApplication {
@@ -60,25 +61,24 @@ impl<'a> ChapelApplication {
         semester: SemesterType,
     ) -> Result<(), RusaintError> {
         let semester = Self::semester_to_key(semester);
-        let year_combobox_lsdata = self
-            .client
-            .read(ReadComboBoxLSDataCommand::new(Self::SEL_PERYR))?;
-        let semester_combobox_lsdata = self
-            .client
-            .read(ReadComboBoxLSDataCommand::new(Self::SEL_PERID))?;
+        let parser = ElementParser::new(self.body());
+        let year_combobox_lsdata = parser.read(ReadComboBoxLSDataCommand::new(Self::SEL_PERYR))?;
+        let semester_combobox_lsdata =
+            parser.read(ReadComboBoxLSDataCommand::new(Self::SEL_PERID))?;
         if (|| Some(year_combobox_lsdata.key()?.as_str()))() != Some(year) {
-            self.client
-                .send(ComboBoxSelectCommand::new(Self::SEL_PERYR, &year, false))
-                .await?;
+            let year_select_event =
+                parser.read(ComboBoxSelectCommand::new(Self::SEL_PERYR, &year, false))?;
+            self.client.process_event(false, year_select_event).await?;
         }
         if (|| Some(semester_combobox_lsdata.key()?.as_str()))() != Some(semester) {
+            let semester_select_event =
+                parser.read(ComboBoxSelectCommand::new(Self::SEL_PERID, semester, false))?;
             self.client
-                .send(ComboBoxSelectCommand::new(Self::SEL_PERID, semester, false))
+                .process_event(false, semester_select_event)
                 .await?;
         }
-        self.client
-            .send(ButtonPressCommand::new(Self::BTN_SEL))
-            .await?;
+        let button_press_event = parser.read(ButtonPressCommand::new(Self::BTN_SEL))?;
+        self.client.process_event(false, button_press_event).await?;
         Ok(())
     }
 
@@ -89,7 +89,8 @@ impl<'a> ChapelApplication {
         semester: SemesterType,
     ) -> Result<ChapelInformation, RusaintError> {
         self.select_semester(&year.to_string(), semester).await?;
-        let general_information = GeneralChapelInformation::from_body(self.body())?
+        let parser = ElementParser::new(self.body());
+        let general_information = GeneralChapelInformation::with_parser(&parser)?
             .pop()
             .ok_or_else(|| {
                 Into::<RusaintError>::into(Into::<WebDynproError>::into(
@@ -99,8 +100,8 @@ impl<'a> ChapelApplication {
                     },
                 ))
             })?;
-        let attendances = ChapelAttendance::from_body(self.body())?;
-        let absence_requests = ChapelAbsenceRequest::from_body(self.body())?;
+        let attendances = ChapelAttendance::with_parser(&parser)?;
+        let absence_requests = ChapelAbsenceRequest::with_parser(&parser)?;
         Ok(ChapelInformation::new(
             year,
             semester,

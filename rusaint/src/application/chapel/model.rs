@@ -5,13 +5,14 @@ use serde::{
     Deserialize,
 };
 
+use crate::webdynpro::command::WebDynproCommandExecutor;
+use crate::webdynpro::element::parser::ElementParser;
 use crate::{
     define_elements,
     error::ApplicationError,
     model::SemesterType,
     utils::de_with::{deserialize_semester_type, deserialize_u32_string},
     webdynpro::{
-        client::body::Body,
         command::element::complex::ReadSapTableBodyCommand,
         element::{
             complex::{
@@ -119,21 +120,21 @@ impl<'a> GeneralChapelInformation {
         TABLE: SapTable<'a> = "ZCMW3681.ID_0001:V_MAIN.TABLE";
     }
 
-    pub(crate) fn from_body(body: &'a Body) -> Result<Vec<Self>, RusaintError> {
-        let table = body.read(ReadSapTableBodyCommand::new(Self::TABLE))?;
+    pub(crate) fn with_parser(parser: &'a ElementParser) -> Result<Vec<Self>, RusaintError> {
+        let table = parser.read(ReadSapTableBodyCommand::new(Self::TABLE))?;
         let Some(first_row) = table.iter().next() else {
             return Err(ApplicationError::NoChapelInformation.into());
         };
-        if let Some(Ok(SapTableCellWrapper::Normal(cell))) = first_row.iter_value(body).next() {
+        if let Some(Ok(SapTableCellWrapper::Normal(cell))) = first_row.iter_value(parser).next() {
             if let Some(ElementDefWrapper::TextView(tv_def)) = cell.content() {
-                if let Ok(tv) = tv_def.from_body(body) {
+                if let Ok(tv) = parser.element_from_def(&tv_def) {
                     if tv.text().contains("없습니다.") {
                         return Err(ApplicationError::NoChapelInformation.into());
                     }
                 }
             }
         }
-        Ok(table.try_table_into::<Self>(body)?)
+        Ok(table.try_table_into::<Self>(parser)?)
     }
 
     /// 분반 번호를 반환합니다.
@@ -179,11 +180,11 @@ impl<'a> GeneralChapelInformation {
 
 impl<'body> FromSapTable<'body> for GeneralChapelInformation {
     fn from_table(
-        body: &'body crate::webdynpro::client::body::Body,
         header: &'body crate::webdynpro::element::complex::sap_table::SapTableHeader,
         row: &'body crate::webdynpro::element::complex::sap_table::SapTableRow,
+        parser: &'body ElementParser,
     ) -> Result<Self, WebDynproError> {
-        let map_string = row.try_row_into::<HashMap<String, String>>(header, body)?;
+        let map_string = row.try_row_into::<HashMap<String, String>>(header, parser)?;
         let map_de: MapDeserializer<_, serde::de::value::Error> = map_string.into_deserializer();
         Ok(
             Self::deserialize(map_de).map_err(|e| ElementError::InvalidContent {
@@ -226,21 +227,21 @@ impl<'a> ChapelAttendance {
         TABLE_A: SapTable<'a> = "ZCMW3681.ID_0001:V_MAIN.TABLE_A";
     }
 
-    pub(crate) fn from_body(body: &'a Body) -> Result<Vec<Self>, WebDynproError> {
-        let table = body.read(ReadSapTableBodyCommand::new(Self::TABLE_A))?;
+    pub(crate) fn with_parser(parser: &'a ElementParser) -> Result<Vec<Self>, WebDynproError> {
+        let table = parser.read(ReadSapTableBodyCommand::new(Self::TABLE_A))?;
         let Some(first_row) = table.iter().next() else {
             return Ok(Vec::with_capacity(0));
         };
-        if let Some(Ok(SapTableCellWrapper::Normal(cell))) = first_row.iter_value(body).next() {
+        if let Some(Ok(SapTableCellWrapper::Normal(cell))) = first_row.iter_value(parser).next() {
             if let Some(ElementDefWrapper::TextView(tv_def)) = cell.content() {
-                if let Ok(tv) = tv_def.from_body(body) {
+                if let Ok(tv) = parser.element_from_def(&tv_def) {
                     if tv.text().contains("채플 출결 상세내용") {
                         return Ok(Vec::with_capacity(0));
                     }
                 }
             }
         }
-        table.try_table_into::<Self>(body)
+        table.try_table_into::<Self>(parser)
     }
 
     /// 채플 분반 번호를 반환합니다.
@@ -291,11 +292,11 @@ impl<'a> ChapelAttendance {
 
 impl<'body> FromSapTable<'body> for ChapelAttendance {
     fn from_table(
-        body: &'body crate::webdynpro::client::body::Body,
         header: &'body crate::webdynpro::element::complex::sap_table::SapTableHeader,
         row: &'body crate::webdynpro::element::complex::sap_table::SapTableRow,
+        parser: &'body ElementParser,
     ) -> Result<Self, WebDynproError> {
-        let map_string = row.try_row_into::<HashMap<String, String>>(header, body)?;
+        let map_string = row.try_row_into::<HashMap<String, String>>(header, parser)?;
         let map_de: MapDeserializer<_, serde::de::value::Error> = map_string.into_deserializer();
         Ok(
             Self::deserialize(map_de).map_err(|e| ElementError::InvalidContent {
@@ -344,14 +345,14 @@ impl<'a> ChapelAbsenceRequest {
     define_elements! {
         TABLE02_CP_CP: SapTable<'a> = "ZCMW3681.ID_0001:V_MAIN.TABLE02_CP_CP";
     }
-    pub(crate) fn from_body(body: &'a Body) -> Result<Vec<Self>, RusaintError> {
-        let table = body.read(ReadSapTableBodyCommand::new(Self::TABLE02_CP_CP))?;
+    pub(crate) fn with_parser(parser: &'a ElementParser) -> Result<Vec<Self>, RusaintError> {
+        let table = parser.read(ReadSapTableBodyCommand::new(Self::TABLE02_CP_CP))?;
         let Some(first_row) = table.iter().next() else {
             return Ok(Vec::with_capacity(0));
         };
-        if let Some(Ok(SapTableCellWrapper::Normal(cell))) = first_row.iter_value(body).next() {
+        if let Some(Ok(SapTableCellWrapper::Normal(cell))) = first_row.iter_value(parser).next() {
             if let Some(ElementDefWrapper::TextView(tv_def)) = cell.content() {
-                if let Ok(tv) = tv_def.from_body(body) {
+                if let Ok(tv) = parser.element_from_def(&tv_def) {
                     if tv.text().contains("없습니다.") {
                         return Ok(Vec::with_capacity(0));
                     }
@@ -359,7 +360,7 @@ impl<'a> ChapelAbsenceRequest {
             }
         }
 
-        Ok(table.try_table_into::<Self>(body)?)
+        Ok(table.try_table_into::<Self>(parser)?)
     }
 
     /// 신청 학년도를 반환합니다.
@@ -420,11 +421,11 @@ impl<'a> ChapelAbsenceRequest {
 
 impl<'body> FromSapTable<'body> for ChapelAbsenceRequest {
     fn from_table(
-        body: &'body crate::webdynpro::client::body::Body,
         header: &'body crate::webdynpro::element::complex::sap_table::SapTableHeader,
         row: &'body crate::webdynpro::element::complex::sap_table::SapTableRow,
+        parser: &'body ElementParser,
     ) -> Result<Self, WebDynproError> {
-        let map_string = row.try_row_into::<HashMap<String, String>>(header, body)?;
+        let map_string = row.try_row_into::<HashMap<String, String>>(header, parser)?;
         let map_de: MapDeserializer<_, serde::de::value::Error> = map_string.into_deserializer();
         Ok(
             Self::deserialize(map_de).map_err(|e| ElementError::InvalidContent {
