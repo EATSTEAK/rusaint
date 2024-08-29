@@ -1,5 +1,6 @@
+use crate::webdynpro::element::parser::ElementParser;
 use crate::webdynpro::{
-    command::{WebDynproCommand, WebDynproReadCommand},
+    command::WebDynproCommand,
     element::{definition::ElementDefinition, text::InputFieldDef},
     error::{ElementError, WebDynproError},
 };
@@ -16,14 +17,12 @@ impl ReadInputFieldValueCommand {
     }
 }
 
-impl WebDynproReadCommand for ReadInputFieldValueCommand {
-    fn read(
-        &self,
-        body: &crate::webdynpro::client::body::Body,
-    ) -> Result<Self::Result, WebDynproError> {
-        let text = self
-            .element_def
-            .from_body(body)?
+impl WebDynproCommand for ReadInputFieldValueCommand {
+    type Result = String;
+
+    fn dispatch(&self, parser: &ElementParser) -> Result<Self::Result, WebDynproError> {
+        let text = parser
+            .element_from_def(&self.element_def)?
             .value()
             .map(str::to_string)
             .ok_or_else(|| ElementError::NoSuchContent {
@@ -31,16 +30,5 @@ impl WebDynproReadCommand for ReadInputFieldValueCommand {
                 content: "value of InputField".to_string(),
             })?;
         Ok(text)
-    }
-}
-
-impl WebDynproCommand for ReadInputFieldValueCommand {
-    type Result = String;
-
-    async fn dispatch(
-        &self,
-        client: &mut crate::webdynpro::client::WebDynproClient,
-    ) -> Result<Self::Result, WebDynproError> {
-        self.read(client.body())
     }
 }

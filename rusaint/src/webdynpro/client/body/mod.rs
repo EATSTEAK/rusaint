@@ -4,10 +4,7 @@ use std::hash::Hash;
 use lol_html::{element, html_content::ContentType, rewrite_str, RewriteStrSettings};
 use roxmltree::Node;
 
-use crate::webdynpro::{
-    command::WebDynproReadCommand,
-    error::{BodyError, UpdateBodyError},
-};
+use crate::webdynpro::error::{BodyError, UpdateBodyError};
 
 use super::SapSsrClient;
 

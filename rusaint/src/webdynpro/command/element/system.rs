@@ -1,4 +1,10 @@
-use crate::webdynpro::{client::EventProcessResult, command::WebDynproCommand, element::{definition::ElementDefinition, system::{ClientInspectorDef, Custom, CustomClientInfo, LoadingPlaceholderDef}}, error::WebDynproError};
+use crate::webdynpro::element::parser::ElementParser;
+use crate::webdynpro::event::Event;
+use crate::webdynpro::{
+    command::WebDynproCommand,
+    element::system::{ClientInspectorDef, Custom, CustomClientInfo, LoadingPlaceholderDef},
+    error::WebDynproError,
+};
 
 /// [`ClientInspector`](crate::webdynpro::element::system::ClientInspector)를 통해 서버에 클라이언트 정보를 전파합니다.
 pub struct ClientInspectorNotifyCommand {
@@ -9,19 +15,20 @@ pub struct ClientInspectorNotifyCommand {
 impl ClientInspectorNotifyCommand {
     /// 새로운 명령 객체를 생성합니다.
     pub fn new(element_def: ClientInspectorDef, message: &str) -> Self {
-        Self { element_def, message: message.to_string() }
+        Self {
+            element_def,
+            message: message.to_string(),
+        }
     }
 }
 
 impl WebDynproCommand for ClientInspectorNotifyCommand {
-    type Result = EventProcessResult;
+    type Result = Event;
 
-    async fn dispatch(
-        &self,
-        client: &mut crate::webdynpro::client::WebDynproClient,
-    ) -> Result<Self::Result, WebDynproError> {
-        let event = (&self.element_def).from_body(client.body())?.notify(&self.message)?;
-        client.process_event(false, event).await
+    fn dispatch(&self, parser: &ElementParser) -> Result<Self::Result, WebDynproError> {
+        parser
+            .element_from_def(&self.element_def)?
+            .notify(&self.message)
     }
 }
 
@@ -38,21 +45,17 @@ impl LoadingPlaceholderLoadCommand {
 }
 
 impl WebDynproCommand for LoadingPlaceholderLoadCommand {
-    type Result = EventProcessResult;
+    type Result = Event;
 
-    async fn dispatch(
-        &self,
-        client: &mut crate::webdynpro::client::WebDynproClient,
-    ) -> Result<Self::Result, WebDynproError> {
-        let event = (&self.element_def).from_body(client.body())?.load()?;
-        client.process_event(false, event).await
+    fn dispatch(&self, parser: &ElementParser) -> Result<Self::Result, WebDynproError> {
+        parser.element_from_def(&self.element_def)?.load()
     }
 }
 
 /// ClientInfo 명령을 커스텀 객체를 이용해 서버에 전송합니다.
 pub struct CustomClientInfoCommand {
     element: Custom,
-    info: CustomClientInfo
+    info: CustomClientInfo,
 }
 
 impl CustomClientInfoCommand {
@@ -63,13 +66,9 @@ impl CustomClientInfoCommand {
 }
 
 impl WebDynproCommand for CustomClientInfoCommand {
-    type Result = EventProcessResult;
+    type Result = Event;
 
-    async fn dispatch(
-        &self,
-        client: &mut crate::webdynpro::client::WebDynproClient,
-    ) -> Result<Self::Result, WebDynproError> {
-        let event = self.element.client_infos(self.info.clone());
-        client.process_event(false, event).await
+    fn dispatch(&self, _parser: &ElementParser) -> Result<Self::Result, WebDynproError> {
+        Ok(self.element.client_infos(self.info.clone()))
     }
 }

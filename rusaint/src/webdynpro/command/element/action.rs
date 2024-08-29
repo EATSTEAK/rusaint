@@ -1,7 +1,7 @@
+use crate::webdynpro::command::WebDynproCommand;
+use crate::webdynpro::event::Event;
 use crate::webdynpro::{
-    client::EventProcessResult,
-    command::WebDynproCommand,
-    element::{action::ButtonDef, definition::ElementDefinition},
+    element::{action::ButtonDef, parser::ElementParser},
     error::WebDynproError,
 };
 
@@ -18,13 +18,9 @@ impl ButtonPressCommand {
 }
 
 impl WebDynproCommand for ButtonPressCommand {
-    type Result = EventProcessResult;
+    type Result = Event;
 
-    async fn dispatch(
-        &self,
-        client: &mut crate::webdynpro::client::WebDynproClient,
-    ) -> Result<Self::Result, WebDynproError> {
-        let event = (&self.element_def).from_body(client.body())?.press()?;
-        client.process_event(false, event).await
+    fn dispatch(&self, parser: &ElementParser) -> Result<Self::Result, WebDynproError> {
+        parser.element_from_def(&self.element_def)?.press()
     }
 }

@@ -1,5 +1,5 @@
 use crate::webdynpro::client::body::Body;
-use crate::webdynpro::command::WebDynproReadCommand;
+use crate::webdynpro::command::WebDynproCommand;
 use crate::webdynpro::element::sub::{definition::SubElementDefinition, SubElement};
 use crate::webdynpro::element::{definition::ElementDefinition, Element};
 use crate::webdynpro::error::{BodyError, WebDynproError};
@@ -47,7 +47,7 @@ impl<'s> ElementParser {
     }
 
     /// WebDynpro 파서에 읽기 명령을 전송합니다.
-    pub fn read<T: WebDynproReadCommand>(&self, command: T) -> Result<T::Result, WebDynproError> {
-        command.read(self)
+    pub fn read<T: WebDynproCommand>(&self, command: T) -> Result<T::Result, WebDynproError> {
+        command.dispatch(self)
     }
 }

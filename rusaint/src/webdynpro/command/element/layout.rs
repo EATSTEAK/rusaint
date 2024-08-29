@@ -1,5 +1,6 @@
+use crate::webdynpro::element::parser::ElementParser;
+use crate::webdynpro::event::Event;
 use crate::webdynpro::{
-    client::EventProcessResult,
     command::WebDynproCommand,
     element::{
         definition::ElementDefinition,
@@ -34,17 +35,13 @@ impl<'a> TabStripTabSelectCommand {
 }
 
 impl WebDynproCommand for TabStripTabSelectCommand {
-    type Result = EventProcessResult;
+    type Result = Event;
 
-    async fn dispatch(
-        &self,
-        client: &mut crate::webdynpro::client::WebDynproClient,
-    ) -> Result<Self::Result, WebDynproError> {
-        let event = self.element_def.from_body(client.body())?.tab_select(
+    fn dispatch(&self, parser: &ElementParser) -> Result<Self::Result, WebDynproError> {
+        parser.element_from_def(&self.element_def)?.tab_select(
             &self.item_id,
             self.item_index,
             self.first_visible_item_index,
-        )?;
-        client.process_event(false, event).await
+        )
     }
 }
