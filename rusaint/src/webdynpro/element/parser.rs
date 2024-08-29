@@ -1,4 +1,5 @@
 use crate::webdynpro::client::body::Body;
+use crate::webdynpro::element::sub::{definition::SubElementDefinition, SubElement};
 use crate::webdynpro::element::{definition::ElementDefinition, Element};
 use crate::webdynpro::error::{BodyError, WebDynproError};
 use tl::{VDom, VDomGuard};
@@ -28,5 +29,19 @@ impl<'s> ElementParser {
             .as_tag()
             .unwrap();
         Element::from_tag(element_def, tag.clone())
+    }
+
+    pub fn subelement_from_def<T: SubElementDefinition<'s>>(
+        &'s self,
+        subelement_def: &T,
+    ) -> Result<T::SubElement, WebDynproError> {
+        let handle = self.dom().get_element_by_id(subelement_def.id());
+        let tag = handle
+            .unwrap()
+            .get(self.dom().parser())
+            .unwrap()
+            .as_tag()
+            .unwrap();
+        SubElement::from_tag(subelement_def, tag.clone())
     }
 }
