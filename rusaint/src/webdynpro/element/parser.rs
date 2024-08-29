@@ -7,6 +7,7 @@ use tl::{VDom, VDomGuard};
 
 pub struct ElementParser(VDomGuard);
 
+// TODO: Documentation of `ElementParser`
 impl<'s> ElementParser {
     pub fn new(body: &Body) -> Result<ElementParser, WebDynproError> {
         Ok(ElementParser(
@@ -18,6 +19,7 @@ impl<'s> ElementParser {
         self.0.get_ref()
     }
 
+    // TODO: Do proper error handling
     pub fn element_from_def<T: ElementDefinition<'s>>(
         &'s self,
         element_def: &T,
@@ -32,6 +34,7 @@ impl<'s> ElementParser {
         Element::from_tag(element_def, tag.clone())
     }
 
+    // TODO: Do proper error handling
     pub fn subelement_from_def<T: SubElementDefinition<'s>>(
         &'s self,
         subelement_def: &T,
