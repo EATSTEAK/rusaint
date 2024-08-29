@@ -10,7 +10,7 @@ impl<'s> ElementParser {
     pub fn new(body: &Body) -> Result<ElementParser, WebDynproError> {
         Ok(ElementParser(
             unsafe { tl::parse_owned(body.raw_body().to_owned(), Default::default()) }
-                .or_else(|err| Err(WebDynproError::Body(BodyError::Parse)))?,
+                .or_else(|_err| Err(WebDynproError::Body(BodyError::Parse)))?,
         ))
     }
     pub(crate) fn dom(&'s self) -> &'s VDom {
