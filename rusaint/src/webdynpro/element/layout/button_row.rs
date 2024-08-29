@@ -1,9 +1,8 @@
-use scraper::Selector;
 use std::{borrow::Cow, cell::OnceCell};
 
 use crate::webdynpro::element::{
-    action::Button, define_element_base, definition::ElementDefinition, property::Visibility,
-    Element,
+    action::Button, definition::ElementDefinition, macros::define_element_base,
+    parser::ElementParser, property::Visibility, Element,
 };
 
 define_element_base! {
@@ -22,10 +21,10 @@ define_element_base! {
 
 impl<'a> ButtonRow<'a> {
     /// HTML 엘리먼트로부터 새로운 [`ButtonRow`] 엘리먼트를 생성합니다.
-    pub fn new(id: Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {
+    pub fn new(id: Cow<'static, str>, tag: tl::HTMLTag<'a>) -> Self {
         Self {
             id,
-            element_ref,
+            tag,
             lsdata: OnceCell::new(),
             buttons: OnceCell::new(),
         }
@@ -34,18 +33,23 @@ impl<'a> ButtonRow<'a> {
     /// 내부 [`Button`]을 반환합니다.
     pub fn buttons(
         &'a self,
+        parser: &ElementParser,
     ) -> impl Iterator<Item = &<Button<'a> as Element<'a>>::Def> + ExactSizeIterator {
         self.buttons
             .get_or_init(|| {
-                let button_selector = &Selector::parse(r#":root [ct="B"]"#).unwrap();
-                self.element_ref
-                    .select(button_selector)
-                    .filter_map(|elem| {
-                        let def = <Button<'a> as Element<'a>>::Def::from_element_ref(elem);
-                        match def {
-                            Ok(button_def) => Some(button_def),
-                            _ => None,
-                        }
+                self.tag
+                    .query_selector(parser.dom().parser(), r#":root [ct="B"]"#)
+                    .into_iter()
+                    .flatten()
+                    .filter_map(|handle| {
+                        let id = handle
+                            .get(parser.dom().parser())?
+                            .as_tag()?
+                            .attributes()
+                            .id()?
+                            .as_utf8_str()
+                            .to_string();
+                        Some(<Button<'a> as Element<'a>>::Def::new_dynamic(id))
                     })
                     .collect::<Vec<<Button<'a> as Element<'a>>::Def>>()
             })

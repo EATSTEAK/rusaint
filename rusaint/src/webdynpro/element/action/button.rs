@@ -2,7 +2,7 @@ use std::{borrow::Cow, cell::OnceCell, collections::HashMap};
 
 use crate::webdynpro::{
     element::{
-        define_element_interactable,
+        macros::define_element_interactable,
         property::{ContentVisibility, HotkeyValue, SemanticColor, TextDesign, Visibility},
         Interactable,
     },
@@ -110,10 +110,10 @@ define_element_interactable! {
 
 impl<'a> Button<'a> {
     /// HTML 엘리먼트로부터 새로운 [`Button`] 엘리먼트를 생성합니다.
-    pub fn new(id: Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {
+    pub fn new(id: Cow<'static, str>, tag: tl::HTMLTag<'a>) -> Self {
         Self {
             id,
-            element_ref,
+            tag,
             lsdata: OnceCell::new(),
             lsevents: OnceCell::new(),
         }

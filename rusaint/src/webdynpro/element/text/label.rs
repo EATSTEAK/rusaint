@@ -1,6 +1,6 @@
 use std::{borrow::Cow, cell::OnceCell};
 
-use crate::webdynpro::element::{define_element_interactable, property::Visibility};
+use crate::webdynpro::element::{macros::define_element_interactable, property::Visibility};
 
 // TODO: Implement additional events and data
 define_element_interactable! {
@@ -38,10 +38,10 @@ define_element_interactable! {
 
 impl<'a> Label<'a> {
     /// HTML 엘리먼트로부터 새로운 [`Label`] 엘리먼트를 반환합니다.
-    pub const fn new(id: Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {
+    pub const fn new(id: Cow<'static, str>, tag: tl::HTMLTag<'a>) -> Self {
         Self {
             id,
-            element_ref,
+            tag,
             lsdata: OnceCell::new(),
             lsevents: OnceCell::new(),
         }

@@ -1,6 +1,6 @@
 use std::{borrow::Cow, cell::OnceCell};
 
-use super::define_element_base;
+use super::macros::define_element_base;
 use super::property::{LockedDesign, Visibility};
 
 define_element_base! {
@@ -17,10 +17,10 @@ define_element_base! {
 
 impl<'a> FlowLayout<'a> {
     /// HTML 엘리먼트로부터 새로운 [`FlowLayout`] 엘리먼트를 생성합니다.
-    pub const fn new(id: Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {
+    pub const fn new(id: Cow<'static, str>, tag: tl::HTMLTag<'a>) -> Self {
         Self {
             id,
-            element_ref,
+            tag,
             lsdata: OnceCell::new(),
         }
     }
@@ -45,10 +45,10 @@ define_element_base! {
 
 impl<'a> Container<'a> {
     /// HTML 엘리먼트로부터 새로운 [`Container`] 엘리먼트를 생성합니다.
-    pub const fn new(id: Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {
+    pub const fn new(id: Cow<'static, str>, tag: tl::HTMLTag<'a>) -> Self {
         Self {
             id,
-            element_ref,
+            tag,
             lsdata: OnceCell::new(),
         }
     }

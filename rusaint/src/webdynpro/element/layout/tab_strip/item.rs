@@ -1,6 +1,6 @@
 use std::{borrow::Cow, cell::OnceCell};
 
-use crate::webdynpro::element::{define_element_base, property::Visibility};
+use crate::webdynpro::element::{macros::define_element_base, property::Visibility};
 
 define_element_base! {
     // Note: This element renders as "TSITM_ie6" if >= IE6
@@ -35,10 +35,10 @@ define_element_base! {
 
 impl<'a> TabStripItem<'a> {
     /// HTML 엘리먼트로부터 새로운 [`TabStripItem`] 엘리먼트를 생성합니다.
-    pub const fn new(id: Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {
+    pub const fn new(id: Cow<'static, str>, tag: tl::HTMLTag<'a>) -> Self {
         Self {
             id,
-            element_ref,
+            tag,
             lsdata: OnceCell::new(),
         }
     }

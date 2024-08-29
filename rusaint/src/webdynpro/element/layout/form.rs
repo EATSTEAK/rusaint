@@ -3,7 +3,7 @@ use std::{borrow::Cow, cell::OnceCell, collections::HashMap};
 use crate::webdynpro::error::WebDynproError;
 use crate::webdynpro::event::Event;
 
-use crate::webdynpro::element::{define_element_interactable, Interactable};
+use crate::webdynpro::element::{macros::define_element_interactable, Interactable};
 
 define_element_interactable! {
     #[doc = "서버에 전송하기 위한 HTML Form"]
@@ -36,10 +36,10 @@ pub struct FormData {
 
 impl<'a> Form<'a> {
     /// HTML 엘리먼트로부터 새로운 [`Form`] 엘리먼트를 생성합니다.
-    pub fn new(id: Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {
+    pub fn new(id: Cow<'static, str>, tag: tl::HTMLTag<'a>) -> Self {
         Self {
             id,
-            element_ref,
+            tag,
             lsdata: OnceCell::new(),
             lsevents: OnceCell::new(),
             data: OnceCell::new(),

@@ -1,12 +1,12 @@
 use std::{borrow::Cow, cell::OnceCell};
 
+use crate::webdynpro::element::parser::ElementParser;
+use crate::webdynpro::error::WebDynproError;
 use serde_json::Value;
 
-use crate::webdynpro::error::{BodyError, WebDynproError};
-
 use super::{
-    definition::{ElementDefinition, ElementNodeId},
-    Element, EventParameterMap, Interactable,
+    children_tag, definition::ElementDefinition, lsdata_tag, lsevents_tag, Element,
+    EventParameterMap, Interactable,
 };
 
 // Type for unimplemented elements
@@ -14,7 +14,7 @@ use super::{
 #[derive(Debug)]
 pub struct Unknown<'a> {
     id: Cow<'static, str>,
-    element_ref: scraper::ElementRef<'a>,
+    tag: tl::HTMLTag<'a>,
     ct: OnceCell<Option<String>>,
     lsdata: OnceCell<Value>,
     lsevents: OnceCell<Option<EventParameterMap>>,
@@ -24,7 +24,6 @@ pub struct Unknown<'a> {
 #[derive(Clone, Debug)]
 pub struct UnknownDef {
     id: Cow<'static, str>,
-    node_id: Option<ElementNodeId>,
 }
 
 impl UnknownDef {
@@ -32,7 +31,6 @@ impl UnknownDef {
     pub const fn new(id: &'static str) -> Self {
         Self {
             id: Cow::Borrowed(id),
-            node_id: None,
         }
     }
 }
@@ -41,25 +39,7 @@ impl<'body> ElementDefinition<'body> for UnknownDef {
     type Element = Unknown<'body>;
 
     fn new_dynamic(id: String) -> Self {
-        Self {
-            id: id.into(),
-            node_id: None,
-        }
-    }
-
-    fn from_element_ref(element_ref: scraper::ElementRef<'_>) -> Result<Self, WebDynproError> {
-        let id = element_ref.value().id().ok_or(BodyError::InvalidElement)?;
-        Ok(Self {
-            id: id.to_string().into(),
-            node_id: None,
-        })
-    }
-
-    fn with_node_id(id: String, body_hash: u64, node_id: ego_tree::NodeId) -> Self {
-        Self {
-            id: id.into(),
-            node_id: Some(ElementNodeId::new(body_hash, node_id)),
-        }
+        Self { id: id.into() }
     }
 
     fn id(&self) -> &str {
@@ -68,10 +48,6 @@ impl<'body> ElementDefinition<'body> for UnknownDef {
 
     fn id_cow(&self) -> Cow<'static, str> {
         self.id.clone()
-    }
-
-    fn node_id(&self) -> Option<&ElementNodeId> {
-        (&self.node_id).as_ref()
     }
 }
 
@@ -85,49 +61,49 @@ impl<'a> Element<'a> for Unknown<'a> {
 
     type Def = UnknownDef;
 
-    fn lsdata(&self) -> &Self::ElementLSData {
-        self.lsdata
-            .get_or_init(|| Self::lsdata_element(self.element_ref).unwrap_or(Value::default()))
+    fn from_tag(
+        elem_def: &impl ElementDefinition<'a>,
+        tag: tl::HTMLTag<'a>,
+    ) -> Result<Self, WebDynproError> {
+        Ok(Self::new(elem_def.id_cow(), tag))
     }
 
-    fn from_element(
-        elem_def: &impl ElementDefinition<'a>,
-        element: scraper::ElementRef<'a>,
-    ) -> Result<Self, WebDynproError> {
-        Ok(Self::new(elem_def.id_cow(), element))
+    fn children(&self, parser: &'a ElementParser) -> Vec<super::ElementWrapper<'a>> {
+        children_tag(self.tag(), parser)
+    }
+
+    fn lsdata(&self) -> &Self::ElementLSData {
+        self.lsdata
+            .get_or_init(|| lsdata_tag(&self.tag).unwrap_or(Value::default()))
     }
 
     fn id(&self) -> &str {
         &self.id
     }
 
-    fn element_ref(&self) -> &scraper::ElementRef<'a> {
-        &self.element_ref
+    fn tag(&self) -> &tl::HTMLTag<'a> {
+        &self.tag
     }
 
     fn wrap(self) -> super::ElementWrapper<'a> {
         super::ElementWrapper::Unknown(self)
-    }
-
-    fn children(&self) -> Vec<super::ElementWrapper<'a>> {
-        Self::children_element(self.element_ref().clone())
     }
 }
 
 impl<'a> Interactable<'a> for Unknown<'a> {
     fn lsevents(&self) -> Option<&EventParameterMap> {
         self.lsevents
-            .get_or_init(|| Self::lsevents_element(self.element_ref).ok())
+            .get_or_init(|| lsevents_tag(&self.tag).ok())
             .as_ref()
     }
 }
 
 impl<'a> Unknown<'a> {
     /// 엘리먼트를 생성합니다.
-    pub fn new(id: Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {
+    pub fn new(id: Cow<'static, str>, tag: tl::HTMLTag<'a>) -> Self {
         Self {
             id,
-            element_ref,
+            tag,
             ct: OnceCell::new(),
             lsdata: OnceCell::new(),
             lsevents: OnceCell::new(),
@@ -138,10 +114,11 @@ impl<'a> Unknown<'a> {
     pub fn ct(&self) -> Option<&String> {
         self.ct
             .get_or_init(|| {
-                self.element_ref
-                    .value()
-                    .attr("ct")
-                    .and_then(|str| Some(str.to_string()))
+                self.tag
+                    .attributes()
+                    .get("ct")
+                    .flatten()
+                    .and_then(|str| Some(str.as_utf8_str().to_string()))
             })
             .as_ref()
     }

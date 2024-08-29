@@ -1,11 +1,8 @@
 use std::{borrow::Cow, collections::HashMap};
 
 use crate::webdynpro::{
-    element::{
-        definition::{ElementDefinition, ElementNodeId},
-        ElementWrapper,
-    },
-    error::{BodyError, WebDynproError},
+    element::{definition::ElementDefinition, parser::ElementParser, ElementWrapper},
+    error::WebDynproError,
     event::{
         ucf_parameters::{UcfAction, UcfParametersBuilder, UcfResponseData},
         Event, EventBuilder,
@@ -95,27 +92,12 @@ impl<'body> ElementDefinition<'body> for CustomDef {
         Self { id: id.into() }
     }
 
-    fn from_element_ref(element_ref: scraper::ElementRef<'_>) -> Result<Self, WebDynproError> {
-        let id = element_ref.value().id().ok_or(BodyError::InvalidElement)?;
-        Ok(Self {
-            id: id.to_string().into(),
-        })
-    }
-
-    fn with_node_id(id: String, _body_hash: u64, _node_id: ego_tree::NodeId) -> Self {
-        Self { id: id.into() }
-    }
-
     fn id(&self) -> &str {
         &self.id
     }
 
     fn id_cow(&self) -> Cow<'static, str> {
         self.id.clone()
-    }
-
-    fn node_id(&self) -> Option<&ElementNodeId> {
-        None
     }
 }
 
@@ -129,31 +111,31 @@ impl<'a> Element<'a> for Custom {
 
     type Def = CustomDef;
 
-    fn lsdata(&self) -> &Self::ElementLSData {
-        &()
-    }
-
-    fn from_element(
+    fn from_tag(
         elem_def: &impl ElementDefinition<'a>,
-        _element: scraper::ElementRef,
+        _tag: tl::HTMLTag,
     ) -> Result<Self, WebDynproError> {
         Ok(Self::new(elem_def.id_cow()))
+    }
+
+    fn children(&self, _parser: &'a ElementParser) -> Vec<ElementWrapper<'a>> {
+        vec![]
+    }
+
+    fn lsdata(&self) -> &Self::ElementLSData {
+        &()
     }
 
     fn id(&self) -> &str {
         &self.id
     }
 
-    fn element_ref(&self) -> &scraper::ElementRef<'a> {
+    fn tag(&self) -> &tl::HTMLTag<'a> {
         panic!("Element Custom is pseudo-element")
     }
 
     fn wrap(self) -> ElementWrapper<'a> {
         ElementWrapper::Custom(self)
-    }
-
-    fn children(&self) -> Vec<ElementWrapper<'a>> {
-        vec![]
     }
 }
 

@@ -5,13 +5,13 @@ use crate::webdynpro::element::property::{
     SuggestFilterCondition, SuggestFilterType, TabBehaviour, TableFieldDesign, Visibility,
 };
 use crate::webdynpro::error::{BodyError, WebDynproError};
-use crate::webdynpro::{client::body::Body, error::ElementError, event::Event};
-
-use crate::webdynpro::element::{
-    define_element_interactable, Element, ElementDefWrapper, Interactable,
-};
+use crate::webdynpro::{error::ElementError, event::Event};
 
 use self::property::ComboBoxBehavior;
+use crate::webdynpro::element::parser::ElementParser;
+use crate::webdynpro::element::{
+    macros::define_element_interactable, Element, ElementDefWrapper, Interactable,
+};
 
 use super::list_box::ListBoxDefWrapper;
 
@@ -73,17 +73,20 @@ define_element_interactable! {
 
 impl<'a> ComboBox<'a> {
     /// HTML 엘리먼트로부터 새로운 [`ComboBox`] 엘리먼트를 생성합니다.
-    pub const fn new(id: Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {
+    pub const fn new(id: Cow<'static, str>, tag: tl::HTMLTag<'a>) -> Self {
         Self {
             id,
-            element_ref,
+            tag,
             lsdata: OnceCell::new(),
             lsevents: OnceCell::new(),
         }
     }
 
     /// [`ComboBox`]의 선택지 역할을 하는 [`ListBox`](super::list_box::ListBox) 엘리먼트를 가져옵니다.
-    pub fn item_list_box(&self, body: &'a Body) -> Result<ListBoxDefWrapper, WebDynproError> {
+    pub fn item_list_box(
+        &self,
+        parser: &'a ElementParser,
+    ) -> Result<ListBoxDefWrapper, WebDynproError> {
         let listbox_id = self
             .lsdata()
             .item_list_box_id()
@@ -91,15 +94,16 @@ impl<'a> ComboBox<'a> {
                 element: self.id().to_string(),
                 field: "item_list_box_id".to_string(),
             })?;
-        let selector = scraper::Selector::parse(format!(r#"[id="{}"]"#, listbox_id).as_str())
-            .or(Err(ElementError::InvalidId(listbox_id.to_owned())))?;
-        let elem = body
-            .document()
-            .select(&selector)
-            .next()
+        let handle = parser
+            .dom()
+            .get_element_by_id(listbox_id.as_str())
+            .ok_or(BodyError::NoSuchElement(listbox_id.to_owned()))?;
+        let tag = handle
+            .get(parser.dom().parser())
+            .and_then(|node| node.as_tag())
             .ok_or(BodyError::NoSuchElement(listbox_id.to_owned()))?;
         Ok(
-            ListBoxDefWrapper::from_def(ElementDefWrapper::dyn_elem_def(elem)?)
+            ListBoxDefWrapper::from_def(ElementDefWrapper::from_tag(tag.clone())?)
                 .ok_or(BodyError::NoSuchElement(listbox_id.to_owned()))?,
         )
     }
@@ -123,6 +127,10 @@ impl<'a> ComboBox<'a> {
 
     /// 이 [`ComboBox`]의 값을 가져옵니다.
     pub fn value(&self) -> Option<&str> {
-        self.element_ref.attr("value")
+        self.tag
+            .attributes()
+            .get("value")
+            .flatten()
+            .and_then(|bytes| bytes.try_as_utf8_str())
     }
 }

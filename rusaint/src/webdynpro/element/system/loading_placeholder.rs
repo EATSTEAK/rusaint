@@ -3,7 +3,7 @@ use std::{borrow::Cow, cell::OnceCell, collections::HashMap};
 use crate::webdynpro::error::WebDynproError;
 use crate::webdynpro::event::Event;
 
-use crate::webdynpro::element::{define_element_interactable, Interactable};
+use crate::webdynpro::element::{macros::define_element_interactable, Interactable};
 
 define_element_interactable! {
     #[doc = "페이지가 로드되기 전 내부 컨텐츠가 로드될 위치의 자리 표시자"]
@@ -27,10 +27,10 @@ define_element_interactable! {
 
 impl<'a> LoadingPlaceholder<'a> {
     /// HTML 엘리먼트로부터 새로운 [`LoadingPlaceholder`]를 생성합니다.
-    pub const fn new(id: Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {
+    pub const fn new(id: Cow<'static, str>, tag: tl::HTMLTag<'a>) -> Self {
         Self {
             id,
-            element_ref,
+            tag,
             lsdata: OnceCell::new(),
             lsevents: OnceCell::new(),
         }

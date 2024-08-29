@@ -1,10 +1,11 @@
 use std::{borrow::Cow, cell::OnceCell, collections::HashMap};
 
-use scraper::Selector;
 
 use crate::webdynpro::{
-    element::{define_element_interactable, definition::ElementDefinition, property::Visibility, Element, Interactable},
-    error::{BodyError, WebDynproError},
+    element::{
+        definition::ElementDefinition, macros::define_element_interactable, parser::ElementParser, property::Visibility, Element, Interactable
+    },
+    error::WebDynproError,
     event::Event,
 };
 
@@ -43,10 +44,10 @@ define_element_interactable! {
 
 impl<'a> TabStrip<'a> {
     /// HTML 엘리먼트로부터 새로운 [`TabStrip`] 엘리먼트를 생성합니다.
-    pub const fn new(id: Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {
+    pub const fn new(id: Cow<'static, str>, tag: tl::HTMLTag<'a>) -> Self {
         Self {
             id,
-            element_ref,
+            tag,
             lsdata: OnceCell::new(),
             lsevents: OnceCell::new(),
             tab_items: OnceCell::new(),
@@ -56,21 +57,15 @@ impl<'a> TabStrip<'a> {
     /// 탭 내부 [`TabStripItem`]의 정의를 반환합니다.
     pub fn tab_items(
         &self,
+        parser: &ElementParser,
     ) -> impl Iterator<Item = &<TabStripItem<'a> as Element<'a>>::Def> + ExactSizeIterator {
         self.tab_items
             .get_or_init(|| {
-                let Ok(items_selector) =
-                    Selector::parse(format!(r#"[ct="{}"]"#, TabStripItem::CONTROL_ID).as_str())
-                        .or(Err(BodyError::InvalidSelector))
-                else {
-                    return vec![];
-                };
-                self.element_ref
-                    .select(&items_selector)
-                    .filter_map(|eref| {
-                        let id = eref.value().id()?;
+                self.tag.query_selector(parser.dom().parser(), format!(r#"[ct="{}"]"#, TabStripItem::CONTROL_ID).as_str()).into_iter().flatten()
+                    .filter_map(|handle| {
+                        let id = handle.get(parser.dom().parser())?.as_tag()?.attributes().get("id").flatten()?.as_utf8_str();
                         Some(<TabStripItem<'a> as Element<'a>>::Def::new_dynamic(
-                            id.to_owned(),
+                            id.to_string(),
                         ))
                     })
                     .collect()

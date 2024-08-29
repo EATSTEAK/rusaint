@@ -2,11 +2,15 @@ use std::{borrow::Cow, cell::OnceCell, collections::HashMap};
 
 use serde::{Deserialize, Serialize};
 
-use crate::webdynpro::element::definition::{ElementDefinition, ElementNodeId};
-use crate::webdynpro::error::{BodyError, WebDynproError};
+use crate::webdynpro::element::definition::ElementDefinition;
+use crate::webdynpro::element::parser::ElementParser;
+use crate::webdynpro::error::WebDynproError;
 use crate::webdynpro::event::Event;
 
-use crate::webdynpro::element::{Element, ElementWrapper, EventParameterMap, Interactable};
+use crate::webdynpro::element::{
+    children_tag, lsdata_tag, lsevents_tag, Element, ElementWrapper, EventParameterMap,
+    Interactable,
+};
 
 /// 클라이언트의 변경 사항을 감시
 ///
@@ -21,7 +25,7 @@ use crate::webdynpro::element::{Element, ElementWrapper, EventParameterMap, Inte
 #[derive(Debug)]
 pub struct ClientInspector<'a> {
     id: Cow<'static, str>,
-    element_ref: scraper::ElementRef<'a>,
+    tag: tl::HTMLTag<'a>,
     lsdata: OnceCell<ClientInspectorLSData>,
     lsevents: OnceCell<Option<EventParameterMap>>,
 }
@@ -127,7 +131,6 @@ pub struct ClientInspectorLSData {
 #[derive(Clone, Debug)]
 pub struct ClientInspectorDef {
     id: Cow<'static, str>,
-    node_id: Option<ElementNodeId>,
 }
 
 impl ClientInspectorDef {
@@ -135,7 +138,6 @@ impl ClientInspectorDef {
     pub const fn new(id: &'static str) -> Self {
         Self {
             id: Cow::Borrowed(id),
-            node_id: None,
         }
     }
 }
@@ -144,25 +146,7 @@ impl<'body> ElementDefinition<'body> for ClientInspectorDef {
     type Element = ClientInspector<'body>;
 
     fn new_dynamic(id: String) -> Self {
-        Self {
-            id: id.into(),
-            node_id: None,
-        }
-    }
-
-    fn from_element_ref(element_ref: scraper::ElementRef<'_>) -> Result<Self, WebDynproError> {
-        let id = element_ref.value().id().ok_or(BodyError::InvalidElement)?;
-        Ok(Self {
-            id: id.to_string().into(),
-            node_id: None,
-        })
-    }
-
-    fn with_node_id(id: String, body_hash: u64, node_id: ego_tree::NodeId) -> Self {
-        Self {
-            id: id.into(),
-            node_id: Some(ElementNodeId::new(body_hash, node_id)),
-        }
+        Self { id: id.into() }
     }
 
     fn id(&self) -> &str {
@@ -171,10 +155,6 @@ impl<'body> ElementDefinition<'body> for ClientInspectorDef {
 
     fn id_cow(&self) -> Cow<'static, str> {
         self.id.clone()
-    }
-
-    fn node_id(&self) -> Option<&ElementNodeId> {
-        (&self.node_id).as_ref()
     }
 }
 
@@ -187,9 +167,20 @@ impl<'a> Element<'a> for ClientInspector<'a> {
 
     type Def = ClientInspectorDef;
 
+    fn from_tag(
+        elem_def: &impl ElementDefinition<'a>,
+        tag: tl::HTMLTag<'a>,
+    ) -> Result<Self, WebDynproError> {
+        Ok(Self::new(elem_def.id_cow(), tag))
+    }
+
+    fn children(&self, parser: &'a ElementParser) -> Vec<ElementWrapper<'a>> {
+        children_tag(self.tag(), &parser)
+    }
+
     fn lsdata(&self) -> &Self::ElementLSData {
         self.lsdata.get_or_init(|| {
-            let Ok(lsdata_obj) = Self::lsdata_element(self.element_ref) else {
+            let Ok(lsdata_obj) = lsdata_tag(self.tag()) else {
                 return ClientInspectorLSData::default();
             };
             serde_json::from_value::<Self::ElementLSData>(lsdata_obj)
@@ -197,44 +188,33 @@ impl<'a> Element<'a> for ClientInspector<'a> {
         })
     }
 
-    fn from_element(
-        elem_def: &impl ElementDefinition<'a>,
-        element: scraper::ElementRef<'a>,
-    ) -> Result<Self, WebDynproError> {
-        Ok(Self::new(elem_def.id_cow(), element))
-    }
-
     fn id(&self) -> &str {
         &self.id
     }
 
-    fn element_ref(&self) -> &scraper::ElementRef<'a> {
-        &self.element_ref
+    fn tag(&self) -> &tl::HTMLTag<'a> {
+        &self.tag
     }
 
     fn wrap(self) -> ElementWrapper<'a> {
         ElementWrapper::ClientInspector(self)
-    }
-
-    fn children(&self) -> Vec<ElementWrapper<'a>> {
-        Self::children_element(self.element_ref().clone())
     }
 }
 
 impl<'a> Interactable<'a> for ClientInspector<'a> {
     fn lsevents(&self) -> Option<&EventParameterMap> {
         self.lsevents
-            .get_or_init(|| Self::lsevents_element(self.element_ref).ok())
+            .get_or_init(|| lsevents_tag(self.tag()).ok())
             .as_ref()
     }
 }
 
 impl<'a> ClientInspector<'a> {
     /// HTML 엘리먼트로 [`ClientInspector`] 엘리먼트를 생성합니다.
-    pub const fn new(id: Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {
+    pub const fn new(id: Cow<'static, str>, tag: tl::HTMLTag<'a>) -> Self {
         Self {
             id,
-            element_ref,
+            tag,
             lsdata: OnceCell::new(),
             lsevents: OnceCell::new(),
         }

@@ -1,7 +1,7 @@
 use std::{borrow::Cow, cell::OnceCell};
 
 use crate::webdynpro::element::{
-    define_element_interactable,
+    macros::define_element_interactable,
     property::{
         EmbeddingBehaviour, IMEMode, InputFieldTextStyle, InputFieldType, SemanticColor,
         TabBehaviour, TableFieldDesign, Visibility,
@@ -55,10 +55,10 @@ define_element_interactable! {
 
 impl<'a> InputField<'a> {
     /// HTML 엘리먼트로부터 새로운 [`InputField`]를 생성합니다.
-    pub const fn new(id: Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {
+    pub const fn new(id: Cow<'static, str>, tag: tl::HTMLTag<'a>) -> Self {
         Self {
             id,
-            element_ref,
+            tag,
             lsdata: OnceCell::new(),
             lsevents: OnceCell::new(),
         }
@@ -66,6 +66,6 @@ impl<'a> InputField<'a> {
 
     /// 이 [`InputField`]의 값을 가져옵니다.
     pub fn value(&self) -> Option<&str> {
-        self.element_ref.attr("value")
+        self.tag.attributes().get("value").flatten().and_then(|bytes| bytes.try_as_utf8_str())
     }
 }

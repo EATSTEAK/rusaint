@@ -1,8 +1,8 @@
 use std::{borrow::Cow, cell::OnceCell};
 
-use scraper::Node;
-
-use crate::webdynpro::element::{define_element_interactable, property::Visibility, Element};
+use crate::webdynpro::element::{
+    macros::define_element_interactable, parser::ElementParser, property::Visibility, Element
+};
 
 define_element_interactable! {
     #[doc = "텍스트 표시 뷰"]
@@ -28,10 +28,10 @@ define_element_interactable! {
 
 impl<'a> TextView<'a> {
     /// HTML 엘리먼트로부터 새로운 [`TextView`] 엘리먼트를 반환합니다.
-    pub fn new(id: Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {
+    pub fn new(id: Cow<'static, str>, tag: tl::HTMLTag<'a>) -> Self {
         Self {
             id,
-            element_ref,
+            tag,
             lsdata: OnceCell::new(),
             lsevents: OnceCell::new(),
             text: OnceCell::new(),
@@ -39,22 +39,9 @@ impl<'a> TextView<'a> {
     }
 
     /// 내부 텍스트를 반환합니다.
-    pub fn text(&self) -> &str {
+    pub fn text(&self, parser: &'a ElementParser) -> &str {
         self.text.get_or_init(|| {
-            self.element_ref()
-                .children()
-                .filter_map(|node| match node.value() {
-                    Node::Text(text) => Some(text.to_string()),
-                    Node::Element(elem) => {
-                        if elem.name() == "br" {
-                            Some("\n".to_string())
-                        } else {
-                            None
-                        }
-                    }
-                    _ => None,
-                })
-                .collect::<String>()
+            self.tag().inner_text(parser.dom().parser()).to_string()
         })
     }
 }
