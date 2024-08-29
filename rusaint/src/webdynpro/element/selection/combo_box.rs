@@ -1,11 +1,11 @@
-use std::{borrow::Cow, cell::OnceCell, collections::HashMap};
-
 use crate::webdynpro::element::property::{
     EmbeddingBehaviour, IMEMode, InputFieldTextStyle, InputFieldType, SemanticColor,
     SuggestFilterCondition, SuggestFilterType, TabBehaviour, TableFieldDesign, Visibility,
 };
 use crate::webdynpro::error::{BodyError, WebDynproError};
 use crate::webdynpro::{error::ElementError, event::Event};
+use std::{borrow::Cow, cell::OnceCell, collections::HashMap};
+use tl::Bytes;
 
 use self::property::ComboBoxBehavior;
 use crate::webdynpro::element::parser::ElementParser;
@@ -131,6 +131,6 @@ impl<'a> ComboBox<'a> {
             .attributes()
             .get("value")
             .flatten()
-            .and_then(|bytes| bytes.try_as_utf8_str())
+            .and_then(Bytes::try_as_utf8_str)
     }
 }

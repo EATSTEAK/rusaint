@@ -1,5 +1,3 @@
-use std::{borrow::Cow, cell::OnceCell};
-
 use crate::webdynpro::element::{
     macros::define_element_interactable,
     property::{
@@ -7,6 +5,8 @@ use crate::webdynpro::element::{
         TabBehaviour, TableFieldDesign, Visibility,
     },
 };
+use std::{borrow::Cow, cell::OnceCell};
+use tl::Bytes;
 
 // TODO: Implement additional events and data
 define_element_interactable! {
@@ -66,6 +66,10 @@ impl<'a> InputField<'a> {
 
     /// 이 [`InputField`]의 값을 가져옵니다.
     pub fn value(&self) -> Option<&str> {
-        self.tag.attributes().get("value").flatten().and_then(|bytes| bytes.try_as_utf8_str())
+        self.tag
+            .attributes()
+            .get("value")
+            .flatten()
+            .and_then(Bytes::try_as_utf8_str)
     }
 }
