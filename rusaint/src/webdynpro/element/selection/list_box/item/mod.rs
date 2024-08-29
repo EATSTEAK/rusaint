@@ -1,6 +1,9 @@
+use crate::webdynpro::{
+    element::{macros::define_element_base, parser::ElementParser, ElementWrapper},
+    error::{ElementError, WebDynproError},
+};
 use std::{borrow::Cow, cell::OnceCell};
-
-use crate::webdynpro::{element::{define_element_base, ElementWrapper}, error::{ElementError, WebDynproError}};
+use tl::Bytes;
 
 /// [`ListBox`](crate::webdynpro::element::selection::list_box::ListBox)의 아이템을 위한 Wrapper
 #[derive(Debug)]
@@ -17,7 +20,7 @@ pub enum ListBoxItemDefWrapper {
     /// 일반 아이템의 정의
     Item(ListBoxItemDef),
     /// 액션이 포함된 아이템의 정의
-    ActionItem(ListBoxActionItemDef)
+    ActionItem(ListBoxActionItemDef),
 }
 
 /// [`ListBoxItem`]의 정보
@@ -37,39 +40,43 @@ pub enum ListBoxItemInfo {
         /// 아이템의 활성화 여부
         enabled: bool,
         /// 제목
-        title: String
+        title: String,
     },
     /// [`ListBoxActionItem`]의 정보
     ActionItem {
         /// 제목
         title: String,
         /// 내부 문자열
-        text: String
-    }
+        text: String,
+    },
 }
 
 impl ListBoxItemInfo {
-    pub(super) fn from_element_ref(element_ref: scraper::ElementRef<'_>) -> Result<ListBoxItemInfo, WebDynproError> {
-        let element = ElementWrapper::dyn_element(element_ref)?;
+    pub(super) fn from_tag(
+        tag: tl::HTMLTag,
+        parser: &ElementParser,
+    ) -> Result<ListBoxItemInfo, WebDynproError> {
+        let element = ElementWrapper::from_tag(tag)?;
         match element {
             ElementWrapper::ListBoxItem(item) => {
-                Ok(ListBoxItemInfo::Item { 
+                Ok(ListBoxItemInfo::Item {
                     index: item.index().unwrap_or("").to_string(),
                     key: item.key().unwrap_or("").to_string(),
                     value1: item.value1().unwrap_or("").to_string(),
                     value2: item.value2().unwrap_or("").to_string(),
                     selected: item.selected().unwrap_or(false),
                     enabled: item.enabled().unwrap_or(true),
-                    title: item.title().to_string()
+                    title: item.title().to_string(),
                 })
             },
-            ElementWrapper::ListBoxActionItem(action_item) => {
-                Ok(ListBoxItemInfo::ActionItem {
-                    title: action_item.title().to_string(),
-                    text: action_item.text().to_string()
-                })
-            }
-            _ => Err(ElementError::InvalidContent { element: "ListBox".to_string(), content: "ListBoxItem".to_string() })?
+            ElementWrapper::ListBoxActionItem(action_item) => Ok(ListBoxItemInfo::ActionItem {
+                title: action_item.title().to_string(),
+                text: action_item.text(parser).to_string(),
+            }),
+            _ => Err(ElementError::InvalidContent {
+                element: "ListBox".to_string(),
+                content: "ListBoxItem".to_string(),
+            })?,
         }
     }
 }
@@ -77,16 +84,16 @@ impl ListBoxItemInfo {
 define_element_base! {
     #[doc = "[`ListBox`](crate::webdynpro::element::selection::list_box::ListBox)의 일반 아이템"]
     ListBoxItem<"LIB_I", "ListBoxItem"> {
-        index: OnceCell<Option<&'a str>>,
-        key: OnceCell<Option<&'a str>>,
-        tooltip: OnceCell<Option<&'a str>>,
-        value1: OnceCell<Option<&'a str>>,
-        value2: OnceCell<Option<&'a str>>,
+        index: OnceCell<Option<String>>,
+        key: OnceCell<Option<String>>,
+        tooltip: OnceCell<Option<String>>,
+        value1: OnceCell<Option<String>>,
+        value2: OnceCell<Option<String>>,
         selected: OnceCell<Option<bool>>,
-        icon_tooltip: OnceCell<Option<&'a str>>,
+        icon_tooltip: OnceCell<Option<String>>,
         enabled: OnceCell<Option<bool>>,
-        group_title: OnceCell<Option<&'a str>>,
-        title: OnceCell<&'a str>,
+        group_title: OnceCell<Option<String>>,
+        title: OnceCell<String>,
     },
     #[doc = "[`ListBoxItem`]의 정의"]
     ListBoxItemDef,
@@ -121,10 +128,10 @@ define_element_base! {
 
 impl<'a> ListBoxItem<'a> {
     /// HTML 엘리먼트로부터 새로운 [`ListBoxItem`]을 생성합니다.
-    pub fn new(id: Cow<'static, str>, element_ref: scraper::ElementRef<'a>) -> Self {
+    pub fn new(id: Cow<'static, str>, tag: tl::HTMLTag<'a>) -> Self {
         Self {
             id,
-            element_ref,
+            tag,
             lsdata: OnceCell::new(),
             title: OnceCell::new(),
             index: OnceCell::new(),
@@ -140,83 +147,143 @@ impl<'a> ListBoxItem<'a> {
     }
 
     /// 인덱스를 반환합니다.
-    pub fn index(&self) -> Option<&str> {
+    pub fn index(&'a self) -> Option<&'a str> {
         self.index
-            .get_or_init(|| self.element_ref.value().attr("data-itemindex"))
-            .to_owned()
+            .get_or_init(|| {
+                self.tag
+                    .attributes()
+                    .get("data-itemindex")
+                    .flatten()
+                    .and_then(Bytes::try_as_utf8_str)
+                    .map(str::to_string)
+            }).as_ref()
+            .map(String::as_str)
     }
 
     /// 키를 반환합니다.
-    pub fn key(&self) -> Option<&str> {
+    pub fn key(&'a self) -> Option<&'a str> {
         self.key
-            .get_or_init(|| self.element_ref.value().attr("data-itemkey"))
-            .to_owned()
+            .get_or_init(|| {
+                self.tag
+                    .attributes()
+                    .get("data-itemkey")
+                    .flatten()
+                    .and_then(Bytes::try_as_utf8_str)
+                    .map(str::to_string)
+            }).as_ref()
+            .map(String::as_str)
     }
 
     /// 툴팁을 반환합니다.
-    pub fn tooltip(&self) -> Option<&str> {
+    pub fn tooltip(&'a self) -> Option<&'a str> {
         self.tooltip
-            .get_or_init(|| self.element_ref.value().attr("data-itemtooltip"))
-            .to_owned()
+            .get_or_init(|| {
+                self.tag
+                    .attributes()
+                    .get("data-itemtooltip")
+                    .flatten()
+                    .and_then(Bytes::try_as_utf8_str)
+                    .map(str::to_string)
+            }).as_ref()
+            .map(String::as_str)
     }
 
     /// 첫번째 값을 반환합니다.
     /// 일반적으로 이 값이 페이지에 표시되는 값입니다.
-    pub fn value1(&self) -> Option<&str> {
+    pub fn value1(&'a self) -> Option<&'a str> {
         self.value1
-            .get_or_init(|| self.element_ref.value().attr("data-itemvalue1"))
-            .to_owned()
+            .get_or_init(|| {
+                self.tag
+                    .attributes()
+                    .get("data-itemvalue1")
+                    .flatten()
+                    .and_then(Bytes::try_as_utf8_str)
+                    .map(str::to_string)
+            }).as_ref()
+            .map(String::as_str)
     }
 
     /// 두번째 값을 반환합니다.
-    pub fn value2(&self) -> Option<&str> {
+    pub fn value2(&'a self) -> Option<&'a str> {
         self.value2
-            .get_or_init(|| self.element_ref.value().attr("data-itemvalue2"))
-            .to_owned()
+            .get_or_init(|| {
+                self.tag
+                    .attributes()
+                    .get("data-itemvalue2")
+                    .flatten()
+                    .and_then(Bytes::try_as_utf8_str)
+                    .map(str::to_string)
+            }).as_ref()
+            .map(String::as_str)
     }
 
     /// 선택 여부를 반환합니다.
-    pub fn selected(&self) -> Option<bool> {
+    pub fn selected(&'a self) -> Option<bool> {
         self.selected
             .get_or_init(|| {
-                self.element_ref
-                    .value()
-                    .attr("aria-selected")
+                self.tag
+                    .attributes()
+                    .get("aria-selected")
+                    .flatten()
+                    .and_then(Bytes::try_as_utf8_str)
                     .and_then(|str| str.parse::<bool>().ok())
             })
             .to_owned()
     }
 
     /// 아이콘의 툴팁을 반환합니다.
-    pub fn icon_tooltip(&self) -> Option<&str> {
+    pub fn icon_tooltip(&'a self) -> Option<&'a str> {
         self.icon_tooltip
-            .get_or_init(|| self.element_ref.value().attr("data-itemicontooltip"))
-            .to_owned()
+            .get_or_init(|| {
+                self.tag
+                    .attributes()
+                    .get("data-itemicontooltip")
+                    .flatten()
+                    .and_then(Bytes::try_as_utf8_str)
+                    .map(str::to_string)
+            }).as_ref()
+            .map(String::as_str)
     }
 
     /// 활성화 여부를 반환합니다.
-    pub fn enabled(&self) -> Option<bool> {
+    pub fn enabled(&'a self) -> Option<bool> {
         self.enabled
             .get_or_init(|| {
-                self.element_ref
-                    .value()
-                    .attr("data-itemdisabled")
+                self.tag
+                    .attributes()
+                    .get("data-itemdisabled")
+                    .flatten()
+                    .and_then(Bytes::try_as_utf8_str)
                     .and_then(|str| str.parse::<bool>().ok().and_then(|b| Some(!b)))
             })
             .to_owned()
     }
 
     /// 아이템 그룹의 제목을 반환합니다.
-    pub fn group_title(&self) -> Option<&str> {
+    pub fn group_title(&'a self) -> Option<&'a str> {
         self.group_title
-            .get_or_init(|| self.element_ref.value().attr("data-itemgrouptitle"))
-            .to_owned()
+            .get_or_init(|| {
+                self.tag
+                    .attributes()
+                    .get("data-itemgrouptitle")
+                    .flatten()
+                    .and_then(Bytes::try_as_utf8_str)
+                    .map(str::to_string)
+            }).as_ref()
+            .map(String::as_str)
     }
 
     /// 아이템 제목을 반환합니다.
-    pub fn title(&self) -> &str {
-        self.title
-            .get_or_init(|| self.element_ref.value().attr("title").unwrap_or(""))
+    pub fn title(&'a self) -> &'a str {
+        self.title.get_or_init(|| {
+            self.tag
+                .attributes()
+                .get("title")
+                .flatten()
+                .and_then(Bytes::try_as_utf8_str)
+                .unwrap_or("")
+                .to_string()
+        })
     }
 }
 
