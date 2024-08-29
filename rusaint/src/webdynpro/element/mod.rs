@@ -1,9 +1,5 @@
 use std::collections::HashMap;
 
-use regex_lite::Regex;
-use selection::CheckBox;
-use serde_json::{Map, Value};
-
 use self::{
     action::{Button, Link},
     complex::SapTable,
@@ -24,6 +20,10 @@ use self::{
     system::{ClientInspector, Custom, LoadingPlaceholder},
     text::{Caption, InputField, Label, TextView},
 };
+use regex_lite::Regex;
+use selection::CheckBox;
+use serde_json::{Map, Value};
+use tl::Bytes;
 
 use super::{
     error::{BodyError, ElementError, WebDynproError},
@@ -89,7 +89,7 @@ macro_rules! register_elements {
                 let attrs = tag.attributes();
                 let id = attrs.get("id").flatten().ok_or(BodyError::NoSuchAttribute("id".to_owned()))?.as_utf8_str().to_string();
                 #[allow(unreachable_patterns)]
-                match attrs.get("ct").flatten().and_then(|bytes| bytes.try_as_utf8_str()) {
+                match attrs.get("ct").flatten().and_then(Bytes::try_as_utf8_str) {
                     $( Some(<$type>::CONTROL_ID) => {
                         let def = <$type as $crate::webdynpro::element::Element<'body>>::Def::new_dynamic(id);
                         Ok(<$type as $crate::webdynpro::element::Element<'body>>::from_tag(&def, tag)?.wrap())
@@ -98,6 +98,14 @@ macro_rules! register_elements {
                         let def = <$crate::webdynpro::element::unknown::Unknown as $crate::webdynpro::element::Element<'body>>::Def::new_dynamic(id);
                         Ok(<$crate::webdynpro::element::unknown::Unknown as $crate::webdynpro::element::Element<'body>>::from_tag(&def, tag)?.wrap())
                     }
+                }
+            }
+
+            /// 주어진 [`ElementDefWrapper`]와 일치하는 [`ElementWrapper`]를 반환합니다.
+            pub fn from_def(wrapper: &'body ElementDefWrapper, parser: &'body $crate::webdynpro::element::parser::ElementParser) -> Result<ElementWrapper<'body>, WebDynproError> {
+                match wrapper {
+                    $( ElementDefWrapper::$enum(def) => Ok(parser.element_from_def(def)?.wrap()), )*
+                    ElementDefWrapper::Unknown(def) => Ok(parser.element_from_def(def)?.wrap()),
                 }
             }
 
@@ -137,7 +145,7 @@ macro_rules! register_elements {
                 let attrs = tag.attributes();
                 let id = attrs.get("id").flatten().ok_or(BodyError::NoSuchAttribute("id".to_owned()))?.as_utf8_str().to_string();
                 #[allow(unreachable_patterns)]
-                match attrs.get("ct").flatten().and_then(|bytes| bytes.try_as_utf8_str()) {
+                match attrs.get("ct").flatten().and_then(Bytes::try_as_utf8_str) {
                     $( Some(<$type>::CONTROL_ID) => Ok(ElementDefWrapper::$enum(<$type as $crate::webdynpro::element::Element<'body>>::Def::new_dynamic(id))), )*
                     _ => Ok(ElementDefWrapper::Unknown(<$crate::webdynpro::element::unknown::Unknown<'body> as $crate::webdynpro::element::Element<'body>>::Def::new_dynamic(id)))
                 }
