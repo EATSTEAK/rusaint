@@ -23,11 +23,11 @@ const SMARTID_LOGIN_FORM_REQUEST_URL: &str = "https://smartid.ssu.ac.kr/Symtra_s
 pub struct USaintSession(Jar);
 
 impl CookieStore for USaintSession {
-    fn set_cookies(&self, cookie_headers: &mut dyn Iterator<Item = &HeaderValue>, url: &url::Url) {
+    fn set_cookies(&self, cookie_headers: &mut dyn Iterator<Item = &HeaderValue>, url: &Url) {
         self.0.set_cookies(cookie_headers, url)
     }
 
-    fn cookies(&self, url: &url::Url) -> Option<HeaderValue> {
+    fn cookies(&self, url: &Url) -> Option<HeaderValue> {
         self.0.cookies(url)
     }
 }
@@ -41,7 +41,7 @@ impl USaintSession {
     /// SSO 로그인 토큰과 학번으로 인증된 세션을 반환합니다.
     pub async fn with_token(id: &str, token: &str) -> Result<USaintSession, RusaintError> {
         let session_store = Self::anonymous();
-        let client = reqwest::Client::builder()
+        let client = Client::builder()
             .user_agent(DEFAULT_USER_AGENT)
             .build()
             .unwrap();
@@ -128,7 +128,7 @@ impl USaintSession {
         Self::with_token(id, &token).await
     }
 
-    /// 세션의 내부 [`reqwest::cookie::Jar`]의 레퍼런스를 반환합니다.
+    /// 세션의 내부 [`Jar`]의 레퍼런스를 반환합니다.
     pub fn jar(&self) -> &Jar {
         &self.0
     }
@@ -141,8 +141,7 @@ pub async fn obtain_ssu_sso_token(id: &str, password: &str) -> Result<String, Ss
         .cookie_provider(jar)
         .cookie_store(true)
         .user_agent(DEFAULT_USER_AGENT)
-        .build()
-        .unwrap();
+        .build()?;
     let body = client
         .get(SMARTID_LOGIN_URL)
         .headers(default_header())

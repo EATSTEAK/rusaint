@@ -75,8 +75,7 @@ impl<'a> WebDynproClient {
             .cookie_provider(jar)
             .cookie_store(true)
             .user_agent(DEFAULT_USER_AGENT)
-            .build()
-            .unwrap();
+            .build()?;
         Self::with_client(base_url, name, client).await
     }
 
@@ -292,11 +291,11 @@ impl Requests for reqwest::Client {
             ("fesrAppName", ssr_client.app_name.as_str()),
             (
                 "fesrUseBeacon",
-                (if ssr_client.use_beacon {
+                if ssr_client.use_beacon {
                     "true"
                 } else {
                     "false"
-                }),
+                },
             ),
             ("SAPEVENTQUEUE", event_queue),
         ];

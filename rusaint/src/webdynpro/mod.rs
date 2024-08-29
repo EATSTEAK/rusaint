@@ -23,7 +23,7 @@
 //! ## 애플리케이션 정의 예시
 //! [`USaintClient`](crate::application::USaintClient)를 활용하여 [예시](https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/ZCMW2100?sap-wd-stableids=x&sap-language=ko) 애플리케이션 상단의 "담당자문의 정보" 텍스트를 파싱하는 예시 애플리케이션입니다.
 //!
-//! [`WebDynproClient`](crate::webdynpro::client::WebDynproClient)을 활용하여 u-saint 외의 다른 사이트에 대한 정의를 만들 수 있으나, [`LoadingPlaceholder`] 로딩이나 [`ClientInspector`] 처리 등 추가적인 처리가 필요할 수 있습니다.
+//! [`WebDynproClient`](client::WebDynproClient)을 활용하여 u-saint 외의 다른 사이트에 대한 정의를 만들 수 있으나, [`LoadingPlaceholder`] 로딩이나 [`ClientInspector`] 처리 등 추가적인 처리가 필요할 수 있습니다.
 //! 추가 정보는 [`LoadingPlaceholder`], [`ClientInspector`] 와 [`Custom`] 엘리먼트를 참고하십시오.
 //! ```ignore
 //! use futures::executor::block_on;
