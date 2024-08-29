@@ -6,7 +6,7 @@ use roxmltree::Node;
 
 use crate::webdynpro::{
     command::WebDynproReadCommand,
-    error::{BodyError, UpdateBodyError, WebDynproError},
+    error::{BodyError, UpdateBodyError},
 };
 
 use super::SapSsrClient;
@@ -152,11 +152,6 @@ impl Body {
     /// 페이지 도큐먼트의 HTML 텍스트를 반환합니다.
     pub fn raw_body(&self) -> &str {
         &self.raw_body
-    }
-
-    /// WebDynpro 바디에 읽기 명령을 전송합니다.
-    pub fn read<T: WebDynproReadCommand>(&self, command: T) -> Result<T::Result, WebDynproError> {
-        command.read(self)
     }
 
     pub(crate) fn ssr_client(&self) -> &SapSsrClient {

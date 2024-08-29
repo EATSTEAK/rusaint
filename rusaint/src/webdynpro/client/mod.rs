@@ -100,21 +100,6 @@ impl<'a> WebDynproClient {
         })
     }
 
-    #[cfg(feature = "element")]
-    /// WebDynpro 클라이언트에 명령을 전송합니다.
-    pub async fn send<T: WebDynproCommand>(
-        &mut self,
-        command: T,
-    ) -> Result<T::Result, WebDynproError> {
-        command.dispatch(self).await
-    }
-
-    #[cfg(feature = "element")]
-    /// WebDynpro 클라이언트에 읽기 명령을 전송합니다.
-    pub fn read<T: WebDynproReadCommand>(&self, command: T) -> Result<T::Result, WebDynproError> {
-        command.read(self.body())
-    }
-
     #[allow(dead_code)]
     /// 특정 WebDynpro 애플리케이션으로 탐색합니다.
     pub(crate) async fn navigate(&mut self, base_url: &Url, name: &str) -> Result<(), ClientError> {
