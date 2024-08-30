@@ -1,3 +1,4 @@
+use crate::webdynpro::element::parser::ElementParser;
 use crate::{
     application::{student_information::StudentInformationApplication, USaintClient},
     define_elements,
@@ -41,22 +42,23 @@ impl<'a> StudentBankAccount {
     }
 
     pub(crate) async fn with_client(client: &mut USaintClient) -> Result<Self, WebDynproError> {
-        client
-            .send(TabStripTabSelectCommand::new(
-                StudentInformationApplication::TAB_ADDITION,
-                Self::TAB_BANK_CP,
-                4,
-                0,
-            ))
-            .await?;
+        let mut parser = ElementParser::new(client.body())?;
+        let event = parser.read(TabStripTabSelectCommand::new(
+            StudentInformationApplication::TAB_ADDITION,
+            Self::TAB_BANK_CP,
+            4,
+            0,
+        ))?;
+        client.process_event(false, event).await?;
+        parser = ElementParser::new(client.body())?;
         Ok(Self {
-            bank: client
+            bank: parser
                 .read(ReadComboBoxValueCommand::new(Self::LIST_BANKS))
                 .ok(),
-            account_number: client
+            account_number: parser
                 .read(ReadInputFieldValueCommand::new(Self::BANKN))
                 .ok(),
-            holder: client
+            holder: parser
                 .read(ReadInputFieldValueCommand::new(Self::ZKOINH))
                 .ok(),
         })

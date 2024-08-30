@@ -13,6 +13,7 @@ use crate::{
         error::WebDynproError,
     },
 };
+use crate::webdynpro::element::parser::ElementParser;
 
 #[derive(Clone, Debug)]
 #[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
@@ -74,55 +75,56 @@ impl<'a> StudentReligion {
     }
 
     pub(crate) async fn with_client(client: &mut USaintClient) -> Result<Self, WebDynproError> {
-        client
-            .send(TabStripTabSelectCommand::new(
-                StudentInformationApplication::TAB_ADDITION,
-                Self::TAB_RELIGION,
-                2,
-                0,
-            ))
-            .await?;
+        let mut parser = ElementParser::new(client.body())?;
+        let event = parser.read(TabStripTabSelectCommand::new(
+            StudentInformationApplication::TAB_ADDITION,
+            Self::TAB_RELIGION,
+            2,
+            0,
+        ))?;
+        client.process_event(false, event).await?;
+        parser = ElementParser::new(client.body())?;
         Ok(Self {
-            religion_type: client
+            religion_type: parser
                 .read(ReadComboBoxValueCommand::new(Self::RELIGION_COD))
                 .ok(),
-            start_date: client
+            start_date: parser
                 .read(ReadInputFieldValueCommand::new(Self::BELIEF_START_DATE))
                 .ok(),
-            church: client
+            church: parser
                 .read(ReadInputFieldValueCommand::new(Self::PRES_CHURCH))
                 .ok(),
-            church_man: client
+            church_man: parser
                 .read(ReadInputFieldValueCommand::new(Self::CHURCH_MAN))
                 .ok(),
-            baptism_level: client
+            baptism_level: parser
                 .read(ReadComboBoxValueCommand::new(Self::BAPTISM_LVL))
                 .ok(),
-            baptism_grp: client
+            baptism_grp: parser
                 .read(ReadInputFieldValueCommand::new(Self::BAPTISM_GRP))
                 .ok(),
-            service_department: client
+            service_department: parser
                 .read(ReadInputFieldValueCommand::new(Self::SERVICE_DEPT_DES))
                 .ok(),
-            service_department_title: client
+            service_department_title: parser
                 .read(ReadInputFieldValueCommand::new(Self::SERVICE_DEPT_LVL))
                 .ok(),
-            church_address: client
+            church_address: parser
                 .read(ReadInputFieldValueCommand::new(Self::CHURCH_ADDR))
                 .ok(),
-            singeub: client
+            singeub: parser
                 .read(ReadComboBoxValueCommand::new(Self::SINGEUB_DES))
                 .ok(),
-            baptism_date: client
+            baptism_date: parser
                 .read(ReadInputFieldValueCommand::new(Self::BAPTISM_DT))
                 .ok(),
-            baptism_church: client
+            baptism_church: parser
                 .read(ReadInputFieldValueCommand::new(Self::BAPTISM_CH))
                 .ok(),
-            baptism_man: client
+            baptism_man: parser
                 .read(ReadInputFieldValueCommand::new(Self::BAPTISM_MAN))
                 .ok(),
-            church_grp: client
+            church_grp: parser
                 .read(ReadInputFieldValueCommand::new(Self::CHURCH_GRP))
                 .ok(),
         })

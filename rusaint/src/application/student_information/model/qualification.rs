@@ -1,10 +1,11 @@
 use crate::{
     define_elements,
     webdynpro::{
-        client::body::Body, command::element::text::ReadInputFieldValueCommand,
+        command::element::text::ReadInputFieldValueCommand,
         element::text::InputField, error::WebDynproError,
     },
 };
+use crate::webdynpro::element::parser::ElementParser;
 
 #[derive(Clone, Debug)]
 #[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
@@ -17,12 +18,12 @@ pub struct StudentQualification {
 }
 
 impl<'a> StudentQualification {
-    pub(crate) fn from_body(body: &'a Body) -> StudentQualification {
+    pub(crate) fn with_parser(parser: &'a ElementParser) -> StudentQualification {
         Self {
-            teaching_major: StudentTeachingMajorInformation::from_body(body).ok(),
-            teaching_plural_major: StudentTeachingPluralMajorInformation::from_body(body).ok(),
-            lifelong: StudentLifelongInformation::from_body(body).ok(),
-            forign_study: StudentForignStudyInformation::from_body(body).ok(),
+            teaching_major: StudentTeachingMajorInformation::with_parser(parser).ok(),
+            teaching_plural_major: StudentTeachingPluralMajorInformation::with_parser(parser).ok(),
+            lifelong: StudentLifelongInformation::with_parser(parser).ok(),
+            forign_study: StudentForignStudyInformation::with_parser(parser).ok(),
         }
     }
 
@@ -70,20 +71,18 @@ impl<'a> StudentTeachingMajorInformation {
         MAJOR_QUAL_DT: InputField<'a> = "ZCMW1001.ID_0001:VIW_DEFAULT.TC_DEFAULT_MAJOR_QUAL_DT";
     }
 
-    pub(crate) fn from_body(
-        body: &'a Body,
+    pub(crate) fn with_parser(
+        parser: &'a ElementParser,
     ) -> Result<StudentTeachingMajorInformation, WebDynproError> {
         Ok(Self {
-            major_name: body
-                .read(ReadInputFieldValueCommand::new(Self::MAJOR_OTYPE))
+            major_name: parser.read(ReadInputFieldValueCommand::new(Self::MAJOR_OTYPE))
                 .ok(),
-            qualification_number: body
-                .read(ReadInputFieldValueCommand::new(Self::MAJOR_QUAL_NUM))
+            qualification_number: parser.read(ReadInputFieldValueCommand::new(Self::MAJOR_QUAL_NUM))
                 .ok(),
-            initiation_date: body
+            initiation_date: parser
                 .read(ReadInputFieldValueCommand::new(Self::MAJOR_SELECT_DT))
                 .ok(),
-            qualification_date: body
+            qualification_date: parser
                 .read(ReadInputFieldValueCommand::new(Self::MAJOR_QUAL_DT))
                 .ok(),
         })
@@ -130,17 +129,17 @@ impl<'a> StudentTeachingPluralMajorInformation {
       DOUBLEL_DT: InputField<'a> = "ZCMW1001.ID_0001:VIW_DEFAULT.TC_DEFAULT_DOUBLEL_DT";
     }
 
-    pub(crate) fn from_body(
-        body: &'a Body,
+    pub(crate) fn with_parser(
+        parser: &'a ElementParser
     ) -> Result<StudentTeachingPluralMajorInformation, WebDynproError> {
         Ok(Self {
-            major_name: body
+            major_name: parser
                 .read(ReadInputFieldValueCommand::new(Self::DOUBLE_OTYPE))
                 .ok(),
-            qualification_number: body
+            qualification_number: parser
                 .read(ReadInputFieldValueCommand::new(Self::DOUBLE_QUAL_NUM))
                 .ok(),
-            qualification_date: body
+            qualification_date: parser
                 .read(ReadInputFieldValueCommand::new(Self::DOUBLEL_DT))
                 .ok(),
         })
@@ -185,18 +184,18 @@ impl<'a> StudentLifelongInformation {
       CONEDU_QUAL_DT: InputField<'a> = "ZCMW1001.ID_0001:VIW_DEFAULT.TC_DEFAULT_CONEDU_QUAL_DT";
     }
 
-    pub(crate) fn from_body(body: &'a Body) -> Result<StudentLifelongInformation, WebDynproError> {
+    pub(crate) fn with_parser(parser: &'a ElementParser) -> Result<StudentLifelongInformation, WebDynproError> {
         Ok(Self {
-            apply_date: body
+            apply_date: parser
                 .read(ReadInputFieldValueCommand::new(Self::CONEDU_APP_DT))
                 .ok(),
-            lifelong_type: body
+            lifelong_type: parser
                 .read(ReadInputFieldValueCommand::new(Self::CONEDU_TYPE))
                 .ok(),
-            qualification_number: body
+            qualification_number: parser
                 .read(ReadInputFieldValueCommand::new(Self::CONEDU_QUAL_NUM))
                 .ok(),
-            qualification_date: body
+            qualification_date: parser
                 .read(ReadInputFieldValueCommand::new(Self::CONEDU_QUAL_DT))
                 .ok(),
         })
@@ -243,17 +242,17 @@ impl<'a> StudentForignStudyInformation {
       ISSUEDATE: InputField<'a> = "ZCMW1001.ID_0001:VIW_DEFAULT.ISSUEDATE";
     }
 
-    pub(crate) fn from_body(
-        body: &'a Body,
+    pub(crate) fn with_parser(
+        parser: &'a ElementParser,
     ) -> Result<StudentForignStudyInformation, WebDynproError> {
         Ok(Self {
-            approval_date: body
+            approval_date: parser
                 .read(ReadInputFieldValueCommand::new(Self::APPRODATE))
                 .ok(),
-            authentication_number: body
+            authentication_number: parser
                 .read(ReadInputFieldValueCommand::new(Self::AUTHEN_NO))
                 .ok(),
-            issue_date: body
+            issue_date: parser
                 .read(ReadInputFieldValueCommand::new(Self::ISSUEDATE))
                 .ok(),
         })

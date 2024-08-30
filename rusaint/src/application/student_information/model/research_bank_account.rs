@@ -13,6 +13,7 @@ use crate::{
         error::WebDynproError,
     },
 };
+use crate::webdynpro::element::parser::ElementParser;
 
 #[derive(Clone, Debug)]
 #[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
@@ -41,22 +42,23 @@ impl<'a> StudentResearchBankAccount {
     }
 
     pub(crate) async fn with_client(client: &mut USaintClient) -> Result<Self, WebDynproError> {
-        client
-            .send(TabStripTabSelectCommand::new(
-                StudentInformationApplication::TAB_ADDITION,
-                Self::TAB_RES_ACCOUNT,
-                6,
-                0,
-            ))
-            .await?;
+        let mut parser = ElementParser::new(client.body())?;
+        let event = parser.read(TabStripTabSelectCommand::new(
+            StudentInformationApplication::TAB_ADDITION,
+            Self::TAB_RES_ACCOUNT,
+            6,
+            0,
+        ))?;
+        client.process_event(false, event).await?;
+        parser = ElementParser::new(client.body())?;
         Ok(Self {
-            bank: client
+            bank: parser
                 .read(ReadComboBoxValueCommand::new(Self::BANK_TEXT))
                 .ok(),
-            account_number: client
+            account_number: parser
                 .read(ReadInputFieldValueCommand::new(Self::BANKN_TEXT))
                 .ok(),
-            holder: client
+            holder: parser
                 .read(ReadInputFieldValueCommand::new(Self::ZKOINH_TEXT))
                 .ok(),
         })
