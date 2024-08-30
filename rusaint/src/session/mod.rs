@@ -5,7 +5,7 @@ use reqwest::{
     header::{HeaderValue, COOKIE, HOST, SET_COOKIE},
     Client,
 };
-use tl::{Bytes, Node, NodeHandle, ParserOptions};
+use tl::{Bytes, Node, ParserOptions};
 use url::Url;
 
 use crate::{
@@ -184,13 +184,14 @@ pub async fn obtain_ssu_sso_token(id: &str, password: &str) -> Result<String, Ss
 }
 
 fn parse_login_form(body: &str) -> Result<(String, String), SsuSsoError> {
-    let document = tl::parse(body, ParserOptions::default()).or_else(|err| Err(SsuSsoError::CantLoadForm))?;
+    // TODO: Detailed error message when failed
+    let document = tl::parse(body, ParserOptions::default()).or_else(|_err| Err(SsuSsoError::CantLoadForm))?;
     let in_tp_bit = document
         .query_selector(r#"input[name="in_tp_bit"]"#)
         .into_iter()
         .flatten()
         .next()
-        .and_then(NodeHandle::get)
+        .and_then(|handle| handle.get(document.parser()))
         .and_then(Node::as_tag)
         .ok_or(SsuSsoError::CantLoadForm)?
         .attributes()
@@ -203,7 +204,7 @@ fn parse_login_form(body: &str) -> Result<(String, String), SsuSsoError> {
         .into_iter()
         .flatten()
         .next()
-        .and_then(NodeHandle::get)
+        .and_then(|handle| handle.get(document.parser()))
         .and_then(Node::as_tag)
         .ok_or(SsuSsoError::CantLoadForm)?
         .attributes()
