@@ -84,14 +84,16 @@ impl<'a> CourseGradesApplication {
         GRADE_BY_CLASSES_TABLE: SapTable<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.TABLE_1";
     );
 
-    async fn close_popups(&mut self, parser: &ElementParser) -> Result<(), WebDynproError> {
+    async fn close_popups(&mut self) -> Result<(), WebDynproError> {
+        let parser = ElementParser::new(self.client.body())?;
+        let selector =format!(r#"[ct="{}"]"#, PopupWindow::CONTROL_ID);
         let mut popup_iter = parser
             .dom()
-            .query_selector(format!(r#"[ct="{}"]"#, PopupWindow::CONTROL_ID).as_str())
+            .query_selector(&selector)
             .into_iter()
             .flatten()
-            .filter_map(|handle| handle.get(parser.dom().parser()).and_then(Node::as_tag))
-            .filter_map(|tag| {
+            .filter_map(|handle| {
+                let tag = handle.get(parser.dom().parser())?.as_tag()?;
                 let id = tag.attributes().id().and_then(Bytes::try_as_utf8_str)?;
                 PopupWindow::new(id.into(), tag.clone()).close().ok()
             });
@@ -188,7 +190,7 @@ impl<'a> CourseGradesApplication {
         course_type: CourseType,
     ) -> Result<GradeSummary, RusaintError> {
         let parser = ElementParser::new(self.client.body())?;
-        self.close_popups(&parser).await?;
+        self.close_popups().await?;
         self.select_course(&parser, course_type).await?;
         self.read_recorded_summary()
     }
@@ -237,7 +239,7 @@ impl<'a> CourseGradesApplication {
         course_type: CourseType,
     ) -> Result<GradeSummary, RusaintError> {
         let parser = ElementParser::new(self.client.body())?;
-        self.close_popups(&parser).await?;
+        self.close_popups().await?;
         self.select_course(&parser, course_type).await?;
         self.read_certificated_summary()
     }
@@ -286,7 +288,7 @@ impl<'a> CourseGradesApplication {
         course_type: CourseType,
     ) -> Result<Vec<SemesterGrade>, RusaintError> {
         let parser = ElementParser::new(self.client.body())?;
-        self.close_popups(&parser).await?;
+        self.close_popups().await?;
         self.select_course(&parser, course_type).await?;
         self.read_semesters()
     }
@@ -342,7 +344,7 @@ impl<'a> CourseGradesApplication {
             };
         let parser = ElementParser::new(self.client.body())?;
         let table = parse_table_in_popup(&parser)?;
-        self.close_popups(&parser).await?;
+        self.close_popups().await?;
         Ok(HashMap::from_iter(table))
     }
 
@@ -390,7 +392,7 @@ impl<'a> CourseGradesApplication {
     ) -> Result<Vec<ClassGrade>, RusaintError> {
         {
             let parser = ElementParser::new(self.client.body())?;
-            self.close_popups(&parser).await?;
+            self.close_popups().await?;
             self.select_course(&parser, course_type).await?;
             self.select_semester(&parser, year, semester).await?;
         }
@@ -476,7 +478,7 @@ impl<'a> CourseGradesApplication {
     ) -> Result<HashMap<String, f32>, RusaintError> {
         {
             let parser = ElementParser::new(self.client.body())?;
-            self.close_popups(&parser).await?;
+            self.close_popups().await?;
             self.select_course(&parser, course_type).await?;
             self.select_semester(&parser, year, semester).await?;
         }
@@ -544,8 +546,10 @@ mod test {
             .build_into::<CourseGradesApplication>()
             .await
             .unwrap();
-        app.close_popups(&ElementParser::new(app.client.body()).unwrap()).await.unwrap();
-        let mut result = ElementParser::new(app.client.body()).unwrap().dom().query_selector(format!(r#"[ct="{}"]"#, PopupWindow::CONTROL_ID).as_str()).into_iter().flatten();
+        app.close_popups().await.unwrap();
+        let parser = ElementParser::new(app.client.body()).unwrap();
+        let selector = format!(r#"[ct="{}"]"#, PopupWindow::CONTROL_ID);
+        let mut result = parser.dom().query_selector(&selector).into_iter().flatten();
         assert!(result.next().is_none());
     }
 }
