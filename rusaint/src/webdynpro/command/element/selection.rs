@@ -12,6 +12,7 @@ use crate::webdynpro::{
     },
     error::{ElementError, WebDynproError},
 };
+use std::io::Read;
 
 /// [`ComboBox`](crate::webdynpro::element::selection::ComboBox)의 선택지를 선택하도록 함
 pub struct ComboBoxSelectCommand {
@@ -67,6 +68,62 @@ impl WebDynproCommand for ComboBoxChangeCommand {
         parser
             .element_from_def(&self.element_def)?
             .change(&self.value)
+    }
+}
+
+/// [`ComboBox`](crate::webdynpro::element::selection::ComboBox)의 선택지를 `value1`의 값을 기반으로 선택하도록 함
+#[allow(unused)]
+pub struct ComboBoxSelectByValue1Command {
+    element_def: ComboBoxDef,
+    value: String,
+    by_enter: bool,
+}
+
+impl ComboBoxSelectByValue1Command {
+    /// 새로운 명령 객체를 생성합니다.
+    pub fn new(
+        element_def: ComboBoxDef,
+        value: &str,
+        by_enter: bool,
+    ) -> ComboBoxSelectByValue1Command {
+        Self {
+            element_def,
+            value: value.to_string(),
+            by_enter,
+        }
+    }
+}
+
+impl WebDynproCommand for ComboBoxSelectByValue1Command {
+    type Result = Event;
+
+    async fn dispatch(&self, parser: &ElementParser) -> Result<Self::Result, WebDynproError> {
+        let listbox_def = parser.read(ReadComboBoxItemListBoxCommand::new(
+            self.element_def.clone(),
+        ))?;
+        let items = parser.read(ReadListBoxItemInfoCommand::new(listbox_def))?;
+        let item_key = items
+            .iter()
+            .find_map(|info| match info {
+                ListBoxItemInfo::Item { value1, key, .. } => {
+                    if value1 == &self.value {
+                        Some(key)
+                    } else {
+                        None
+                    }
+                }
+                _ => None,
+            })
+            .ok_or(ElementError::InvalidContent {
+                element: self.element_def.id().to_string(),
+                content: format!("Cannot find {} option", self.value),
+            })?
+            .to_owned();
+        parser.read(ComboBoxSelectCommand::new(
+            self.element_def.clone(),
+            &item_key,
+            false,
+        ))
     }
 }
 
