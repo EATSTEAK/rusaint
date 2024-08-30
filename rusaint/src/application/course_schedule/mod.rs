@@ -1,3 +1,6 @@
+use super::{USaintApplication, USaintClient};
+use crate::webdynpro::command::WebDynproCommandExecutor;
+use crate::webdynpro::element::parser::ElementParser;
 use crate::{
     application::course_schedule::model::{Lecture, LectureCategory},
     define_elements,
@@ -10,7 +13,6 @@ use crate::{
                 sap_table::cell::{SapTableCell, SapTableCellWrapper},
                 SapTable,
             },
-            definition::ElementDefinition,
             layout::TabStrip,
             selection::ComboBox,
             ElementDefWrapper,
@@ -19,8 +21,6 @@ use crate::{
     },
     ApplicationError, RusaintError,
 };
-
-use super::{USaintApplication, USaintClient};
 
 /// [강의시간표](https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/ZCMW2100)
 pub struct CourseScheduleApplication {
@@ -61,30 +61,35 @@ impl<'a> CourseScheduleApplication {
 
     async fn select_period(
         &mut self,
+        parser: &ElementParser,
         year: &str,
         period: SemesterType,
     ) -> Result<(), WebDynproError> {
+        let year_select_event =
+            parser.read(ComboBoxSelectCommand::new(Self::PERIOD_YEAR, year, false))?;
+        self.client.process_event(false, year_select_event).await?;
+        let semester_select_event = parser.read(ComboBoxSelectCommand::new(
+            Self::PERIOD_ID,
+            Self::semester_to_key(period),
+            false,
+        ))?;
         self.client
-            .send(ComboBoxSelectCommand::new(Self::PERIOD_YEAR, year, false))
-            .await?;
-        self.client
-            .send(ComboBoxSelectCommand::new(
-                Self::PERIOD_ID,
-                Self::semester_to_key(period),
-                false,
-            ))
+            .process_event(false, semester_select_event)
             .await?;
         Ok(())
     }
 
-    async fn select_rows(&mut self, row: u32) -> Result<(), WebDynproError> {
-        self.client
-            .send(ComboBoxSelectCommand::new(
-                Self::TABLE_ROWS,
-                row.to_string().as_str(),
-                false,
-            ))
-            .await?;
+    async fn select_rows(
+        &mut self,
+        parser: &ElementParser,
+        row: u32,
+    ) -> Result<(), WebDynproError> {
+        let event = parser.read(ComboBoxSelectCommand::new(
+            Self::TABLE_ROWS,
+            row.to_string().as_str(),
+            false,
+        ))?;
+        self.client.process_event(false, event).await?;
         Ok(())
     }
 
@@ -99,28 +104,28 @@ impl<'a> CourseScheduleApplication {
         period: SemesterType,
         lecture_category: &LectureCategory,
     ) -> Result<impl Iterator<Item = Lecture>, RusaintError> {
-        let year_str = format!("{}", year);
-        self.select_rows(500).await?;
-        self.select_period(&year_str, period).await?;
+        {
+            let parser = ElementParser::new(self.body());
+            let year_str = format!("{}", year);
+            self.select_rows(&parser, 500).await?;
+            self.select_period(&parser, &year_str, period).await?;
+        }
         lecture_category.request_query(&mut self.client.0).await?;
-        let table = self
-            .client
-            .read(ReadSapTableBodyCommand::new(Self::MAIN_TABLE))?;
+        let parser = ElementParser::new(self.body());
+        let table = parser.read(ReadSapTableBodyCommand::new(Self::MAIN_TABLE))?;
         let Some(first_row) = table.iter().next() else {
             return Err(ApplicationError::NoLectureResult.into());
         };
-        if let Some(Ok(SapTableCellWrapper::Normal(cell))) =
-            first_row.iter_value(self.body()).next()
-        {
+        if let Some(Ok(SapTableCellWrapper::Normal(cell))) = first_row.iter_value(&parser).next() {
             if let Some(ElementDefWrapper::TextView(tv_def)) = cell.content() {
-                if let Ok(tv) = tv_def.from_body(self.body()) {
+                if let Ok(tv) = parser.element_from_def(&tv_def) {
                     if tv.text().contains("없습니다.") {
                         return Err(ApplicationError::NoLectureResult.into());
                     }
                 }
             }
         }
-        let lectures = table.try_table_into::<Lecture>(self.client.body())?;
+        let lectures = table.try_table_into::<Lecture>(&parser)?;
         Ok(lectures.into_iter())
     }
 
