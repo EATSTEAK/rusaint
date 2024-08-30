@@ -73,3 +73,32 @@ impl<'a> InputField<'a> {
             .and_then(Bytes::try_as_utf8_str)
     }
 }
+
+#[cfg(test)]
+mod test {
+    use crate::define_elements;
+    use crate::webdynpro::element::Element;
+    use crate::webdynpro::element::text::InputField;
+
+    define_elements! {
+        INPUTFIELD_TEST: InputField<'_> = "ZCMB3W0017.ID_0001:VIW_MAIN.ATTM_CRD1";
+    }
+    #[test]
+    fn read_input_field_value() {
+        let dom = tl::parse(r#"<input id="ZCMB3W0017.ID_0001:VIW_MAIN.ATTM_CRD1" ct="I" readonly value="82.0">"#, tl::ParserOptions::new().track_ids()).unwrap();
+        let parser = dom.parser();
+        let element = dom
+            .get_element_by_id("ZCMB3W0017.ID_0001:VIW_MAIN.ATTM_CRD1")
+            .expect("Failed to find element")
+            .get(parser)
+            .unwrap()
+            .as_tag()
+            .unwrap();
+        element.attributes().iter().for_each(|(key, value)| {
+            dbg!(key, value);
+        });
+        let input_field = InputField::from_tag(&INPUTFIELD_TEST, element.clone()).unwrap();
+        let value = input_field.value().unwrap();
+        assert_eq!(value, "82.0");
+    }
+}
