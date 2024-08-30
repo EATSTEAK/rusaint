@@ -56,8 +56,8 @@ impl<'a> SapTable<'a> {
             }
         };
         let element = &self.tag;
-        let tbody_selector = format!(
-            r#"[id="{}-contentTBody"]"#,
+        let tbody_id = format!(
+            "{}-contentTBody",
             element
                 .attributes()
                 .id()
@@ -67,11 +67,7 @@ impl<'a> SapTable<'a> {
                     field: "id".to_string()
                 })?
         );
-        let Some(tbody) = element
-            .query_selector(parser.dom().parser(), &tbody_selector)
-            .into_iter()
-            .flatten()
-            .next()
+        let Some(tbody) = parser.dom().get_element_by_id(tbody_id.as_str())
             .and_then(|handle| handle.get(parser.dom().parser()))
             .and_then(Node::as_tag)
         else {
