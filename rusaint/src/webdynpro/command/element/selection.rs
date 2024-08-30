@@ -12,7 +12,6 @@ use crate::webdynpro::{
     },
     error::{ElementError, WebDynproError},
 };
-use std::io::Read;
 
 /// [`ComboBox`](crate::webdynpro::element::selection::ComboBox)의 선택지를 선택하도록 함
 pub struct ComboBoxSelectCommand {
@@ -97,7 +96,7 @@ impl ComboBoxSelectByValue1Command {
 impl WebDynproCommand for ComboBoxSelectByValue1Command {
     type Result = Event;
 
-    async fn dispatch(&self, parser: &ElementParser) -> Result<Self::Result, WebDynproError> {
+    fn dispatch(&self, parser: &ElementParser) -> Result<Self::Result, WebDynproError> {
         let listbox_def = parser.read(ReadComboBoxItemListBoxCommand::new(
             self.element_def.clone(),
         ))?;
