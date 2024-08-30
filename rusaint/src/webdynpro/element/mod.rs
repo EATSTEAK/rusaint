@@ -261,8 +261,8 @@ pub(crate) fn children_tag<'body>(
     let mut next_refs = vec![root.clone()];
     let mut cts: Vec<tl::HTMLTag> = vec![];
     while let Some(elem) = next_refs.pop() {
-        for child in elem.children().all(parser.dom().parser()) {
-            if let tl::Node::Tag(child_tag) = child {
+        for child in elem.children().top().iter() {
+            if let Some(tl::Node::Tag(child_tag)) = child.get(parser.dom().parser()) {
                 if child_tag.attributes().get("ct").flatten().is_some() {
                     cts.push(child_tag.clone());
                 } else {

@@ -25,13 +25,13 @@ impl<'a> SapTableBody {
         tag: tl::HTMLTag<'a>,
         parser: &'a ElementParser,
     ) -> Result<SapTableBody, ElementError> {
-        let tag_iter = tag
-            .children()
-            .all(parser.dom().parser())
-            .into_iter()
+        let children = tag.children();
+        let tag_iter = children.top()
+            .as_slice()
+            .iter()
+            .filter_map(|handle| handle.get(parser.dom().parser()))
             .filter_map(|node| node.as_tag());
-        let mut header_iter = tag_iter
-            .clone()
+        let mut header_iter = tag_iter.clone()
             .filter_map(|tag| SapTableHeader::new(table_def.clone(), tag.clone(), parser).ok());
         let Some(header) = header_iter.next() else {
             return Err(ElementError::NoSuchContent {
