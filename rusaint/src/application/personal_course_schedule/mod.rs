@@ -14,7 +14,7 @@ use crate::{
     },
     RusaintError,
 };
-
+use crate::webdynpro::element::parser::ElementParser;
 use super::{USaintApplication, USaintClient};
 
 /// [개인수업시간표](https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/ZCMW2102)
@@ -60,21 +60,16 @@ impl<'a> PersonalCourseScheduleApplication {
         semester: SemesterType,
     ) -> Result<(), WebDynproError> {
         let semester = Self::semester_to_key(semester);
-        let year_combobox_lsdata = self
-            .client
-            .read(ReadComboBoxLSDataCommand::new(Self::PERYR))?;
-        let semester_combobox_lsdata = self
-            .client
-            .read(ReadComboBoxLSDataCommand::new(Self::PERID))?;
+        let parser = ElementParser::new(self.body())?;
+        let year_combobox_lsdata = parser.read(ReadComboBoxLSDataCommand::new(Self::PERYR))?;
+        let semester_combobox_lsdata = parser.read(ReadComboBoxLSDataCommand::new(Self::PERID))?;
         if (|| Some(year_combobox_lsdata.key()?.as_str()))() != Some(year) {
-            self.client
-                .send(ComboBoxSelectCommand::new(Self::PERYR, &year, false))
-                .await?;
+            let event = parser.read(ComboBoxSelectCommand::new(Self::PERYR, &year, false))?;
+            self.client.process_event(false, event).await?;
         }
         if (|| Some(semester_combobox_lsdata.key()?.as_str()))() != Some(semester) {
-            self.client
-                .send(ComboBoxSelectCommand::new(Self::PERID, semester, false))
-                .await?;
+            let event = parser.read(ComboBoxSelectCommand::new(Self::PERID, semester, false))?;
+            self.client.process_event(false, event).await?;
         }
         Ok(())
     }
@@ -86,11 +81,13 @@ impl<'a> PersonalCourseScheduleApplication {
         semester: SemesterType,
     ) -> Result<PersonalCourseSchedule, RusaintError> {
         self.select_semester(&year.to_string(), semester).await?;
-        match Self::TABLE.from_body(self.body()) {
+        let parser = ElementParser::new(self.body())?;
+        let table = parser.element_from_def(&Self::TABLE);
+        match table {
             Ok(table) => {
-                let table_body = table.table()?;
+                let table_body = table.table(&parser)?;
                 let row_string: Vec<Vec<Option<String>>> =
-                    table_body.try_table_into::<Vec<Option<String>>>(self.body())?;
+                    table_body.try_table_into::<Vec<Option<String>>>(&parser)?;
                 let mut schedule: HashMap<Weekday, Vec<CourseScheduleInformation>> = Default::default();
                 for (_row_idx, row) in row_string.into_iter().skip(1).enumerate() {
                     row.into_iter()
