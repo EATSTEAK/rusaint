@@ -12,7 +12,6 @@ use crate::{
                 sap_table::cell::{SapTableCell, SapTableCellWrapper},
                 SapTable,
             },
-            definition::ElementDefinition,
             layout::TabStrip,
             selection::ComboBox,
             ElementDefWrapper,

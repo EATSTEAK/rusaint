@@ -11,7 +11,6 @@ use crate::{
     model::SemesterType,
     utils::de_with::{deserialize_semester_type, deserialize_u32_string},
     webdynpro::{
-        client::body::Body,
         command::element::complex::ReadSapTableBodyCommand,
         element::{
             complex::{

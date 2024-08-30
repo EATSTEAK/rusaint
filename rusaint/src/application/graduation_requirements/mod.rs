@@ -13,7 +13,6 @@ use crate::{
         element::{
             action::Button,
             complex::SapTable,
-            definition::ElementDefinition,
             text::{InputField, InputFieldDef},
         },
     },

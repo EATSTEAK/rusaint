@@ -9,7 +9,7 @@ use crate::{
     webdynpro::{
         client::body::Body,
         command::element::selection::{ComboBoxSelectCommand, ReadComboBoxLSDataCommand},
-        element::{complex::SapTable, definition::ElementDefinition, selection::ComboBox},
+        element::{complex::SapTable, selection::ComboBox},
         error::{ElementError, WebDynproError},
     },
     RusaintError,
