@@ -5,6 +5,8 @@ use serde::{
     Deserialize,
 };
 
+use crate::webdynpro::command::WebDynproCommandExecutor;
+use crate::webdynpro::element::parser::ElementParser;
 use crate::{
     application::{student_information::StudentInformationApplication, USaintClient},
     define_elements,
@@ -37,16 +39,17 @@ impl<'a> StudentFamily {
     }
 
     pub(crate) async fn with_client(client: &mut USaintClient) -> Result<Self, WebDynproError> {
-        client
-            .send(TabStripTabSelectCommand::new(
-                StudentInformationApplication::TAB_ADDITION,
-                Self::TAB_FAMILY,
-                1,
-                0,
-            ))
-            .await?;
-        let table = client.read(ReadSapTableBodyCommand::new(Self::TABLE_FAMILY))?;
-        let members = table.try_table_into::<StudentFamilyMember>(client.body())?;
+        let mut parser = ElementParser::new(client.body());
+        let event = parser.read(TabStripTabSelectCommand::new(
+            StudentInformationApplication::TAB_ADDITION,
+            Self::TAB_FAMILY,
+            1,
+            0,
+        ))?;
+        client.process_event(false, event).await?;
+        parser = ElementParser::new(client.body());
+        let table = parser.read(ReadSapTableBodyCommand::new(Self::TABLE_FAMILY))?;
+        let members = table.try_table_into::<StudentFamilyMember>(&parser)?;
         Ok(Self { members })
     }
 
@@ -155,11 +158,11 @@ impl StudentFamilyMember {
 
 impl<'a> FromSapTable<'a> for StudentFamilyMember {
     fn from_table(
-        body: &'a crate::webdynpro::client::body::Body,
         header: &'a crate::webdynpro::element::complex::sap_table::SapTableHeader,
         row: &'a crate::webdynpro::element::complex::sap_table::SapTableRow,
+        parser: &'a ElementParser,
     ) -> Result<Self, WebDynproError> {
-        let map_string = row.try_row_into::<HashMap<String, String>>(header, body)?;
+        let map_string = row.try_row_into::<HashMap<String, String>>(header, parser)?;
         let map_de: MapDeserializer<_, serde::de::value::Error> = map_string.into_deserializer();
         Ok(
             StudentFamilyMember::deserialize(map_de).map_err(|e| ElementError::InvalidContent {
