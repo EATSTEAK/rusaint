@@ -1,10 +1,15 @@
 use model::{GraduationRequirement, GraduationRequirements, GraduationStudent};
 
+use super::{USaintApplication, USaintClient};
+use crate::webdynpro::element::parser::ElementParser;
 use crate::{
     define_elements,
     webdynpro::{
         client::body::Body,
-        command::element::{action::ButtonPressCommand, complex::ReadSapTableBodyCommand, text::ReadInputFieldValueCommand},
+        command::element::{
+            action::ButtonPressCommand, complex::ReadSapTableBodyCommand,
+            text::ReadInputFieldValueCommand,
+        },
         element::{
             action::Button,
             complex::SapTable,
@@ -14,8 +19,6 @@ use crate::{
     },
     RusaintError,
 };
-
-use super::{USaintApplication, USaintClient};
 
 /// [졸업사정표](https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/ZCMW8015)
 pub struct GraduationRequirementsApplication {
@@ -75,16 +78,27 @@ impl<'a> GraduationRequirementsApplication {
 
     /// 학생 정보를 반환합니다.
     pub async fn student_info(&self) -> Result<GraduationStudent, RusaintError> {
-        let number = Self::STUDENT_NUM.from_body(self.body())?.value_into_u32()?;
-        let name = &Self::STUDENT_NAME.from_body(self.body())?.value_string()?;
-        let grade = Self::STUDENT_GRADE
-            .from_body(self.body())?
+        let parser = ElementParser::new(self.client.body())?;
+        let number = parser
+            .element_from_def(&Self::STUDENT_NUM)?
             .value_into_u32()?;
-        let semester = Self::PRCL.from_body(self.body())?.value_into_u32()?;
-        let status = &Self::STATUS.from_body(self.body())?.value_string()?;
-        let apply_year = Self::APPLY_YEAR.from_body(self.body())?.value_into_u32()?;
-        let apply_type = &Self::NEWINCOR_CDT.from_body(self.body())?.value_string()?;
-        let department = &Self::CG_IDT_DEPT.from_body(self.body())?.value_string()?;
+        let name = &parser
+            .element_from_def(&Self::STUDENT_NAME)?
+            .value_string()?;
+        let grade = parser
+            .element_from_def(&Self::STUDENT_GRADE)?
+            .value_into_u32()?;
+        let semester = parser.element_from_def(&Self::PRCL)?.value_into_u32()?;
+        let status = &parser.element_from_def(&Self::STATUS)?.value_string()?;
+        let apply_year = parser
+            .element_from_def(&Self::APPLY_YEAR)?
+            .value_into_u32()?;
+        let apply_type = &parser
+            .element_from_def(&Self::NEWINCOR_CDT)?
+            .value_string()?;
+        let department = &parser
+            .element_from_def(&Self::CG_IDT_DEPT)?
+            .value_string()?;
         let mut majors = Vec::new();
         const IDTS: &[InputFieldDef] = &[
             GraduationRequirementsApplication::CG_IDT1,
@@ -93,7 +107,7 @@ impl<'a> GraduationRequirementsApplication {
             GraduationRequirementsApplication::CG_IDT4,
         ];
         for idt in IDTS {
-            let major = idt.from_body(self.body())?.value_string().ok();
+            let major = parser.element_from_def(idt)?.value_string().ok();
             if let Some(major) = major {
                 if !major.trim().is_empty() {
                     majors.push(major);
@@ -104,9 +118,11 @@ impl<'a> GraduationRequirementsApplication {
                 break;
             }
         }
-        let audit_date = &Self::AUDIT_DATE.from_body(self.body())?.value_string()?;
-        let graduation_points = Self::GR_CPOP.from_body(self.body())?.value_into_f32()?;
-        let completed_points = Self::COMP_CPOP.from_body(self.body())?.value_into_f32()?;
+        let audit_date = &parser.element_from_def(&Self::AUDIT_DATE)?.value_string()?;
+        let graduation_points = parser.element_from_def(&Self::GR_CPOP)?.value_into_f32()?;
+        let completed_points = parser
+            .element_from_def(&Self::COMP_CPOP)?
+            .value_into_f32()?;
         Ok(GraduationStudent::new(
             number,
             name,
@@ -125,16 +141,16 @@ impl<'a> GraduationRequirementsApplication {
 
     /// 졸업사정 결과와 졸업 필요 요건별 충족 여부와 세부 정보를 반환합니다.
     pub async fn requirements(&mut self) -> Result<GraduationRequirements, RusaintError> {
-        self.client
-            .send(ButtonPressCommand::new(Self::SHOW_DETAILS))
-            .await?;
-        let audit_result = self
-            .client
-            .read(ReadInputFieldValueCommand::new(Self::AUDIT_RESULT))
+        {
+            let event = ElementParser::new(self.client.body())?.read(ButtonPressCommand::new(Self::SHOW_DETAILS))?;
+            self.client.process_event(false, event).await?;
+        }
+        let parser = ElementParser::new(self.client.body())?;
+        let audit_result = parser.read(ReadInputFieldValueCommand::new(Self::AUDIT_RESULT))
             .is_ok_and(|str| str == "가능");
-        let table = self.client.read(ReadSapTableBodyCommand::new(Self::MAIN_TABLE))?;
+        let table = parser.read(ReadSapTableBodyCommand::new(Self::MAIN_TABLE))?;
         let requirements = table
-            .try_table_into::<GraduationRequirement>(self.body())?
+            .try_table_into::<GraduationRequirement>(&parser)?
             .into_iter()
             .map(|req| (req.name().to_owned(), req))
             .collect();
@@ -153,8 +169,11 @@ mod test {
 
     use serial_test::serial;
 
+    use crate::webdynpro::element::parser::ElementParser;
     use crate::{
-        application::{graduation_requirements::GraduationRequirementsApplication, USaintClientBuilder},
+        application::{
+            graduation_requirements::GraduationRequirementsApplication, USaintClientBuilder,
+        },
         global_test_utils::get_session,
         webdynpro::command::element::complex::ReadSapTableBodyCommand,
     };
@@ -168,8 +187,13 @@ mod test {
             .build_into::<GraduationRequirementsApplication>()
             .await
             .unwrap();
-        let table = app.body().read(ReadSapTableBodyCommand::new(GraduationRequirementsApplication::MAIN_TABLE)).unwrap()
-            .try_table_into::<Vec<(String, String)>>(app.body())
+        let parser = ElementParser::new(app.body()).unwrap();
+        let table = parser
+            .read(ReadSapTableBodyCommand::new(
+                GraduationRequirementsApplication::MAIN_TABLE,
+            ))
+            .unwrap()
+            .try_table_into::<Vec<(String, String)>>(&parser)
             .unwrap();
         dbg!(table);
     }

@@ -12,6 +12,7 @@ use crate::{
         error::ElementError,
     },
 };
+use crate::webdynpro::element::parser::ElementParser;
 
 #[derive(Debug)]
 #[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
@@ -273,11 +274,11 @@ fn deserialize_lectures<'de, D: Deserializer<'de>>(
 
 impl<'body> FromSapTable<'body> for GraduationRequirement {
     fn from_table(
-        body: &'body crate::webdynpro::client::body::Body,
         header: &'body crate::webdynpro::element::complex::sap_table::SapTableHeader,
         row: &'body crate::webdynpro::element::complex::sap_table::SapTableRow,
+        parser: &'body ElementParser,
     ) -> Result<Self, crate::webdynpro::error::WebDynproError> {
-        let map_string = row.try_row_into::<HashMap<String, String>>(header, body)?;
+        let map_string = row.try_row_into::<HashMap<String, String>>(header, parser)?;
         let map_de: MapDeserializer<_, serde::de::value::Error> = map_string.into_deserializer();
         Ok(GraduationRequirement::deserialize(map_de).map_err(|e| {
             ElementError::InvalidContent {
