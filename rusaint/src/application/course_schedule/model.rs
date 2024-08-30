@@ -532,6 +532,7 @@ impl LectureCategory {
             tab_index,
             0,
         ))?;
+        client.process_event(false, tab_select).await?;
         let btn_press = ElementParser::new(client.body())?.read(ButtonPressCommand::new(search_btn))?;
         client.process_event(false, btn_press).await?;
         Ok(())
