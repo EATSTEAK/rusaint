@@ -86,7 +86,8 @@ impl<'a> SapTableCellWrapper<'a> {
             _ => None,
         }
     }
-
+    
+    /// [`SapTableCellDefWrapper`] 로부터 [`SapTableCellWrapper`]를 생성합니다.
     pub fn from_def(
         wrapper: &SapTableCellDefWrapper,
         parser: &'a ElementParser,

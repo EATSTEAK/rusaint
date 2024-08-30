@@ -5,21 +5,27 @@ use crate::webdynpro::element::{definition::ElementDefinition, Element};
 use crate::webdynpro::error::{BodyError, WebDynproError};
 use tl::{VDom, VDomGuard};
 
+/// DOM에서 엘리먼트를 파싱하기 위한 파서
 pub struct ElementParser(VDomGuard);
 
 // TODO: Documentation of `ElementParser`
 impl<'s> ElementParser {
+
+    /// [`Body`]로부터 새로운 파서를 만듭니다.
     pub fn new(body: &Body) -> Result<ElementParser, WebDynproError> {
         Ok(ElementParser(
             unsafe { tl::parse_owned(body.raw_body().to_owned(), Default::default()) }
                 .or_else(|_err| Err(WebDynproError::Body(BodyError::Parse)))?,
         ))
     }
+
+    /// 파서 내의 [`VDom`]을 반환합니다.
     pub(crate) fn dom(&'s self) -> &'s VDom {
         self.0.get_ref()
     }
 
     // TODO: Do proper error handling
+    /// [`ElementDefinition`]을 구현하는 값에서 알맞는 [`Element`]를 만듭니다.
     pub fn element_from_def<T: ElementDefinition<'s>>(
         &'s self,
         element_def: &T,
@@ -35,6 +41,7 @@ impl<'s> ElementParser {
     }
 
     // TODO: Do proper error handling
+    /// [`SubElementDefinition`]을 구현하는 값에서 알맞는 [`SubElement`]를 만듭니다.
     pub fn subelement_from_def<T: SubElementDefinition<'s>>(
         &'s self,
         subelement_def: &T,
