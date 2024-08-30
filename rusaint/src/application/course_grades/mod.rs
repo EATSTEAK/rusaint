@@ -92,9 +92,10 @@ impl<'a> CourseGradesApplication {
             .query_selector(&selector)
             .into_iter()
             .flatten()
-            .filter_map(|handle| {
-                let tag = handle.get(parser.dom().parser())?.as_tag()?;
-                let id = tag.attributes().id().and_then(Bytes::try_as_utf8_str)?;
+            .filter_map(|handle| handle.get(parser.dom().parser()))
+            .filter_map(|node| node.as_tag())
+            .filter_map(|tag| {
+                let id = tag.attributes().id().and_then(Bytes::try_as_utf8_str)?.to_string();
                 PopupWindow::new(id.into(), tag.clone()).close().ok()
             });
 
