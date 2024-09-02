@@ -1,10 +1,7 @@
 use std::{borrow::Cow, collections::HashMap};
 
 use crate::webdynpro::{
-    element::{
-        definition::{ElementDefinition, ElementNodeId},
-        ElementWrapper,
-    },
+    element::{definition::ElementDefinition, ElementWrapper},
     error::{BodyError, WebDynproError},
     event::{
         ucf_parameters::{UcfAction, UcfParametersBuilder, UcfResponseData},
@@ -95,15 +92,11 @@ impl<'body> ElementDefinition<'body> for CustomDef {
         Self { id: id.into() }
     }
 
-    fn from_element_ref(element_ref: scraper::ElementRef<'_>) -> Result<Self, WebDynproError> {
+    fn from_ref(element_ref: scraper::ElementRef<'_>) -> Result<Self, WebDynproError> {
         let id = element_ref.value().id().ok_or(BodyError::InvalidElement)?;
         Ok(Self {
             id: id.to_string().into(),
         })
-    }
-
-    fn with_node_id(id: String, _body_hash: u64, _node_id: ego_tree::NodeId) -> Self {
-        Self { id: id.into() }
     }
 
     fn id(&self) -> &str {
@@ -112,10 +105,6 @@ impl<'body> ElementDefinition<'body> for CustomDef {
 
     fn id_cow(&self) -> Cow<'static, str> {
         self.id.clone()
-    }
-
-    fn node_id(&self) -> Option<&ElementNodeId> {
-        None
     }
 }
 
@@ -133,7 +122,7 @@ impl<'a> Element<'a> for Custom {
         &()
     }
 
-    fn from_element(
+    fn from_ref(
         elem_def: &impl ElementDefinition<'a>,
         _element: scraper::ElementRef,
     ) -> Result<Self, WebDynproError> {
