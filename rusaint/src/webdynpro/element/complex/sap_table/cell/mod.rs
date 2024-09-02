@@ -1,5 +1,5 @@
 use crate::webdynpro::client::body::Body;
-use crate::webdynpro::element::definition::sub::SubElementDefinition;
+use crate::webdynpro::element::sub::definition::SubElementDefinition;
 use crate::webdynpro::element::sub::SubElement;
 use crate::webdynpro::element::{Element, ElementDefWrapper};
 use crate::webdynpro::error::WebDynproError;

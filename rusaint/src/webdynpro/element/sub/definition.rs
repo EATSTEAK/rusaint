@@ -3,7 +3,6 @@ use std::borrow::Cow;
 use scraper::Selector;
 
 use crate::webdynpro::{
-    client::body::Body,
     element::{definition::ElementDefinition, sub::SubElement, Element},
     error::{ElementError, WebDynproError},
 };
@@ -18,14 +17,6 @@ pub trait SubElementDefinition<'body>: Sized {
 
     /// 런타임에서 서브 엘리먼트의 정의를 만듭니다.
     fn new_dynamic(parent: <Self::Parent as Element<'body>>::Def, id: String) -> Self;
-
-    /// 빠른 엘리먼트 탐색을 위해 `ego_tree::NodeId`와 함께 서브 엘리먼트 정의를 생성합니다.
-    fn with_node_id(
-        id: String,
-        parent: <Self::Parent as Element<'body>>::Def,
-        body_hash: u64,
-        node_id: ego_tree::NodeId,
-    ) -> Self;
 
     /// [`scraper::ElementRef`]에서 엘리먼트 정의를 생성합니다.
     fn from_ref(

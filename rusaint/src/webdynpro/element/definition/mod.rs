@@ -51,6 +51,3 @@ pub trait ElementDefinition<'body>: Sized {
         )
     }
 }
-
-/// [`SubElement`](super::sub::SubElement)의 정의에 관련된 모듈
-pub mod sub;

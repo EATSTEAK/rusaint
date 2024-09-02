@@ -1,19 +1,39 @@
-use std::{collections::HashMap, hash::{DefaultHasher, Hash, Hasher}};
-
+use std::collections::HashMap;
 
 use regex_lite::Regex;
 use scraper::ElementRef;
 use selection::CheckBox;
-use serde_json::{Map, Value};
 
-use self::{action::{Button, Link}, complex::SapTable, definition::ElementDefinition, graphic::Image, layout::{grid_layout::cell::GridLayoutCell, tab_strip::item::TabStripItem, ButtonRow, Container, FlowLayout, Form, GridLayout, PopupWindow, ScrollContainer, Scrollbar, TabStrip, Tray}, selection::{list_box::{item::{ListBoxActionItem, ListBoxItem}, ListBoxMultiple, ListBoxPopup, ListBoxPopupFiltered, ListBoxPopupJson, ListBoxPopupJsonFiltered, ListBoxSingle}, ComboBox}, system::{ClientInspector, Custom, LoadingPlaceholder}, text::{Caption, InputField, Label, TextView}};
+use self::{
+    action::{Button, Link},
+    complex::SapTable,
+    definition::ElementDefinition,
+    graphic::Image,
+    layout::{
+        grid_layout::cell::GridLayoutCell, tab_strip::item::TabStripItem, ButtonRow, Container,
+        FlowLayout, Form, GridLayout, PopupWindow, ScrollContainer, Scrollbar, TabStrip, Tray,
+    },
+    selection::{
+        list_box::{
+            item::{ListBoxActionItem, ListBoxItem},
+            ListBoxMultiple, ListBoxPopup, ListBoxPopupFiltered, ListBoxPopupJson,
+            ListBoxPopupJsonFiltered, ListBoxSingle,
+        },
+        ComboBox,
+    },
+    system::{ClientInspector, Custom, LoadingPlaceholder},
+    text::{Caption, InputField, Label, TextView},
+};
 
-use super::{event::{ucf_parameters::UcfParameters, Event, EventBuilder}, error::{ElementError, BodyError, WebDynproError}, client::body::Body};
+use super::{
+    error::{BodyError, ElementError, WebDynproError},
+    event::{ucf_parameters::UcfParameters, Event, EventBuilder},
+};
 
-/// [`ElementParser`]의 모듈
-pub mod parser;
 /// 엘리먼트의 정의를 다루는 모듈
 pub mod definition;
+/// [`ElementParser`]의 모듈
+pub mod parser;
 
 /// 버튼 등 기본적인 액션에 이용되는 엘리먼트
 pub mod action;
@@ -92,7 +112,7 @@ macro_rules! define_element_base {
         }
 
         impl $def_name {
-            /// 엘리먼트 정의를 생성합니다. 이 함수를 직접 실행하기보다는 [`define_elements`](crate::webdynpro::element::define_elements)매크로 사용을 추천합니다.
+            /// 엘리먼트 정의를 생성합니다. 이 함수를 직접 실행하기보다는 [`define_elements`](define_elements)매크로 사용을 추천합니다.
             pub const fn new(id: &'static str) -> Self {
                 Self {
                     id: std::borrow::Cow::Borrowed(id)
@@ -102,7 +122,7 @@ macro_rules! define_element_base {
 
         impl<'body> $crate::webdynpro::element::definition::ElementDefinition<'body> for $def_name {
             type Element = $name<'body>;
-            
+
             fn new_dynamic(id: String) -> Self {
                 Self {
                     id: id.into()
@@ -148,7 +168,8 @@ macro_rules! define_element_base {
             fn lsdata(&self) -> &Self::ElementLSData {
                 self.lsdata
                     .get_or_init(|| {
-                        let Ok(lsdata_obj) = Self::lsdata_element(self.element_ref).or_else(|e| { eprintln!("{:?}", e); Err(e) }) else {
+                        let lsdata_attr = self.element_ref.value().attr("lsdata").unwrap_or("");
+                        let Ok(lsdata_obj) = $crate::webdynpro::element::utils::parse_lsdata(lsdata_attr).or_else(|e| { eprintln!("{:?}", e); Err(e) }) else {
                             return $lsdata::default();
                         };
                         serde_json::from_value::<Self::ElementLSData>(lsdata_obj).or_else(|e| { eprintln!("{:?}", e); Err(e) }).ok().unwrap_or($lsdata::default())
@@ -175,10 +196,10 @@ macro_rules! define_element_base {
             }
 
             fn children(&self) -> Vec<$crate::webdynpro::element::ElementWrapper<'a>> {
-                Self::children_element(self.element_ref().clone())
+                $crate::webdynpro::element::utils::children_element(self.element_ref().clone())
             }
         }
-        
+
         $crate::webdynpro::element::define_lsdata! {
             $(#[$lsdata_outer])*
             $lsdata {
@@ -219,7 +240,7 @@ macro_rules! define_element_interactable {
             $lsdata {
                 $(
                     $(#[$lsdata_inner])*
-                    $field: $ftype => $encoded, 
+                    $field: $ftype => $encoded,
                 )*
             }
         }
@@ -227,16 +248,19 @@ macro_rules! define_element_interactable {
         impl<'a> $crate::webdynpro::element::Interactable<'a> for $name<'a> {
             fn lsevents(&self) -> Option<&$crate::webdynpro::element::EventParameterMap> {
                 self.lsevents
-                    .get_or_init(|| Self::lsevents_element(self.element_ref).ok())
+                    .get_or_init(|| {
+                        let lsevents_attr = self.element_ref.value().attr("lsevents").unwrap_or("");
+                        $crate::webdynpro::element::utils::parse_lsevents(lsevents_attr).or_else(|e| { eprintln!("{:?}", e); Err(e) }).ok()
+                    })
                     .as_ref()
             }
         }
     }
 }
 
-pub(crate) use define_lsdata;
 pub(crate) use define_element_base;
 pub(crate) use define_element_interactable;
+pub(crate) use define_lsdata;
 
 macro_rules! register_elements {
     [$( $enum:ident : $type: ty ),+ $(,)?] => {
@@ -272,8 +296,8 @@ macro_rules! register_elements {
                 let id = value.id().ok_or(BodyError::NoSuchAttribute("id".to_owned()))?.to_owned();
                 #[allow(unreachable_patterns)]
                 match element.value().attr("ct") {
-                    $( Some(<$type>::CONTROL_ID) => Ok(<$type as $crate::webdynpro::element::Element<'a>>::Def::new_dynamic(id).from_element(element)?.wrap()), )*
-                    _ => Ok(<$crate::webdynpro::element::unknown::Unknown as $crate::webdynpro::element::Element<'a>>::Def::new_dynamic(id).from_element(element)?.wrap())
+                    $( Some(<$type>::CONTROL_ID) => Ok(<$type as $crate::webdynpro::element::Element<'a>>::Def::new_dynamic(id).from_ref(element)?.wrap()), )*
+                    _ => Ok(<$crate::webdynpro::element::unknown::Unknown as $crate::webdynpro::element::Element<'a>>::Def::new_dynamic(id).from_ref(element)?.wrap())
                 }
             }
 
@@ -289,7 +313,7 @@ macro_rules! register_elements {
         $(
             impl<'a> std::convert::TryFrom<ElementWrapper<'a>> for $type {
                 type Error = $crate::webdynpro::error::BodyError;
-    
+
                 fn try_from(wrapper: ElementWrapper<'a>) -> Result<$type, Self::Error> {
                     match wrapper {
                         ElementWrapper::$enum(res) => Ok(res),
@@ -335,7 +359,7 @@ macro_rules! register_elements {
                 }
             }
         }
-        
+
     };
 }
 
@@ -420,14 +444,18 @@ fn normalize_lsjson(lsjson: &str) -> String {
     let quote_to_double = Regex::new(r"([^\\])'([\s\S]*?)'").unwrap();
     let convert_escape_to_rust = Regex::new(r"\\x([a-f0-9]{2})").unwrap();
     let quoted = quote_key.replace_all(lsjson, r#"$1"$2":"#).into_owned();
-    let double_quoted = quote_to_double.replace_all(&quoted, r#"$1"$2""#).into_owned();
-    let ret = convert_escape_to_rust.replace_all(&double_quoted, r"\u00$1").into_owned();
+    let double_quoted = quote_to_double
+        .replace_all(&quoted, r#"$1"$2""#)
+        .into_owned();
+    let ret = convert_escape_to_rust
+        .replace_all(&double_quoted, r"\u00$1")
+        .into_owned();
     ret
 }
 
 /// 엘리먼트의 기본 동작
 pub trait Element<'a>: Sized {
-	/// WebDynpro 상에서 사용하는 엘리먼트의 Id
+    /// WebDynpro 상에서 사용하는 엘리먼트의 Id
     const CONTROL_ID: &'static str;
     /// WebDynpro 상에서 사용하는 엘리먼트의 이름
     const ELEMENT_NAME: &'static str;
@@ -436,102 +464,85 @@ pub trait Element<'a>: Sized {
 
     /// 엘리먼트의 정의
     type Def: ElementDefinition<'a>;
-	
-    /// 엘리먼트의 JSON 객체 형태의 LSData를 반환합니다.
-    fn lsdata_element(element: scraper::ElementRef) -> Result<Value, WebDynproError> {
-        let raw_data = element.value().attr("lsdata").ok_or(ElementError::InvalidLSData(element.value().id().unwrap().to_string()))?;
-        let normalized = normalize_lsjson(raw_data);
-        return Ok(serde_json::from_str(&normalized).or(Err(ElementError::InvalidLSData(element.value().id().unwrap().to_string())))?);
-    }
 
-	/// 엘리먼트 정의와 [`scraper::ElementRef`]에서 엘리먼트를 가져옵니다.
-    fn from_ref(elem_def: &impl ElementDefinition<'a>, element: scraper::ElementRef<'a>) -> Result<Self, WebDynproError>;
+    /// 엘리먼트 정의와 [`scraper::ElementRef`]에서 엘리먼트를 가져옵니다.
+    fn from_ref(
+        elem_def: &impl ElementDefinition<'a>,
+        element: scraper::ElementRef<'a>,
+    ) -> Result<Self, WebDynproError>;
 
-	/// 엘리먼트의 자식 엘리먼트를 가져옵니다.
-    fn children_element(root: scraper::ElementRef<'a>) -> Vec<ElementWrapper<'a>> {
-        let mut next_refs = vec![root];
-        let mut cts: Vec<ElementRef<'_>> = vec![];
-        while let Some(elem) = next_refs.pop() {
-            for child in elem.children() {
-                if let scraper::Node::Element(child_elem) = child.value() {
-                    let child_elem_ref = scraper::ElementRef::wrap(child).unwrap();
-                    if child_elem.attr("ct").is_some() {
-                        cts.push(child_elem_ref);
-                    } else {
-                        next_refs.push(child_elem_ref);
-                    }
-
-                }
-            }
-        }
-        cts.into_iter().rev().filter_map(|eref| ElementWrapper::dyn_element(eref).ok()).collect()
-    }
-
-	/// 엘리먼트의 자식 엘리먼트를 가져옵니다.
+    /// 엘리먼트의 자식 엘리먼트를 가져옵니다.
     fn children(&self) -> Vec<ElementWrapper<'a>>;
 
-/// 엘리먼트의 LSData를 가져옵니다.
+    /// 엘리먼트의 LSData를 가져옵니다.
     fn lsdata(&self) -> &Self::ElementLSData;
 
-	/// 엘리먼트의 Id를 가져옵니다.
+    /// 엘리먼트의 Id를 가져옵니다.
     fn id(&self) -> &str;
-	
+
     /// 엘리먼트의 [`scraper::ElementRef`]를 가져옵니다.
     fn element_ref(&self) -> &ElementRef<'a>;
 
-	/// 엘리먼트를 [`ElementWrapper`]로 감쌉니다.
+    /// 엘리먼트를 [`ElementWrapper`]로 감쌉니다.
     fn wrap(self) -> ElementWrapper<'a>;
 }
 
 /// 이벤트를 통해 상호작용 할 수 있는 [`Element`]의 기본 동작
 pub trait Interactable<'a>: Element<'a> {
-
-	/// 엘리먼트가 이벤트를 발생시킬 수 있는가와 관계 없이 이벤트를 발생시킵니다.
+    /// 엘리먼트가 이벤트를 발생시킬 수 있는가와 관계 없이 이벤트를 발생시킵니다.
     /// > | **주의** | 엘리먼트가 이벤트를 발생시킬 수 있는지 여부를 확인하지 않으므로 예상치 않은 오류가 발생할 수 있습니다.
-    unsafe fn fire_event_unchecked(event: String, parameters: HashMap<String, String>, ucf_params: UcfParameters, custom_params: HashMap<String, String>) -> Event {
+    unsafe fn fire_event_unchecked(
+        event: String,
+        parameters: HashMap<String, String>,
+        ucf_params: UcfParameters,
+        custom_params: HashMap<String, String>,
+    ) -> Event {
         EventBuilder::default()
-        .control(Self::ELEMENT_NAME.to_owned())
-        .event(event)
-        .parameters(parameters)
-        .ucf_parameters(ucf_params)
-        .custom_parameters(custom_params)
-        .build()
-        .unwrap()
+            .control(Self::ELEMENT_NAME.to_owned())
+            .event(event)
+            .parameters(parameters)
+            .ucf_parameters(ucf_params)
+            .custom_parameters(custom_params)
+            .build()
+            .unwrap()
     }
 
-	/// 엘리먼트가 발생시킬 수 있는 이벤트와 파라메터를 가져옵니다.
-    fn lsevents_element(element: scraper::ElementRef) -> Result<EventParameterMap, WebDynproError> {
-        let raw_data = element.value().attr("lsevents").ok_or(BodyError::Invalid("Cannot find lsevents from element".to_string()))?;
-        let normalized = normalize_lsjson(raw_data);
-        let json: Map<String, Value> = serde_json::from_str::<Map<String, Value>>(&normalized).or(Err(BodyError::Invalid("Cannot deserialize lsevents field".to_string())))?.to_owned();
-        Ok(json.into_iter().flat_map(|(key, value)| -> Result<(String, (UcfParameters, HashMap<String, String>)), BodyError> {
-                    let mut parameters = value.as_array().ok_or(BodyError::Invalid("Cannot deserialize lsevents field".to_string()))?.to_owned().into_iter();
-                    let raw_ucf = parameters.next().ok_or(BodyError::Invalid("Cannot deserialize lsevents field".to_string()))?;
-                    let ucf: UcfParameters = serde_json::from_value(raw_ucf).or(Err(BodyError::Invalid("Cannot deserialize lsevents field".to_string())))?;
-                    let mut custom = parameters.next().ok_or(BodyError::Invalid("Cannot deserialize lsevents field".to_string()))?.as_object().ok_or(BodyError::Invalid("Cannot deserialize lsevents field".to_string()))?.to_owned();
-                    let custom_map = custom.iter_mut().map(|(key, value)| { 
-                        (key.to_owned(), value.to_string())
-                    }).collect::<HashMap<String, String>>();
-                    Ok((key, (ucf, custom_map)))
-                }).collect::<EventParameterMap>())
-    }
-
-	/// 엘리먼트의 주어진 이벤트에 대한 파라메터들을 가져옵니다.
-    fn event_parameter(&self, event: &str) -> Result<&(UcfParameters, HashMap<String, String>), ElementError> {
+    /// 엘리먼트의 주어진 이벤트에 대한 파라메터들을 가져옵니다.
+    fn event_parameter(
+        &self,
+        event: &str,
+    ) -> Result<&(UcfParameters, HashMap<String, String>), ElementError> {
         if let Some(lsevents) = self.lsevents() {
-            lsevents.get(event).ok_or(ElementError::NoSuchEvent { element: self.id().to_string(), event: event.to_string() })
+            lsevents.get(event).ok_or(ElementError::NoSuchEvent {
+                element: self.id().to_string(),
+                event: event.to_string(),
+            })
         } else {
-            Err(ElementError::NoSuchEvent { element: self.id().to_string(), event: event.to_string() })
+            Err(ElementError::NoSuchEvent {
+                element: self.id().to_string(),
+                event: event.to_string(),
+            })
         }
     }
 
-	/// 엘리먼트의 주어진 이벤트를 발생시킵니다.
-    fn fire_event(&self, event: String, parameters: HashMap<String, String>) -> Result<Event, WebDynproError> {
+    /// 엘리먼트의 주어진 이벤트를 발생시킵니다.
+    fn fire_event(
+        &self,
+        event: String,
+        parameters: HashMap<String, String>,
+    ) -> Result<Event, WebDynproError> {
         let (ucf_params, custom_params) = self.event_parameter(&event)?;
-        Ok(unsafe { Self::fire_event_unchecked(event, parameters, ucf_params.to_owned(), custom_params.to_owned()) })
+        Ok(unsafe {
+            Self::fire_event_unchecked(
+                event,
+                parameters,
+                ucf_params.to_owned(),
+                custom_params.to_owned(),
+            )
+        })
     }
 
-	/// 주어진 엘리먼트의 이벤트 데이터를 반환합니다.
+    /// 주어진 엘리먼트의 이벤트 데이터를 반환합니다.
     fn lsevents(&self) -> Option<&EventParameterMap>;
 }
 
@@ -542,10 +553,14 @@ impl<'a> ElementWrapper<'a> {
             ElementWrapper::TextView(tv) => Ok(tv.text().to_string()),
             ElementWrapper::Caption(cp) => Ok(cp.text().to_string()),
             ElementWrapper::CheckBox(c) => Ok(format!("{}", c.checked())),
-            _ => Err(WebDynproError::Element(ElementError::InvalidContent { element: self.id().to_string(), content: "This element is cannot be textised.".to_string() }))
+            _ => Err(WebDynproError::Element(ElementError::InvalidContent {
+                element: self.id().to_string(),
+                content: "This element is cannot be textised.".to_string(),
+            })),
         }
     }
 }
 
 /// [`SubElement`](crate::webdynpro::element::sub::SubElement) 트레이트 모듈
 pub mod sub;
+mod utils;

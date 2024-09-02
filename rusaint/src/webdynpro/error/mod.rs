@@ -119,7 +119,7 @@ pub enum ElementError {
     #[error("Invalid content {content} in element: {element}")]
     InvalidContent { element: String, content: String },
     /// 엘리먼트의 LSData가 올바른 형태가 아님
-    #[error("Element {0} has invalid lsdata attribute")]
+    #[error("Cannot parse lsdata: {0}")]
     InvalidLSData(String),
     /// LSData 오브젝트를 파싱할 수 없음
     #[error("Failed parse lsdata json-like object")]

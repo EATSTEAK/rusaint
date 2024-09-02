@@ -31,7 +31,7 @@ macro_rules! define_subelement {
           }
       }
 
-      impl<'body> $crate::webdynpro::element::definition::sub::SubElementDefinition<'body> for $def_name {
+      impl<'body> $crate::webdynpro::element::definition::definition::SubElementDefinition<'body> for $def_name {
 
           type Parent = $parent<'body>;
 
@@ -90,7 +90,8 @@ macro_rules! define_subelement {
           fn lsdata(&self) -> &Self::SubElementLSData {
               self.lsdata
                   .get_or_init(|| {
-                      let Ok(lsdata_obj) = Self::lsdata_element(self.element_ref) else {
+                      let lsdata_attr = self.element_ref.value().attr("lsdata").unwrap_or("");
+                      let Ok(lsdata_obj) = $crate::webdynpro::element::utils::parse_lsdata(lsdata_attr) else {
                           return $lsdata::default();
                       };
                       serde_json::from_value::<Self::SubElementLSData>(lsdata_obj).ok().unwrap_or($lsdata::default())
@@ -98,10 +99,10 @@ macro_rules! define_subelement {
           }
 
           fn from_ref(
-              element_def: &impl $crate::webdynpro::element::definition::sub::SubElementDefinition<'a>,
+              element_def: &impl $crate::webdynpro::element::definition::definition::SubElementDefinition<'a>,
               element: scraper::ElementRef<'a>,
           ) -> Result<Self, $crate::webdynpro::error::WebDynproError> {
-              Ok(Self::new($crate::webdynpro::element::definition::sub::SubElementDefinition::id_cow(element_def), element))
+              Ok(Self::new($crate::webdynpro::element::definition::definition::SubElementDefinition::id_cow(element_def), element))
           }
 
           fn id(&self) -> &str {
@@ -125,16 +126,13 @@ macro_rules! define_subelement {
   };
 }
 
+use crate::webdynpro::error::WebDynproError;
 pub(crate) use define_subelement;
+use definition::SubElementDefinition;
 use scraper::ElementRef;
-use serde_json::Value;
 
-use crate::webdynpro::{
-    client::body::Body,
-    error::{ElementError, WebDynproError},
-};
-
-use super::{definition::sub::SubElementDefinition, normalize_lsjson};
+/// [`SubElement`](super::sub::SubElement)의 정의에 관련된 모듈
+pub mod definition;
 
 /// 서브 엘리먼트의 기능
 pub trait SubElement<'a>: Sized {
@@ -146,22 +144,6 @@ pub trait SubElement<'a>: Sized {
     type SubElementLSData;
     /// 서브 엘리먼트의 정의
     type Def: SubElementDefinition<'a>;
-
-    /// 서브 엘리먼트의 LSData를 JSON 객체 형태로 반환합니다.
-    fn lsdata_element(element: scraper::ElementRef) -> Result<Value, WebDynproError> {
-        let raw_data = element
-            .value()
-            .attr("lsdata")
-            .ok_or(ElementError::InvalidLSData(
-                element.value().id().unwrap().to_string(),
-            ))?;
-        let normalized = normalize_lsjson(raw_data);
-        return Ok(
-            serde_json::from_str(&normalized).or(Err(ElementError::InvalidLSData(
-                element.value().id().unwrap().to_string(),
-            )))?,
-        );
-    }
 
     /// 서브 엘리먼트 정의와[] `scraper::ElementRef`]로부터 서브 엘리먼트를 가져옵니다.
     fn from_ref(
