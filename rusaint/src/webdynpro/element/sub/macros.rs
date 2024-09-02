@@ -40,8 +40,7 @@ macro_rules! define_subelement {
           fn new_dynamic(parent: <Self::Parent as $crate::webdynpro::element::Element<'body>>::Def, id: String) -> Self {
               Self {
                   id: id.into(),
-                  parent,
-                  node_id: None
+                  parent
               }
           }
 
@@ -49,8 +48,7 @@ macro_rules! define_subelement {
               let id = element_ref.value().id().ok_or($crate::webdynpro::error::BodyError::InvalidElement)?;
               Ok(Self {
                   id: id.to_string().into(),
-                  parent,
-                  node_id: None
+                  parent
               })
           }
 
