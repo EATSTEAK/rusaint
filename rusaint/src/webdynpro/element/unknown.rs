@@ -4,10 +4,7 @@ use serde_json::Value;
 
 use crate::webdynpro::error::{BodyError, WebDynproError};
 
-use super::{
-    definition::{ElementDefinition, ElementNodeId},
-    Element, EventParameterMap, Interactable,
-};
+use super::{definition::ElementDefinition, Element, EventParameterMap, Interactable};
 
 // Type for unimplemented elements
 /// rusaint에 구현되지 않은 엘리먼트를 위한 가상 엘리먼트
@@ -24,7 +21,6 @@ pub struct Unknown<'a> {
 #[derive(Clone, Debug)]
 pub struct UnknownDef {
     id: Cow<'static, str>,
-    node_id: Option<ElementNodeId>,
 }
 
 impl UnknownDef {
@@ -32,7 +28,6 @@ impl UnknownDef {
     pub const fn new(id: &'static str) -> Self {
         Self {
             id: Cow::Borrowed(id),
-            node_id: None,
         }
     }
 }
@@ -41,9 +36,7 @@ impl<'body> ElementDefinition<'body> for UnknownDef {
     type Element = Unknown<'body>;
 
     fn new_dynamic(id: String) -> Self {
-        Self {
-            id: id.into(),
-        }
+        Self { id: id.into() }
     }
 
     fn from_ref(element_ref: scraper::ElementRef<'_>) -> Result<Self, WebDynproError> {
@@ -60,7 +53,6 @@ impl<'body> ElementDefinition<'body> for UnknownDef {
     fn id_cow(&self) -> Cow<'static, str> {
         self.id.clone()
     }
-
 }
 
 impl<'a> Element<'a> for Unknown<'a> {
