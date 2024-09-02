@@ -86,16 +86,14 @@ macro_rules! define_element_base {
         $(#[$def_outer])*
         #[derive(Clone, Debug)]
         pub struct $def_name {
-            id: std::borrow::Cow<'static, str>,
-            node_id: Option<crate::webdynpro::element::definition::ElementNodeId>
+            id: std::borrow::Cow<'static, str>
         }
 
         impl $def_name {
             /// 엘리먼트 정의를 생성합니다. 이 함수를 직접 실행하기보다는 [`define_elements`](crate::webdynpro::element::define_elements)매크로 사용을 추천합니다.
             pub const fn new(id: &'static str) -> Self {
                 Self {
-                    id: std::borrow::Cow::Borrowed(id),
-                    node_id: None
+                    id: std::borrow::Cow::Borrowed(id)
                 }
             }
         }
@@ -105,24 +103,15 @@ macro_rules! define_element_base {
             
             fn new_dynamic(id: String) -> Self {
                 Self {
-                    id: id.into(),
-                    node_id: None
+                    id: id.into()
                 }
             }
 
-            fn from_element_ref(element_ref: scraper::ElementRef<'_>) -> Result<Self, $crate::webdynpro::error::WebDynproError> {
+            fn from_ref(element_ref: scraper::ElementRef<'_>) -> Result<Self, $crate::webdynpro::error::WebDynproError> {
                 let id = element_ref.value().id().ok_or($crate::webdynpro::error::BodyError::InvalidElement)?;
                 Ok(Self {
-                    id: id.to_string().into(),
-                    node_id: None
+                    id: id.to_string().into()
                 })
-            }
-
-            fn with_node_id(id: String, body_hash: u64, node_id: ego_tree::NodeId) -> Self {
-                Self {
-                    id: id.into(),
-                    node_id: Some($crate::webdynpro::element::definition::ElementNodeId::new(body_hash, node_id))
-                }
             }
 
             fn id(&self) -> &str {
@@ -131,10 +120,6 @@ macro_rules! define_element_base {
 
             fn id_cow(&self) -> Cow<'static, str> {
                 self.id.clone()
-            }
-
-            fn node_id(&self) -> Option<&$crate::webdynpro::element::definition::ElementNodeId> {
-                (&self.node_id).as_ref()
             }
         }
 
@@ -168,7 +153,7 @@ macro_rules! define_element_base {
                     })
             }
 
-            fn from_element(
+            fn from_ref(
                 element_def: &impl $crate::webdynpro::element::definition::ElementDefinition<'a>,
                 element: scraper::ElementRef<'a>,
             ) -> Result<Self, $crate::webdynpro::error::WebDynproError> {
@@ -280,7 +265,7 @@ macro_rules! register_elements {
 
         impl<'a> ElementWrapper<'a> {
         	/// 분류를 알 수 없는 엘리먼트의 `scraper::ElementRef`로 [`ElementWrapper`]를 반환합니다.
-            pub fn dyn_element(element: scraper::ElementRef<'a>) -> Result<ElementWrapper, WebDynproError> {
+            pub fn from_ref(element: scraper::ElementRef<'a>) -> Result<ElementWrapper, WebDynproError> {
                 let value = element.value();
                 let id = value.id().ok_or(BodyError::NoSuchAttribute("id".to_owned()))?.to_owned();
                 #[allow(unreachable_patterns)]
@@ -322,7 +307,7 @@ macro_rules! register_elements {
 
         impl<'a> ElementDefWrapper<'a> {
         	/// 분류를 알 수 없는 엘리먼트의 `scraper::ElementRef`로 [`ElementDefWrapper`]를 반환합니다.
-            pub fn dyn_elem_def(element: scraper::ElementRef<'a>) -> Result<ElementDefWrapper<'a>, WebDynproError> {
+            pub fn from_ref(element: scraper::ElementRef<'a>) -> Result<ElementDefWrapper<'a>, WebDynproError> {
                 let value = element.value();
                 let id = value.id().ok_or(BodyError::NoSuchAttribute("id".to_owned()))?.to_owned();
                 #[allow(unreachable_patterns)]
@@ -346,17 +331,6 @@ macro_rules! register_elements {
                     $( ElementDefWrapper::$enum(element_def) => <$type as $crate::webdynpro::element::Element<'a>>::Def::selector(element_def), )*
                     ElementDefWrapper::Unknown(element_def) => <$crate::webdynpro::element::unknown::Unknown<'a> as $crate::webdynpro::element::Element<'a>>::Def::selector(element_def),
                 }
-            }
-
-            /// [`Body`](crate::webdynpro::client::body::Body)에서 [`ElementWrapper`]를 반환합니다.
-            pub fn from_body(&self, body: &'a $crate::webdynpro::client::body::Body) -> Result<$crate::webdynpro::element::ElementWrapper<'a>, WebDynproError> {
-                let selector = &self.selector()?;
-                let element = body
-                    .document()
-                    .select(selector)
-                    .next()
-                    .ok_or(ElementError::InvalidId(self.id().to_owned()))?;
-                $crate::webdynpro::element::ElementWrapper::dyn_element(element)
             }
         }
         
@@ -468,29 +442,8 @@ pub trait Element<'a>: Sized {
         return Ok(serde_json::from_str(&normalized).or(Err(ElementError::InvalidLSData(element.value().id().unwrap().to_string())))?);
     }
 
-	/// 엘리먼트 정의와 [`Body`]에서 엘리먼트를 가져옵니다.
-    fn from_body(elem_def: &impl ElementDefinition<'a>, body: &'a Body) -> Result<Self, WebDynproError> {
-        if let Some(node_id) = elem_def.node_id() {
-            let mut hasher = DefaultHasher::new();
-            body.hash(&mut hasher);
-            let body_hash = hasher.finish();
-            if body_hash == node_id.body_hash() {
-                if let Some(elem) = body.document().tree.get(node_id.node_id()).and_then(|node| ElementRef::wrap(node)) {
-                    return Self::from_element(elem_def, elem)
-                }
-            }
-        }
-        let selector = &elem_def.selector()?;
-        let element = body
-            .document()
-            .select(selector)
-            .next()
-            .ok_or(ElementError::InvalidId(elem_def.id().to_owned()))?;
-        Self::from_element(elem_def, element)
-    }
-
 	/// 엘리먼트 정의와 [`scraper::ElementRef`]에서 엘리먼트를 가져옵니다.
-    fn from_element(elem_def: &impl ElementDefinition<'a>, element: scraper::ElementRef<'a>) -> Result<Self, WebDynproError>;
+    fn from_ref(elem_def: &impl ElementDefinition<'a>, element: scraper::ElementRef<'a>) -> Result<Self, WebDynproError>;
 
 	/// 엘리먼트의 자식 엘리먼트를 가져옵니다.
     fn children_element(root: scraper::ElementRef<'a>) -> Vec<ElementWrapper<'a>> {

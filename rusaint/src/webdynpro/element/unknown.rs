@@ -43,23 +43,14 @@ impl<'body> ElementDefinition<'body> for UnknownDef {
     fn new_dynamic(id: String) -> Self {
         Self {
             id: id.into(),
-            node_id: None,
         }
     }
 
-    fn from_element_ref(element_ref: scraper::ElementRef<'_>) -> Result<Self, WebDynproError> {
+    fn from_ref(element_ref: scraper::ElementRef<'_>) -> Result<Self, WebDynproError> {
         let id = element_ref.value().id().ok_or(BodyError::InvalidElement)?;
         Ok(Self {
             id: id.to_string().into(),
-            node_id: None,
         })
-    }
-
-    fn with_node_id(id: String, body_hash: u64, node_id: ego_tree::NodeId) -> Self {
-        Self {
-            id: id.into(),
-            node_id: Some(ElementNodeId::new(body_hash, node_id)),
-        }
     }
 
     fn id(&self) -> &str {
@@ -70,9 +61,6 @@ impl<'body> ElementDefinition<'body> for UnknownDef {
         self.id.clone()
     }
 
-    fn node_id(&self) -> Option<&ElementNodeId> {
-        (&self.node_id).as_ref()
-    }
 }
 
 impl<'a> Element<'a> for Unknown<'a> {
@@ -90,7 +78,7 @@ impl<'a> Element<'a> for Unknown<'a> {
             .get_or_init(|| Self::lsdata_element(self.element_ref).unwrap_or(Value::default()))
     }
 
-    fn from_element(
+    fn from_ref(
         elem_def: &impl ElementDefinition<'a>,
         element: scraper::ElementRef<'a>,
     ) -> Result<Self, WebDynproError> {

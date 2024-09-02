@@ -18,8 +18,7 @@ macro_rules! define_subelement {
       #[derive(Clone, Debug)]
       pub struct $def_name {
           id: std::borrow::Cow<'static, str>,
-          parent: $parent_def,
-          node_id: Option<crate::webdynpro::element::definition::ElementNodeId>
+          parent: $parent_def
       }
 
       impl $def_name {
@@ -27,8 +26,7 @@ macro_rules! define_subelement {
           pub const fn new(parent: $parent_def, id: &'static str) -> Self {
               Self {
                   id: std::borrow::Cow::Borrowed(id),
-                  parent,
-                  node_id: None
+                  parent
               }
           }
       }
@@ -47,7 +45,7 @@ macro_rules! define_subelement {
               }
           }
 
-          fn from_element_ref(parent: <Self::Parent as $crate::webdynpro::element::Element<'body>>::Def, element_ref: scraper::ElementRef<'_>) -> Result<Self, $crate::webdynpro::error::WebDynproError> {
+          fn from_ref(parent: <Self::Parent as $crate::webdynpro::element::Element<'body>>::Def, element_ref: scraper::ElementRef<'_>) -> Result<Self, $crate::webdynpro::error::WebDynproError> {
               let id = element_ref.value().id().ok_or($crate::webdynpro::error::BodyError::InvalidElement)?;
               Ok(Self {
                   id: id.to_string().into(),
@@ -56,24 +54,12 @@ macro_rules! define_subelement {
               })
           }
 
-          fn with_node_id(id: String, parent: <Self::Parent as $crate::webdynpro::element::Element<'body>>::Def, body_hash: u64, node_id: ego_tree::NodeId) -> Self {
-              Self {
-                  id: id.into(),
-                  parent,
-                  node_id: Some($crate::webdynpro::element::definition::ElementNodeId::new(body_hash, node_id))
-              }
-          }
-
           fn id(&self) -> &str {
               &self.id
           }
 
           fn id_cow(&self) -> Cow<'static, str> {
               self.id.clone()
-          }
-
-          fn node_id(&self) -> Option<&$crate::webdynpro::element::definition::ElementNodeId> {
-              (&self.node_id).as_ref()
           }
 
           fn parent(&self) -> &<Self::Parent as $crate::webdynpro::element::Element<'body>>::Def {
@@ -111,7 +97,7 @@ macro_rules! define_subelement {
                   })
           }
 
-          fn from_subelement(
+          fn from_ref(
               element_def: &impl $crate::webdynpro::element::definition::sub::SubElementDefinition<'a>,
               element: scraper::ElementRef<'a>,
           ) -> Result<Self, $crate::webdynpro::error::WebDynproError> {
@@ -177,22 +163,8 @@ pub trait SubElement<'a>: Sized {
         );
     }
 
-    /// 서브 엘리먼트의 정의와 [`Body`]로부터 서브 엘리먼트를 가져옵니다.
-    fn from_body(
-        elem_def: &impl SubElementDefinition<'a>,
-        body: &'a Body,
-    ) -> Result<Self, WebDynproError> {
-        let selector = &elem_def.selector()?;
-        let element = body
-            .document()
-            .select(selector)
-            .next()
-            .ok_or(ElementError::InvalidId(elem_def.id().to_owned()))?;
-        Self::from_subelement(elem_def, element)
-    }
-
     /// 서브 엘리먼트 정의와[] `scraper::ElementRef`]로부터 서브 엘리먼트를 가져옵니다.
-    fn from_subelement(
+    fn from_ref(
         elem_def: &impl SubElementDefinition<'a>,
         element: scraper::ElementRef<'a>,
     ) -> Result<Self, WebDynproError>;
