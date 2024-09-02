@@ -2,7 +2,10 @@ use std::{borrow::Cow, cell::OnceCell};
 
 use serde::Deserialize;
 
-use crate::webdynpro::{element::{ElementDefWrapper, EventParameterMap}, error::WebDynproError};
+use crate::webdynpro::{
+    element::{ElementDefWrapper, EventParameterMap},
+    error::WebDynproError,
+};
 
 use self::item::{ListBoxItemDefWrapper, ListBoxItemInfo};
 
@@ -16,16 +19,14 @@ macro_rules! def_listbox_subset {
         $(#[$def_attr])*
         #[derive(Clone, Debug)]
         pub struct $def_name {
-            id: std::borrow::Cow<'static, str>,
-            node_id: Option<crate::webdynpro::element::definition::ElementNodeId>
+            id: std::borrow::Cow<'static, str>
         }
 
         impl $def_name {
             /// 엘리먼트의 정의를 생성합니다.
             pub const fn new(id: &'static str) -> Self {
                 Self {
-                    id: std::borrow::Cow::Borrowed(id),
-                    node_id: None
+                    id: std::borrow::Cow::Borrowed(id)
                 }
             }
         }
@@ -35,24 +36,15 @@ macro_rules! def_listbox_subset {
 
             fn new_dynamic(id: String) -> Self {
                 Self {
-                    id: id.into(),
-                    node_id: None
+                    id: id.into()
                 }
             }
 
-            fn from_element_ref(element_ref: scraper::ElementRef<'_>) -> Result<Self, $crate::webdynpro::error::WebDynproError> {
+            fn from_ref(element_ref: scraper::ElementRef<'_>) -> Result<Self, $crate::webdynpro::error::WebDynproError> {
                 let id = element_ref.value().id().ok_or($crate::webdynpro::error::BodyError::InvalidElement)?;
                 Ok(Self {
-                    id: id.to_string().into(),
-                    node_id: None
+                    id: id.to_string().into()
                 })
-            }
-
-            fn with_node_id(id: String, body_hash: u64, node_id: ego_tree::NodeId) -> Self {
-                Self {
-                    id: id.into(),
-                    node_id: Some($crate::webdynpro::element::definition::ElementNodeId::new(body_hash, node_id))
-                }
             }
 
             fn id(&self) -> &str {
@@ -61,10 +53,6 @@ macro_rules! def_listbox_subset {
 
             fn id_cow(&self) -> Cow<'static, str> {
                 self.id.clone()
-            }
-
-            fn node_id(&self) -> Option<&$crate::webdynpro::element::definition::ElementNodeId> {
-                (&self.node_id).as_ref()
             }
         }
 
@@ -90,14 +78,15 @@ macro_rules! def_listbox_subset {
             fn lsdata(&self) -> &Self::ElementLSData {
                 self.list_box().lsdata
                     .get_or_init(|| {
-                        let Ok(lsdata_obj) = Self::lsdata_element(self.list_box().element_ref) else {
+                        let lsdata_attr = self.element_ref().value().attr("lsdata").unwrap_or("");
+                        let Ok(lsdata_obj) = $crate::webdynpro::element::utils::parse_lsdata(lsdata_attr).or_else(|e| { eprintln!("{:?}", e); Err(e) }) else {
                             return ListBoxLSData::default();
                         };
                         serde_json::from_value::<Self::ElementLSData>(lsdata_obj).unwrap_or(ListBoxLSData::default())
                     })
             }
 
-            fn from_element(elem_def: &impl $crate::webdynpro::element::definition::ElementDefinition<'a>, element: scraper::ElementRef<'a>) -> Result<Self, $crate::webdynpro::error::WebDynproError> {
+            fn from_ref(elem_def: &impl $crate::webdynpro::element::definition::ElementDefinition<'a>, element: scraper::ElementRef<'a>) -> Result<Self, $crate::webdynpro::error::WebDynproError> {
                 Ok(Self::new($crate::webdynpro::element::definition::ElementDefinition::id_cow(elem_def), element))
             }
 
@@ -114,14 +103,17 @@ macro_rules! def_listbox_subset {
             }
 
             fn children(&self) -> Vec<$crate::webdynpro::element::ElementWrapper<'a>> {
-                Self::children_element(self.element_ref().clone())
+                $crate::webdynpro::element::utils::children_element(self.element_ref().clone())
             }
         }
 
         impl<'a> $crate::webdynpro::element::Interactable<'a> for $name<'a> {
             fn lsevents(&self) -> Option<&EventParameterMap> {
                 self.list_box().lsevents
-                    .get_or_init(|| Self::lsevents_element(self.list_box().element_ref).ok())
+                    .get_or_init(|| {
+                        let lsevents_attr = self.list_box().element_ref.value().attr("lsevents").unwrap_or("");
+                        $crate::webdynpro::element::utils::parse_lsevents(lsevents_attr).or_else(|e| { eprintln!("{:?}", e); Err(e) }).ok()
+                    })
                     .as_ref()
             }
         }
@@ -150,17 +142,6 @@ macro_rules! def_listbox_subset {
             match element_def {
                 $($crate::webdynpro::element::ElementDefWrapper::$name(elem) => Some(ListBoxDefWrapper::$name(elem)),)+
                 _ => None
-            }
-        }
-
-        /// [`ListBoxWrapper`]를 가져옵니다.
-        pub fn from_body<'body>(&self, body: &'body $crate::webdynpro::client::body::Body) -> Result<ListBoxWrapper<'body>, $crate::webdynpro::error::WebDynproError> {
-            match self {
-                $(ListBoxDefWrapper::$name(def) => {
-                    let raw_element = $crate::webdynpro::element::definition::ElementDefinition::from_body(def, body)?;
-                    let elem_wrapper = $crate::webdynpro::element::Element::wrap(raw_element);
-                    Ok(ListBoxWrapper::from_elements(elem_wrapper).ok_or($crate::webdynpro::error::BodyError::InvalidElement)?)
-                },)+
             }
         }
     }
@@ -320,7 +301,7 @@ impl<'a> ListBox<'a> {
                 self.element_ref
                     .select(&items_selector)
                     .filter_map(|elem_ref| {
-                        let element = ElementDefWrapper::dyn_elem_def(elem_ref).ok()?;
+                        let element = ElementDefWrapper::from_ref(elem_ref).ok()?;
                         match element {
                             ElementDefWrapper::ListBoxItem(item) => {
                                 Some(ListBoxItemDefWrapper::Item(item))
@@ -339,11 +320,10 @@ impl<'a> ListBox<'a> {
     /// [`ListBoxItemInfo`]의 Iterator를 반환합니다.
     pub fn item_infos(&self) -> Result<impl Iterator<Item = ListBoxItemInfo>, WebDynproError> {
         let items_selector = scraper::Selector::parse("[ct]").unwrap();
-        let vec = self.element_ref
+        let vec = self
+            .element_ref
             .select(&items_selector)
-            .map(|elem_ref| {
-                ListBoxItemInfo::from_element_ref(elem_ref)
-            })
+            .map(|elem_ref| ListBoxItemInfo::from_element_ref(elem_ref))
             .collect::<Result<Vec<ListBoxItemInfo>, WebDynproError>>()?;
         Ok(vec.into_iter())
     }
