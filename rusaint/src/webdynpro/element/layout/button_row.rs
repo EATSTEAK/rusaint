@@ -41,7 +41,7 @@ impl<'a> ButtonRow<'a> {
                 self.element_ref
                     .select(button_selector)
                     .filter_map(|elem| {
-                        let def = <Button<'a> as Element<'a>>::Def::from_element_ref(elem);
+                        let def = <Button<'a> as Element<'a>>::Def::from_ref(elem);
                         match def {
                             Ok(button_def) => Some(button_def),
                             _ => None,
