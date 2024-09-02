@@ -31,7 +31,7 @@ macro_rules! define_subelement {
           }
       }
 
-      impl<'body> $crate::webdynpro::element::definition::definition::SubElementDefinition<'body> for $def_name {
+      impl<'body> $crate::webdynpro::element::sub::definition::SubElementDefinition<'body> for $def_name {
 
           type Parent = $parent<'body>;
 
@@ -99,10 +99,10 @@ macro_rules! define_subelement {
           }
 
           fn from_ref(
-              element_def: &impl $crate::webdynpro::element::definition::definition::SubElementDefinition<'a>,
+              element_def: &impl $crate::webdynpro::element::sub::definition::SubElementDefinition<'a>,
               element: scraper::ElementRef<'a>,
           ) -> Result<Self, $crate::webdynpro::error::WebDynproError> {
-              Ok(Self::new($crate::webdynpro::element::definition::definition::SubElementDefinition::id_cow(element_def), element))
+              Ok(Self::new($crate::webdynpro::element::sub::definition::SubElementDefinition::id_cow(element_def), element))
           }
 
           fn id(&self) -> &str {
