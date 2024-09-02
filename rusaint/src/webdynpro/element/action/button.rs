@@ -2,7 +2,7 @@ use std::{borrow::Cow, cell::OnceCell, collections::HashMap};
 
 use crate::webdynpro::{
     element::{
-        define_element_interactable,
+        macros::define_element_interactable,
         property::{ContentVisibility, HotkeyValue, SemanticColor, TextDesign, Visibility},
         Interactable,
     },

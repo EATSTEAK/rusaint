@@ -10,7 +10,7 @@ use crate::webdynpro::element::{
         },
         SapTable,
     },
-    sub::define_subelement,
+    sub::macros::define_subelement,
     ElementDefWrapper,
 };
 

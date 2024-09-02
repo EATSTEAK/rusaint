@@ -1,6 +1,6 @@
 use std::{borrow::Cow, cell::OnceCell};
 
-use crate::webdynpro::element::{define_element_interactable, property::Visibility};
+use crate::webdynpro::element::{macros::define_element_interactable, property::Visibility};
 
 define_element_interactable! {
     #[doc = "체크박스"]
@@ -46,21 +46,29 @@ impl<'a> CheckBox<'a> {
 
     /// 이 [`CheckBox`]가 체크되었는지 여부를 반환합니다.
     pub fn checked(&self) -> bool {
-        self.element_ref.attr("aria-checked").is_some_and(|str| str == "true")
+        self.element_ref
+            .attr("aria-checked")
+            .is_some_and(|str| str == "true")
     }
 
     /// 이 [`CheckBox`]가 읽기 전용인지 여부를 반환합니다.
     pub fn readonly(&self) -> bool {
-        self.element_ref.attr("aria-readonly").is_some_and(|str| str == "true")
+        self.element_ref
+            .attr("aria-readonly")
+            .is_some_and(|str| str == "true")
     }
 
     /// 이 [`CheckBox`]가 비활성화 상태인지 여부를 반환합니다.
     pub fn disabled(&self) -> bool {
-        self.element_ref.attr("aria-disabled").is_some_and(|str| str == "true")
+        self.element_ref
+            .attr("aria-disabled")
+            .is_some_and(|str| str == "true")
     }
 
     /// 이 [`CheckBox`]가 올바르지 않은 상태인지 여부를 반환합니다.
     pub fn invalid(&self) -> bool {
-        self.element_ref.attr("aria-invalid").is_some_and(|str| str == "true")
+        self.element_ref
+            .attr("aria-invalid")
+            .is_some_and(|str| str == "true")
     }
 }

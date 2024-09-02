@@ -2,8 +2,8 @@ use scraper::Selector;
 use std::{borrow::Cow, cell::OnceCell};
 
 use crate::webdynpro::element::{
-    action::Button, define_element_base, definition::ElementDefinition, property::Visibility,
-    Element,
+    action::Button, definition::ElementDefinition, macros::define_element_base,
+    property::Visibility, Element,
 };
 
 define_element_base! {

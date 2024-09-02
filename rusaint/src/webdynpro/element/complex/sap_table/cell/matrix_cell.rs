@@ -7,7 +7,7 @@ use crate::webdynpro::element::{
         sap_table::{property::SapTableCellDesign, SapTableDef},
         SapTable,
     },
-    sub::define_subelement,
+    sub::macros::define_subelement,
     ElementDefWrapper,
 };
 

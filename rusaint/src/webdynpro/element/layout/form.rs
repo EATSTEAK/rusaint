@@ -3,7 +3,7 @@ use std::{borrow::Cow, cell::OnceCell, collections::HashMap};
 use crate::webdynpro::error::WebDynproError;
 use crate::webdynpro::event::Event;
 
-use crate::webdynpro::element::{define_element_interactable, Interactable};
+use crate::webdynpro::element::{macros::define_element_interactable, Interactable};
 
 define_element_interactable! {
     #[doc = "서버에 전송하기 위한 HTML Form"]

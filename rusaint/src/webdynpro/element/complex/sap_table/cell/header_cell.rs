@@ -15,7 +15,7 @@ use crate::webdynpro::{
             SapTable,
         },
         property::SortState,
-        sub::define_subelement,
+        sub::macros::define_subelement,
         ElementDefWrapper,
     },
     error::BodyError,

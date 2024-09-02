@@ -3,7 +3,7 @@ use std::{borrow::Cow, cell::OnceCell, collections::HashMap};
 use scraper::Selector;
 
 use crate::webdynpro::{
-    element::{define_element_interactable, definition::ElementDefinition, Interactable},
+    element::{definition::ElementDefinition, macros::define_element_interactable, Interactable},
     error::{BodyError, ElementError, WebDynproError},
     event::Event,
 };

@@ -3,11 +3,14 @@ use std::{borrow::Cow, cell::OnceCell};
 use scraper::Selector;
 
 use crate::webdynpro::element::{
-    complex::{sap_table::{
-        property::{SapTableCellDesign, SapTableCellType},
-        SapTableDef,
-    }, SapTable},
-    sub::define_subelement,
+    complex::{
+        sap_table::{
+            property::{SapTableCellDesign, SapTableCellType},
+            SapTableDef,
+        },
+        SapTable,
+    },
+    sub::macros::define_subelement,
     ElementDefWrapper,
 };
 

@@ -2,7 +2,9 @@ use std::{borrow::Cow, cell::OnceCell};
 
 use scraper::Node;
 
-use crate::webdynpro::element::{define_element_interactable, property::Visibility, Element};
+use crate::webdynpro::element::{
+    macros::define_element_interactable, property::Visibility, Element,
+};
 
 define_element_interactable! {
     #[doc = "텍스트 표시 뷰"]

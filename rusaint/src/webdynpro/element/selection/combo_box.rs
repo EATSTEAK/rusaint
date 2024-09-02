@@ -8,7 +8,7 @@ use crate::webdynpro::error::{BodyError, WebDynproError};
 use crate::webdynpro::{client::body::Body, error::ElementError, event::Event};
 
 use crate::webdynpro::element::{
-    define_element_interactable, Element, ElementDefWrapper, Interactable,
+    macros::define_element_interactable, Element, ElementDefWrapper, Interactable,
 };
 
 use self::property::ComboBoxBehavior;
