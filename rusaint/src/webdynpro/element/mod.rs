@@ -10,6 +10,8 @@ use self::{action::{Button, Link}, complex::SapTable, definition::ElementDefinit
 
 use super::{event::{ucf_parameters::UcfParameters, Event, EventBuilder}, error::{ElementError, BodyError, WebDynproError}, client::body::Body};
 
+/// [`ElementParser`]의 모듈
+pub mod parser;
 /// 엘리먼트의 정의를 다루는 모듈
 pub mod definition;
 
