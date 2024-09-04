@@ -144,6 +144,17 @@ macro_rules! def_listbox_subset {
                 _ => None
             }
         }
+
+        /// [`ListBoxWrapper`]를 가져옵니다.
+        pub fn value<'body>(&self, parser: &'body $crate::webdynpro::element::parser::ElementParser) -> Result<ListBoxWrapper<'body>, $crate::webdynpro::error::WebDynproError> {
+            match self {
+                $(ListBoxDefWrapper::$name(def) => {
+                    let raw_element = parser.element_from_def(def)?;
+                    let elem_wrapper = $crate::webdynpro::element::Element::wrap(raw_element);
+                    Ok(ListBoxWrapper::from_elements(elem_wrapper).ok_or($crate::webdynpro::error::BodyError::InvalidElement)?)
+                },)+
+            }
+        }
     }
 
     /// [`ListBox`] 분류의 엘리먼트를 위한 공통된 Wrapper
