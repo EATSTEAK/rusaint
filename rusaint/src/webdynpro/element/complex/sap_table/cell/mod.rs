@@ -1,4 +1,4 @@
-use crate::webdynpro::client::body::Body;
+use crate::webdynpro::element::parser::ElementParser;
 use crate::webdynpro::element::sub::definition::SubElementDefinition;
 use crate::webdynpro::element::sub::SubElement;
 use crate::webdynpro::element::{Element, ElementDefWrapper};
@@ -21,59 +21,81 @@ pub enum SapTableCellWrapper<'a> {
 
 impl<'a> SapTableCellWrapper<'a> {
     /// 셀을 표현하는 HTML 엘리먼트로부터 [`SapTableCellWrapper`]를 생성합니다.
-    pub fn dyn_cell(
+    pub fn from_ref(
         table_def: <SapTable<'a> as Element<'a>>::Def,
         elem_ref: scraper::ElementRef<'a>,
     ) -> Option<SapTableCellWrapper<'a>> {
         let subct_value = elem_ref.value();
         match subct_value.attr("subct") {
             Some(SapTableNormalCell::SUBCONTROL_ID) => Some(
-                <SapTableNormalCell<'_> as SubElement>::Def::new_dynamic(
-                    table_def,
-                    subct_value.id()?.to_owned(),
+                SapTableNormalCell::from_ref(
+                    &SapTableNormalCellDef::new_dynamic(table_def, subct_value.id()?.to_owned()),
+                    elem_ref,
                 )
-                .from_element(elem_ref)
                 .ok()?
                 .wrap(),
             ),
             Some(SapTableHeaderCell::SUBCONTROL_ID) => Some(
-                <SapTableHeaderCell<'_> as SubElement>::Def::new_dynamic(
-                    table_def,
-                    subct_value.id()?.to_owned(),
+                SapTableHeaderCell::from_ref(
+                    &SapTableHeaderCellDef::new_dynamic(table_def, subct_value.id()?.to_owned()),
+                    elem_ref,
                 )
-                .from_element(elem_ref)
                 .ok()?
                 .wrap(),
             ),
             Some(SapTableHierarchicalCell::SUBCONTROL_ID) => Some(
-                <SapTableHierarchicalCell<'_> as SubElement>::Def::new_dynamic(
-                    table_def,
-                    subct_value.id()?.to_owned(),
+                SapTableHierarchicalCell::from_ref(
+                    &SapTableHierarchicalCellDef::new_dynamic(
+                        table_def,
+                        subct_value.id()?.to_owned(),
+                    ),
+                    elem_ref,
                 )
-                .from_element(elem_ref)
                 .ok()?
                 .wrap(),
             ),
             Some(SapTableMatrixCell::SUBCONTROL_ID) => Some(
-                <SapTableMatrixCell<'_> as SubElement>::Def::new_dynamic(
-                    table_def,
-                    subct_value.id()?.to_owned(),
+                SapTableMatrixCell::from_ref(
+                    &SapTableMatrixCellDef::new_dynamic(table_def, subct_value.id()?.to_owned()),
+                    elem_ref,
                 )
-                .from_element(elem_ref)
                 .ok()?
                 .wrap(),
             ),
             Some(SapTableSelectionCell::SUBCONTROL_ID) => Some(
-                <SapTableSelectionCell<'_> as SubElement>::Def::new_dynamic(
-                    table_def,
-                    subct_value.id()?.to_owned(),
+                SapTableSelectionCell::from_ref(
+                    &SapTableSelectionCellDef::new_dynamic(table_def, subct_value.id()?.to_owned()),
+                    elem_ref,
                 )
-                .from_element(elem_ref)
                 .ok()?
                 .wrap(),
             ),
             _ => None,
         }
+    }
+
+    /// [`SapTableCellDefWrapper`] 로부터 [`SapTableCellWrapper`]를 생성합니다.
+    pub fn from_def(
+        wrapper: &SapTableCellDefWrapper,
+        parser: &'a ElementParser,
+    ) -> Result<SapTableCellWrapper<'a>, WebDynproError> {
+        Ok(match wrapper {
+            SapTableCellDefWrapper::Normal(def) => {
+                SapTableCellWrapper::Normal(parser.subelement_from_def(def)?)
+            }
+            SapTableCellDefWrapper::Header(def) => {
+                SapTableCellWrapper::Header(parser.subelement_from_def(def)?)
+            }
+            SapTableCellDefWrapper::Hierarchical(def) => {
+                SapTableCellWrapper::Hierarchical(parser.subelement_from_def(def)?)
+            }
+            SapTableCellDefWrapper::Matrix(def) => {
+                SapTableCellWrapper::Matrix(parser.subelement_from_def(def)?)
+            }
+            SapTableCellDefWrapper::Selection(def) => {
+                SapTableCellWrapper::Selection(parser.subelement_from_def(def)?)
+            }
+        })
     }
 
     /// 셀의 id를 반환합니다.
@@ -106,7 +128,7 @@ pub enum SapTableCellDefWrapper {
 impl SapTableCellDefWrapper {
     // TODO: include node id in def to improve performance
     /// 셀을 표현하는 HTML 엘리먼트로부터 [`SapTableCellDefWrapper`]를 생성합니다.
-    pub fn dyn_cell_def(
+    pub fn from_ref(
         table_def: SapTableDef,
         elem_ref: scraper::ElementRef<'_>,
     ) -> Option<SapTableCellDefWrapper> {
@@ -134,28 +156,17 @@ impl SapTableCellDefWrapper {
         }
     }
 
-    /// [`Body`]에서 서브 엘리먼트를 가져옵니다.
-    pub fn from_body(self, body: &Body) -> Result<SapTableCellWrapper, WebDynproError> {
+    /// [`ElementParser`]로 서브 엘리먼트를 가져옵니다.
+    pub fn with_parser<'body>(
+        &self,
+        parser: &'body ElementParser,
+    ) -> Result<SapTableCellWrapper<'body>, WebDynproError> {
         match self {
-            Self::Normal(def) => Ok(def.from_body(body)?.wrap()),
-            Self::Header(def) => Ok(def.from_body(body)?.wrap()),
-            Self::Hierarchical(def) => Ok(def.from_body(body)?.wrap()),
-            Self::Matrix(def) => Ok(def.from_body(body)?.wrap()),
-            Self::Selection(def) => Ok(def.from_body(body)?.wrap()),
-        }
-    }
-
-    /// [`scraper::ElementRef`]에서 서브 엘리먼트를 가져옵니다.
-    pub fn from_element(
-        self,
-        element: scraper::ElementRef<'_>,
-    ) -> Result<SapTableCellWrapper, WebDynproError> {
-        match self {
-            Self::Normal(def) => Ok(def.from_element(element)?.wrap()),
-            Self::Header(def) => Ok(def.from_element(element)?.wrap()),
-            Self::Hierarchical(def) => Ok(def.from_element(element)?.wrap()),
-            Self::Matrix(def) => Ok(def.from_element(element)?.wrap()),
-            Self::Selection(def) => Ok(def.from_element(element)?.wrap()),
+            Self::Normal(def) => Ok(parser.subelement_from_def(def)?.wrap()),
+            Self::Header(def) => Ok(parser.subelement_from_def(def)?.wrap()),
+            Self::Hierarchical(def) => Ok(parser.subelement_from_def(def)?.wrap()),
+            Self::Matrix(def) => Ok(parser.subelement_from_def(def)?.wrap()),
+            Self::Selection(def) => Ok(parser.subelement_from_def(def)?.wrap()),
         }
     }
 }

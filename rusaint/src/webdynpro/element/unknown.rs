@@ -1,8 +1,8 @@
 use std::{borrow::Cow, cell::OnceCell};
 
-use serde_json::Value;
-
+use crate::webdynpro::element::utils::{children_element, parse_lsdata, parse_lsevents};
 use crate::webdynpro::error::{BodyError, WebDynproError};
+use serde_json::Value;
 
 use super::{definition::ElementDefinition, Element, EventParameterMap, Interactable};
 
@@ -66,8 +66,10 @@ impl<'a> Element<'a> for Unknown<'a> {
     type Def = UnknownDef;
 
     fn lsdata(&self) -> &Self::ElementLSData {
-        self.lsdata
-            .get_or_init(|| Self::lsdata_element(self.element_ref).unwrap_or(Value::default()))
+        self.lsdata.get_or_init(|| {
+            parse_lsdata(self.element_ref.value().attr("lsdata").unwrap_or(""))
+                .unwrap_or(Value::default())
+        })
     }
 
     fn from_ref(
@@ -90,14 +92,14 @@ impl<'a> Element<'a> for Unknown<'a> {
     }
 
     fn children(&self) -> Vec<super::ElementWrapper<'a>> {
-        Self::children_element(self.element_ref().clone())
+        children_element(self.element_ref().clone())
     }
 }
 
 impl<'a> Interactable<'a> for Unknown<'a> {
     fn lsevents(&self) -> Option<&EventParameterMap> {
         self.lsevents
-            .get_or_init(|| Self::lsevents_element(self.element_ref).ok())
+            .get_or_init(|| parse_lsevents(self.element_ref.value().attr("lsevents")?).ok())
             .as_ref()
     }
 }

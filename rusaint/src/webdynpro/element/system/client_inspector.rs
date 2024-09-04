@@ -6,6 +6,7 @@ use crate::webdynpro::element::definition::ElementDefinition;
 use crate::webdynpro::error::{BodyError, WebDynproError};
 use crate::webdynpro::event::Event;
 
+use crate::webdynpro::element::utils::{children_element, parse_lsdata, parse_lsevents};
 use crate::webdynpro::element::{Element, ElementWrapper, EventParameterMap, Interactable};
 
 /// 클라이언트의 변경 사항을 감시
@@ -172,7 +173,9 @@ impl<'a> Element<'a> for ClientInspector<'a> {
 
     fn lsdata(&self) -> &Self::ElementLSData {
         self.lsdata.get_or_init(|| {
-            let Ok(lsdata_obj) = Self::lsdata_element(self.element_ref) else {
+            let Ok(lsdata_obj) =
+                parse_lsdata(self.element_ref.value().attr("lsdata").unwrap_or(""))
+            else {
                 return ClientInspectorLSData::default();
             };
             serde_json::from_value::<Self::ElementLSData>(lsdata_obj)
@@ -200,14 +203,14 @@ impl<'a> Element<'a> for ClientInspector<'a> {
     }
 
     fn children(&self) -> Vec<ElementWrapper<'a>> {
-        Self::children_element(self.element_ref().clone())
+        children_element(self.element_ref().clone())
     }
 }
 
 impl<'a> Interactable<'a> for ClientInspector<'a> {
     fn lsevents(&self) -> Option<&EventParameterMap> {
         self.lsevents
-            .get_or_init(|| Self::lsevents_element(self.element_ref).ok())
+            .get_or_init(|| parse_lsevents(self.element_ref.attr("lsevents")?).ok())
             .as_ref()
     }
 }

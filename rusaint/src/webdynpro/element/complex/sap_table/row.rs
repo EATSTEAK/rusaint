@@ -2,16 +2,13 @@ use std::ops::Index;
 
 use scraper::ElementRef;
 
-use crate::webdynpro::{
-    client::body::Body,
-    error::{ElementError, WebDynproError},
-};
-
 use super::{
     cell::{SapTableCellDefWrapper, SapTableCellWrapper},
     property::{SapTableRowType, SapTableSelectionState},
     FromSapTable, SapTableDef, SapTableHeader,
 };
+use crate::webdynpro::element::parser::ElementParser;
+use crate::webdynpro::error::{ElementError, WebDynproError};
 
 /// [`SapTable`](super::SapTable)의 행
 #[derive(Clone, Debug)]
@@ -67,10 +64,12 @@ impl<'a> SapTableRow {
     /// 행 내부 셀 엘리먼트의 [`Iterator`]를 반환합니다.
     pub fn iter_value(
         &'a self,
-        body: &'a Body,
+        parser: &'a ElementParser,
     ) -> impl Iterator<Item = Result<SapTableCellWrapper<'a>, WebDynproError>> + ExactSizeIterator
     {
-        self.cells.iter().map(|def| def.clone().from_body(body))
+        self.cells
+            .iter()
+            .map(|def| SapTableCellWrapper::from_def(def, parser))
     }
 
     /// 원본 [`SapTable`](super::SapTable)의 [`SapTableDef`]를 반환합니다.
@@ -117,9 +116,9 @@ impl<'a> SapTableRow {
     pub fn try_row_into<T: FromSapTable<'a>>(
         &'a self,
         header: &'a SapTableHeader,
-        body: &'a Body,
+        parser: &'a ElementParser,
     ) -> Result<T, WebDynproError> {
-        T::from_table(body, header, self)
+        T::from_table(header, self, parser)
     }
 }
 

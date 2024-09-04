@@ -55,7 +55,7 @@ impl ListBoxItemInfo {
     pub(super) fn from_element_ref(
         element_ref: scraper::ElementRef<'_>,
     ) -> Result<ListBoxItemInfo, WebDynproError> {
-        let element = ElementWrapper::dyn_element(element_ref)?;
+        let element = ElementWrapper::from_ref(element_ref)?;
         match element {
             ElementWrapper::ListBoxItem(item) => Ok(ListBoxItemInfo::Item {
                 index: item.index().unwrap_or("").to_string(),

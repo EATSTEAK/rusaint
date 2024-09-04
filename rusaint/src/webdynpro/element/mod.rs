@@ -99,8 +99,22 @@ macro_rules! register_elements {
                 let id = value.id().ok_or(BodyError::NoSuchAttribute("id".to_owned()))?.to_owned();
                 #[allow(unreachable_patterns)]
                 match element.value().attr("ct") {
-                    $( Some(<$type>::CONTROL_ID) => Ok(<$type as $crate::webdynpro::element::Element<'a>>::Def::new_dynamic(id).from_ref(element)?.wrap()), )*
-                    _ => Ok(<$crate::webdynpro::element::unknown::Unknown as $crate::webdynpro::element::Element<'a>>::Def::new_dynamic(id).from_ref(element)?.wrap())
+                    $( Some(<$type>::CONTROL_ID) => {
+                        let def = <$type as $crate::webdynpro::element::Element<'a>>::Def::new_dynamic(id);
+                        Ok(<$type as $crate::webdynpro::element::Element<'a>>::from_ref(&def, element)?.wrap())
+                    }, )*
+                    _ => {
+                        let def = <$crate::webdynpro::element::unknown::Unknown as $crate::webdynpro::element::Element<'a>>::Def::new_dynamic(id);
+                        Ok(<$crate::webdynpro::element::unknown::Unknown as $crate::webdynpro::element::Element<'a>>::from_ref(&def, element)?.wrap())
+                    }
+                }
+            }
+
+            /// 주어진 [`ElementDefWrapper`]와 일치하는 [`ElementWrapper`]를 반환합니다.
+            pub fn from_def(wrapper: &'a ElementDefWrapper, parser: &'a $crate::webdynpro::element::parser::ElementParser) -> Result<ElementWrapper<'a>, WebDynproError> {
+                match wrapper {
+                    $( ElementDefWrapper::$enum(def) => Ok(parser.element_from_def(def)?.wrap()), )*
+                    ElementDefWrapper::Unknown(def) => Ok(parser.element_from_def(def)?.wrap()),
                 }
             }
 

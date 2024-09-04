@@ -41,7 +41,7 @@ impl<'a> SapTableCell<'a> for SapTableNormalCell<'a> {
         self.content
             .get_or_init(|| {
                 let content_selector = Selector::parse(":root [ct]").unwrap();
-                ElementDefWrapper::dyn_elem_def(
+                ElementDefWrapper::from_ref(
                     self.element_ref
                         .select(&content_selector)
                         .next()?
