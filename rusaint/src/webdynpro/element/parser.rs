@@ -31,4 +31,9 @@ impl<'s> ElementParser {
             .ok_or(ElementError::InvalidId(definition.id().to_string()))?;
         T::SubElement::from_ref(definition, element_ref)
     }
+
+    /// 파서 내의 [`Html`]을 반환합니다.
+    pub(crate) fn document(&'s self) -> &'s scraper::Html {
+        &self.0
+    }
 }
