@@ -1,6 +1,8 @@
+use crate::webdynpro::command::WebDynproCommandExecutor;
+use crate::webdynpro::element::parser::ElementParser;
+use crate::webdynpro::event::Event;
 use crate::webdynpro::{
-    client::EventProcessResult,
-    command::{WebDynproCommand, WebDynproReadCommand},
+    command::WebDynproCommand,
     element::{
         definition::ElementDefinition,
         selection::{
@@ -31,17 +33,12 @@ impl ComboBoxSelectCommand {
 }
 
 impl WebDynproCommand for ComboBoxSelectCommand {
-    type Result = EventProcessResult;
+    type Result = Event;
 
-    async fn dispatch(
-        &self,
-        client: &mut crate::webdynpro::client::WebDynproClient,
-    ) -> Result<Self::Result, WebDynproError> {
-        let event = self
-            .element_def
-            .from_body(client.body())?
-            .select(&self.key, self.by_enter)?;
-        client.process_event(false, event).await
+    fn dispatch(&self, parser: &ElementParser) -> Result<Self::Result, WebDynproError> {
+        parser
+            .element_from_def(&self.element_def)?
+            .select(&self.key, self.by_enter)
     }
 }
 
@@ -65,17 +62,12 @@ impl ComboBoxChangeCommand {
 }
 
 impl WebDynproCommand for ComboBoxChangeCommand {
-    type Result = EventProcessResult;
+    type Result = Event;
 
-    async fn dispatch(
-        &self,
-        client: &mut crate::webdynpro::client::WebDynproClient,
-    ) -> Result<Self::Result, WebDynproError> {
-        let event = self
-            .element_def
-            .from_body(client.body())?
-            .change(&self.value)?;
-        client.process_event(false, event).await
+    fn dispatch(&self, parser: &ElementParser) -> Result<Self::Result, WebDynproError> {
+        parser
+            .element_from_def(&self.element_def)?
+            .change(&self.value)
     }
 }
 
@@ -103,16 +95,13 @@ impl ComboBoxSelectByValue1Command {
 }
 
 impl WebDynproCommand for ComboBoxSelectByValue1Command {
-    type Result = EventProcessResult;
+    type Result = Event;
 
-    async fn dispatch(
-        &self,
-        client: &mut crate::webdynpro::client::WebDynproClient,
-    ) -> Result<Self::Result, WebDynproError> {
-        let listbox_def = client.read(ReadComboBoxItemListBoxCommand::new(
+    fn dispatch(&self, parser: &ElementParser) -> Result<Self::Result, WebDynproError> {
+        let listbox_def = parser.read(ReadComboBoxItemListBoxCommand::new(
             self.element_def.clone(),
         ))?;
-        let items = client.read(ReadListBoxItemInfoCommand::new(listbox_def))?;
+        let items = parser.read(ReadListBoxItemInfoCommand::new(listbox_def))?;
         let item_key = items
             .iter()
             .find_map(|info| match info {
@@ -130,13 +119,11 @@ impl WebDynproCommand for ComboBoxSelectByValue1Command {
                 content: format!("Cannot find {} option", self.value),
             })?
             .to_owned();
-        client
-            .send(ComboBoxSelectCommand::new(
-                self.element_def.clone(),
-                &item_key,
-                false,
-            ))
-            .await
+        parser.read(ComboBoxSelectCommand::new(
+            self.element_def.clone(),
+            &item_key,
+            false,
+        ))
     }
 }
 
@@ -152,24 +139,12 @@ impl ReadComboBoxLSDataCommand {
     }
 }
 
-impl WebDynproReadCommand for ReadComboBoxLSDataCommand {
-    fn read(
-        &self,
-        body: &crate::webdynpro::client::body::Body,
-    ) -> Result<Self::Result, WebDynproError> {
-        let lsdata = self.element_def.from_body(body)?.lsdata().clone();
-        Ok(lsdata)
-    }
-}
-
 impl WebDynproCommand for ReadComboBoxLSDataCommand {
     type Result = ComboBoxLSData;
 
-    async fn dispatch(
-        &self,
-        client: &mut crate::webdynpro::client::WebDynproClient,
-    ) -> Result<Self::Result, WebDynproError> {
-        self.read(client.body())
+    fn dispatch(&self, parser: &ElementParser) -> Result<Self::Result, WebDynproError> {
+        let lsdata = parser.element_from_def(&self.element_def)?.lsdata().clone();
+        Ok(lsdata)
     }
 }
 
@@ -185,24 +160,14 @@ impl ReadComboBoxItemListBoxCommand {
     }
 }
 
-impl WebDynproReadCommand for ReadComboBoxItemListBoxCommand {
-    fn read(
-        &self,
-        body: &crate::webdynpro::client::body::Body,
-    ) -> Result<Self::Result, WebDynproError> {
-        let listbox_def = self.element_def.from_body(body)?.item_list_box(body)?;
-        Ok(listbox_def)
-    }
-}
-
 impl WebDynproCommand for ReadComboBoxItemListBoxCommand {
     type Result = ListBoxDefWrapper;
 
-    async fn dispatch(
-        &self,
-        client: &mut crate::webdynpro::client::WebDynproClient,
-    ) -> Result<Self::Result, WebDynproError> {
-        self.read(client.body())
+    fn dispatch(&self, parser: &ElementParser) -> Result<Self::Result, WebDynproError> {
+        let listbox_def = parser
+            .element_from_def(&self.element_def)?
+            .item_list_box(parser)?;
+        Ok(listbox_def)
     }
 }
 
@@ -218,14 +183,12 @@ impl ReadComboBoxValueCommand {
     }
 }
 
-impl WebDynproReadCommand for ReadComboBoxValueCommand {
-    fn read(
-        &self,
-        body: &crate::webdynpro::client::body::Body,
-    ) -> Result<Self::Result, WebDynproError> {
-        let text = self
-            .element_def
-            .from_body(body)?
+impl WebDynproCommand for ReadComboBoxValueCommand {
+    type Result = String;
+
+    fn dispatch(&self, parser: &ElementParser) -> Result<Self::Result, WebDynproError> {
+        let text = parser
+            .element_from_def(&self.element_def)?
             .value()
             .map(str::to_string)
             .ok_or_else(|| ElementError::NoSuchContent {
@@ -233,17 +196,6 @@ impl WebDynproReadCommand for ReadComboBoxValueCommand {
                 content: "value of ComboBox".to_string(),
             })?;
         Ok(text)
-    }
-}
-
-impl WebDynproCommand for ReadComboBoxValueCommand {
-    type Result = String;
-
-    async fn dispatch(
-        &self,
-        client: &mut crate::webdynpro::client::WebDynproClient,
-    ) -> Result<Self::Result, WebDynproError> {
-        self.read(client.body())
     }
 }
 
@@ -259,12 +211,11 @@ impl ReadListBoxItemInfoCommand {
     }
 }
 
-impl WebDynproReadCommand for ReadListBoxItemInfoCommand {
-    fn read(
-        &self,
-        body: &crate::webdynpro::client::body::Body,
-    ) -> Result<Self::Result, WebDynproError> {
-        let element = self.element_def.from_body(body)?;
+impl WebDynproCommand for ReadListBoxItemInfoCommand {
+    type Result = Vec<ListBoxItemInfo>;
+
+    fn dispatch(&self, parser: &ElementParser) -> Result<Self::Result, WebDynproError> {
+        let element = &self.element_def.value(parser)?;
         match element {
             ListBoxWrapper::ListBoxPopup(list_box) => Ok(list_box
                 .list_box()
@@ -291,16 +242,5 @@ impl WebDynproReadCommand for ReadListBoxItemInfoCommand {
                 .item_infos()?
                 .collect::<Vec<ListBoxItemInfo>>()),
         }
-    }
-}
-
-impl WebDynproCommand for ReadListBoxItemInfoCommand {
-    type Result = Vec<ListBoxItemInfo>;
-
-    async fn dispatch(
-        &self,
-        client: &mut crate::webdynpro::client::WebDynproClient,
-    ) -> Result<Self::Result, WebDynproError> {
-        self.read(client.body())
     }
 }

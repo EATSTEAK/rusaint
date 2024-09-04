@@ -1,6 +1,7 @@
+use crate::webdynpro::element::parser::ElementParser;
+use crate::webdynpro::event::Event;
 use crate::webdynpro::{
-    client::EventProcessResult,
-    command::{WebDynproCommand, WebDynproReadCommand},
+    command::WebDynproCommand,
     element::{
         complex::{sap_table::SapTableBody, SapTableDef, SapTableLSData},
         definition::ElementDefinition,
@@ -47,24 +48,18 @@ impl SapTableVerticalScrollCommand {
 }
 
 impl WebDynproCommand for SapTableVerticalScrollCommand {
-    type Result = EventProcessResult;
+    type Result = Event;
 
-    async fn dispatch(
-        &self,
-        client: &mut crate::webdynpro::client::WebDynproClient,
-    ) -> Result<Self::Result, WebDynproError> {
-        let event = (&self.element_def)
-            .from_body(client.body())?
-            .vertical_scroll(
-                self.first_visible_item_index,
-                &self.cell_id,
-                &self.access_type,
-                self.selection_follow_focus,
-                self.shift,
-                self.ctrl,
-                self.alt,
-            )?;
-        client.process_event(false, event).await
+    fn dispatch(&self, parser: &ElementParser) -> Result<Self::Result, WebDynproError> {
+        parser.element_from_def(&self.element_def)?.vertical_scroll(
+            self.first_visible_item_index,
+            &self.cell_id,
+            &self.access_type,
+            self.selection_follow_focus,
+            self.shift,
+            self.ctrl,
+            self.alt,
+        )
     }
 }
 
@@ -80,24 +75,12 @@ impl ReadSapTableLSDataCommand {
     }
 }
 
-impl WebDynproReadCommand for ReadSapTableLSDataCommand {
-    fn read(
-        &self,
-        body: &crate::webdynpro::client::body::Body,
-    ) -> Result<Self::Result, WebDynproError> {
-        let lsdata = self.element_def.from_body(body)?.lsdata().clone();
-        Ok(lsdata)
-    }
-}
-
 impl WebDynproCommand for ReadSapTableLSDataCommand {
     type Result = SapTableLSData;
 
-    async fn dispatch(
-        &self,
-        client: &mut crate::webdynpro::client::WebDynproClient,
-    ) -> Result<Self::Result, WebDynproError> {
-        self.read(client.body())
+    fn dispatch(&self, parser: &ElementParser) -> Result<Self::Result, WebDynproError> {
+        let lsdata = parser.element_from_def(&self.element_def)?.lsdata().clone();
+        Ok(lsdata)
     }
 }
 
@@ -113,23 +96,11 @@ impl ReadSapTableBodyCommand {
     }
 }
 
-impl WebDynproReadCommand for ReadSapTableBodyCommand {
-    fn read(
-        &self,
-        body: &crate::webdynpro::client::body::Body,
-    ) -> Result<Self::Result, WebDynproError> {
-        let body = self.element_def.from_body(body)?.table()?.clone();
-        Ok(body)
-    }
-}
-
 impl WebDynproCommand for ReadSapTableBodyCommand {
     type Result = SapTableBody;
 
-    async fn dispatch(
-        &self,
-        client: &mut crate::webdynpro::client::WebDynproClient,
-    ) -> Result<Self::Result, WebDynproError> {
-        self.read(client.body())
+    fn dispatch(&self, parser: &ElementParser) -> Result<Self::Result, WebDynproError> {
+        let body = parser.element_from_def(&self.element_def)?.table()?.clone();
+        Ok(body)
     }
 }
