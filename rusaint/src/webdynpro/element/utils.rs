@@ -2,9 +2,8 @@ use crate::webdynpro::element::{normalize_lsjson, ElementWrapper, EventParameter
 use crate::webdynpro::error::{BodyError, ElementError, WebDynproError};
 use crate::webdynpro::event::ucf_parameters::UcfParameters;
 use scraper::ElementRef;
-use serde_json::Value;
+use serde_json::{Map, Value};
 use std::collections::HashMap;
-use std::iter::Map;
 
 /// 엘리먼트의 lsdata 속성을 파싱합니다.
 pub(super) fn parse_lsdata(raw_lsdata: &str) -> Result<Value, WebDynproError> {
