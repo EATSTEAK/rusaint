@@ -1,11 +1,17 @@
+use crate::webdynpro::client::body::Body;
 use crate::webdynpro::element::sub::definition::SubElementDefinition;
 use crate::webdynpro::element::sub::SubElement;
 use crate::webdynpro::element::{definition::ElementDefinition, Element};
 use crate::webdynpro::error::{ElementError, WebDynproError};
+use scraper::Html;
 
-pub struct ElementParser(scraper::Html);
+pub struct ElementParser(Html);
 
 impl<'s> ElementParser {
+    pub fn new(body: &Body) -> Self {
+        let document = Html::parse_document(body.raw_body());
+        Self(document)
+    }
     pub fn element_from_def<T: ElementDefinition<'s>>(
         &'s self,
         definition: &T,
@@ -16,7 +22,7 @@ impl<'s> ElementParser {
             .select(&selector)
             .next()
             .ok_or(ElementError::InvalidId(definition.id().to_string()))?;
-        T::Element::from_ref(definition, element_ref)
+        Element::from_ref(definition, element_ref)
     }
 
     pub fn subelement_from_def<T: SubElementDefinition<'s>>(
@@ -29,11 +35,11 @@ impl<'s> ElementParser {
             .select(&selector)
             .next()
             .ok_or(ElementError::InvalidId(definition.id().to_string()))?;
-        T::SubElement::from_ref(definition, element_ref)
+        SubElement::from_ref(definition, element_ref)
     }
 
     /// 파서 내의 [`Html`]을 반환합니다.
-    pub(crate) fn document(&'s self) -> &'s scraper::Html {
+    pub(crate) fn document(&'s self) -> &'s Html {
         &self.0
     }
 }
