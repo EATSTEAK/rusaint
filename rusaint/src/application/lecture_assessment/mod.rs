@@ -84,11 +84,11 @@ impl<'a> LectureAssessmentApplication {
         let year_combobox_lsdata = parser.read(ReadComboBoxLSDataCommand::new(Self::DDLB_01))?;
         let semester_combobox_lsdata =
             parser.read(ReadComboBoxLSDataCommand::new(Self::DDLB_02))?;
-        if (|| Some(year_combobox_lsdata.key()?.as_str()))() != Some(year) {
+        if year_combobox_lsdata.key().map(String::as_str) != Some(year) {
             let event = parser.read(ComboBoxSelectCommand::new(Self::DDLB_01, &year, false))?;
             self.client.process_event(false, event).await?;
         }
-        if (|| Some(semester_combobox_lsdata.key()?.as_str()))() != Some(semester) {
+        if semester_combobox_lsdata.key().map(String::as_str) != Some(semester) {
             let event = parser.read(ComboBoxSelectCommand::new(Self::DDLB_02, semester, false))?;
             self.client.process_event(false, event).await?;
         }
@@ -134,7 +134,7 @@ impl<'a> LectureAssessmentApplication {
             lecture_code,
             professor_name,
         )
-            .await?;
+        .await?;
         let mut parser = ElementParser::new(self.body());
         let row_count = parser
             .read(ReadSapTableLSDataCommand::new(Self::TABLE))?

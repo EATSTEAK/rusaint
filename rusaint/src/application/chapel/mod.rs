@@ -65,12 +65,12 @@ impl<'a> ChapelApplication {
         let year_combobox_lsdata = parser.read(ReadComboBoxLSDataCommand::new(Self::SEL_PERYR))?;
         let semester_combobox_lsdata =
             parser.read(ReadComboBoxLSDataCommand::new(Self::SEL_PERID))?;
-        if (|| Some(year_combobox_lsdata.key()?.as_str()))() != Some(year) {
+        if year_combobox_lsdata.key().map(String::as_str) != Some(year) {
             let year_select_event =
                 parser.read(ComboBoxSelectCommand::new(Self::SEL_PERYR, &year, false))?;
             self.client.process_event(false, year_select_event).await?;
         }
-        if (|| Some(semester_combobox_lsdata.key()?.as_str()))() != Some(semester) {
+        if semester_combobox_lsdata.key().map(String::as_str) != Some(semester) {
             let semester_select_event =
                 parser.read(ComboBoxSelectCommand::new(Self::SEL_PERID, semester, false))?;
             self.client

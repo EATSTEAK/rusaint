@@ -64,11 +64,11 @@ impl<'a> PersonalCourseScheduleApplication {
         let parser = ElementParser::new(self.body());
         let year_combobox_lsdata = parser.read(ReadComboBoxLSDataCommand::new(Self::PERYR))?;
         let semester_combobox_lsdata = parser.read(ReadComboBoxLSDataCommand::new(Self::PERID))?;
-        if (|| Some(year_combobox_lsdata.key()?.as_str()))() != Some(year) {
+        if year_combobox_lsdata.key().map(String::as_str) != Some(year) {
             let event = parser.read(ComboBoxSelectCommand::new(Self::PERYR, &year, false))?;
             self.client.process_event(false, event).await?;
         }
-        if (|| Some(semester_combobox_lsdata.key()?.as_str()))() != Some(semester) {
+        if semester_combobox_lsdata.key().map(String::as_str) != Some(semester) {
             let event = parser.read(ComboBoxSelectCommand::new(Self::PERID, semester, false))?;
             self.client.process_event(false, event).await?;
         }
