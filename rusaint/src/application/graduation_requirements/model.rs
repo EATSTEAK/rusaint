@@ -5,6 +5,7 @@ use serde::{
     Deserialize, Deserializer,
 };
 
+use crate::webdynpro::element::parser::ElementParser;
 use crate::{
     utils::de_with::deserialize_with_trim,
     webdynpro::{
@@ -12,7 +13,6 @@ use crate::{
         error::ElementError,
     },
 };
-use crate::webdynpro::element::parser::ElementParser;
 
 #[derive(Debug)]
 #[cfg_attr(feature = "uniffi", derive(uniffi::Record))]

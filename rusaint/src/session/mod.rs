@@ -23,7 +23,7 @@ const SMARTID_LOGIN_FORM_REQUEST_URL: &str = "https://smartid.ssu.ac.kr/Symtra_s
 pub struct USaintSession(Jar);
 
 impl CookieStore for USaintSession {
-    fn set_cookies(&self, cookie_headers: &mut dyn Iterator<Item = &HeaderValue>, url: &Url) {
+    fn set_cookies(&self, cookie_headers: &mut dyn Iterator<Item=&HeaderValue>, url: &Url) {
         self.0.set_cookies(cookie_headers, url)
     }
 

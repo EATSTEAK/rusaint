@@ -15,7 +15,6 @@ pub struct CourseGradesApplication(
 
 #[uniffi::export(async_runtime = "tokio")]
 impl CourseGradesApplication {
-    
     /// 전체 학기의 학적부 평점 정보를 가져옵니다.
     pub async fn recorded_summary(
         &self,

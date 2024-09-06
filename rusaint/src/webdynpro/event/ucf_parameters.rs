@@ -152,7 +152,7 @@ impl Display for UcfAction {
             Self::Enqueue => "enqueue",
             _ => "none",
         }
-        .to_owned();
+            .to_owned();
         write!(f, "{}", str)
     }
 }
@@ -176,7 +176,7 @@ impl Display for UcfCardinality {
             Self::Single => "single",
             _ => "none",
         }
-        .to_owned();
+            .to_owned();
         write!(f, "{}", str)
     }
 }
@@ -200,7 +200,7 @@ impl Display for UcfResponseData {
             Self::Delta => "delta",
             Self::Inherit => "inherit",
         }
-        .to_owned();
+            .to_owned();
         write!(f, "{}", str)
     }
 }
@@ -219,7 +219,7 @@ impl Display for UcfTransportMethod {
             Self::Full => "full",
             Self::Partial => "partial",
         }
-        .to_owned();
+            .to_owned();
         write!(f, "{}", str)
     }
 }
@@ -239,7 +239,7 @@ impl Display for UcfDelay {
             Self::Full => "full",
             _ => "none",
         }
-        .to_owned();
+            .to_owned();
         write!(f, "{}", str)
     }
 }

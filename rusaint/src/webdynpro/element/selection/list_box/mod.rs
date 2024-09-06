@@ -305,7 +305,7 @@ impl<'a> ListBox<'a> {
     }
 
     /// [`ListBoxItemDefWrapper`]의 목록을 반환합니다.
-    pub fn items(&self) -> impl Iterator<Item = &ListBoxItemDefWrapper> {
+    pub fn items(&self) -> impl Iterator<Item=&ListBoxItemDefWrapper> {
         self.items
             .get_or_init(|| {
                 let items_selector = scraper::Selector::parse("[ct]").unwrap();
@@ -329,7 +329,7 @@ impl<'a> ListBox<'a> {
     }
 
     /// [`ListBoxItemInfo`]의 Iterator를 반환합니다.
-    pub fn item_infos(&self) -> Result<impl Iterator<Item = ListBoxItemInfo>, WebDynproError> {
+    pub fn item_infos(&self) -> Result<impl Iterator<Item=ListBoxItemInfo>, WebDynproError> {
         let items_selector = scraper::Selector::parse("[ct]").unwrap();
         let vec = self
             .element_ref

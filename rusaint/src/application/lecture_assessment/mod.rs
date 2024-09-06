@@ -134,7 +134,7 @@ impl<'a> LectureAssessmentApplication {
             lecture_code,
             professor_name,
         )
-        .await?;
+            .await?;
         let mut parser = ElementParser::new(self.body());
         let row_count = parser
             .read(ReadSapTableLSDataCommand::new(Self::TABLE))?

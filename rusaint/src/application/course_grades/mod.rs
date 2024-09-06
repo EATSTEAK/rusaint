@@ -410,12 +410,12 @@ impl<'a> CourseGradesApplication {
                     });
                 (btn_event, row)
             })
-            .filter_map(|(btn_event, row)| {
-                row.try_row_into::<HashMap<String, String>>(grade_table_body.header(), &parser)
-                    .ok()
-                    .and_then(|row| Some((btn_event, row)))
-            })
-            .collect()
+                .filter_map(|(btn_event, row)| {
+                    row.try_row_into::<HashMap<String, String>>(grade_table_body.header(), &parser)
+                        .ok()
+                        .and_then(|row| Some((btn_event, row)))
+                })
+                .collect()
         };
         let mut ret: Vec<ClassGrade> = vec![];
         for (btn_event, values) in class_grades {

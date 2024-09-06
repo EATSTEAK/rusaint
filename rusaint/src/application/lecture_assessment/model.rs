@@ -5,6 +5,7 @@ use serde::{
     Deserialize,
 };
 
+use crate::webdynpro::element::parser::ElementParser;
 use crate::{
     model::SemesterType,
     utils::de_with::{deserialize_f32_string, deserialize_semester_type, deserialize_u32_string},
@@ -13,7 +14,6 @@ use crate::{
         error::{ElementError, WebDynproError},
     },
 };
-use crate::webdynpro::element::parser::ElementParser;
 
 /// 강의평가 결과
 #[derive(Clone, Debug, Deserialize)]

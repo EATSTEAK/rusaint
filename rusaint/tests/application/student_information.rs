@@ -30,7 +30,7 @@ async fn graduation() {
         Err(RusaintError::WebDynproError(WebDynproError::Element(ElementError::NoSuchContent { element: _, content: _ }))) => assert!(true),
         Err(err) => {
             panic!("{:?}", err);
-        },
+        }
         Ok(_) => assert!(true)
     }
     println!("{:?}", student_info);

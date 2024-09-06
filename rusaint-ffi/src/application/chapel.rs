@@ -6,10 +6,7 @@ use tokio::sync::RwLock;
 use crate::{error::RusaintError, session::USaintSession};
 
 #[derive(uniffi::Object)]
-pub struct ChapelApplication(
-    RwLock<rusaint::application::chapel::ChapelApplication>,
-);
-
+pub struct ChapelApplication(RwLock<rusaint::application::chapel::ChapelApplication>);
 
 #[uniffi::export(async_runtime = "tokio")]
 impl ChapelApplication {
@@ -25,12 +22,11 @@ impl ChapelApplication {
 #[derive(uniffi::Object)]
 pub struct ChapelApplicationBuilder {}
 
-
 #[uniffi::export(async_runtime = "tokio")]
 impl ChapelApplicationBuilder {
     #[uniffi::constructor]
     pub fn new() -> Self {
-        Self {  }
+        Self {}
     }
 
     pub async fn build(
@@ -39,8 +35,9 @@ impl ChapelApplicationBuilder {
     ) -> Result<ChapelApplication, RusaintError> {
         let mut original_builder = rusaint::application::USaintClientBuilder::new();
         original_builder = original_builder.session(session.original());
-        let original_app = original_builder.build_into::<rusaint::application::chapel::ChapelApplication>()
-        .await?;
-    Ok(ChapelApplication(RwLock::new(original_app)))
+        let original_app = original_builder
+            .build_into::<rusaint::application::chapel::ChapelApplication>()
+            .await?;
+        Ok(ChapelApplication(RwLock::new(original_app)))
     }
 }

@@ -222,7 +222,7 @@ impl LectureCategory {
                         department,
                         major,
                     )
-                    .await?;
+                        .await?;
                 } else {
                     Self::request_lv2(
                         client,
@@ -234,7 +234,7 @@ impl LectureCategory {
                         collage,
                         department,
                     )
-                    .await?;
+                        .await?;
                 }
             }
             LectureCategory::RequiredElective { lecture_name } => {
@@ -252,7 +252,7 @@ impl LectureCategory {
                     SEARCH_GENERAL_REQ,
                     lecture_name,
                 )
-                .await?;
+                    .await?;
             }
             LectureCategory::OptionalElective { category } => {
                 // 교양선택
@@ -269,7 +269,7 @@ impl LectureCategory {
                     SEARCH_GENERAL_OPT,
                     category,
                 )
-                .await?;
+                    .await?;
             }
             LectureCategory::Chapel { lecture_name } => {
                 // 채플
@@ -286,7 +286,7 @@ impl LectureCategory {
                     SEARCH_CHAPEL,
                     lecture_name,
                 )
-                .await?;
+                    .await?;
             }
             LectureCategory::Education => {
                 // 교직
@@ -317,7 +317,7 @@ impl LectureCategory {
                     collage,
                     department,
                 )
-                .await?;
+                    .await?;
             }
             LectureCategory::ConnectedMajor { major } => {
                 // 연계전공
@@ -352,7 +352,7 @@ impl LectureCategory {
                     SEARCH_PROFESSOR,
                     keyword,
                 )
-                .await?;
+                    .await?;
             }
             LectureCategory::FindByLecture { keyword } => {
                 // 과목검색
@@ -390,7 +390,7 @@ impl LectureCategory {
                         department,
                         major,
                     )
-                    .await?;
+                        .await?;
                 } else {
                     Self::request_lv2(
                         client,
@@ -402,7 +402,7 @@ impl LectureCategory {
                         collage,
                         department,
                     )
-                    .await?;
+                        .await?;
                 }
             }
             LectureCategory::Cyber => {

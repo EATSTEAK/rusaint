@@ -31,7 +31,11 @@ impl USaintSessionBuilder {
         USaintSession(Arc::new(rusaint::USaintSession::anonymous()))
     }
 
-    pub async fn with_password(&self, id: &str, password: &str) -> Result<USaintSession, RusaintError> {
+    pub async fn with_password(
+        &self,
+        id: &str,
+        password: &str,
+    ) -> Result<USaintSession, RusaintError> {
         let original = rusaint::USaintSession::with_password(id, password).await?;
         Ok(USaintSession(Arc::new(original)))
     }
@@ -41,4 +45,3 @@ impl USaintSessionBuilder {
         Ok(USaintSession(Arc::new(original)))
     }
 }
-

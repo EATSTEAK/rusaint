@@ -242,7 +242,7 @@ fn parse_sap_ssr_client(document: &str) -> Result<SapSsrClient, BodyError> {
         action: html_escape::decode_html_entities(data.get("action").ok_or(
             BodyError::NoSuchAttribute("'action' field of SSR Form".to_string()),
         )?)
-        .to_string(),
+            .to_string(),
         charset: data
             .get("sap-charset")
             .ok_or(BodyError::NoSuchAttribute(
