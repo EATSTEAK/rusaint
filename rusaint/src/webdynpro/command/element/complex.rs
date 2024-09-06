@@ -9,8 +9,8 @@ use crate::webdynpro::{
     error::WebDynproError,
 };
 
-/// 주어진 [`SapTable`](crate::webdynpro::element::complex::SapTable)의 상하 스크롤을 수행
-pub struct SapTableVerticalScrollCommand {
+/// 주어진 [`SapTable`](crate::webdynpro::element::complex::SapTable)의 상하 스크롤을 수행하는 이벤트를 반환
+pub struct SapTableVerticalScrollEventCommand {
     element_def: SapTableDef,
     first_visible_item_index: u32,
     cell_id: String,
@@ -21,7 +21,7 @@ pub struct SapTableVerticalScrollCommand {
     alt: bool,
 }
 
-impl SapTableVerticalScrollCommand {
+impl SapTableVerticalScrollEventCommand {
     /// 새로운 명령 객체를 생성합니다.
     pub fn new(
         element_def: SapTableDef,
@@ -46,7 +46,7 @@ impl SapTableVerticalScrollCommand {
     }
 }
 
-impl WebDynproCommand for SapTableVerticalScrollCommand {
+impl WebDynproCommand for SapTableVerticalScrollEventCommand {
     type Result = Event;
 
     fn dispatch(&self, parser: &ElementParser) -> Result<Self::Result, WebDynproError> {
@@ -63,18 +63,18 @@ impl WebDynproCommand for SapTableVerticalScrollCommand {
 }
 
 /// [`SapTableLSData`]를 반환
-pub struct ReadSapTableLSDataCommand {
+pub struct SapTableLSDataCommand {
     element_def: SapTableDef,
 }
 
-impl ReadSapTableLSDataCommand {
+impl SapTableLSDataCommand {
     /// 새로운 명령 객체를 생성합니다.
-    pub fn new(element_def: SapTableDef) -> ReadSapTableLSDataCommand {
+    pub fn new(element_def: SapTableDef) -> SapTableLSDataCommand {
         Self { element_def }
     }
 }
 
-impl WebDynproCommand for ReadSapTableLSDataCommand {
+impl WebDynproCommand for SapTableLSDataCommand {
     type Result = SapTableLSData;
 
     fn dispatch(&self, parser: &ElementParser) -> Result<Self::Result, WebDynproError> {
@@ -84,18 +84,18 @@ impl WebDynproCommand for ReadSapTableLSDataCommand {
 }
 
 /// [`SapTableBody`]를 반환
-pub struct ReadSapTableBodyCommand {
+pub struct SapTableBodyCommand {
     element_def: SapTableDef,
 }
 
-impl ReadSapTableBodyCommand {
+impl SapTableBodyCommand {
     /// 새로운 명령 객체를 생성합니다.
-    pub fn new(element_def: SapTableDef) -> ReadSapTableBodyCommand {
+    pub fn new(element_def: SapTableDef) -> SapTableBodyCommand {
         Self { element_def }
     }
 }
 
-impl WebDynproCommand for ReadSapTableBodyCommand {
+impl WebDynproCommand for SapTableBodyCommand {
     type Result = SapTableBody;
 
     fn dispatch(&self, parser: &ElementParser) -> Result<Self::Result, WebDynproError> {

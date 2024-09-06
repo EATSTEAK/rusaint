@@ -7,7 +7,7 @@ use crate::{
     model::SemesterType,
     webdynpro::{
         client::body::Body,
-        command::element::{complex::ReadSapTableBodyCommand, selection::ComboBoxSelectCommand},
+        command::element::{complex::SapTableBodyCommand, selection::ComboBoxSelectEventCommand},
         element::{
             complex::{
                 sap_table::cell::{SapTableCell, SapTableCellWrapper},
@@ -65,10 +65,13 @@ impl<'a> CourseScheduleApplication {
         year: &str,
         period: SemesterType,
     ) -> Result<(), WebDynproError> {
-        let year_select_event =
-            parser.read(ComboBoxSelectCommand::new(Self::PERIOD_YEAR, year, false))?;
+        let year_select_event = parser.read(ComboBoxSelectEventCommand::new(
+            Self::PERIOD_YEAR,
+            year,
+            false,
+        ))?;
         self.client.process_event(false, year_select_event).await?;
-        let semester_select_event = parser.read(ComboBoxSelectCommand::new(
+        let semester_select_event = parser.read(ComboBoxSelectEventCommand::new(
             Self::PERIOD_ID,
             Self::semester_to_key(period),
             false,
@@ -84,7 +87,7 @@ impl<'a> CourseScheduleApplication {
         parser: &ElementParser,
         row: u32,
     ) -> Result<(), WebDynproError> {
-        let event = parser.read(ComboBoxSelectCommand::new(
+        let event = parser.read(ComboBoxSelectEventCommand::new(
             Self::TABLE_ROWS,
             row.to_string().as_str(),
             false,
@@ -103,7 +106,7 @@ impl<'a> CourseScheduleApplication {
         year: u32,
         period: SemesterType,
         lecture_category: &LectureCategory,
-    ) -> Result<impl Iterator<Item=Lecture>, RusaintError> {
+    ) -> Result<impl Iterator<Item = Lecture>, RusaintError> {
         {
             let parser = ElementParser::new(self.body());
             let year_str = format!("{}", year);
@@ -112,7 +115,7 @@ impl<'a> CourseScheduleApplication {
         }
         lecture_category.request_query(&mut self.client.0).await?;
         let parser = ElementParser::new(self.body());
-        let table = parser.read(ReadSapTableBodyCommand::new(Self::MAIN_TABLE))?;
+        let table = parser.read(SapTableBodyCommand::new(Self::MAIN_TABLE))?;
         let Some(first_row) = table.iter().next() else {
             return Err(ApplicationError::NoLectureResult.into());
         };

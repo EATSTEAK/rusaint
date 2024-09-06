@@ -1,7 +1,7 @@
 use crate::{
     define_elements,
     webdynpro::{
-        command::element::text::ReadInputFieldValueCommand,
+        command::element::text::InputFieldValueCommand,
         element::{action::Button, graphic::Image, text::InputField},
         error::WebDynproError,
     },
@@ -126,60 +126,52 @@ impl<'a> StudentInformation {
             student_number: parser
                 .element_from_def(&Self::STUDENT12)?
                 .value_into_u32()?,
-            name: parser.read(ReadInputFieldValueCommand::new(Self::VORNA))?,
+            name: parser.read(InputFieldValueCommand::new(Self::VORNA))?,
             rrn: parser.element_from_def(&Self::PRDNI)?.value_into_u32()?,
-            collage: parser.read(ReadInputFieldValueCommand::new(Self::COLEG_TXT))?,
-            department: parser.read(ReadInputFieldValueCommand::new(Self::DEPT_TXT))?,
+            collage: parser.read(InputFieldValueCommand::new(Self::COLEG_TXT))?,
+            department: parser.read(InputFieldValueCommand::new(Self::DEPT_TXT))?,
             major: parser
-                .read(ReadInputFieldValueCommand::new(Self::MAJOR_TXT))
+                .read(InputFieldValueCommand::new(Self::MAJOR_TXT))
                 .ok(),
-            division: parser
-                .read(ReadInputFieldValueCommand::new(Self::TITEL))
-                .ok(),
+            division: parser.read(InputFieldValueCommand::new(Self::TITEL)).ok(),
             grade: parser.element_from_def(&Self::CMSTYEAR)?.value_into_u32()?,
             term: parser.element_from_def(&Self::ZSCHTERM)?.value_into_u32()?,
             image: Vec::with_capacity(0), // TODO: Image to bytes
-            alias: parser
-                .read(ReadInputFieldValueCommand::new(Self::RUFNM))
-                .ok(),
+            alias: parser.read(InputFieldValueCommand::new(Self::RUFNM)).ok(),
             kanji_name: parser
-                .read(ReadInputFieldValueCommand::new(Self::BIRTHNAME))
+                .read(InputFieldValueCommand::new(Self::BIRTHNAME))
                 .ok(),
             email: parser
-                .read(ReadInputFieldValueCommand::new(Self::SMTP_ADDR))
+                .read(InputFieldValueCommand::new(Self::SMTP_ADDR))
                 .ok(),
             tel_number: parser
-                .read(ReadInputFieldValueCommand::new(Self::TEL_NUMBER))
+                .read(InputFieldValueCommand::new(Self::TEL_NUMBER))
                 .ok(),
             mobile_number: parser
-                .read(ReadInputFieldValueCommand::new(Self::MOB_NUMBER))
+                .read(InputFieldValueCommand::new(Self::MOB_NUMBER))
                 .ok(),
             post_code: parser
-                .read(ReadInputFieldValueCommand::new(Self::POST_CODE))
+                .read(InputFieldValueCommand::new(Self::POST_CODE))
                 .ok(),
-            address: parser
-                .read(ReadInputFieldValueCommand::new(Self::CITY1))
-                .ok(),
-            specific_address: parser
-                .read(ReadInputFieldValueCommand::new(Self::STREET))
-                .ok(),
+            address: parser.read(InputFieldValueCommand::new(Self::CITY1)).ok(),
+            specific_address: parser.read(InputFieldValueCommand::new(Self::STREET)).ok(),
             is_transfer_student: !parser
-                .read(ReadInputFieldValueCommand::new(Self::NEWINCOR_CDT))?
+                .read(InputFieldValueCommand::new(Self::NEWINCOR_CDT))?
                 .contains("신입학"),
-            apply_date: parser.read(ReadInputFieldValueCommand::new(Self::APPLY_DT))?,
-            applied_collage: parser.read(ReadInputFieldValueCommand::new(Self::COLEG_CDT))?,
-            applied_department: parser.read(ReadInputFieldValueCommand::new(Self::DEPT_CDT))?,
+            apply_date: parser.read(InputFieldValueCommand::new(Self::APPLY_DT))?,
+            applied_collage: parser.read(InputFieldValueCommand::new(Self::COLEG_CDT))?,
+            applied_department: parser.read(InputFieldValueCommand::new(Self::DEPT_CDT))?,
             plural_major: parser
-                .read(ReadInputFieldValueCommand::new(Self::CG_STEXT1))
+                .read(InputFieldValueCommand::new(Self::CG_STEXT1))
                 .ok(),
             sub_major: parser
-                .read(ReadInputFieldValueCommand::new(Self::CG_STEXT2))
+                .read(InputFieldValueCommand::new(Self::CG_STEXT2))
                 .ok(),
             connected_major: parser
-                .read(ReadInputFieldValueCommand::new(Self::CG_STEXT3))
+                .read(InputFieldValueCommand::new(Self::CG_STEXT3))
                 .ok(),
             abeek: parser
-                .read(ReadInputFieldValueCommand::new(Self::CG_STEXT4))
+                .read(InputFieldValueCommand::new(Self::CG_STEXT4))
                 .ok(),
         })
     }

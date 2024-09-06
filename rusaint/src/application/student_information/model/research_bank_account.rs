@@ -5,8 +5,8 @@ use crate::{
     define_elements,
     webdynpro::{
         command::element::{
-            layout::TabStripTabSelectCommand, selection::ReadComboBoxValueCommand,
-            text::ReadInputFieldValueCommand,
+            layout::TabStripTabSelectEventCommand, selection::ComboBoxValueCommand,
+            text::InputFieldValueCommand,
         },
         element::{
             action::Button, layout::tab_strip::item::TabStripItem, selection::ComboBox,
@@ -44,7 +44,7 @@ impl<'a> StudentResearchBankAccount {
 
     pub(crate) async fn with_client(client: &mut USaintClient) -> Result<Self, WebDynproError> {
         let mut parser = ElementParser::new(client.body());
-        let event = parser.read(TabStripTabSelectCommand::new(
+        let event = parser.read(TabStripTabSelectEventCommand::new(
             StudentInformationApplication::TAB_ADDITION,
             Self::TAB_RES_ACCOUNT,
             6,
@@ -53,14 +53,12 @@ impl<'a> StudentResearchBankAccount {
         client.process_event(false, event).await?;
         parser = ElementParser::new(client.body());
         Ok(Self {
-            bank: parser
-                .read(ReadComboBoxValueCommand::new(Self::BANK_TEXT))
-                .ok(),
+            bank: parser.read(ComboBoxValueCommand::new(Self::BANK_TEXT)).ok(),
             account_number: parser
-                .read(ReadInputFieldValueCommand::new(Self::BANKN_TEXT))
+                .read(InputFieldValueCommand::new(Self::BANKN_TEXT))
                 .ok(),
             holder: parser
-                .read(ReadInputFieldValueCommand::new(Self::ZKOINH_TEXT))
+                .read(InputFieldValueCommand::new(Self::ZKOINH_TEXT))
                 .ok(),
         })
     }

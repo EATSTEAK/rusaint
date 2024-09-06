@@ -3,7 +3,7 @@ use crate::webdynpro::element::parser::ElementParser;
 use crate::{
     define_elements,
     webdynpro::{
-        command::element::text::ReadInputFieldValueCommand, element::text::InputField,
+        command::element::text::InputFieldValueCommand, element::text::InputField,
         error::WebDynproError,
     },
 };
@@ -77,16 +77,16 @@ impl<'a> StudentTeachingMajorInformation {
     ) -> Result<StudentTeachingMajorInformation, WebDynproError> {
         Ok(Self {
             major_name: parser
-                .read(ReadInputFieldValueCommand::new(Self::MAJOR_OTYPE))
+                .read(InputFieldValueCommand::new(Self::MAJOR_OTYPE))
                 .ok(),
             qualification_number: parser
-                .read(ReadInputFieldValueCommand::new(Self::MAJOR_QUAL_NUM))
+                .read(InputFieldValueCommand::new(Self::MAJOR_QUAL_NUM))
                 .ok(),
             initiation_date: parser
-                .read(ReadInputFieldValueCommand::new(Self::MAJOR_SELECT_DT))
+                .read(InputFieldValueCommand::new(Self::MAJOR_SELECT_DT))
                 .ok(),
             qualification_date: parser
-                .read(ReadInputFieldValueCommand::new(Self::MAJOR_QUAL_DT))
+                .read(InputFieldValueCommand::new(Self::MAJOR_QUAL_DT))
                 .ok(),
         })
     }
@@ -137,13 +137,13 @@ impl<'a> StudentTeachingPluralMajorInformation {
     ) -> Result<StudentTeachingPluralMajorInformation, WebDynproError> {
         Ok(Self {
             major_name: parser
-                .read(ReadInputFieldValueCommand::new(Self::DOUBLE_OTYPE))
+                .read(InputFieldValueCommand::new(Self::DOUBLE_OTYPE))
                 .ok(),
             qualification_number: parser
-                .read(ReadInputFieldValueCommand::new(Self::DOUBLE_QUAL_NUM))
+                .read(InputFieldValueCommand::new(Self::DOUBLE_QUAL_NUM))
                 .ok(),
             qualification_date: parser
-                .read(ReadInputFieldValueCommand::new(Self::DOUBLEL_DT))
+                .read(InputFieldValueCommand::new(Self::DOUBLEL_DT))
                 .ok(),
         })
     }
@@ -192,16 +192,16 @@ impl<'a> StudentLifelongInformation {
     ) -> Result<StudentLifelongInformation, WebDynproError> {
         Ok(Self {
             apply_date: parser
-                .read(ReadInputFieldValueCommand::new(Self::CONEDU_APP_DT))
+                .read(InputFieldValueCommand::new(Self::CONEDU_APP_DT))
                 .ok(),
             lifelong_type: parser
-                .read(ReadInputFieldValueCommand::new(Self::CONEDU_TYPE))
+                .read(InputFieldValueCommand::new(Self::CONEDU_TYPE))
                 .ok(),
             qualification_number: parser
-                .read(ReadInputFieldValueCommand::new(Self::CONEDU_QUAL_NUM))
+                .read(InputFieldValueCommand::new(Self::CONEDU_QUAL_NUM))
                 .ok(),
             qualification_date: parser
-                .read(ReadInputFieldValueCommand::new(Self::CONEDU_QUAL_DT))
+                .read(InputFieldValueCommand::new(Self::CONEDU_QUAL_DT))
                 .ok(),
         })
     }
@@ -252,13 +252,13 @@ impl<'a> StudentForignStudyInformation {
     ) -> Result<StudentForignStudyInformation, WebDynproError> {
         Ok(Self {
             approval_date: parser
-                .read(ReadInputFieldValueCommand::new(Self::APPRODATE))
+                .read(InputFieldValueCommand::new(Self::APPRODATE))
                 .ok(),
             authentication_number: parser
-                .read(ReadInputFieldValueCommand::new(Self::AUTHEN_NO))
+                .read(InputFieldValueCommand::new(Self::AUTHEN_NO))
                 .ok(),
             issue_date: parser
-                .read(ReadInputFieldValueCommand::new(Self::ISSUEDATE))
+                .read(InputFieldValueCommand::new(Self::ISSUEDATE))
                 .ok(),
         })
     }

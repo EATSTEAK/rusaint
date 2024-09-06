@@ -13,9 +13,9 @@ use crate::{
     webdynpro::{
         client::WebDynproClient,
         command::element::{
-            action::ButtonPressCommand,
-            layout::TabStripTabSelectCommand,
-            selection::{ComboBoxChangeCommand, ComboBoxSelectByValue1Command},
+            action::ButtonPressEventCommand,
+            layout::TabStripTabSelectEventCommand,
+            selection::{ComboBoxChangeEventCommand, ComboBoxSelectByValue1EventCommand},
         },
         element::{
             action::{Button, ButtonDef},
@@ -222,7 +222,7 @@ impl LectureCategory {
                         department,
                         major,
                     )
-                        .await?;
+                    .await?;
                 } else {
                     Self::request_lv2(
                         client,
@@ -234,7 +234,7 @@ impl LectureCategory {
                         collage,
                         department,
                     )
-                        .await?;
+                    .await?;
                 }
             }
             LectureCategory::RequiredElective { lecture_name } => {
@@ -252,7 +252,7 @@ impl LectureCategory {
                     SEARCH_GENERAL_REQ,
                     lecture_name,
                 )
-                    .await?;
+                .await?;
             }
             LectureCategory::OptionalElective { category } => {
                 // 교양선택
@@ -269,7 +269,7 @@ impl LectureCategory {
                     SEARCH_GENERAL_OPT,
                     category,
                 )
-                    .await?;
+                .await?;
             }
             LectureCategory::Chapel { lecture_name } => {
                 // 채플
@@ -286,7 +286,7 @@ impl LectureCategory {
                     SEARCH_CHAPEL,
                     lecture_name,
                 )
-                    .await?;
+                .await?;
             }
             LectureCategory::Education => {
                 // 교직
@@ -317,7 +317,7 @@ impl LectureCategory {
                     collage,
                     department,
                 )
-                    .await?;
+                .await?;
             }
             LectureCategory::ConnectedMajor { major } => {
                 // 연계전공
@@ -352,7 +352,7 @@ impl LectureCategory {
                     SEARCH_PROFESSOR,
                     keyword,
                 )
-                    .await?;
+                .await?;
             }
             LectureCategory::FindByLecture { keyword } => {
                 // 과목검색
@@ -390,7 +390,7 @@ impl LectureCategory {
                         department,
                         major,
                     )
-                        .await?;
+                    .await?;
                 } else {
                     Self::request_lv2(
                         client,
@@ -402,7 +402,7 @@ impl LectureCategory {
                         collage,
                         department,
                     )
-                        .await?;
+                    .await?;
                 }
             }
             LectureCategory::Cyber => {
@@ -429,23 +429,24 @@ impl LectureCategory {
         value_lv2: &str,
         value_lv3: &str,
     ) -> Result<(), WebDynproError> {
-        let tab_select = ElementParser::new(client.body()).read(TabStripTabSelectCommand::new(
-            Self::TABSTRIP,
-            tab_item,
-            tab_index,
-            0,
-        ))?;
+        let tab_select = ElementParser::new(client.body()).read(
+            TabStripTabSelectEventCommand::new(Self::TABSTRIP, tab_item, tab_index, 0),
+        )?;
         client.process_event(false, tab_select).await?;
-        let lv1_event = ElementParser::new(client.body())
-            .read(ComboBoxSelectByValue1Command::new(lv1, value_lv1, false))?;
+        let lv1_event = ElementParser::new(client.body()).read(
+            ComboBoxSelectByValue1EventCommand::new(lv1, value_lv1, false),
+        )?;
         client.process_event(false, lv1_event).await?;
-        let lv2_event = ElementParser::new(client.body())
-            .read(ComboBoxSelectByValue1Command::new(lv2, value_lv2, false))?;
+        let lv2_event = ElementParser::new(client.body()).read(
+            ComboBoxSelectByValue1EventCommand::new(lv2, value_lv2, false),
+        )?;
         client.process_event(false, lv2_event).await?;
         let parser = ElementParser::new(client.body());
-        let lv3_event = parser.read(ComboBoxSelectByValue1Command::new(lv3, value_lv3, false))?;
+        let lv3_event = parser.read(ComboBoxSelectByValue1EventCommand::new(
+            lv3, value_lv3, false,
+        ))?;
         client.process_event(false, lv3_event).await?;
-        let btn_press = parser.read(ButtonPressCommand::new(search_btn))?;
+        let btn_press = parser.read(ButtonPressEventCommand::new(search_btn))?;
         client.process_event(false, btn_press).await?;
         Ok(())
     }
@@ -460,20 +461,20 @@ impl LectureCategory {
         value_lv1: &str,
         value_lv2: &str,
     ) -> Result<(), WebDynproError> {
-        let tab_select = ElementParser::new(client.body()).read(TabStripTabSelectCommand::new(
-            Self::TABSTRIP,
-            tab_item,
-            tab_index,
-            0,
-        ))?;
+        let tab_select = ElementParser::new(client.body()).read(
+            TabStripTabSelectEventCommand::new(Self::TABSTRIP, tab_item, tab_index, 0),
+        )?;
         client.process_event(false, tab_select).await?;
-        let lv1_event = ElementParser::new(client.body())
-            .read(ComboBoxSelectByValue1Command::new(lv1, value_lv1, false))?;
+        let lv1_event = ElementParser::new(client.body()).read(
+            ComboBoxSelectByValue1EventCommand::new(lv1, value_lv1, false),
+        )?;
         client.process_event(false, lv1_event).await?;
         let parser = ElementParser::new(client.body());
-        let lv2_event = parser.read(ComboBoxSelectByValue1Command::new(lv2, value_lv2, false))?;
+        let lv2_event = parser.read(ComboBoxSelectByValue1EventCommand::new(
+            lv2, value_lv2, false,
+        ))?;
         client.process_event(false, lv2_event).await?;
-        let btn_press = parser.read(ButtonPressCommand::new(search_btn))?;
+        let btn_press = parser.read(ButtonPressEventCommand::new(search_btn))?;
         client.process_event(false, btn_press).await?;
         Ok(())
     }
@@ -486,17 +487,16 @@ impl LectureCategory {
         search_btn: ButtonDef,
         value_lv1: &str,
     ) -> Result<(), WebDynproError> {
-        let tab_select = ElementParser::new(client.body()).read(TabStripTabSelectCommand::new(
-            Self::TABSTRIP,
-            tab_item,
-            tab_index,
-            0,
-        ))?;
+        let tab_select = ElementParser::new(client.body()).read(
+            TabStripTabSelectEventCommand::new(Self::TABSTRIP, tab_item, tab_index, 0),
+        )?;
         client.process_event(false, tab_select).await?;
         let parser = ElementParser::new(client.body());
-        let lv1_event = parser.read(ComboBoxSelectByValue1Command::new(lv1, value_lv1, false))?;
+        let lv1_event = parser.read(ComboBoxSelectByValue1EventCommand::new(
+            lv1, value_lv1, false,
+        ))?;
         client.process_event(false, lv1_event).await?;
-        let btn_press = parser.read(ButtonPressCommand::new(search_btn))?;
+        let btn_press = parser.read(ButtonPressEventCommand::new(search_btn))?;
         client.process_event(false, btn_press).await?;
         Ok(())
     }
@@ -509,17 +509,14 @@ impl LectureCategory {
         search_btn: ButtonDef,
         value: &str,
     ) -> Result<(), WebDynproError> {
-        let tab_select = ElementParser::new(client.body()).read(TabStripTabSelectCommand::new(
-            Self::TABSTRIP,
-            tab_item,
-            tab_index,
-            0,
-        ))?;
+        let tab_select = ElementParser::new(client.body()).read(
+            TabStripTabSelectEventCommand::new(Self::TABSTRIP, tab_item, tab_index, 0),
+        )?;
         client.process_event(false, tab_select).await?;
         let parser = ElementParser::new(client.body());
-        let change = parser.read(ComboBoxChangeCommand::new(text_combo, value, false))?;
+        let change = parser.read(ComboBoxChangeEventCommand::new(text_combo, value, false))?;
         client.process_event(false, change).await?;
-        let btn_press = parser.read(ButtonPressCommand::new(search_btn))?;
+        let btn_press = parser.read(ButtonPressEventCommand::new(search_btn))?;
         client.process_event(false, btn_press).await?;
         Ok(())
     }
@@ -530,15 +527,12 @@ impl LectureCategory {
         tab_index: u32,
         search_btn: ButtonDef,
     ) -> Result<(), WebDynproError> {
-        let tab_select = ElementParser::new(client.body()).read(TabStripTabSelectCommand::new(
-            Self::TABSTRIP,
-            tab_item,
-            tab_index,
-            0,
-        ))?;
+        let tab_select = ElementParser::new(client.body()).read(
+            TabStripTabSelectEventCommand::new(Self::TABSTRIP, tab_item, tab_index, 0),
+        )?;
         client.process_event(false, tab_select).await?;
         let btn_press =
-            ElementParser::new(client.body()).read(ButtonPressCommand::new(search_btn))?;
+            ElementParser::new(client.body()).read(ButtonPressEventCommand::new(search_btn))?;
         client.process_event(false, btn_press).await?;
         Ok(())
     }

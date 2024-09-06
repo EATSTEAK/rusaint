@@ -12,7 +12,7 @@ use crate::{
     define_elements,
     utils::de_with::{deserialize_bool_string, deserialize_optional_string},
     webdynpro::{
-        command::element::{complex::ReadSapTableBodyCommand, layout::TabStripTabSelectCommand},
+        command::element::{complex::SapTableBodyCommand, layout::TabStripTabSelectEventCommand},
         element::{
             complex::{sap_table::FromSapTable, SapTable},
             definition::ElementDefinition,
@@ -40,7 +40,7 @@ impl<'a> StudentFamily {
 
     pub(crate) async fn with_client(client: &mut USaintClient) -> Result<Self, WebDynproError> {
         let mut parser = ElementParser::new(client.body());
-        let event = parser.read(TabStripTabSelectCommand::new(
+        let event = parser.read(TabStripTabSelectEventCommand::new(
             StudentInformationApplication::TAB_ADDITION,
             Self::TAB_FAMILY,
             1,
@@ -48,7 +48,7 @@ impl<'a> StudentFamily {
         ))?;
         client.process_event(false, event).await?;
         parser = ElementParser::new(client.body());
-        let table = parser.read(ReadSapTableBodyCommand::new(Self::TABLE_FAMILY))?;
+        let table = parser.read(SapTableBodyCommand::new(Self::TABLE_FAMILY))?;
         let members = table.try_table_into::<StudentFamilyMember>(&parser)?;
         Ok(Self { members })
     }

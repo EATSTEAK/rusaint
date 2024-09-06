@@ -9,22 +9,22 @@ use crate::webdynpro::{
     error::WebDynproError,
 };
 
-/// [`TabStrip`](crate::webdynpro::element::layout::TabStrip)의 탭을 선택하도록 함
-pub struct TabStripTabSelectCommand {
+/// [`TabStrip`](crate::webdynpro::element::layout::TabStrip)의 탭을 선택하도록 하는 이벤트를 반환
+pub struct TabStripTabSelectEventCommand {
     element_def: TabStripDef,
     item_id: String,
     item_index: u32,
     first_visible_item_index: u32,
 }
 
-impl<'a> TabStripTabSelectCommand {
+impl<'a> TabStripTabSelectEventCommand {
     /// 새로운 명령 객체를 생성합니다.
     pub fn new(
         element_def: TabStripDef,
         item: TabStripItemDef,
         item_index: u32,
         first_visible_item_index: u32,
-    ) -> TabStripTabSelectCommand {
+    ) -> TabStripTabSelectEventCommand {
         Self {
             element_def,
             item_id: item.id().to_owned(),
@@ -34,7 +34,7 @@ impl<'a> TabStripTabSelectCommand {
     }
 }
 
-impl WebDynproCommand for TabStripTabSelectCommand {
+impl WebDynproCommand for TabStripTabSelectEventCommand {
     type Result = Event;
 
     fn dispatch(&self, parser: &ElementParser) -> Result<Self::Result, WebDynproError> {
