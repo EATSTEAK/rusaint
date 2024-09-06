@@ -5,13 +5,22 @@ use crate::webdynpro::element::{definition::ElementDefinition, Element};
 use crate::webdynpro::error::{ElementError, WebDynproError};
 use scraper::Html;
 
+/// DOM에서 엘리먼트를 파싱하기 위한 파서
 pub struct ElementParser(Html);
 
+// This is safe since `ElementParser` is immutable.
+unsafe impl Send for ElementParser {}
+
+unsafe impl Sync for ElementParser {}
+
 impl<'s> ElementParser {
+    /// [`Body`]로부터 새로운 파서를 만듭니다.
     pub fn new(body: &Body) -> Self {
         let document = Html::parse_document(body.raw_body());
         Self(document)
     }
+
+    /// [`ElementDefinition`]을 구현하는 값에서 알맞는 [`Element`]를 만듭니다.
     pub fn element_from_def<T: ElementDefinition<'s>>(
         &'s self,
         definition: &T,
@@ -25,6 +34,7 @@ impl<'s> ElementParser {
         Element::from_ref(definition, element_ref)
     }
 
+    /// [`SubElementDefinition`]을 구현하는 값에서 알맞는 [`SubElement`]를 만듭니다.
     pub fn subelement_from_def<T: SubElementDefinition<'s>>(
         &'s self,
         definition: &T,
