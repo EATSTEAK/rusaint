@@ -1,5 +1,6 @@
 use derive_builder::Builder;
 use serde::Deserialize;
+use std::fmt::Display;
 
 use super::{EVENT_DATA_COLON, EVENT_DATA_COMMA, EVENT_DATA_END, EVENT_DATA_START};
 
@@ -28,9 +29,8 @@ pub struct UcfParameters {
     client_listener: Option<String>,
 }
 
-impl ToString for UcfParameters {
-    /// [`UcfParameters`]값을 이벤트 웹 리퀘스트에 전송할 수 있는 형태의 문자열으로 변환합니다.
-    fn to_string(&self) -> String {
+impl Display for UcfParameters {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut owned = "".to_owned();
         owned.push_str(EVENT_DATA_START);
         if let Some(action) = &self.action {
@@ -91,7 +91,7 @@ impl ToString for UcfParameters {
             owned.truncate(owned.len() - 5)
         };
         owned.push_str(EVENT_DATA_END);
-        owned
+        write!(f, "{}", owned)
     }
 }
 
@@ -144,15 +144,16 @@ pub enum UcfAction {
     None,
 }
 
-impl ToString for UcfAction {
-    fn to_string(&self) -> String {
-        match &self {
+impl Display for UcfAction {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let str = match &self {
             Self::Submit => "submit",
             Self::SubmitAsync => "submit_async",
             Self::Enqueue => "enqueue",
             _ => "none",
         }
-        .to_owned()
+        .to_owned();
+        write!(f, "{}", str)
     }
 }
 
@@ -168,14 +169,15 @@ pub enum UcfCardinality {
     None,
 }
 
-impl ToString for UcfCardinality {
-    fn to_string(&self) -> String {
-        match &self {
+impl Display for UcfCardinality {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let str = match &self {
             Self::Multiple => "multiple",
             Self::Single => "single",
             _ => "none",
         }
-        .to_owned()
+        .to_owned();
+        write!(f, "{}", str)
     }
 }
 
@@ -191,14 +193,15 @@ pub enum UcfResponseData {
     Inherit,
 }
 
-impl ToString for UcfResponseData {
-    fn to_string(&self) -> String {
-        match &self {
+impl Display for UcfResponseData {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let str = match &self {
             Self::Full => "full",
             Self::Delta => "delta",
             Self::Inherit => "inherit",
         }
-        .to_owned()
+        .to_owned();
+        write!(f, "{}", str)
     }
 }
 
@@ -210,13 +213,14 @@ pub enum UcfTransportMethod {
     Partial,
 }
 
-impl ToString for UcfTransportMethod {
-    fn to_string(&self) -> String {
-        match &self {
+impl Display for UcfTransportMethod {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let str = match &self {
             Self::Full => "full",
             Self::Partial => "partial",
         }
-        .to_owned()
+        .to_owned();
+        write!(f, "{}", str)
     }
 }
 
@@ -229,12 +233,13 @@ pub enum UcfDelay {
     None,
 }
 
-impl ToString for UcfDelay {
-    fn to_string(&self) -> String {
-        match &self {
+impl Display for UcfDelay {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let str = match &self {
             Self::Full => "full",
             _ => "none",
         }
-        .to_owned()
+        .to_owned();
+        write!(f, "{}", str)
     }
 }

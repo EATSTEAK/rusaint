@@ -29,9 +29,7 @@ impl EventTestSuite {
 impl USaintApplication for EventTestSuite {
     const APP_NAME: &'static str = "WDR_TEST_EVENTS";
 
-    fn from_client(
-        client: rusaint::application::USaintClient,
-    ) -> Result<Self, rusaint::RusaintError> {
+    fn from_client(client: USaintClient) -> Result<Self, RusaintError> {
         if client.name() != Self::APP_NAME {
             Err(RusaintError::InvalidClientError)
         } else {

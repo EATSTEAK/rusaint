@@ -113,7 +113,7 @@ impl<'a> FromSapTable<'a> for StudentTransferRecord {
         header: &'a crate::webdynpro::element::complex::sap_table::SapTableHeader,
         row: &'a crate::webdynpro::element::complex::sap_table::SapTableRow,
         parser: &'a ElementParser,
-    ) -> Result<Self, crate::webdynpro::error::WebDynproError> {
+    ) -> Result<Self, WebDynproError> {
         let map_string = row.try_row_into::<HashMap<String, String>>(header, parser)?;
         let map_de: MapDeserializer<_, serde::de::value::Error> = map_string.into_deserializer();
         Ok(StudentTransferRecord::deserialize(map_de).map_err(|e| {

@@ -11,8 +11,8 @@ pub async fn get_session() -> Result<Arc<USaintSession>> {
         Ok(session.to_owned())
     } else {
         dotenv().ok();
-        let id = std::env::var("SSO_ID").unwrap();
-        let password = std::env::var("SSO_PASSWORD").unwrap();
+        let id = std::env::var("SSO_ID")?;
+        let password = std::env::var("SSO_PASSWORD")?;
         let session = USaintSession::with_password(&id, &password).await?;
         let _ = SESSION.set(Arc::new(session));
         SESSION

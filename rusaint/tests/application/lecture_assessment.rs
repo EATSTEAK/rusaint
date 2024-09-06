@@ -19,6 +19,6 @@ async fn lecture_assessment() {
         .find_assessments(2023, SemesterType::Two, Some("마케팅"), None, None)
         .await
         .unwrap();
-    assert!(info.len() == 29);
+    assert_eq!(info.len(), 29);
     println!("{} results: {:?}", info.len(), info);
 }

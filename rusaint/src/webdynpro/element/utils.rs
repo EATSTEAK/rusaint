@@ -33,15 +33,13 @@ pub(super) fn parse_lsevents(raw_lsevents: &str) -> Result<EventParameterMap, We
 }
 
 /// 엘리먼트의 자식 엘리먼트를 가져옵니다.
-pub(super) fn children_element<'body>(
-    root: scraper::ElementRef<'body>,
-) -> Vec<ElementWrapper<'body>> {
+pub(super) fn children_element(root: ElementRef) -> Vec<ElementWrapper> {
     let mut next_refs = vec![root];
     let mut cts: Vec<ElementRef<'_>> = vec![];
     while let Some(elem) = next_refs.pop() {
         for child in elem.children() {
             if let scraper::Node::Element(child_elem) = child.value() {
-                let child_elem_ref = scraper::ElementRef::wrap(child).unwrap();
+                let child_elem_ref = ElementRef::wrap(child).unwrap();
                 if child_elem.attr("ct").is_some() {
                     cts.push(child_elem_ref);
                 } else {
