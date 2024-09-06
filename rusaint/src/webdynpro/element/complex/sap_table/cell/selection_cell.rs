@@ -44,7 +44,7 @@ impl<'a> SapTableCell<'a> for SapTableSelectionCell<'a> {
                         .next()?
                         .to_owned(),
                 )
-                .ok()
+                    .ok()
             })
             .to_owned()
     }

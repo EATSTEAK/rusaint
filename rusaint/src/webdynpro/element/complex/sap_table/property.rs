@@ -1,4 +1,5 @@
 use serde::Deserialize;
+use std::fmt::Display;
 
 /// 테이블 내의 셀 접근 방식
 #[allow(missing_docs)]
@@ -11,9 +12,9 @@ pub enum AccessType {
     DeselectAll,
 }
 
-impl ToString for AccessType {
-    fn to_string(&self) -> String {
-        match self {
+impl Display for AccessType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let str = match self {
             AccessType::Invalid => "INVALID",
             AccessType::Standard => "STANDARD",
             AccessType::Range => "RANGE",
@@ -21,7 +22,8 @@ impl ToString for AccessType {
             AccessType::SelectAll => "SELECT_ALL",
             AccessType::DeselectAll => "DESELECT_ALL",
         }
-        .to_owned()
+            .to_owned();
+        write!(f, "{}", str)
     }
 }
 

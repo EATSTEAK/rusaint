@@ -28,7 +28,7 @@ impl<'a> SapTableBody {
     ) -> Result<SapTableBody, ElementError> {
         let ref_iter = elem_ref
             .children()
-            .filter_map(|node| scraper::ElementRef::wrap(node));
+            .filter_map(|node| ElementRef::wrap(node));
         let mut header_iter = ref_iter
             .clone()
             .filter_map(|row_ref| SapTableHeader::new(table_def.clone(), row_ref).ok());
@@ -81,7 +81,7 @@ impl<'a> SapTableBody {
                                 (spanned_cell.0.clone(), spanned_cell.1 - 1, spanned_cell.2),
                             );
                         }
-                        for _ in 0..(spanned_cell.2) {
+                        for _ in 0..spanned_cell.2 {
                             col_counter += 1;
                             cells.push(spanned_cell.0.clone());
                         }
@@ -113,7 +113,7 @@ impl<'a> SapTableBody {
                         (spanned_cell.0.clone(), spanned_cell.1 - 1, spanned_cell.2),
                     );
                 }
-                for _ in 0..(spanned_cell.2) {
+                for _ in 0..spanned_cell.2 {
                     col_counter += 1;
                     cells.push(spanned_cell.0.clone());
                 }
@@ -135,14 +135,14 @@ impl<'a> SapTableBody {
     }
 
     /// 내부 행의 Iterator를 반환합니다.
-    pub fn iter(&'a self) -> impl Iterator<Item = &SapTableRow> + ExactSizeIterator {
+    pub fn iter(&'a self) -> impl Iterator<Item=&SapTableRow> + ExactSizeIterator {
         self.rows.iter()
     }
 
     /// 내부 행에 헤더 행을 포함한 튜플의 Iterator를 반환합니다.
     pub fn zip_header(
         &'a self,
-    ) -> impl Iterator<Item = (&SapTableHeader, &SapTableRow)> + ExactSizeIterator {
+    ) -> impl Iterator<Item=(&SapTableHeader, &SapTableRow)> + ExactSizeIterator {
         self.rows.iter().map(|row| (self.header(), row))
     }
 

@@ -59,7 +59,7 @@ impl<'a> TabStrip<'a> {
     /// 탭 내부 [`TabStripItem`]의 정의를 반환합니다.
     pub fn tab_items(
         &self,
-    ) -> impl Iterator<Item = &<TabStripItem<'a> as Element<'a>>::Def> + ExactSizeIterator {
+    ) -> impl Iterator<Item=&<TabStripItem<'a> as Element<'a>>::Def> + ExactSizeIterator {
         self.tab_items
             .get_or_init(|| {
                 let Ok(items_selector) =

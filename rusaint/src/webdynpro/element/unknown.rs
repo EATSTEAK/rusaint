@@ -65,18 +65,22 @@ impl<'a> Element<'a> for Unknown<'a> {
 
     type Def = UnknownDef;
 
-    fn lsdata(&self) -> &Self::ElementLSData {
-        self.lsdata.get_or_init(|| {
-            parse_lsdata(self.element_ref.value().attr("lsdata").unwrap_or(""))
-                .unwrap_or(Value::default())
-        })
-    }
-
     fn from_ref(
         elem_def: &impl ElementDefinition<'a>,
         element: scraper::ElementRef<'a>,
     ) -> Result<Self, WebDynproError> {
         Ok(Self::new(elem_def.id_cow(), element))
+    }
+
+    fn children(&self) -> Vec<super::ElementWrapper<'a>> {
+        children_element(self.element_ref().clone())
+    }
+
+    fn lsdata(&self) -> &Self::ElementLSData {
+        self.lsdata.get_or_init(|| {
+            parse_lsdata(self.element_ref.value().attr("lsdata").unwrap_or(""))
+                .unwrap_or(Value::default())
+        })
     }
 
     fn id(&self) -> &str {
@@ -89,10 +93,6 @@ impl<'a> Element<'a> for Unknown<'a> {
 
     fn wrap(self) -> super::ElementWrapper<'a> {
         super::ElementWrapper::Unknown(self)
-    }
-
-    fn children(&self) -> Vec<super::ElementWrapper<'a>> {
-        children_element(self.element_ref().clone())
     }
 }
 

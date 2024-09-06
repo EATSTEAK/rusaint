@@ -57,7 +57,7 @@ impl<'a> SapTableRow {
     }
 
     /// 행 내부 셀 정의의 [`Iterator`]를 반환합니다.
-    pub fn iter(&self) -> impl Iterator<Item = &SapTableCellDefWrapper> + ExactSizeIterator {
+    pub fn iter(&self) -> impl Iterator<Item=&SapTableCellDefWrapper> + ExactSizeIterator {
         self.cells.iter()
     }
 
@@ -65,7 +65,7 @@ impl<'a> SapTableRow {
     pub fn iter_value(
         &'a self,
         parser: &'a ElementParser,
-    ) -> impl Iterator<Item = Result<SapTableCellWrapper<'a>, WebDynproError>> + ExactSizeIterator
+    ) -> impl Iterator<Item=Result<SapTableCellWrapper<'a>, WebDynproError>> + ExactSizeIterator
     {
         self.cells
             .iter()

@@ -168,7 +168,7 @@ macro_rules! def_listbox_subset {
 
     impl<'a> ListBoxWrapper<'a> {
 
-        /// [`ElementWrapper`](crate::webdynpro::element::ElementWrapper)에서 [`ListBoxWrapper`](crate::webdynpro::element::selection::list_box::ListBoxWrapper)로 변환을 시도합니다.
+        /// [`ElementWrapper`](crate::webdynpro::element::ElementWrapper)에서 [`ListBoxWrapper`](ListBoxWrapper)로 변환을 시도합니다.
         pub fn from_elements(elements: $crate::webdynpro::element::ElementWrapper<'a>) -> Option<ListBoxWrapper<'a>> {
             match elements {
                 $($crate::webdynpro::element::ElementWrapper::$name(elem) => Some(ListBoxWrapper::$name(elem)),)+
@@ -305,7 +305,7 @@ impl<'a> ListBox<'a> {
     }
 
     /// [`ListBoxItemDefWrapper`]의 목록을 반환합니다.
-    pub fn items(&self) -> impl Iterator<Item = &ListBoxItemDefWrapper> {
+    pub fn items(&self) -> impl Iterator<Item=&ListBoxItemDefWrapper> {
         self.items
             .get_or_init(|| {
                 let items_selector = scraper::Selector::parse("[ct]").unwrap();
@@ -329,7 +329,7 @@ impl<'a> ListBox<'a> {
     }
 
     /// [`ListBoxItemInfo`]의 Iterator를 반환합니다.
-    pub fn item_infos(&self) -> Result<impl Iterator<Item = ListBoxItemInfo>, WebDynproError> {
+    pub fn item_infos(&self) -> Result<impl Iterator<Item=ListBoxItemInfo>, WebDynproError> {
         let items_selector = scraper::Selector::parse("[ct]").unwrap();
         let vec = self
             .element_ref
@@ -340,5 +340,5 @@ impl<'a> ListBox<'a> {
     }
 }
 
-/// [`ListBoxItem`](self::item::ListBoxItem)과 [`ListBoxActionItem`](self::item::ListBoxActionItem)이 포함된 모듈
+/// [`ListBoxItem`](item::ListBoxItem)과 [`ListBoxActionItem`](item::ListBoxActionItem)이 포함된 모듈
 pub mod item;

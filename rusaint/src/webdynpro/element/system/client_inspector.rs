@@ -171,6 +171,17 @@ impl<'a> Element<'a> for ClientInspector<'a> {
 
     type Def = ClientInspectorDef;
 
+    fn from_ref(
+        elem_def: &impl ElementDefinition<'a>,
+        element: scraper::ElementRef<'a>,
+    ) -> Result<Self, WebDynproError> {
+        Ok(Self::new(elem_def.id_cow(), element))
+    }
+
+    fn children(&self) -> Vec<ElementWrapper<'a>> {
+        children_element(self.element_ref().clone())
+    }
+
     fn lsdata(&self) -> &Self::ElementLSData {
         self.lsdata.get_or_init(|| {
             let Ok(lsdata_obj) =
@@ -183,13 +194,6 @@ impl<'a> Element<'a> for ClientInspector<'a> {
         })
     }
 
-    fn from_ref(
-        elem_def: &impl ElementDefinition<'a>,
-        element: scraper::ElementRef<'a>,
-    ) -> Result<Self, WebDynproError> {
-        Ok(Self::new(elem_def.id_cow(), element))
-    }
-
     fn id(&self) -> &str {
         &self.id
     }
@@ -200,10 +204,6 @@ impl<'a> Element<'a> for ClientInspector<'a> {
 
     fn wrap(self) -> ElementWrapper<'a> {
         ElementWrapper::ClientInspector(self)
-    }
-
-    fn children(&self) -> Vec<ElementWrapper<'a>> {
-        children_element(self.element_ref().clone())
     }
 }
 

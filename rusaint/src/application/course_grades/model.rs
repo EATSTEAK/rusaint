@@ -5,6 +5,7 @@ use serde::{
     Deserialize, Deserializer,
 };
 
+use crate::webdynpro::element::parser::ElementParser;
 use crate::{
     utils::de_with::{deserialize_empty, deserialize_f32_string, deserialize_u32_string},
     webdynpro::{
@@ -12,7 +13,6 @@ use crate::{
         error::{ElementError, WebDynproError},
     },
 };
-use crate::webdynpro::element::parser::ElementParser;
 
 /// 전체 성적(학적부, 증명)
 #[derive(Debug)]

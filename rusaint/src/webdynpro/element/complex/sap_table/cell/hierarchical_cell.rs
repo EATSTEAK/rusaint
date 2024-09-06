@@ -49,7 +49,7 @@ impl<'a> SapTableCell<'a> for SapTableHierarchicalCell<'a> {
                         .next()?
                         .to_owned(),
                 )
-                .ok()
+                    .ok()
             })
             .to_owned()
     }

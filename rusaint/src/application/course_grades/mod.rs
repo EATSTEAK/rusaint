@@ -133,7 +133,7 @@ impl<'a> CourseGradesApplication {
     ) -> Result<(), WebDynproError> {
         let course = Self::course_type_to_key(course);
         let combobox_lsdata = parser.read(ReadComboBoxLSDataCommand::new(Self::PROGRESS_TYPE))?;
-        if (|| Some(combobox_lsdata.key()?.as_str()))() != Some(course) {
+        if combobox_lsdata.key().map(String::as_str) != Some(course) {
             let select_event = parser.read(ComboBoxSelectCommand::new(
                 Self::PROGRESS_TYPE,
                 course,
@@ -155,12 +155,12 @@ impl<'a> CourseGradesApplication {
             parser.read(ReadComboBoxLSDataCommand::new(Self::PERIOD_YEAR))?;
         let semester_combobox_lsdata =
             parser.read(ReadComboBoxLSDataCommand::new(Self::PERIOD_SEMESTER))?;
-        if (|| Some(year_combobox_lsdata.key()?.as_str()))() != Some(year) {
+        if year_combobox_lsdata.key().map(String::as_str) != Some(year) {
             let year_select_event =
                 parser.read(ComboBoxSelectCommand::new(Self::PERIOD_YEAR, &year, false))?;
             self.client.process_event(false, year_select_event).await?;
         }
-        if (|| Some(semester_combobox_lsdata.key()?.as_str()))() != Some(semester) {
+        if semester_combobox_lsdata.key().map(String::as_str) != Some(semester) {
             let semester_select_event = parser.read(ComboBoxSelectCommand::new(
                 Self::PERIOD_SEMESTER,
                 semester,

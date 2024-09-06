@@ -47,22 +47,22 @@ impl CourseScheduleInformation {
             classroom: splited.next().unwrap_or("").to_string(),
         }
     }
-    
+
     /// 강의명을 반환합니다.
     pub fn name(&self) -> &str {
         &self.name
     }
-    
+
     /// 강의 교수자를 반환합니다.
     pub fn professor(&self) -> &str {
         &self.professor
     }
-    
+
     /// 강의 시간을 반환합니다. hh:mm-hh:mm 형태입니다.
     pub fn time(&self) -> &str {
         &self.time
     }
-    
+
     /// 강의실을 반환합니다.
     pub fn classroom(&self) -> &str {
         &self.classroom

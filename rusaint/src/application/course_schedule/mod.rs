@@ -103,7 +103,7 @@ impl<'a> CourseScheduleApplication {
         year: u32,
         period: SemesterType,
         lecture_category: &LectureCategory,
-    ) -> Result<impl Iterator<Item = Lecture>, RusaintError> {
+    ) -> Result<impl Iterator<Item=Lecture>, RusaintError> {
         {
             let parser = ElementParser::new(self.body());
             let year_str = format!("{}", year);

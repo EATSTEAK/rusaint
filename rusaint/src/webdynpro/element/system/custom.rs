@@ -118,15 +118,19 @@ impl<'a> Element<'a> for Custom {
 
     type Def = CustomDef;
 
-    fn lsdata(&self) -> &Self::ElementLSData {
-        &()
-    }
-
     fn from_ref(
         elem_def: &impl ElementDefinition<'a>,
         _element: scraper::ElementRef,
     ) -> Result<Self, WebDynproError> {
         Ok(Self::new(elem_def.id_cow()))
+    }
+
+    fn children(&self) -> Vec<ElementWrapper<'a>> {
+        vec![]
+    }
+
+    fn lsdata(&self) -> &Self::ElementLSData {
+        &()
     }
 
     fn id(&self) -> &str {
@@ -139,10 +143,6 @@ impl<'a> Element<'a> for Custom {
 
     fn wrap(self) -> ElementWrapper<'a> {
         ElementWrapper::Custom(self)
-    }
-
-    fn children(&self) -> Vec<ElementWrapper<'a>> {
-        vec![]
     }
 }
 

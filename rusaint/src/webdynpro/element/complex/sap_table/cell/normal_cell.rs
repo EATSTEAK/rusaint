@@ -47,7 +47,7 @@ impl<'a> SapTableCell<'a> for SapTableNormalCell<'a> {
                         .next()?
                         .to_owned(),
                 )
-                .ok()
+                    .ok()
             })
             .to_owned()
     }

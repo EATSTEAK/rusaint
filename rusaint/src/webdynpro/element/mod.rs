@@ -30,7 +30,7 @@ use super::{
     event::{ucf_parameters::UcfParameters, Event, EventBuilder},
 };
 
-/// [`SubElement`](crate::webdynpro::element::sub::SubElement) 트레이트 모듈
+/// [`SubElement`](sub::SubElement) 트레이트 모듈
 pub mod sub;
 
 /// 엘리먼트의 정의를 다루는 모듈
@@ -282,10 +282,10 @@ pub trait Element<'a>: Sized {
     /// 엘리먼트의 정의
     type Def: ElementDefinition<'a>;
 
-    /// 엘리먼트 정의와 [`scraper::ElementRef`]에서 엘리먼트를 가져옵니다.
+    /// 엘리먼트 정의와 [`ElementRef`]에서 엘리먼트를 가져옵니다.
     fn from_ref(
         elem_def: &impl ElementDefinition<'a>,
-        element: scraper::ElementRef<'a>,
+        element: ElementRef<'a>,
     ) -> Result<Self, WebDynproError>;
 
     /// 엘리먼트의 자식 엘리먼트를 가져옵니다.
@@ -297,7 +297,7 @@ pub trait Element<'a>: Sized {
     /// 엘리먼트의 Id를 가져옵니다.
     fn id(&self) -> &str;
 
-    /// 엘리먼트의 [`scraper::ElementRef`]를 가져옵니다.
+    /// 엘리먼트의 [`ElementRef`]를 가져옵니다.
     fn element_ref(&self) -> &ElementRef<'a>;
 
     /// 엘리먼트를 [`ElementWrapper`]로 감쌉니다.
