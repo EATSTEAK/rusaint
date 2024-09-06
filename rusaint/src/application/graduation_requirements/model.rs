@@ -5,13 +5,11 @@ use serde::{
     Deserialize, Deserializer,
 };
 
+use crate::application::utils::de_with::deserialize_with_trim;
 use crate::webdynpro::element::parser::ElementParser;
-use crate::{
-    utils::de_with::deserialize_with_trim,
-    webdynpro::{
-        element::{complex::sap_table::FromSapTable, definition::ElementDefinition},
-        error::ElementError,
-    },
+use crate::webdynpro::{
+    element::{complex::sap_table::FromSapTable, definition::ElementDefinition},
+    error::ElementError,
 };
 
 #[derive(Debug)]

@@ -5,13 +5,13 @@ use serde::{
     Deserialize,
 };
 
+use crate::application::utils::de_with::{deserialize_semester_type, deserialize_u32_string};
 use crate::webdynpro::command::WebDynproCommandExecutor;
 use crate::webdynpro::element::parser::ElementParser;
 use crate::{
     define_elements,
     error::ApplicationError,
     model::SemesterType,
-    utils::de_with::{deserialize_semester_type, deserialize_u32_string},
     webdynpro::{
         command::element::complex::ReadSapTableBodyCommand,
         element::{

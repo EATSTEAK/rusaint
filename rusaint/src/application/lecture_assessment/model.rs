@@ -5,10 +5,12 @@ use serde::{
     Deserialize,
 };
 
+use crate::application::utils::de_with::{
+    deserialize_f32_string, deserialize_semester_type, deserialize_u32_string,
+};
 use crate::webdynpro::element::parser::ElementParser;
 use crate::{
     model::SemesterType,
-    utils::de_with::{deserialize_f32_string, deserialize_semester_type, deserialize_u32_string},
     webdynpro::{
         element::{complex::sap_table::FromSapTable, definition::ElementDefinition},
         error::{ElementError, WebDynproError},
