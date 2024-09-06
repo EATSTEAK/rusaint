@@ -1,13 +1,10 @@
 use std::{borrow::Cow, cell::OnceCell};
 
+use crate::webdynpro::element::utils::{children_element, parse_lsdata, parse_lsevents};
+use crate::webdynpro::error::{BodyError, WebDynproError};
 use serde_json::Value;
 
-use crate::webdynpro::error::{BodyError, WebDynproError};
-
-use super::{
-    definition::{ElementDefinition, ElementNodeId},
-    Element, EventParameterMap, Interactable,
-};
+use super::{definition::ElementDefinition, Element, EventParameterMap, Interactable};
 
 // Type for unimplemented elements
 /// rusaint에 구현되지 않은 엘리먼트를 위한 가상 엘리먼트
@@ -24,7 +21,6 @@ pub struct Unknown<'a> {
 #[derive(Clone, Debug)]
 pub struct UnknownDef {
     id: Cow<'static, str>,
-    node_id: Option<ElementNodeId>,
 }
 
 impl UnknownDef {
@@ -32,7 +28,6 @@ impl UnknownDef {
     pub const fn new(id: &'static str) -> Self {
         Self {
             id: Cow::Borrowed(id),
-            node_id: None,
         }
     }
 }
@@ -41,25 +36,14 @@ impl<'body> ElementDefinition<'body> for UnknownDef {
     type Element = Unknown<'body>;
 
     fn new_dynamic(id: String) -> Self {
-        Self {
-            id: id.into(),
-            node_id: None,
-        }
+        Self { id: id.into() }
     }
 
-    fn from_element_ref(element_ref: scraper::ElementRef<'_>) -> Result<Self, WebDynproError> {
+    fn from_ref(element_ref: scraper::ElementRef<'_>) -> Result<Self, WebDynproError> {
         let id = element_ref.value().id().ok_or(BodyError::InvalidElement)?;
         Ok(Self {
             id: id.to_string().into(),
-            node_id: None,
         })
-    }
-
-    fn with_node_id(id: String, body_hash: u64, node_id: ego_tree::NodeId) -> Self {
-        Self {
-            id: id.into(),
-            node_id: Some(ElementNodeId::new(body_hash, node_id)),
-        }
     }
 
     fn id(&self) -> &str {
@@ -68,10 +52,6 @@ impl<'body> ElementDefinition<'body> for UnknownDef {
 
     fn id_cow(&self) -> Cow<'static, str> {
         self.id.clone()
-    }
-
-    fn node_id(&self) -> Option<&ElementNodeId> {
-        (&self.node_id).as_ref()
     }
 }
 
@@ -86,11 +66,13 @@ impl<'a> Element<'a> for Unknown<'a> {
     type Def = UnknownDef;
 
     fn lsdata(&self) -> &Self::ElementLSData {
-        self.lsdata
-            .get_or_init(|| Self::lsdata_element(self.element_ref).unwrap_or(Value::default()))
+        self.lsdata.get_or_init(|| {
+            parse_lsdata(self.element_ref.value().attr("lsdata").unwrap_or(""))
+                .unwrap_or(Value::default())
+        })
     }
 
-    fn from_element(
+    fn from_ref(
         elem_def: &impl ElementDefinition<'a>,
         element: scraper::ElementRef<'a>,
     ) -> Result<Self, WebDynproError> {
@@ -110,14 +92,14 @@ impl<'a> Element<'a> for Unknown<'a> {
     }
 
     fn children(&self) -> Vec<super::ElementWrapper<'a>> {
-        Self::children_element(self.element_ref().clone())
+        children_element(self.element_ref().clone())
     }
 }
 
 impl<'a> Interactable<'a> for Unknown<'a> {
     fn lsevents(&self) -> Option<&EventParameterMap> {
         self.lsevents
-            .get_or_init(|| Self::lsevents_element(self.element_ref).ok())
+            .get_or_init(|| parse_lsevents(self.element_ref.value().attr("lsevents")?).ok())
             .as_ref()
     }
 }

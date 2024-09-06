@@ -1,11 +1,8 @@
 use crate::{
     define_elements,
     webdynpro::{
-        client::body::Body,
         command::element::text::ReadInputFieldValueCommand,
-        element::{
-            action::Button, definition::ElementDefinition, graphic::Image, text::InputField,
-        },
+        element::{action::Button, graphic::Image, text::InputField},
         error::WebDynproError,
     },
 };
@@ -119,57 +116,69 @@ impl<'a> StudentInformation {
         CG_STEXT4: InputField<'a> = "ZCMW1001.ID_0001:VIW_DEFAULT.TC_DEFAULT_CG_STEXT4";
     }
 
-    pub(super) fn from_body(body: &'a Body) -> Result<StudentInformation, WebDynproError> {
+    pub(super) fn with_parser(
+        parser: &'a ElementParser,
+    ) -> Result<StudentInformation, WebDynproError> {
         Ok(Self {
-            apply_year: Self::APPLY_PERYR.from_body(body)?.value_into_u32()?,
-            student_number: Self::STUDENT12.from_body(body)?.value_into_u32()?,
-            name: body.read(ReadInputFieldValueCommand::new(Self::VORNA))?,
-            rrn: Self::PRDNI.from_body(body)?.value_into_u32()?,
-            collage: body.read(ReadInputFieldValueCommand::new(Self::COLEG_TXT))?,
-            department: body.read(ReadInputFieldValueCommand::new(Self::DEPT_TXT))?,
-            major: body
+            apply_year: parser
+                .element_from_def(&Self::APPLY_PERYR)?
+                .value_into_u32()?,
+            student_number: parser
+                .element_from_def(&Self::STUDENT12)?
+                .value_into_u32()?,
+            name: parser.read(ReadInputFieldValueCommand::new(Self::VORNA))?,
+            rrn: parser.element_from_def(&Self::PRDNI)?.value_into_u32()?,
+            collage: parser.read(ReadInputFieldValueCommand::new(Self::COLEG_TXT))?,
+            department: parser.read(ReadInputFieldValueCommand::new(Self::DEPT_TXT))?,
+            major: parser
                 .read(ReadInputFieldValueCommand::new(Self::MAJOR_TXT))
                 .ok(),
-            division: body.read(ReadInputFieldValueCommand::new(Self::TITEL)).ok(),
-            grade: Self::CMSTYEAR.from_body(body)?.value_into_u32()?,
-            term: Self::ZSCHTERM.from_body(body)?.value_into_u32()?,
+            division: parser
+                .read(ReadInputFieldValueCommand::new(Self::TITEL))
+                .ok(),
+            grade: parser.element_from_def(&Self::CMSTYEAR)?.value_into_u32()?,
+            term: parser.element_from_def(&Self::ZSCHTERM)?.value_into_u32()?,
             image: Vec::with_capacity(0), // TODO: Image to bytes
-            alias: body.read(ReadInputFieldValueCommand::new(Self::RUFNM)).ok(),
-            kanji_name: body
+            alias: parser
+                .read(ReadInputFieldValueCommand::new(Self::RUFNM))
+                .ok(),
+            kanji_name: parser
                 .read(ReadInputFieldValueCommand::new(Self::BIRTHNAME))
                 .ok(),
-            email: body
+            email: parser
                 .read(ReadInputFieldValueCommand::new(Self::SMTP_ADDR))
                 .ok(),
-            tel_number: body
+            tel_number: parser
                 .read(ReadInputFieldValueCommand::new(Self::TEL_NUMBER))
                 .ok(),
-            mobile_number: body
+            mobile_number: parser
                 .read(ReadInputFieldValueCommand::new(Self::MOB_NUMBER))
                 .ok(),
-            post_code: body
+            post_code: parser
                 .read(ReadInputFieldValueCommand::new(Self::POST_CODE))
                 .ok(),
-            address: body.read(ReadInputFieldValueCommand::new(Self::CITY1)).ok(),
-            specific_address: body
+            address: parser
+                .read(ReadInputFieldValueCommand::new(Self::CITY1))
+                .ok(),
+            specific_address: parser
                 .read(ReadInputFieldValueCommand::new(Self::STREET))
                 .ok(),
-            is_transfer_student: !body
+            is_transfer_student: !parser
                 .read(ReadInputFieldValueCommand::new(Self::NEWINCOR_CDT))?
                 .contains("신입학"),
-            apply_date: body.read(ReadInputFieldValueCommand::new(Self::APPLY_DT))?,
-            applied_collage: body.read(ReadInputFieldValueCommand::new(Self::COLEG_CDT))?,
-            applied_department: body.read(ReadInputFieldValueCommand::new(Self::DEPT_CDT))?,
-            plural_major: body
+            apply_date: parser.read(ReadInputFieldValueCommand::new(Self::APPLY_DT))?,
+            applied_collage: parser.read(ReadInputFieldValueCommand::new(Self::COLEG_CDT))?,
+            applied_department: parser.read(ReadInputFieldValueCommand::new(Self::DEPT_CDT))?,
+            plural_major: parser
                 .read(ReadInputFieldValueCommand::new(Self::CG_STEXT1))
                 .ok(),
-            sub_major: body
+            sub_major: parser
                 .read(ReadInputFieldValueCommand::new(Self::CG_STEXT2))
                 .ok(),
-            connected_major: body
+            connected_major: parser
                 .read(ReadInputFieldValueCommand::new(Self::CG_STEXT3))
                 .ok(),
-            abeek: body
+            abeek: parser
                 .read(ReadInputFieldValueCommand::new(Self::CG_STEXT4))
                 .ok(),
         })
@@ -318,6 +327,8 @@ mod research_bank_account;
 mod transfer;
 mod work;
 
+use crate::webdynpro::command::WebDynproCommandExecutor;
+use crate::webdynpro::element::parser::ElementParser;
 pub use academic_record::{StudentAcademicRecord, StudentAcademicRecords};
 pub use bank_account::StudentBankAccount;
 pub use family::{StudentFamily, StudentFamilyMember};

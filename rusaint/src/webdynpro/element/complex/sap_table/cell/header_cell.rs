@@ -15,7 +15,7 @@ use crate::webdynpro::{
             SapTable,
         },
         property::SortState,
-        sub::define_subelement,
+        sub::macros::define_subelement,
         ElementDefWrapper,
     },
     error::BodyError,
@@ -61,7 +61,7 @@ impl<'a> SapTableCell<'a> for SapTableHeaderCell<'a> {
                     Selector::parse(format!(r#"[id="{}-CONTENT"] [ct]"#, &self.id).as_str())
                         .or(Err(BodyError::InvalidSelector))
                         .ok()?;
-                ElementDefWrapper::dyn_elem_def(
+                ElementDefWrapper::from_ref(
                     self.element_ref
                         .select(&content_selector)
                         .next()?

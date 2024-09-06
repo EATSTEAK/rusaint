@@ -1,19 +1,18 @@
+use crate::webdynpro::event::ucf_parameters::UcfParameters;
+use crate::webdynpro::event::{EventBuilder, EventBuilderError};
 use crate::{
-    define_elements,
     utils::{default_header, DEFAULT_USER_AGENT},
     webdynpro::{
-        element::layout::Form,
         error::{ClientError, WebDynproError},
         event::{event_queue::EventQueue, Event},
     },
 };
 use body::{Body, BodyUpdate};
 use reqwest::{cookie::Jar, header::*, RequestBuilder};
-use tokio::sync::Mutex;
+use std::collections::HashMap;
 use std::sync::Arc;
+use tokio::sync::Mutex;
 use url::Url;
-
-use super::{command::{WebDynproCommand, WebDynproReadCommand}, element::definition::ElementDefinition};
 
 /// WebDynpro 애플리케이션의 웹 요청 및 페이지 문서 처리를 담당하는 클라이언트
 pub struct WebDynproClient {
@@ -40,10 +39,6 @@ fn wd_xhr_header() -> HeaderMap {
 }
 
 impl<'a> WebDynproClient {
-    define_elements! {
-        SSR_FORM: Form<'a> = "sap.client.SsrClient.form";
-    }
-
     /// WebDynpro 애플리케이션의 이름을 반환합니다.
     pub fn name(&self) -> &str {
         &self.name
@@ -104,19 +99,6 @@ impl<'a> WebDynproClient {
         })
     }
 
-    /// WebDynpro 클라이언트에 명령을 전송합니다.
-    pub async fn send<T: WebDynproCommand>(
-        &mut self,
-        command: T,
-    ) -> Result<T::Result, WebDynproError> {
-        command.dispatch(self).await
-    }
-
-    /// WebDynpro 클라이언트에 읽기 명령을 전송합니다.
-    pub fn read<T: WebDynproReadCommand>(&self, command: T) -> Result<T::Result, WebDynproError> {
-        command.read(self.body())
-    }
-
     #[allow(dead_code)]
     /// 특정 WebDynpro 애플리케이션으로 탐색합니다.
     pub(crate) async fn navigate(&mut self, base_url: &Url, name: &str) -> Result<(), ClientError> {
@@ -137,12 +119,9 @@ impl<'a> WebDynproClient {
         force_send: bool,
         event: Event,
     ) -> Result<EventProcessResult, WebDynproError> {
-        let form_req = Self::SSR_FORM
-            .from_body(self.body())?
-            .request(false, "", "", false, false)
-            .or(Err(ClientError::NoSuchForm(
-                Self::SSR_FORM.id().to_string(),
-            )))?;
+        let form_req = create_form_request_event(false, "", "", false, false).or(Err(
+            ClientError::NoSuchForm("sap.client.SsrClient.form".to_string()),
+        ))?;
         if (!event.is_enqueable() && event.is_submitable()) || force_send {
             {
                 self.add_event(event);
@@ -223,6 +202,29 @@ impl<'a> WebDynproClientBuilder<'a> {
             None => Ok(WebDynproClient::new(base_url, self.name).await?),
         }
     }
+}
+
+fn create_form_request_event(
+    is_async: bool,
+    focus_info: &str,
+    hash: &str,
+    dom_changed: bool,
+    is_dirty: bool,
+) -> Result<Event, EventBuilderError> {
+    let mut form_parameters: HashMap<String, String> = HashMap::new();
+    form_parameters.insert("Id".to_string(), "sap.client.SsrClient.form".to_string());
+    form_parameters.insert("Async".to_string(), is_async.to_string());
+    form_parameters.insert("FocusInfo".to_string(), focus_info.to_string());
+    form_parameters.insert("Hash".to_string(), hash.to_string());
+    form_parameters.insert("DomChanged".to_string(), dom_changed.to_string());
+    form_parameters.insert("IsDirty".to_string(), is_dirty.to_string());
+    EventBuilder::default()
+        .control("Form".to_string())
+        .event("Request".to_string())
+        .parameters(form_parameters)
+        .ucf_parameters(UcfParameters::default())
+        .custom_parameters(HashMap::new())
+        .build()
 }
 
 trait Requests {

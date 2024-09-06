@@ -3,9 +3,8 @@ use std::hash::Hash;
 
 use lol_html::{element, html_content::ContentType, rewrite_str, RewriteStrSettings};
 use roxmltree::Node;
-use scraper::{Html};
 
-use crate::webdynpro::{command::WebDynproReadCommand, error::{BodyError, UpdateBodyError, WebDynproError}};
+use crate::webdynpro::error::{BodyError, UpdateBodyError};
 
 use super::SapSsrClient;
 
@@ -129,13 +128,8 @@ impl BodyUpdate {
 /// WebDynpro 페이지의 상태를 관리하는 구조체
 pub struct Body {
     raw_body: String,
-    document: Html,
     sap_ssr_client: SapSsrClient,
 }
-
-// This is safe since body doesn't mutate `scraper::Html` directly
-unsafe impl Send for Body {}
-unsafe impl Sync for Body {}
 
 impl Hash for Body {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
@@ -146,10 +140,8 @@ impl Hash for Body {
 impl Body {
     pub(crate) fn new(body: String) -> Result<Body, BodyError> {
         let sap_ssr_client = parse_sap_ssr_client(&body)?;
-        let document = Html::parse_document(&body);
         Ok(Body {
             raw_body: body,
-            document,
             sap_ssr_client,
         })
     }
@@ -157,16 +149,6 @@ impl Body {
     /// 페이지 도큐먼트의 HTML 텍스트를 반환합니다.
     pub fn raw_body(&self) -> &str {
         &self.raw_body
-    }
-
-    /// 도큐먼트 파싱을 위한 `scraper::Html` 구조체를 반환합니다.
-    pub fn document(&self) -> &Html {
-        &self.document
-    }
-
-    /// WebDynpro 바디에 읽기 명령을 전송합니다.
-    pub fn read<T: WebDynproReadCommand>(&self, command: T) -> Result<T::Result, WebDynproError> {
-        command.read(self)
     }
 
     pub(crate) fn ssr_client(&self) -> &SapSsrClient {
@@ -212,7 +194,6 @@ impl Body {
                     )?
                 }
             };
-            self.document = Html::parse_document(&output);
             self.raw_body = output;
         }
         Ok(())
@@ -222,9 +203,12 @@ impl Body {
 fn parse_sap_ssr_client(document: &str) -> Result<SapSsrClient, BodyError> {
     let form_regex = regex_lite::Regex::new(r"<form\b[^>]*>(.|\n)*?<\/form>").unwrap();
     let mut forms = form_regex.find_iter(document);
-    let form_match = forms.find(|form| form.as_str().contains("sap.client.SsrClient.form")).ok_or(BodyError::Invalid(
-        "Cannot find SSR Client form".to_string(),
-    ))?.as_str();
+    let form_match = forms
+        .find(|form| form.as_str().contains("sap.client.SsrClient.form"))
+        .ok_or(BodyError::Invalid(
+            "Cannot find SSR Client form".to_string(),
+        ))?
+        .as_str();
 
     // Create closing tag to match xml structures
     let input_regex = regex_lite::Regex::new(r"(<input\b[^>]*)(/?>)").unwrap();
@@ -235,14 +219,17 @@ fn parse_sap_ssr_client(document: &str) -> Result<SapSsrClient, BodyError> {
     let mut data = HashMap::<String, String>::new();
     data.insert(
         "action".to_owned(),
-        client_form.root_element().attribute("action")
+        client_form
+            .root_element()
+            .attribute("action")
             .expect("Attribute not found or malformed")
             .to_string(),
     );
 
     let children_iter = client_form.root_element().children();
     children_iter.for_each(|item| {
-        let id = item.attribute("id")
+        let id = item
+            .attribute("id")
             .expect("id Attribute not found or malformed")
             .to_string();
         let value = item
@@ -255,7 +242,7 @@ fn parse_sap_ssr_client(document: &str) -> Result<SapSsrClient, BodyError> {
         action: html_escape::decode_html_entities(data.get("action").ok_or(
             BodyError::NoSuchAttribute("'action' field of SSR Form".to_string()),
         )?)
-            .to_string(),
+        .to_string(),
         charset: data
             .get("sap-charset")
             .ok_or(BodyError::NoSuchAttribute(
@@ -274,25 +261,25 @@ fn parse_sap_ssr_client(document: &str) -> Result<SapSsrClient, BodyError> {
                 "'fesrAppName' field of SSR Form".to_string(),
             ))?
             .to_owned(),
-        use_beacon: (data
+        use_beacon: data
             .get("fesrUseBeacon")
             .ok_or(BodyError::NoSuchAttribute(
                 "'fesrUseBeacon' field of SSR Form".to_string(),
             ))?
             .to_owned()
             .as_str()
-            == "true"),
+            == "true",
     })
 }
 
 #[cfg(test)]
 mod test {
-    use std::sync::Arc;
-    use reqwest::cookie::Jar;
-    use url::Url;
     use crate::utils::DEFAULT_USER_AGENT;
     use crate::webdynpro::client::body::parse_sap_ssr_client;
     use crate::webdynpro::client::Requests;
+    use reqwest::cookie::Jar;
+    use std::sync::Arc;
+    use url::Url;
 
     #[tokio::test]
     async fn test_ssr_form() {
@@ -303,7 +290,14 @@ mod test {
             .user_agent(DEFAULT_USER_AGENT)
             .build()
             .unwrap();
-        let result = client.wd_navigate(&Url::parse("https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/").unwrap(), "ZCMW2100").send().await.unwrap();
+        let result = client
+            .wd_navigate(
+                &Url::parse("https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/").unwrap(),
+                "ZCMW2100",
+            )
+            .send()
+            .await
+            .unwrap();
         let ssr_client = parse_sap_ssr_client(&result.text().await.unwrap()).unwrap();
         dbg!(ssr_client);
         assert!(true);

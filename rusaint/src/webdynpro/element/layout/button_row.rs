@@ -2,8 +2,8 @@ use scraper::Selector;
 use std::{borrow::Cow, cell::OnceCell};
 
 use crate::webdynpro::element::{
-    action::Button, define_element_base, definition::ElementDefinition, property::Visibility,
-    Element,
+    action::Button, definition::ElementDefinition, macros::define_element_base,
+    property::Visibility, Element,
 };
 
 define_element_base! {
@@ -41,7 +41,7 @@ impl<'a> ButtonRow<'a> {
                 self.element_ref
                     .select(button_selector)
                     .filter_map(|elem| {
-                        let def = <Button<'a> as Element<'a>>::Def::from_element_ref(elem);
+                        let def = <Button<'a> as Element<'a>>::Def::from_ref(elem);
                         match def {
                             Ok(button_def) => Some(button_def),
                             _ => None,

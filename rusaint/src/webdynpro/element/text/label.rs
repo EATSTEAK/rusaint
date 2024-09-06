@@ -1,6 +1,6 @@
 use std::{borrow::Cow, cell::OnceCell};
 
-use crate::webdynpro::element::{define_element_interactable, property::Visibility};
+use crate::webdynpro::element::{macros::define_element_interactable, property::Visibility};
 
 // TODO: Implement additional events and data
 define_element_interactable! {

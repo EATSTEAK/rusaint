@@ -3,8 +3,11 @@ use std::{borrow::Cow, cell::OnceCell};
 use scraper::Selector;
 
 use crate::webdynpro::element::{
-    complex::{sap_table::{property::SapTableCellType, SapTableDef}, SapTable},
-    sub::define_subelement,
+    complex::{
+        sap_table::{property::SapTableCellType, SapTableDef},
+        SapTable,
+    },
+    sub::macros::define_subelement,
     ElementDefWrapper,
 };
 
@@ -35,7 +38,7 @@ impl<'a> SapTableCell<'a> for SapTableSelectionCell<'a> {
         self.content
             .get_or_init(|| {
                 let content_selector = Selector::parse(":root > div > div [ct]").unwrap();
-                ElementDefWrapper::dyn_elem_def(
+                ElementDefWrapper::from_ref(
                     self.element_ref
                         .select(&content_selector)
                         .next()?

@@ -5,13 +5,13 @@ use crate::webdynpro::element::property::{
     SuggestFilterCondition, SuggestFilterType, TabBehaviour, TableFieldDesign, Visibility,
 };
 use crate::webdynpro::error::{BodyError, WebDynproError};
-use crate::webdynpro::{client::body::Body, error::ElementError, event::Event};
-
-use crate::webdynpro::element::{
-    define_element_interactable, Element, ElementDefWrapper, Interactable,
-};
+use crate::webdynpro::{error::ElementError, event::Event};
 
 use self::property::ComboBoxBehavior;
+use crate::webdynpro::element::parser::ElementParser;
+use crate::webdynpro::element::{
+    macros::define_element_interactable, Element, ElementDefWrapper, Interactable,
+};
 
 use super::list_box::ListBoxDefWrapper;
 
@@ -83,7 +83,10 @@ impl<'a> ComboBox<'a> {
     }
 
     /// [`ComboBox`]의 선택지 역할을 하는 [`ListBox`](super::list_box::ListBox) 엘리먼트를 가져옵니다.
-    pub fn item_list_box(&self, body: &'a Body) -> Result<ListBoxDefWrapper, WebDynproError> {
+    pub fn item_list_box(
+        &self,
+        parser: &ElementParser,
+    ) -> Result<ListBoxDefWrapper, WebDynproError> {
         let listbox_id = self
             .lsdata()
             .item_list_box_id()
@@ -93,13 +96,13 @@ impl<'a> ComboBox<'a> {
             })?;
         let selector = scraper::Selector::parse(format!(r#"[id="{}"]"#, listbox_id).as_str())
             .or(Err(ElementError::InvalidId(listbox_id.to_owned())))?;
-        let elem = body
+        let elem = parser
             .document()
             .select(&selector)
             .next()
             .ok_or(BodyError::NoSuchElement(listbox_id.to_owned()))?;
         Ok(
-            ListBoxDefWrapper::from_def(ElementDefWrapper::dyn_elem_def(elem)?)
+            ListBoxDefWrapper::from_def(ElementDefWrapper::from_ref(elem)?)
                 .ok_or(BodyError::NoSuchElement(listbox_id.to_owned()))?,
         )
     }

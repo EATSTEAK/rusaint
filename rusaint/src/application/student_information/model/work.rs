@@ -1,3 +1,5 @@
+use crate::webdynpro::command::WebDynproCommandExecutor;
+use crate::webdynpro::element::parser::ElementParser;
 use crate::{
     application::{student_information::StudentInformationApplication, USaintClient},
     define_elements,
@@ -64,41 +66,42 @@ impl<'a> StudentWorkInformation {
     pub(crate) async fn with_client(
         client: &mut USaintClient,
     ) -> Result<StudentWorkInformation, WebDynproError> {
-        client
-            .send(TabStripTabSelectCommand::new(
-                StudentInformationApplication::TAB_ADDITION,
-                Self::TAB_WORK,
-                0,
-                0,
-            ))
-            .await?;
+        let mut parser = ElementParser::new(client.body());
+        let event = parser.read(TabStripTabSelectCommand::new(
+            StudentInformationApplication::TAB_ADDITION,
+            Self::TAB_WORK,
+            0,
+            0,
+        ))?;
+        client.process_event(false, event).await?;
+        parser = ElementParser::new(client.body());
         Ok(Self {
-            job: client.read(ReadComboBoxValueCommand::new(Self::COJOB)).ok(),
-            public_official: client
+            job: parser.read(ReadComboBoxValueCommand::new(Self::COJOB)).ok(),
+            public_official: parser
                 .read(ReadComboBoxValueCommand::new(Self::COMPANY_ORGR))
                 .ok(),
-            company_name: client
+            company_name: parser
                 .read(ReadInputFieldValueCommand::new(Self::COMPANY_NAM))
                 .ok(),
-            department_name: client
+            department_name: parser
                 .read(ReadInputFieldValueCommand::new(Self::COMPANY_DEPT_NAM))
                 .ok(),
-            title: client
+            title: parser
                 .read(ReadInputFieldValueCommand::new(Self::COMPANY_TITLE))
                 .ok(),
-            zip_code: client
+            zip_code: parser
                 .read(ReadInputFieldValueCommand::new(Self::COMPANY_ZIP_COD))
                 .ok(),
-            address: client
+            address: parser
                 .read(ReadInputFieldValueCommand::new(Self::COMPANY_ADDRESS))
                 .ok(),
-            specific_address: client
+            specific_address: parser
                 .read(ReadInputFieldValueCommand::new(Self::COMPANY_ADDRESS2))
                 .ok(),
-            tel_number: client
+            tel_number: parser
                 .read(ReadInputFieldValueCommand::new(Self::COMPANY_TEL1))
                 .ok(),
-            fax_number: client
+            fax_number: parser
                 .read(ReadInputFieldValueCommand::new(Self::COMPANY_TEL2))
                 .ok(),
         })

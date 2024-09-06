@@ -1,6 +1,6 @@
 use std::{borrow::Cow, cell::OnceCell};
 
-use crate::webdynpro::element::{define_element_base, property::Visibility};
+use crate::webdynpro::element::{macros::define_element_base, property::Visibility};
 
 define_element_base! {
     // Note: This element renders as "TSITM_ie6" if >= IE6

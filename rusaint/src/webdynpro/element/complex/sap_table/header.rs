@@ -2,16 +2,15 @@ use std::ops::Index;
 
 use scraper::ElementRef;
 
-use crate::webdynpro::{
-    client::body::Body,
-    element::{definition::ElementDefinition, Element, ElementDefWrapper},
-    error::{ElementError, WebDynproError},
-};
-
 use super::{
     cell::{SapTableCell, SapTableCellDefWrapper, SapTableCellWrapper},
     property::{SapTableRowType, SapTableSelectionState},
     SapTableDef,
+};
+use crate::webdynpro::element::parser::ElementParser;
+use crate::webdynpro::{
+    element::{definition::ElementDefinition, Element, ElementDefWrapper},
+    error::{ElementError, WebDynproError},
 };
 
 /// [`SapTable`](super::SapTable)의 행
@@ -37,9 +36,7 @@ impl<'a> SapTableHeader {
         let subct_selector = scraper::Selector::parse("[subct]").unwrap();
         let subcts = header_ref.select(&subct_selector);
         let cells = subcts
-            .filter_map(|subct_ref| {
-                SapTableCellDefWrapper::dyn_cell_def(table_def.clone(), subct_ref)
-            })
+            .filter_map(|subct_ref| SapTableCellDefWrapper::from_ref(table_def.clone(), subct_ref))
             .collect::<Vec<SapTableCellDefWrapper>>();
         let row_type = row
             .attr("rt")
@@ -79,23 +76,25 @@ impl<'a> SapTableHeader {
     /// 행 내부 셀 엘리먼트의 [`Iterator`]를 반환합니다.
     pub fn iter_value(
         &'a self,
-        body: &'a Body,
+        parser: &'a ElementParser,
     ) -> impl Iterator<Item = Result<SapTableCellWrapper<'a>, WebDynproError>> + ExactSizeIterator
     {
-        self.cells.iter().map(|def| def.clone().from_body(body))
+        self.cells
+            .iter()
+            .map(|def| SapTableCellWrapper::from_def(def, parser))
     }
 
     /// 헤더 행 제목들의 [`Vec`]를 반환합니다.
-    pub fn titles(&'a self, body: &'a Body) -> Result<Vec<String>, WebDynproError> {
+    pub fn titles(&'a self, parser: &'a ElementParser) -> Result<Vec<String>, WebDynproError> {
         let vec = self
             .iter()
             .map(|def| -> Result<String, WebDynproError> {
-                let cell_wrapper = def.clone().from_body(body)?;
+                let cell_wrapper = SapTableCellWrapper::from_def(def, parser)?;
                 if let SapTableCellWrapper::Header(header_cell) = cell_wrapper {
                     if let Some(def_wrapper) = header_cell.content() {
                         if let ElementDefWrapper::Caption(caption_def) = def_wrapper {
-                            Ok(caption_def
-                                .from_body(body)?
+                            Ok(parser
+                                .element_from_def(&caption_def)?
                                 .lsdata()
                                 .text()
                                 .unwrap_or(&String::default())

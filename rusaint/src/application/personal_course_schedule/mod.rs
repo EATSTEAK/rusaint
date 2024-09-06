@@ -2,6 +2,9 @@ use std::collections::HashMap;
 
 use model::{CourseScheduleInformation, PersonalCourseSchedule, Weekday};
 
+use super::{USaintApplication, USaintClient};
+use crate::webdynpro::command::WebDynproCommandExecutor;
+use crate::webdynpro::element::parser::ElementParser;
 use crate::{
     define_elements,
     error::ApplicationError,
@@ -9,13 +12,11 @@ use crate::{
     webdynpro::{
         client::body::Body,
         command::element::selection::{ComboBoxSelectCommand, ReadComboBoxLSDataCommand},
-        element::{complex::SapTable, definition::ElementDefinition, selection::ComboBox},
+        element::{complex::SapTable, selection::ComboBox},
         error::{ElementError, WebDynproError},
     },
     RusaintError,
 };
-
-use super::{USaintApplication, USaintClient};
 
 /// [개인수업시간표](https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/ZCMW2102)
 pub struct PersonalCourseScheduleApplication {
@@ -60,21 +61,16 @@ impl<'a> PersonalCourseScheduleApplication {
         semester: SemesterType,
     ) -> Result<(), WebDynproError> {
         let semester = Self::semester_to_key(semester);
-        let year_combobox_lsdata = self
-            .client
-            .read(ReadComboBoxLSDataCommand::new(Self::PERYR))?;
-        let semester_combobox_lsdata = self
-            .client
-            .read(ReadComboBoxLSDataCommand::new(Self::PERID))?;
+        let parser = ElementParser::new(self.body());
+        let year_combobox_lsdata = parser.read(ReadComboBoxLSDataCommand::new(Self::PERYR))?;
+        let semester_combobox_lsdata = parser.read(ReadComboBoxLSDataCommand::new(Self::PERID))?;
         if (|| Some(year_combobox_lsdata.key()?.as_str()))() != Some(year) {
-            self.client
-                .send(ComboBoxSelectCommand::new(Self::PERYR, &year, false))
-                .await?;
+            let event = parser.read(ComboBoxSelectCommand::new(Self::PERYR, &year, false))?;
+            self.client.process_event(false, event).await?;
         }
         if (|| Some(semester_combobox_lsdata.key()?.as_str()))() != Some(semester) {
-            self.client
-                .send(ComboBoxSelectCommand::new(Self::PERID, semester, false))
-                .await?;
+            let event = parser.read(ComboBoxSelectCommand::new(Self::PERID, semester, false))?;
+            self.client.process_event(false, event).await?;
         }
         Ok(())
     }
@@ -86,12 +82,15 @@ impl<'a> PersonalCourseScheduleApplication {
         semester: SemesterType,
     ) -> Result<PersonalCourseSchedule, RusaintError> {
         self.select_semester(&year.to_string(), semester).await?;
-        match Self::TABLE.from_body(self.body()) {
+        let parser = ElementParser::new(self.body());
+        let table = parser.element_from_def(&Self::TABLE);
+        match table {
             Ok(table) => {
                 let table_body = table.table()?;
                 let row_string: Vec<Vec<Option<String>>> =
-                    table_body.try_table_into::<Vec<Option<String>>>(self.body())?;
-                let mut schedule: HashMap<Weekday, Vec<CourseScheduleInformation>> = Default::default();
+                    table_body.try_table_into::<Vec<Option<String>>>(&parser)?;
+                let mut schedule: HashMap<Weekday, Vec<CourseScheduleInformation>> =
+                    Default::default();
                 for (_row_idx, row) in row_string.into_iter().skip(1).enumerate() {
                     row.into_iter()
                         .skip(1)
@@ -102,30 +101,72 @@ impl<'a> PersonalCourseScheduleApplication {
                         })
                         .for_each(|(col_idx, str)| match col_idx {
                             0 => {
-                                if !schedule.contains_key(&Weekday::Mon) { schedule.insert(Weekday::Mon, Vec::new()); }
-                                str.split("\n\n").for_each(|str| schedule.get_mut(&Weekday::Mon).unwrap().push(CourseScheduleInformation::from_string(str)));
-                            },
+                                if !schedule.contains_key(&Weekday::Mon) {
+                                    schedule.insert(Weekday::Mon, Vec::new());
+                                }
+                                str.split("\n\n").for_each(|str| {
+                                    schedule
+                                        .get_mut(&Weekday::Mon)
+                                        .unwrap()
+                                        .push(CourseScheduleInformation::from_string(str))
+                                });
+                            }
                             1 => {
-                                if !schedule.contains_key(&Weekday::Tue) { schedule.insert(Weekday::Tue, Vec::new()); }
-                                str.split("\n\n").for_each(|str| schedule.get_mut(&Weekday::Tue).unwrap().push(CourseScheduleInformation::from_string(str)));
-                            },
+                                if !schedule.contains_key(&Weekday::Tue) {
+                                    schedule.insert(Weekday::Tue, Vec::new());
+                                }
+                                str.split("\n\n").for_each(|str| {
+                                    schedule
+                                        .get_mut(&Weekday::Tue)
+                                        .unwrap()
+                                        .push(CourseScheduleInformation::from_string(str))
+                                });
+                            }
                             2 => {
-                                if !schedule.contains_key(&Weekday::Wed) { schedule.insert(Weekday::Wed, Vec::new()); }
-                                str.split("\n\n").for_each(|str| schedule.get_mut(&Weekday::Wed).unwrap().push(CourseScheduleInformation::from_string(str)));
-                            },
+                                if !schedule.contains_key(&Weekday::Wed) {
+                                    schedule.insert(Weekday::Wed, Vec::new());
+                                }
+                                str.split("\n\n").for_each(|str| {
+                                    schedule
+                                        .get_mut(&Weekday::Wed)
+                                        .unwrap()
+                                        .push(CourseScheduleInformation::from_string(str))
+                                });
+                            }
                             3 => {
-                                if !schedule.contains_key(&Weekday::Thu) { schedule.insert(Weekday::Thu, Vec::new()); }
-                                str.split("\n\n").for_each(|str| schedule.get_mut(&Weekday::Thu).unwrap().push(CourseScheduleInformation::from_string(str)));
-                            },
+                                if !schedule.contains_key(&Weekday::Thu) {
+                                    schedule.insert(Weekday::Thu, Vec::new());
+                                }
+                                str.split("\n\n").for_each(|str| {
+                                    schedule
+                                        .get_mut(&Weekday::Thu)
+                                        .unwrap()
+                                        .push(CourseScheduleInformation::from_string(str))
+                                });
+                            }
                             4 => {
-                                if !schedule.contains_key(&Weekday::Fri) { schedule.insert(Weekday::Fri, Vec::new()); }
-                                str.split("\n\n").for_each(|str| schedule.get_mut(&Weekday::Fri).unwrap().push(CourseScheduleInformation::from_string(str)));
-                            },
+                                if !schedule.contains_key(&Weekday::Fri) {
+                                    schedule.insert(Weekday::Fri, Vec::new());
+                                }
+                                str.split("\n\n").for_each(|str| {
+                                    schedule
+                                        .get_mut(&Weekday::Fri)
+                                        .unwrap()
+                                        .push(CourseScheduleInformation::from_string(str))
+                                });
+                            }
                             5 => {
-                                if !schedule.contains_key(&Weekday::Sat) { schedule.insert(Weekday::Sat, Vec::new()); }
-                                str.split("\n\n").for_each(|str| schedule.get_mut(&Weekday::Sat).unwrap().push(CourseScheduleInformation::from_string(str)));
-                            },
-                            _ => {},
+                                if !schedule.contains_key(&Weekday::Sat) {
+                                    schedule.insert(Weekday::Sat, Vec::new());
+                                }
+                                str.split("\n\n").for_each(|str| {
+                                    schedule
+                                        .get_mut(&Weekday::Sat)
+                                        .unwrap()
+                                        .push(CourseScheduleInformation::from_string(str))
+                                });
+                            }
+                            _ => {}
                         });
                 }
                 Ok(PersonalCourseSchedule::new(schedule))

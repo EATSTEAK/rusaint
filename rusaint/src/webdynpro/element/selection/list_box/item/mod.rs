@@ -1,6 +1,9 @@
 use std::{borrow::Cow, cell::OnceCell};
 
-use crate::webdynpro::{element::{define_element_base, ElementWrapper}, error::{ElementError, WebDynproError}};
+use crate::webdynpro::{
+    element::{macros::define_element_base, ElementWrapper},
+    error::{ElementError, WebDynproError},
+};
 
 /// [`ListBox`](crate::webdynpro::element::selection::list_box::ListBox)의 아이템을 위한 Wrapper
 #[derive(Debug)]
@@ -17,7 +20,7 @@ pub enum ListBoxItemDefWrapper {
     /// 일반 아이템의 정의
     Item(ListBoxItemDef),
     /// 액션이 포함된 아이템의 정의
-    ActionItem(ListBoxActionItemDef)
+    ActionItem(ListBoxActionItemDef),
 }
 
 /// [`ListBoxItem`]의 정보
@@ -37,39 +40,40 @@ pub enum ListBoxItemInfo {
         /// 아이템의 활성화 여부
         enabled: bool,
         /// 제목
-        title: String
+        title: String,
     },
     /// [`ListBoxActionItem`]의 정보
     ActionItem {
         /// 제목
         title: String,
         /// 내부 문자열
-        text: String
-    }
+        text: String,
+    },
 }
 
 impl ListBoxItemInfo {
-    pub(super) fn from_element_ref(element_ref: scraper::ElementRef<'_>) -> Result<ListBoxItemInfo, WebDynproError> {
-        let element = ElementWrapper::dyn_element(element_ref)?;
+    pub(super) fn from_element_ref(
+        element_ref: scraper::ElementRef<'_>,
+    ) -> Result<ListBoxItemInfo, WebDynproError> {
+        let element = ElementWrapper::from_ref(element_ref)?;
         match element {
-            ElementWrapper::ListBoxItem(item) => {
-                Ok(ListBoxItemInfo::Item { 
-                    index: item.index().unwrap_or("").to_string(),
-                    key: item.key().unwrap_or("").to_string(),
-                    value1: item.value1().unwrap_or("").to_string(),
-                    value2: item.value2().unwrap_or("").to_string(),
-                    selected: item.selected().unwrap_or(false),
-                    enabled: item.enabled().unwrap_or(true),
-                    title: item.title().to_string()
-                })
-            },
-            ElementWrapper::ListBoxActionItem(action_item) => {
-                Ok(ListBoxItemInfo::ActionItem {
-                    title: action_item.title().to_string(),
-                    text: action_item.text().to_string()
-                })
-            }
-            _ => Err(ElementError::InvalidContent { element: "ListBox".to_string(), content: "ListBoxItem".to_string() })?
+            ElementWrapper::ListBoxItem(item) => Ok(ListBoxItemInfo::Item {
+                index: item.index().unwrap_or("").to_string(),
+                key: item.key().unwrap_or("").to_string(),
+                value1: item.value1().unwrap_or("").to_string(),
+                value2: item.value2().unwrap_or("").to_string(),
+                selected: item.selected().unwrap_or(false),
+                enabled: item.enabled().unwrap_or(true),
+                title: item.title().to_string(),
+            }),
+            ElementWrapper::ListBoxActionItem(action_item) => Ok(ListBoxItemInfo::ActionItem {
+                title: action_item.title().to_string(),
+                text: action_item.text().to_string(),
+            }),
+            _ => Err(ElementError::InvalidContent {
+                element: "ListBox".to_string(),
+                content: "ListBoxItem".to_string(),
+            })?,
         }
     }
 }

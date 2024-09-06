@@ -2,7 +2,9 @@ use std::{borrow::Cow, cell::OnceCell};
 
 use scraper::Node;
 
-use crate::webdynpro::element::{define_element_interactable, property::Visibility, Element};
+use crate::webdynpro::element::{
+    macros::define_element_interactable, property::Visibility, Element,
+};
 
 define_element_interactable! {
     #[doc = "엘리먼트 제목 부분 등에서 사용되는 캡션"]

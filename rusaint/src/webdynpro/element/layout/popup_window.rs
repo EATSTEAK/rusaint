@@ -4,7 +4,7 @@ use crate::webdynpro::element::property::{Mode, QuickViewDesign};
 use crate::webdynpro::error::WebDynproError;
 use crate::webdynpro::event::Event;
 
-use crate::webdynpro::element::{define_element_interactable, Interactable};
+use crate::webdynpro::element::{macros::define_element_interactable, Interactable};
 
 // TODO: Implement additional events and data
 define_element_interactable! {

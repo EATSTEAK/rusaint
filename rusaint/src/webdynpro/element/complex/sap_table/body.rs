@@ -2,15 +2,14 @@ use std::{collections::HashMap, ops::Index};
 
 use scraper::ElementRef;
 
-use crate::webdynpro::{
-    client::body::Body,
-    element::definition::ElementDefinition,
-    error::{ElementError, WebDynproError},
-};
-
 use super::{
     cell::SapTableCellDefWrapper, property::SapTableRowType, row::SapTableRow, FromSapTable,
     SapTableDef, SapTableHeader,
+};
+use crate::webdynpro::element::parser::ElementParser;
+use crate::webdynpro::{
+    element::definition::ElementDefinition,
+    error::{ElementError, WebDynproError},
 };
 
 /// [`SapTable`](super::SapTable) 내부 테이블
@@ -55,7 +54,10 @@ impl<'a> SapTableBody {
                 .attr("rt")
                 .and_then(|s| Some(s.into()))
                 .unwrap_or(SapTableRowType::default());
-            let row_count = row_ref.value().attr("rr").and_then(|s| s.parse::<u32>().ok());
+            let row_count = row_ref
+                .value()
+                .attr("rr")
+                .and_then(|s| s.parse::<u32>().ok());
             if matches!(row_type, SapTableRowType::Header) {
                 continue;
             }
@@ -69,7 +71,7 @@ impl<'a> SapTableBody {
             let mut cells: Vec<SapTableCellDefWrapper> = Vec::new();
             let mut col_counter: u32 = 0;
             for cell_ref in subcts {
-                let cell = SapTableCellDefWrapper::dyn_cell_def(table_def.clone(), cell_ref);
+                let cell = SapTableCellDefWrapper::from_ref(table_def.clone(), cell_ref);
                 if let Some(cell) = cell {
                     if spans.contains_key(&col_counter) {
                         let spanned_cell = spans.remove(&col_counter).unwrap();
@@ -157,10 +159,10 @@ impl<'a> SapTableBody {
     /// 테이블을 [`FromSapTable`]을 구현하는 형의 [`Vec`]으로 변환합니다.
     pub fn try_table_into<T: FromSapTable<'a>>(
         &'a self,
-        body: &'a Body,
+        parser: &'a ElementParser,
     ) -> Result<Vec<T>, WebDynproError> {
         self.iter()
-            .map(|row| T::from_table(body, self.header(), row))
+            .map(|row| T::from_table(self.header(), row, parser))
             .collect::<Result<Vec<T>, WebDynproError>>()
     }
 }

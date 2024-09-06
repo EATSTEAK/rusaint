@@ -1,17 +1,16 @@
 use model::{
-    StudentInformation, StudentAcademicRecords, StudentBankAccount,
-    StudentFamily, StudentGraduation, StudentQualification,
-    StudentReligion, StudentResearchBankAccount, StudentTransferRecords,
-    StudentWorkInformation,
+    StudentAcademicRecords, StudentBankAccount, StudentFamily, StudentGraduation,
+    StudentInformation, StudentQualification, StudentReligion, StudentResearchBankAccount,
+    StudentTransferRecords, StudentWorkInformation,
 };
 
+use super::{USaintApplication, USaintClient};
+use crate::webdynpro::element::parser::ElementParser;
 use crate::{
     define_elements,
     webdynpro::{client::body::Body, element::layout::TabStrip},
     RusaintError,
 };
-
-use super::{USaintApplication, USaintClient};
 
 /// [학생 정보 수정 및 조회](https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/ZCMW1001n)
 pub struct StudentInformationApplication {
@@ -38,17 +37,23 @@ impl<'a> StudentInformationApplication {
 
     /// 일반 학생 정보를 반환합니다.
     pub fn general(&self) -> Result<StudentInformation, RusaintError> {
-        Ok(StudentInformation::from_body(self.body())?)
+        Ok(StudentInformation::with_parser(&ElementParser::new(
+            self.body(),
+        ))?)
     }
 
     /// 학생의 졸업과 관련된 정보를 반환합니다.
     pub fn graduation(&self) -> Result<StudentGraduation, RusaintError> {
-        Ok(StudentGraduation::from_body(self.body())?)
+        Ok(StudentGraduation::with_parser(&ElementParser::new(
+            self.body(),
+        ))?)
     }
 
     /// 학생의 교직, 평생교육사, 7+1 프로그램 등 자격 관련 정보를 반환합니다.
-    pub fn qualifications(&self) -> StudentQualification {
-        StudentQualification::from_body(self.body())
+    pub fn qualifications(&self) -> Result<StudentQualification, RusaintError> {
+        Ok(StudentQualification::with_parser(&ElementParser::new(
+            self.body(),
+        )))
     }
 
     /// 학생의 직장 정보를 반환합니다.
@@ -77,9 +82,7 @@ impl<'a> StudentInformationApplication {
     }
 
     /// 학생의 학적상태 정보를 반환합니다.
-    pub async fn academic_record(
-        &mut self,
-    ) -> Result<StudentAcademicRecords, RusaintError> {
+    pub async fn academic_record(&mut self) -> Result<StudentAcademicRecords, RusaintError> {
         Ok(StudentAcademicRecords::with_client(&mut self.client).await?)
     }
 
@@ -99,5 +102,4 @@ impl<'a> StudentInformationApplication {
 pub mod model;
 
 #[cfg(test)]
-mod test {
-}
+mod test {}

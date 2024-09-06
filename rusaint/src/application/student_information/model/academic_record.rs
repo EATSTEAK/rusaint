@@ -5,6 +5,8 @@ use serde::{
     Deserialize,
 };
 
+use crate::webdynpro::command::WebDynproCommandExecutor;
+use crate::webdynpro::element::parser::ElementParser;
 use crate::{
     application::{student_information::StudentInformationApplication, USaintClient},
     define_elements,
@@ -36,16 +38,17 @@ impl<'a> StudentAcademicRecords {
     }
 
     pub(crate) async fn with_client(client: &mut USaintClient) -> Result<Self, WebDynproError> {
-        client
-            .send(TabStripTabSelectCommand::new(
-                StudentInformationApplication::TAB_ADDITION,
-                Self::TAB_READ_9600,
-                5,
-                0,
-            ))
-            .await?;
-        let table = client.read(ReadSapTableBodyCommand::new(Self::TABLE_9600))?;
-        let records = table.try_table_into::<StudentAcademicRecord>(client.body())?;
+        let mut parser = ElementParser::new(client.body());
+        let event = parser.read(TabStripTabSelectCommand::new(
+            StudentInformationApplication::TAB_ADDITION,
+            Self::TAB_READ_9600,
+            5,
+            0,
+        ))?;
+        client.process_event(false, event).await?;
+        parser = ElementParser::new(client.body());
+        let table = parser.read(ReadSapTableBodyCommand::new(Self::TABLE_9600))?;
+        let records = table.try_table_into::<StudentAcademicRecord>(&parser)?;
         Ok(Self { records })
     }
 
@@ -114,11 +117,11 @@ impl StudentAcademicRecord {
 
 impl<'a> FromSapTable<'a> for StudentAcademicRecord {
     fn from_table(
-        body: &'a crate::webdynpro::client::body::Body,
         header: &'a crate::webdynpro::element::complex::sap_table::SapTableHeader,
         row: &'a crate::webdynpro::element::complex::sap_table::SapTableRow,
+        parser: &'a ElementParser,
     ) -> Result<Self, crate::webdynpro::error::WebDynproError> {
-        let map_string = row.try_row_into::<HashMap<String, String>>(header, body)?;
+        let map_string = row.try_row_into::<HashMap<String, String>>(header, parser)?;
         let map_de: MapDeserializer<_, serde::de::value::Error> = map_string.into_deserializer();
         Ok(StudentAcademicRecord::deserialize(map_de).map_err(|e| {
             ElementError::InvalidContent {

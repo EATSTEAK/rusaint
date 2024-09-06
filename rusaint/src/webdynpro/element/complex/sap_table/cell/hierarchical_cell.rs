@@ -10,7 +10,7 @@ use crate::webdynpro::element::{
         },
         SapTable,
     },
-    sub::define_subelement,
+    sub::macros::define_subelement,
     ElementDefWrapper,
 };
 
@@ -43,7 +43,7 @@ impl<'a> SapTableCell<'a> for SapTableHierarchicalCell<'a> {
         self.content
             .get_or_init(|| {
                 let content_selector = Selector::parse(":root [ct]").unwrap();
-                ElementDefWrapper::dyn_elem_def(
+                ElementDefWrapper::from_ref(
                     self.element_ref
                         .select(&content_selector)
                         .next()?

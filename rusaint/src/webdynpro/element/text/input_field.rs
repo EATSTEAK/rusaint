@@ -1,7 +1,7 @@
 use std::{borrow::Cow, cell::OnceCell};
 
 use crate::webdynpro::element::{
-    define_element_interactable,
+    macros::define_element_interactable,
     property::{
         EmbeddingBehaviour, IMEMode, InputFieldTextStyle, InputFieldType, SemanticColor,
         TabBehaviour, TableFieldDesign, Visibility,

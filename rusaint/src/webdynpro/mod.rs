@@ -60,8 +60,10 @@
 //!
 //!     // 캡션의 데이터를 읽는 함수
 //!     pub fn read_caption(&self) -> Result<String, RusaintError> {
+//!         // 엘리먼트 파서를 생성
+//!         let parser = ElementParser::new(self.client.body());
 //!         // 캡션 정의와 현재 애플리케이션 바디로부터 엘리먼트 객체 생성
-//!         let caption = Self::CAPTION.from_body(self.client.body())?;
+//!         let caption = parser.element_from_def(&Self::CAPTION)?;
 //!         // 캡션 엘리먼트로부터 텍스트를 반환
 //!         Ok(caption.text().to_string())
 //!     }
@@ -87,9 +89,11 @@
 
 /// WebDynpro 페이지의 기본 클라이언트
 pub mod client;
+#[cfg(feature = "element")]
 /// WebDynpro 페이지를 구성하는 엘리먼트
 pub mod element;
 
+#[cfg(feature = "element")]
 /// WebDynpro 클라이언트를 조작하는 명령
 pub mod command;
 

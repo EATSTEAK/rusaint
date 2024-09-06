@@ -1,6 +1,6 @@
 use std::{borrow::Cow, cell::OnceCell};
 
-use crate::webdynpro::element::{define_element_base, Element};
+use crate::webdynpro::element::{macros::define_element_base, Element};
 
 define_element_base! {
     #[doc = "실행할 수 있는 액션이 포함된 [`ListBox`](crate::webdynpro::element::selection::list_box::ListBox)의 아이템"]
