@@ -5,12 +5,12 @@ use serde::{
     Deserialize,
 };
 
+use crate::application::utils::de_with::{deserialize_bool_string, deserialize_optional_string};
 use crate::webdynpro::command::WebDynproCommandExecutor;
 use crate::webdynpro::element::parser::ElementParser;
 use crate::{
     application::{student_information::StudentInformationApplication, USaintClient},
     define_elements,
-    utils::de_with::{deserialize_bool_string, deserialize_optional_string},
     webdynpro::{
         command::element::{complex::ReadSapTableBodyCommand, layout::TabStripTabSelectCommand},
         element::{

@@ -168,3 +168,5 @@ pub mod personal_course_schedule;
 
 /// 강의평가 조회: [`LectureAssessmentApplication`](lecture_assessment::LectureAssessmentApplication)
 pub mod lecture_assessment;
+
+pub(crate) mod utils;

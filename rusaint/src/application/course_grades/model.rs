@@ -5,13 +5,13 @@ use serde::{
     Deserialize, Deserializer,
 };
 
+use crate::application::utils::de_with::{
+    deserialize_empty, deserialize_f32_string, deserialize_u32_string,
+};
 use crate::webdynpro::element::parser::ElementParser;
-use crate::{
-    utils::de_with::{deserialize_empty, deserialize_f32_string, deserialize_u32_string},
-    webdynpro::{
-        element::{complex::sap_table::FromSapTable, definition::ElementDefinition},
-        error::{ElementError, WebDynproError},
-    },
+use crate::webdynpro::{
+    element::{complex::sap_table::FromSapTable, definition::ElementDefinition},
+    error::{ElementError, WebDynproError},
 };
 
 /// 전체 성적(학적부, 증명)
