@@ -8,12 +8,8 @@ use crate::{
     utils::DEFAULT_USER_AGENT,
     webdynpro::{
         client::{body::Body, EventProcessResult, WebDynproClient, WebDynproClientBuilder},
-        command::{
-            element::system::{
-                ClientInspectorNotifyCommand, CustomClientInfoCommand,
-                LoadingPlaceholderLoadCommand,
-            },
-            WebDynproCommand,
+        command::element::system::{
+            ClientInspectorNotifyCommand, CustomClientInfoCommand, LoadingPlaceholderLoadCommand,
         },
         element::{
             define_elements,

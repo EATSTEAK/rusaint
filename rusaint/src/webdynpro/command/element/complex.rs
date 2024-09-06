@@ -4,7 +4,6 @@ use crate::webdynpro::{
     command::WebDynproCommand,
     element::{
         complex::{sap_table::SapTableBody, SapTableDef, SapTableLSData},
-        definition::ElementDefinition,
         Element,
     },
     error::WebDynproError,

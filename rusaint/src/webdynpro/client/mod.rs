@@ -1,5 +1,3 @@
-#[cfg(feature = "element")]
-use super::command::WebDynproCommand;
 use crate::webdynpro::event::ucf_parameters::UcfParameters;
 use crate::webdynpro::event::{EventBuilder, EventBuilderError};
 use crate::{

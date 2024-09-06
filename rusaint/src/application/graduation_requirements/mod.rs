@@ -78,7 +78,7 @@ impl<'a> GraduationRequirementsApplication {
 
     /// 학생 정보를 반환합니다.
     pub async fn student_info(&self) -> Result<GraduationStudent, RusaintError> {
-        let parser = ElementParser::new(self.client.body());
+        let parser = ElementParser::new(self.body());
         let number = parser
             .element_from_def(&Self::STUDENT_NUM)?
             .value_into_u32()?;
@@ -142,11 +142,11 @@ impl<'a> GraduationRequirementsApplication {
     /// 졸업사정 결과와 졸업 필요 요건별 충족 여부와 세부 정보를 반환합니다.
     pub async fn requirements(&mut self) -> Result<GraduationRequirements, RusaintError> {
         {
-            let event = ElementParser::new(self.client.body())
+            let event = ElementParser::new(self.body())
                 .read(ButtonPressCommand::new(Self::SHOW_DETAILS))?;
             self.client.process_event(false, event).await?;
         }
-        let parser = ElementParser::new(self.client.body());
+        let parser = ElementParser::new(self.body());
         let audit_result = parser
             .read(ReadInputFieldValueCommand::new(Self::AUDIT_RESULT))
             .is_ok_and(|str| str == "가능");
