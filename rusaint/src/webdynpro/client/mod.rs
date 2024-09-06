@@ -1,5 +1,5 @@
 #[cfg(feature = "element")]
-use super::command::{WebDynproCommand, WebDynproReadCommand};
+use super::command::WebDynproCommand;
 use crate::webdynpro::event::ucf_parameters::UcfParameters;
 use crate::webdynpro::event::{EventBuilder, EventBuilderError};
 use crate::{
@@ -99,21 +99,6 @@ impl<'a> WebDynproClient {
             client,
             event_queue: Mutex::new(EventQueue::new()),
         })
-    }
-
-    #[cfg(feature = "element")]
-    /// WebDynpro 클라이언트에 명령을 전송합니다.
-    pub async fn send<T: WebDynproCommand>(
-        &mut self,
-        command: T,
-    ) -> Result<T::Result, WebDynproError> {
-        command.dispatch(self).await
-    }
-
-    #[cfg(feature = "element")]
-    /// WebDynpro 클라이언트에 읽기 명령을 전송합니다.
-    pub fn read<T: WebDynproReadCommand>(&self, command: T) -> Result<T::Result, WebDynproError> {
-        command.read(self.body())
     }
 
     #[allow(dead_code)]
