@@ -1,6 +1,7 @@
 use std::sync::Arc;
 use url::Url;
 
+use crate::webdynpro::command::WebDynproCommandExecutor;
 use crate::webdynpro::element::parser::ElementParser;
 use crate::{
     session::USaintSession,
@@ -75,7 +76,7 @@ impl<'a> USaintClient {
     }
 
     async fn load_placeholder(&mut self) -> Result<(), WebDynproError> {
-        let parser = ElementParser::new(self.body())?;
+        let parser = ElementParser::new(self.body());
         let notify_wd01 = parser.read(ClientInspectorNotifyCommand::new(
             Self::CLIENT_INSPECTOR_WD01,
             INITIAL_CLIENT_DATA_WD01,
