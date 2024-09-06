@@ -33,11 +33,11 @@ pub trait ElementDefinition<'body>: Sized {
     /// `scraper`에서 이 엘리먼트를 선택할 수 있는 CSS Selector를 반환합니다.
     /// ### 예시
     /// ```ignore
-    /// let body = app.body();
+    /// let parser = ElementParser(body);
     /// const BUTTON: ElementDef<'_, Button<'_>> = ElementDef::new("TEST.BUTTON1");
     /// let selector = BUTTON.selector().unwrap();
-    /// let btn_elem = body.document().select(&selector).next().unwrap();
-    /// let btn = ElementWrapper::dyn_element(btn_elem).unwrap();
+    /// let btn_elem = parser.document().select(&selector).next().unwrap();
+    /// let btn = ElementWrapper::from_ref(btn_elem).unwrap();
     /// if let ElementWrapper::Button(btn) = btn {
     ///     println!("It's button!");
     /// }
