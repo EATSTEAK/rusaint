@@ -9,11 +9,13 @@ use crate::{
     webdynpro::{
         client::body::Body,
         command::element::{
-            action::ButtonPressCommand,
+            action::ButtonPressEventCommand,
             complex::{
-                ReadSapTableBodyCommand, ReadSapTableLSDataCommand, SapTableVerticalScrollCommand,
+                SapTableBodyCommand, SapTableLSDataCommand, SapTableVerticalScrollEventCommand,
             },
-            selection::{ComboBoxChangeCommand, ComboBoxSelectCommand, ReadComboBoxLSDataCommand},
+            selection::{
+                ComboBoxChangeEventCommand, ComboBoxLSDataCommand, ComboBoxSelectEventCommand,
+            },
         },
         element::{
             action::Button,
@@ -81,24 +83,31 @@ impl<'a> LectureAssessmentApplication {
     ) -> Result<(), WebDynproError> {
         let parser = ElementParser::new(self.body());
         let semester = Self::semester_to_key(semester);
-        let year_combobox_lsdata = parser.read(ReadComboBoxLSDataCommand::new(Self::DDLB_01))?;
-        let semester_combobox_lsdata =
-            parser.read(ReadComboBoxLSDataCommand::new(Self::DDLB_02))?;
+        let year_combobox_lsdata = parser.read(ComboBoxLSDataCommand::new(Self::DDLB_01))?;
+        let semester_combobox_lsdata = parser.read(ComboBoxLSDataCommand::new(Self::DDLB_02))?;
         if year_combobox_lsdata.key().map(String::as_str) != Some(year) {
-            let event = parser.read(ComboBoxSelectCommand::new(Self::DDLB_01, &year, false))?;
+            let event =
+                parser.read(ComboBoxSelectEventCommand::new(Self::DDLB_01, &year, false))?;
             self.client.process_event(false, event).await?;
         }
         if semester_combobox_lsdata.key().map(String::as_str) != Some(semester) {
-            let event = parser.read(ComboBoxSelectCommand::new(Self::DDLB_02, semester, false))?;
+            let event = parser.read(ComboBoxSelectEventCommand::new(
+                Self::DDLB_02,
+                semester,
+                false,
+            ))?;
             self.client.process_event(false, event).await?;
         }
         if let Some(lecture_name) = lecture_name {
-            let event =
-                parser.read(ComboBoxChangeCommand::new(Self::IF_01, lecture_name, false))?;
+            let event = parser.read(ComboBoxChangeEventCommand::new(
+                Self::IF_01,
+                lecture_name,
+                false,
+            ))?;
             self.client.process_event(false, event).await?;
         }
         if let Some(lecture_code) = lecture_code {
-            let event = parser.read(ComboBoxChangeCommand::new(
+            let event = parser.read(ComboBoxChangeEventCommand::new(
                 Self::ILSM_OBJID,
                 &lecture_code.to_string(),
                 false,
@@ -106,14 +115,14 @@ impl<'a> LectureAssessmentApplication {
             self.client.process_event(false, event).await?;
         }
         if let Some(professor_name) = professor_name {
-            let event = parser.read(ComboBoxChangeCommand::new(
+            let event = parser.read(ComboBoxChangeEventCommand::new(
                 Self::IF_04,
                 professor_name,
                 false,
             ))?;
             self.client.process_event(false, event).await?;
         }
-        let btn_press = parser.read(ButtonPressCommand::new(Self::BT_SEARCH))?;
+        let btn_press = parser.read(ButtonPressEventCommand::new(Self::BT_SEARCH))?;
         self.client.process_event(false, btn_press).await?;
         Ok(())
     }
@@ -137,7 +146,7 @@ impl<'a> LectureAssessmentApplication {
         .await?;
         let mut parser = ElementParser::new(self.body());
         let row_count = parser
-            .read(ReadSapTableLSDataCommand::new(Self::TABLE))?
+            .read(SapTableLSDataCommand::new(Self::TABLE))?
             .row_count()
             .map(|u| u.to_owned())
             .ok_or_else(|| {
@@ -148,7 +157,7 @@ impl<'a> LectureAssessmentApplication {
             })?
             .try_into()
             .unwrap();
-        let mut table = parser.read(ReadSapTableBodyCommand::new(Self::TABLE))?;
+        let mut table = parser.read(SapTableBodyCommand::new(Self::TABLE))?;
         if row_count == 1 {
             let Some(first_row) = table.iter().next() else {
                 return Err(ApplicationError::NoLectureAssessments.into());
@@ -174,7 +183,7 @@ impl<'a> LectureAssessmentApplication {
             }
             results.append(&mut partial_results);
             if results.len() < row_count {
-                let event = parser.read(SapTableVerticalScrollCommand::new(
+                let event = parser.read(SapTableVerticalScrollEventCommand::new(
                     Self::TABLE,
                     results.len().try_into().unwrap(),
                     "",
@@ -186,7 +195,7 @@ impl<'a> LectureAssessmentApplication {
                 ))?;
                 self.client.process_event(false, event).await?;
                 parser = ElementParser::new(self.body());
-                table = parser.read(ReadSapTableBodyCommand::new(Self::TABLE))?;
+                table = parser.read(SapTableBodyCommand::new(Self::TABLE))?;
             }
         }
         Ok(results)

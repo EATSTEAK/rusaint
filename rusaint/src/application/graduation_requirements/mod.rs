@@ -8,8 +8,8 @@ use crate::{
     webdynpro::{
         client::body::Body,
         command::element::{
-            action::ButtonPressCommand, complex::ReadSapTableBodyCommand,
-            text::ReadInputFieldValueCommand,
+            action::ButtonPressEventCommand, complex::SapTableBodyCommand,
+            text::InputFieldValueCommand,
         },
         element::{
             action::Button,
@@ -143,14 +143,14 @@ impl<'a> GraduationRequirementsApplication {
     pub async fn requirements(&mut self) -> Result<GraduationRequirements, RusaintError> {
         {
             let event = ElementParser::new(self.body())
-                .read(ButtonPressCommand::new(Self::SHOW_DETAILS))?;
+                .read(ButtonPressEventCommand::new(Self::SHOW_DETAILS))?;
             self.client.process_event(false, event).await?;
         }
         let parser = ElementParser::new(self.body());
         let audit_result = parser
-            .read(ReadInputFieldValueCommand::new(Self::AUDIT_RESULT))
+            .read(InputFieldValueCommand::new(Self::AUDIT_RESULT))
             .is_ok_and(|str| str == "가능");
-        let table = parser.read(ReadSapTableBodyCommand::new(Self::MAIN_TABLE))?;
+        let table = parser.read(SapTableBodyCommand::new(Self::MAIN_TABLE))?;
         let requirements = table
             .try_table_into::<GraduationRequirement>(&parser)?
             .into_iter()
@@ -177,7 +177,7 @@ mod test {
             graduation_requirements::GraduationRequirementsApplication, USaintClientBuilder,
         },
         global_test_utils::get_session,
-        webdynpro::command::element::complex::ReadSapTableBodyCommand,
+        webdynpro::command::element::complex::SapTableBodyCommand,
     };
 
     #[tokio::test]
@@ -191,7 +191,7 @@ mod test {
             .unwrap();
         let parser = ElementParser::new(app.body());
         let table = parser
-            .read(ReadSapTableBodyCommand::new(
+            .read(SapTableBodyCommand::new(
                 GraduationRequirementsApplication::MAIN_TABLE,
             ))
             .unwrap()

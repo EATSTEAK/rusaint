@@ -13,7 +13,7 @@ use crate::{
     error::ApplicationError,
     model::SemesterType,
     webdynpro::{
-        command::element::complex::ReadSapTableBodyCommand,
+        command::element::complex::SapTableBodyCommand,
         element::{
             complex::{
                 sap_table::{
@@ -121,7 +121,7 @@ impl<'a> GeneralChapelInformation {
     }
 
     pub(crate) fn with_parser(parser: &'a ElementParser) -> Result<Vec<Self>, RusaintError> {
-        let table = parser.read(ReadSapTableBodyCommand::new(Self::TABLE))?;
+        let table = parser.read(SapTableBodyCommand::new(Self::TABLE))?;
         let Some(first_row) = table.iter().next() else {
             return Err(ApplicationError::NoChapelInformation.into());
         };
@@ -228,7 +228,7 @@ impl<'a> ChapelAttendance {
     }
 
     pub(crate) fn with_parser(parser: &'a ElementParser) -> Result<Vec<Self>, WebDynproError> {
-        let table = parser.read(ReadSapTableBodyCommand::new(Self::TABLE_A))?;
+        let table = parser.read(SapTableBodyCommand::new(Self::TABLE_A))?;
         let Some(first_row) = table.iter().next() else {
             return Ok(Vec::with_capacity(0));
         };
@@ -346,7 +346,7 @@ impl<'a> ChapelAbsenceRequest {
         TABLE02_CP_CP: SapTable<'a> = "ZCMW3681.ID_0001:V_MAIN.TABLE02_CP_CP";
     }
     pub(crate) fn with_parser(parser: &'a ElementParser) -> Result<Vec<Self>, RusaintError> {
-        let table = parser.read(ReadSapTableBodyCommand::new(Self::TABLE02_CP_CP))?;
+        let table = parser.read(SapTableBodyCommand::new(Self::TABLE02_CP_CP))?;
         let Some(first_row) = table.iter().next() else {
             return Ok(Vec::with_capacity(0));
         };

@@ -5,8 +5,8 @@ use crate::{
     define_elements,
     webdynpro::{
         command::element::{
-            layout::TabStripTabSelectCommand, selection::ReadComboBoxValueCommand,
-            text::ReadInputFieldValueCommand,
+            layout::TabStripTabSelectEventCommand, selection::ComboBoxValueCommand,
+            text::InputFieldValueCommand,
         },
         element::{
             action::Button, layout::tab_strip::item::TabStripItem, selection::ComboBox,
@@ -67,7 +67,7 @@ impl<'a> StudentWorkInformation {
         client: &mut USaintClient,
     ) -> Result<StudentWorkInformation, WebDynproError> {
         let mut parser = ElementParser::new(client.body());
-        let event = parser.read(TabStripTabSelectCommand::new(
+        let event = parser.read(TabStripTabSelectEventCommand::new(
             StudentInformationApplication::TAB_ADDITION,
             Self::TAB_WORK,
             0,
@@ -76,33 +76,33 @@ impl<'a> StudentWorkInformation {
         client.process_event(false, event).await?;
         parser = ElementParser::new(client.body());
         Ok(Self {
-            job: parser.read(ReadComboBoxValueCommand::new(Self::COJOB)).ok(),
+            job: parser.read(ComboBoxValueCommand::new(Self::COJOB)).ok(),
             public_official: parser
-                .read(ReadComboBoxValueCommand::new(Self::COMPANY_ORGR))
+                .read(ComboBoxValueCommand::new(Self::COMPANY_ORGR))
                 .ok(),
             company_name: parser
-                .read(ReadInputFieldValueCommand::new(Self::COMPANY_NAM))
+                .read(InputFieldValueCommand::new(Self::COMPANY_NAM))
                 .ok(),
             department_name: parser
-                .read(ReadInputFieldValueCommand::new(Self::COMPANY_DEPT_NAM))
+                .read(InputFieldValueCommand::new(Self::COMPANY_DEPT_NAM))
                 .ok(),
             title: parser
-                .read(ReadInputFieldValueCommand::new(Self::COMPANY_TITLE))
+                .read(InputFieldValueCommand::new(Self::COMPANY_TITLE))
                 .ok(),
             zip_code: parser
-                .read(ReadInputFieldValueCommand::new(Self::COMPANY_ZIP_COD))
+                .read(InputFieldValueCommand::new(Self::COMPANY_ZIP_COD))
                 .ok(),
             address: parser
-                .read(ReadInputFieldValueCommand::new(Self::COMPANY_ADDRESS))
+                .read(InputFieldValueCommand::new(Self::COMPANY_ADDRESS))
                 .ok(),
             specific_address: parser
-                .read(ReadInputFieldValueCommand::new(Self::COMPANY_ADDRESS2))
+                .read(InputFieldValueCommand::new(Self::COMPANY_ADDRESS2))
                 .ok(),
             tel_number: parser
-                .read(ReadInputFieldValueCommand::new(Self::COMPANY_TEL1))
+                .read(InputFieldValueCommand::new(Self::COMPANY_TEL1))
                 .ok(),
             fax_number: parser
-                .read(ReadInputFieldValueCommand::new(Self::COMPANY_TEL2))
+                .read(InputFieldValueCommand::new(Self::COMPANY_TEL2))
                 .ok(),
         })
     }

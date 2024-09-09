@@ -9,8 +9,8 @@ use crate::{
     webdynpro::{
         client::body::Body,
         command::element::{
-            action::ButtonPressCommand,
-            selection::{ComboBoxSelectCommand, ReadComboBoxLSDataCommand},
+            action::ButtonPressEventCommand,
+            selection::{ComboBoxLSDataCommand, ComboBoxSelectEventCommand},
         },
         element::{action::Button, selection::ComboBox},
         error::{ElementError, WebDynproError},
@@ -62,22 +62,27 @@ impl<'a> ChapelApplication {
     ) -> Result<(), RusaintError> {
         let semester = Self::semester_to_key(semester);
         let parser = ElementParser::new(self.body());
-        let year_combobox_lsdata = parser.read(ReadComboBoxLSDataCommand::new(Self::SEL_PERYR))?;
-        let semester_combobox_lsdata =
-            parser.read(ReadComboBoxLSDataCommand::new(Self::SEL_PERID))?;
+        let year_combobox_lsdata = parser.read(ComboBoxLSDataCommand::new(Self::SEL_PERYR))?;
+        let semester_combobox_lsdata = parser.read(ComboBoxLSDataCommand::new(Self::SEL_PERID))?;
         if year_combobox_lsdata.key().map(String::as_str) != Some(year) {
-            let year_select_event =
-                parser.read(ComboBoxSelectCommand::new(Self::SEL_PERYR, &year, false))?;
+            let year_select_event = parser.read(ComboBoxSelectEventCommand::new(
+                Self::SEL_PERYR,
+                &year,
+                false,
+            ))?;
             self.client.process_event(false, year_select_event).await?;
         }
         if semester_combobox_lsdata.key().map(String::as_str) != Some(semester) {
-            let semester_select_event =
-                parser.read(ComboBoxSelectCommand::new(Self::SEL_PERID, semester, false))?;
+            let semester_select_event = parser.read(ComboBoxSelectEventCommand::new(
+                Self::SEL_PERID,
+                semester,
+                false,
+            ))?;
             self.client
                 .process_event(false, semester_select_event)
                 .await?;
         }
-        let button_press_event = parser.read(ButtonPressCommand::new(Self::BTN_SEL))?;
+        let button_press_event = parser.read(ButtonPressEventCommand::new(Self::BTN_SEL))?;
         self.client.process_event(false, button_press_event).await?;
         Ok(())
     }

@@ -6,18 +6,18 @@ use crate::webdynpro::{
 };
 
 /// [`InputField`](crate::webdynpro::element::text::InputField)의 값을 반환
-pub struct ReadInputFieldValueCommand {
+pub struct InputFieldValueCommand {
     element_def: InputFieldDef,
 }
 
-impl ReadInputFieldValueCommand {
+impl InputFieldValueCommand {
     /// 새로운 명령 객체를 생성합니다.
-    pub fn new(element_def: InputFieldDef) -> ReadInputFieldValueCommand {
+    pub fn new(element_def: InputFieldDef) -> InputFieldValueCommand {
         Self { element_def }
     }
 }
 
-impl WebDynproCommand for ReadInputFieldValueCommand {
+impl WebDynproCommand for InputFieldValueCommand {
     type Result = String;
 
     fn dispatch(&self, parser: &ElementParser) -> Result<Self::Result, WebDynproError> {

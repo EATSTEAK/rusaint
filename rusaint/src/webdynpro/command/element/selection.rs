@@ -14,16 +14,16 @@ use crate::webdynpro::{
     error::{ElementError, WebDynproError},
 };
 
-/// [`ComboBox`](crate::webdynpro::element::selection::ComboBox)의 선택지를 선택하도록 함
-pub struct ComboBoxSelectCommand {
+/// [`ComboBox`](crate::webdynpro::element::selection::ComboBox)의 선택지를 선택하도록 하는 이벤트를 반환
+pub struct ComboBoxSelectEventCommand {
     element_def: ComboBoxDef,
     key: String,
     by_enter: bool,
 }
 
-impl ComboBoxSelectCommand {
+impl ComboBoxSelectEventCommand {
     /// 새로운 명령 객체를 생성합니다.
-    pub fn new(element_def: ComboBoxDef, key: &str, by_enter: bool) -> ComboBoxSelectCommand {
+    pub fn new(element_def: ComboBoxDef, key: &str, by_enter: bool) -> ComboBoxSelectEventCommand {
         Self {
             element_def,
             key: key.to_string(),
@@ -32,7 +32,7 @@ impl ComboBoxSelectCommand {
     }
 }
 
-impl WebDynproCommand for ComboBoxSelectCommand {
+impl WebDynproCommand for ComboBoxSelectEventCommand {
     type Result = Event;
 
     fn dispatch(&self, parser: &ElementParser) -> Result<Self::Result, WebDynproError> {
@@ -42,17 +42,21 @@ impl WebDynproCommand for ComboBoxSelectCommand {
     }
 }
 
-/// [`ComboBox`](crate::webdynpro::element::selection::ComboBox)의 내용을 바꿈
+/// [`ComboBox`](crate::webdynpro::element::selection::ComboBox)의 내용을 바꾸는 이벤트를 반환
 #[allow(unused)]
-pub struct ComboBoxChangeCommand {
+pub struct ComboBoxChangeEventCommand {
     element_def: ComboBoxDef,
     value: String,
     by_enter: bool,
 }
 
-impl ComboBoxChangeCommand {
+impl ComboBoxChangeEventCommand {
     /// 새로운 명령 객체를 생성합니다.
-    pub fn new(element_def: ComboBoxDef, value: &str, by_enter: bool) -> ComboBoxChangeCommand {
+    pub fn new(
+        element_def: ComboBoxDef,
+        value: &str,
+        by_enter: bool,
+    ) -> ComboBoxChangeEventCommand {
         Self {
             element_def,
             value: value.to_string(),
@@ -61,7 +65,7 @@ impl ComboBoxChangeCommand {
     }
 }
 
-impl WebDynproCommand for ComboBoxChangeCommand {
+impl WebDynproCommand for ComboBoxChangeEventCommand {
     type Result = Event;
 
     fn dispatch(&self, parser: &ElementParser) -> Result<Self::Result, WebDynproError> {
@@ -71,21 +75,21 @@ impl WebDynproCommand for ComboBoxChangeCommand {
     }
 }
 
-/// [`ComboBox`](crate::webdynpro::element::selection::ComboBox)의 선택지를 `value1`의 값을 기반으로 선택하도록 함
+/// [`ComboBox`](crate::webdynpro::element::selection::ComboBox)의 선택지를 `value1`의 값을 기반으로 선택하도록 하는 이벤트를 반환
 #[allow(unused)]
-pub struct ComboBoxSelectByValue1Command {
+pub struct ComboBoxSelectByValue1EventCommand {
     element_def: ComboBoxDef,
     value: String,
     by_enter: bool,
 }
 
-impl ComboBoxSelectByValue1Command {
+impl ComboBoxSelectByValue1EventCommand {
     /// 새로운 명령 객체를 생성합니다.
     pub fn new(
         element_def: ComboBoxDef,
         value: &str,
         by_enter: bool,
-    ) -> ComboBoxSelectByValue1Command {
+    ) -> ComboBoxSelectByValue1EventCommand {
         Self {
             element_def,
             value: value.to_string(),
@@ -94,14 +98,12 @@ impl ComboBoxSelectByValue1Command {
     }
 }
 
-impl WebDynproCommand for ComboBoxSelectByValue1Command {
+impl WebDynproCommand for ComboBoxSelectByValue1EventCommand {
     type Result = Event;
 
     fn dispatch(&self, parser: &ElementParser) -> Result<Self::Result, WebDynproError> {
-        let listbox_def = parser.read(ReadComboBoxItemListBoxCommand::new(
-            self.element_def.clone(),
-        ))?;
-        let items = parser.read(ReadListBoxItemInfoCommand::new(listbox_def))?;
+        let listbox_def = parser.read(ComboBoxItemListBoxCommand::new(self.element_def.clone()))?;
+        let items = parser.read(ListBoxItemInfoCommand::new(listbox_def))?;
         let item_key = items
             .iter()
             .find_map(|info| match info {
@@ -119,7 +121,7 @@ impl WebDynproCommand for ComboBoxSelectByValue1Command {
                 content: format!("Cannot find {} option", self.value),
             })?
             .to_owned();
-        parser.read(ComboBoxSelectCommand::new(
+        parser.read(ComboBoxSelectEventCommand::new(
             self.element_def.clone(),
             &item_key,
             false,
@@ -128,18 +130,18 @@ impl WebDynproCommand for ComboBoxSelectByValue1Command {
 }
 
 /// [`ComboBoxLSData`]를 반환
-pub struct ReadComboBoxLSDataCommand {
+pub struct ComboBoxLSDataCommand {
     element_def: ComboBoxDef,
 }
 
-impl ReadComboBoxLSDataCommand {
+impl ComboBoxLSDataCommand {
     /// 새로운 명령 객체를 생성합니다.
-    pub fn new(element_def: ComboBoxDef) -> ReadComboBoxLSDataCommand {
+    pub fn new(element_def: ComboBoxDef) -> ComboBoxLSDataCommand {
         Self { element_def }
     }
 }
 
-impl WebDynproCommand for ReadComboBoxLSDataCommand {
+impl WebDynproCommand for ComboBoxLSDataCommand {
     type Result = ComboBoxLSData;
 
     fn dispatch(&self, parser: &ElementParser) -> Result<Self::Result, WebDynproError> {
@@ -149,18 +151,18 @@ impl WebDynproCommand for ReadComboBoxLSDataCommand {
 }
 
 /// [`ComboBox`](crate::webdynpro::element::selection::ComboBox)의 참조 [`ListBoxDefWrapper`]를 반환
-pub struct ReadComboBoxItemListBoxCommand {
+pub struct ComboBoxItemListBoxCommand {
     element_def: ComboBoxDef,
 }
 
-impl ReadComboBoxItemListBoxCommand {
+impl ComboBoxItemListBoxCommand {
     /// 새로운 명령 객체를 생성합니다.
-    pub fn new(element_def: ComboBoxDef) -> ReadComboBoxItemListBoxCommand {
+    pub fn new(element_def: ComboBoxDef) -> ComboBoxItemListBoxCommand {
         Self { element_def }
     }
 }
 
-impl WebDynproCommand for ReadComboBoxItemListBoxCommand {
+impl WebDynproCommand for ComboBoxItemListBoxCommand {
     type Result = ListBoxDefWrapper;
 
     fn dispatch(&self, parser: &ElementParser) -> Result<Self::Result, WebDynproError> {
@@ -172,18 +174,18 @@ impl WebDynproCommand for ReadComboBoxItemListBoxCommand {
 }
 
 /// [`ComboBox`](crate::webdynpro::element::selection::ComboBox)의 값을 반환
-pub struct ReadComboBoxValueCommand {
+pub struct ComboBoxValueCommand {
     element_def: ComboBoxDef,
 }
 
-impl ReadComboBoxValueCommand {
+impl ComboBoxValueCommand {
     /// 새로운 명령 객체를 생성합니다.
     pub fn new(element_def: ComboBoxDef) -> Self {
         Self { element_def }
     }
 }
 
-impl WebDynproCommand for ReadComboBoxValueCommand {
+impl WebDynproCommand for ComboBoxValueCommand {
     type Result = String;
 
     fn dispatch(&self, parser: &ElementParser) -> Result<Self::Result, WebDynproError> {
@@ -200,18 +202,18 @@ impl WebDynproCommand for ReadComboBoxValueCommand {
 }
 
 /// [`ListBox`](crate::webdynpro::element::selection::list_box::ListBox)의 아이템 정보를 가져옴
-pub struct ReadListBoxItemInfoCommand {
+pub struct ListBoxItemInfoCommand {
     element_def: ListBoxDefWrapper,
 }
 
-impl ReadListBoxItemInfoCommand {
+impl ListBoxItemInfoCommand {
     /// 새로운 명령 객체를 생성합니다.
     pub fn new(element_def: ListBoxDefWrapper) -> Self {
         Self { element_def }
     }
 }
 
-impl WebDynproCommand for ReadListBoxItemInfoCommand {
+impl WebDynproCommand for ListBoxItemInfoCommand {
     type Result = Vec<ListBoxItemInfo>;
 
     fn dispatch(&self, parser: &ElementParser) -> Result<Self::Result, WebDynproError> {

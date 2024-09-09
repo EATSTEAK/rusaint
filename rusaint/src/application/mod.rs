@@ -9,7 +9,8 @@ use crate::{
     webdynpro::{
         client::{body::Body, EventProcessResult, WebDynproClient, WebDynproClientBuilder},
         command::element::system::{
-            ClientInspectorNotifyCommand, CustomClientInfoCommand, LoadingPlaceholderLoadCommand,
+            ClientInspectorNotifyEventCommand, CustomClientInfoEventCommand,
+            LoadingPlaceholderLoadEventCommand,
         },
         element::{
             define_elements,
@@ -73,18 +74,18 @@ impl<'a> USaintClient {
 
     async fn load_placeholder(&mut self) -> Result<(), WebDynproError> {
         let parser = ElementParser::new(self.body());
-        let notify_wd01 = parser.read(ClientInspectorNotifyCommand::new(
+        let notify_wd01 = parser.read(ClientInspectorNotifyEventCommand::new(
             Self::CLIENT_INSPECTOR_WD01,
             INITIAL_CLIENT_DATA_WD01,
         ))?;
-        let notify_wd02 = parser.read(ClientInspectorNotifyCommand::new(
+        let notify_wd02 = parser.read(ClientInspectorNotifyEventCommand::new(
             Self::CLIENT_INSPECTOR_WD02,
             INITIAL_CLIENT_DATA_WD02,
         ))?;
-        let load = parser.read(LoadingPlaceholderLoadCommand::new(
+        let load = parser.read(LoadingPlaceholderLoadEventCommand::new(
             Self::LOADING_PLACEHOLDER,
         ))?;
-        let custom = parser.read(CustomClientInfoCommand::new(
+        let custom = parser.read(CustomClientInfoEventCommand::new(
             Self::CUSTOM,
             CustomClientInfo {
                 client_url: self.client_url(),

@@ -5,8 +5,8 @@ use crate::{
     define_elements,
     webdynpro::{
         command::element::{
-            layout::TabStripTabSelectCommand, selection::ReadComboBoxValueCommand,
-            text::ReadInputFieldValueCommand,
+            layout::TabStripTabSelectEventCommand, selection::ComboBoxValueCommand,
+            text::InputFieldValueCommand,
         },
         element::{
             action::Button, layout::tab_strip::item::TabStripItem, selection::ComboBox,
@@ -77,7 +77,7 @@ impl<'a> StudentReligion {
 
     pub(crate) async fn with_client(client: &mut USaintClient) -> Result<Self, WebDynproError> {
         let mut parser = ElementParser::new(client.body());
-        let event = parser.read(TabStripTabSelectCommand::new(
+        let event = parser.read(TabStripTabSelectEventCommand::new(
             StudentInformationApplication::TAB_ADDITION,
             Self::TAB_RELIGION,
             2,
@@ -87,46 +87,46 @@ impl<'a> StudentReligion {
         parser = ElementParser::new(client.body());
         Ok(Self {
             religion_type: parser
-                .read(ReadComboBoxValueCommand::new(Self::RELIGION_COD))
+                .read(ComboBoxValueCommand::new(Self::RELIGION_COD))
                 .ok(),
             start_date: parser
-                .read(ReadInputFieldValueCommand::new(Self::BELIEF_START_DATE))
+                .read(InputFieldValueCommand::new(Self::BELIEF_START_DATE))
                 .ok(),
             church: parser
-                .read(ReadInputFieldValueCommand::new(Self::PRES_CHURCH))
+                .read(InputFieldValueCommand::new(Self::PRES_CHURCH))
                 .ok(),
             church_man: parser
-                .read(ReadInputFieldValueCommand::new(Self::CHURCH_MAN))
+                .read(InputFieldValueCommand::new(Self::CHURCH_MAN))
                 .ok(),
             baptism_level: parser
-                .read(ReadComboBoxValueCommand::new(Self::BAPTISM_LVL))
+                .read(ComboBoxValueCommand::new(Self::BAPTISM_LVL))
                 .ok(),
             baptism_grp: parser
-                .read(ReadInputFieldValueCommand::new(Self::BAPTISM_GRP))
+                .read(InputFieldValueCommand::new(Self::BAPTISM_GRP))
                 .ok(),
             service_department: parser
-                .read(ReadInputFieldValueCommand::new(Self::SERVICE_DEPT_DES))
+                .read(InputFieldValueCommand::new(Self::SERVICE_DEPT_DES))
                 .ok(),
             service_department_title: parser
-                .read(ReadInputFieldValueCommand::new(Self::SERVICE_DEPT_LVL))
+                .read(InputFieldValueCommand::new(Self::SERVICE_DEPT_LVL))
                 .ok(),
             church_address: parser
-                .read(ReadInputFieldValueCommand::new(Self::CHURCH_ADDR))
+                .read(InputFieldValueCommand::new(Self::CHURCH_ADDR))
                 .ok(),
             singeub: parser
-                .read(ReadComboBoxValueCommand::new(Self::SINGEUB_DES))
+                .read(ComboBoxValueCommand::new(Self::SINGEUB_DES))
                 .ok(),
             baptism_date: parser
-                .read(ReadInputFieldValueCommand::new(Self::BAPTISM_DT))
+                .read(InputFieldValueCommand::new(Self::BAPTISM_DT))
                 .ok(),
             baptism_church: parser
-                .read(ReadInputFieldValueCommand::new(Self::BAPTISM_CH))
+                .read(InputFieldValueCommand::new(Self::BAPTISM_CH))
                 .ok(),
             baptism_man: parser
-                .read(ReadInputFieldValueCommand::new(Self::BAPTISM_MAN))
+                .read(InputFieldValueCommand::new(Self::BAPTISM_MAN))
                 .ok(),
             church_grp: parser
-                .read(ReadInputFieldValueCommand::new(Self::CHURCH_GRP))
+                .read(InputFieldValueCommand::new(Self::CHURCH_GRP))
                 .ok(),
         })
     }

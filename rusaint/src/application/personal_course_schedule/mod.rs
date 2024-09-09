@@ -11,7 +11,7 @@ use crate::{
     model::SemesterType,
     webdynpro::{
         client::body::Body,
-        command::element::selection::{ComboBoxSelectCommand, ReadComboBoxLSDataCommand},
+        command::element::selection::{ComboBoxLSDataCommand, ComboBoxSelectEventCommand},
         element::{complex::SapTable, selection::ComboBox},
         error::{ElementError, WebDynproError},
     },
@@ -62,14 +62,18 @@ impl<'a> PersonalCourseScheduleApplication {
     ) -> Result<(), WebDynproError> {
         let semester = Self::semester_to_key(semester);
         let parser = ElementParser::new(self.body());
-        let year_combobox_lsdata = parser.read(ReadComboBoxLSDataCommand::new(Self::PERYR))?;
-        let semester_combobox_lsdata = parser.read(ReadComboBoxLSDataCommand::new(Self::PERID))?;
+        let year_combobox_lsdata = parser.read(ComboBoxLSDataCommand::new(Self::PERYR))?;
+        let semester_combobox_lsdata = parser.read(ComboBoxLSDataCommand::new(Self::PERID))?;
         if year_combobox_lsdata.key().map(String::as_str) != Some(year) {
-            let event = parser.read(ComboBoxSelectCommand::new(Self::PERYR, &year, false))?;
+            let event = parser.read(ComboBoxSelectEventCommand::new(Self::PERYR, &year, false))?;
             self.client.process_event(false, event).await?;
         }
         if semester_combobox_lsdata.key().map(String::as_str) != Some(semester) {
-            let event = parser.read(ComboBoxSelectCommand::new(Self::PERID, semester, false))?;
+            let event = parser.read(ComboBoxSelectEventCommand::new(
+                Self::PERID,
+                semester,
+                false,
+            ))?;
             self.client.process_event(false, event).await?;
         }
         Ok(())
