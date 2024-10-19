@@ -39,3 +39,13 @@ languages/kotlin/dev/eatsteak/rusaint/rusaint.kt
 languages/swift/Rusaint.swift
 languages/swift/RusaintFFI.h
 languages/swift/RusaintFFI.modulemap
+
+# swift
+.DS_Store
+*.xcuserstate
+
+# xcframework
+languages/swift/RusaintFFI.xcframework/
+
+
+
