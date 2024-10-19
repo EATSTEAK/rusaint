@@ -1,5 +1,5 @@
 [bindings.kotlin]
-package_name = "dev.eatsteak.rusaint"
+package_name = "dev.eatsteak.rusaint.ffi"
 generate_immutable_records = true
 android = true
 
