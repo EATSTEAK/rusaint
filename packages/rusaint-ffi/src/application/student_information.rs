@@ -73,7 +73,6 @@ pub struct StudentInformationApplicationBuilder {}
 
 #[uniffi::export(async_runtime = "tokio")]
 impl StudentInformationApplicationBuilder {
-
     /// 새로운 [`StudentInformationApplicationBuilder`]를 만듭니다.
     #[uniffi::constructor]
     pub fn new() -> Self {
@@ -85,8 +84,8 @@ impl StudentInformationApplicationBuilder {
         &self,
         session: Arc<USaintSession>,
     ) -> Result<StudentInformationApplication, RusaintError> {
-        let mut original_builder = rusaint::application::USaintClientBuilder::new();
-        original_builder = original_builder.session(session.original());
+        let original_builder =
+            rusaint::application::USaintClientBuilder::new().session(session.original());
         let original_app = original_builder
             .build_into::<rusaint::application::student_information::StudentInformationApplication>(
             )

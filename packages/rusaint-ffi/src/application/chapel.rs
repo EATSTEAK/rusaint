@@ -38,8 +38,8 @@ impl ChapelApplicationBuilder {
         &self,
         session: Arc<USaintSession>,
     ) -> Result<ChapelApplication, RusaintError> {
-        let mut original_builder = rusaint::application::USaintClientBuilder::new();
-        original_builder = original_builder.session(session.original());
+        let original_builder =
+            rusaint::application::USaintClientBuilder::new().session(session.original());
         let original_app = original_builder
             .build_into::<rusaint::application::chapel::ChapelApplication>()
             .await?;

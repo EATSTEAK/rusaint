@@ -6,7 +6,6 @@ use rusaint::{
 use tokio::sync::RwLock;
 use rusaint::application::personal_course_schedule::model::PersonalCourseSchedule;
 use crate::{error::RusaintError, session::USaintSession};
-use crate::application::chapel::{ChapelApplication, ChapelApplicationBuilder};
 
 /// [개인수업시간표](https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/ZCMW2102)
 #[derive(uniffi::Object)]
@@ -45,8 +44,7 @@ impl PersonalCourseScheduleApplicationBuilder {
         &self,
         session: Arc<USaintSession>,
     ) -> Result<PersonalCourseScheduleApplication, RusaintError> {
-        let mut original_builder = rusaint::application::USaintClientBuilder::new();
-        original_builder = original_builder.session(session.original());
+        let original_builder = rusaint::application::USaintClientBuilder::new().session(session.original());
         let original_app = original_builder
             .build_into::<rusaint::application::personal_course_schedule::PersonalCourseScheduleApplication>()
             .await?;

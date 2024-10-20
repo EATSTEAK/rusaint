@@ -6,8 +6,8 @@ use rusaint::{
 };
 use tokio::sync::RwLock;
 
-use crate::{error::RusaintError, session::USaintSession};
 use crate::application::chapel::{ChapelApplication, ChapelApplicationBuilder};
+use crate::{error::RusaintError, session::USaintSession};
 
 /// [학생 성적 조회](https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/ZCMB3W0017)
 #[derive(uniffi::Object)]
@@ -88,7 +88,6 @@ pub struct CourseGradesApplicationBuilder {}
 
 #[uniffi::export(async_runtime = "tokio")]
 impl CourseGradesApplicationBuilder {
-    
     /// 새로운 [`CourseGradesApplicationBuilder`]를 만듭니다.
     #[uniffi::constructor]
     pub fn new() -> Self {
@@ -100,8 +99,8 @@ impl CourseGradesApplicationBuilder {
         &self,
         session: Arc<USaintSession>,
     ) -> Result<CourseGradesApplication, RusaintError> {
-        let mut original_builder = rusaint::application::USaintClientBuilder::new();
-        original_builder = original_builder.session(session.original());
+        let original_builder =
+            rusaint::application::USaintClientBuilder::new().session(session.original());
         let original_app = original_builder
             .build_into::<rusaint::application::course_grades::CourseGradesApplication>()
             .await?;

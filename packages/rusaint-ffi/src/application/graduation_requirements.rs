@@ -1,9 +1,11 @@
 use std::sync::Arc;
 
-use crate::{error::RusaintError, session::USaintSession};
-use rusaint::application::graduation_requirements::model::{GraduationRequirements, GraduationStudent};
-use tokio::sync::RwLock;
 use crate::application::chapel::{ChapelApplication, ChapelApplicationBuilder};
+use crate::{error::RusaintError, session::USaintSession};
+use rusaint::application::graduation_requirements::model::{
+    GraduationRequirements, GraduationStudent,
+};
+use tokio::sync::RwLock;
 
 /// [졸업사정표](https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/ZCMW8015)
 #[derive(uniffi::Object)]
@@ -41,8 +43,8 @@ impl GraduationRequirementsApplicationBuilder {
         &self,
         session: Arc<USaintSession>,
     ) -> Result<GraduationRequirementsApplication, RusaintError> {
-        let mut original_builder = rusaint::application::USaintClientBuilder::new();
-        original_builder = original_builder.session(session.original());
+        let original_builder =
+            rusaint::application::USaintClientBuilder::new().session(session.original());
         let original_app = original_builder
             .build_into::<rusaint::application::graduation_requirements::GraduationRequirementsApplication>()
             .await?;
