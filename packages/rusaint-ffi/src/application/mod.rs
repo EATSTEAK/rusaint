@@ -4,3 +4,4 @@ pub mod course_schedule;
 mod graduation_requirments;
 mod lecture_assessment;
 mod personal_course_schedule;
+mod student_information;
