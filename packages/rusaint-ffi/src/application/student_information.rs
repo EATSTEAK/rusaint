@@ -1,15 +1,14 @@
 use std::sync::Arc;
 
 use crate::{error::RusaintError, session::USaintSession};
-use rusaint::application::personal_course_schedule::model::PersonalCourseSchedule;
 use rusaint::application::student_information::model::{
     StudentAcademicRecords, StudentBankAccount, StudentFamily, StudentGraduation,
     StudentInformation, StudentQualification, StudentReligion, StudentResearchBankAccount,
     StudentTransferRecords, StudentWorkInformation,
 };
-use rusaint::model::SemesterType;
 use tokio::sync::RwLock;
 
+/// [학생 정보 수정 및 조회](https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/ZCMW1001n)
 #[derive(uniffi::Object)]
 pub struct StudentInformationApplication(
     RwLock<rusaint::application::student_information::StudentInformationApplication>,
@@ -68,16 +67,20 @@ impl StudentInformationApplication {
     }
 }
 
+/// [`StudentInformationApplication`] 생성을 위한 빌더
 #[derive(uniffi::Object)]
 pub struct StudentInformationApplicationBuilder {}
 
 #[uniffi::export(async_runtime = "tokio")]
 impl StudentInformationApplicationBuilder {
+
+    /// 새로운 [`StudentInformationApplicationBuilder`]를 만듭니다.
     #[uniffi::constructor]
     pub fn new() -> Self {
         Self {}
     }
 
+    /// 세션과 함께 [`StudentInformationApplication`]을 만듭니다.
     pub async fn build(
         &self,
         session: Arc<USaintSession>,

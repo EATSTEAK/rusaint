@@ -6,7 +6,9 @@ use rusaint::{
 use tokio::sync::RwLock;
 use rusaint::application::lecture_assessment::model::LectureAssessmentResult;
 use crate::{error::RusaintError, session::USaintSession};
+use crate::application::chapel::{ChapelApplication, ChapelApplicationBuilder};
 
+/// [강의평가조회](https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/ZCMB2W1010)
 #[derive(uniffi::Object)]
 pub struct LectureAssessmentApplication(
     RwLock<rusaint::application::lecture_assessment::LectureAssessmentApplication>,
@@ -14,8 +16,8 @@ pub struct LectureAssessmentApplication(
 
 #[uniffi::export(async_runtime = "tokio")]
 impl LectureAssessmentApplication {
-    
-    /// 학기, 학년도, 강의 분류를 통해 강의를 찾습니다.
+
+    /// 검색 조건에 맞는 강의평가 정보를 가져옵니다.
     #[uniffi::method(default(lecture_name = None, lecture_code = None, professor_name = None))]
     pub async fn find_assessments(
         &self,
@@ -36,16 +38,20 @@ impl LectureAssessmentApplication {
     }
 }
 
+/// [`LectureAssessmentApplication`] 생성을 위한 빌더
 #[derive(uniffi::Object)]
 pub struct LectureAssessmentApplicationBuilder {}
 
 #[uniffi::export(async_runtime = "tokio")]
 impl LectureAssessmentApplicationBuilder {
+
+    /// 새로운 [`LectureAssessmentApplicationBuilder`]를 만듭니다.
     #[uniffi::constructor]
     pub fn new() -> Self {
         Self {}
     }
 
+    /// 세션과 함께 [`LectureAssessmentApplication`]을 만듭니다.
     pub async fn build(
         &self,
         session: Arc<USaintSession>,

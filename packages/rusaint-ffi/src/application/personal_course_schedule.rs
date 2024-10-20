@@ -6,7 +6,9 @@ use rusaint::{
 use tokio::sync::RwLock;
 use rusaint::application::personal_course_schedule::model::PersonalCourseSchedule;
 use crate::{error::RusaintError, session::USaintSession};
+use crate::application::chapel::{ChapelApplication, ChapelApplicationBuilder};
 
+/// [개인수업시간표](https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/ZCMW2102)
 #[derive(uniffi::Object)]
 pub struct PersonalCourseScheduleApplication(
     RwLock<rusaint::application::personal_course_schedule::PersonalCourseScheduleApplication>,
@@ -25,16 +27,20 @@ impl PersonalCourseScheduleApplication {
     }
 }
 
+/// [`PersonalCourseScheduleApplication`] 생성을 위한 빌더
 #[derive(uniffi::Object)]
 pub struct PersonalCourseScheduleApplicationBuilder {}
 
 #[uniffi::export(async_runtime = "tokio")]
 impl PersonalCourseScheduleApplicationBuilder {
+
+    /// 새로운 [`PersonalCourseScheduleApplicationBuilder`]를 만듭니다.
     #[uniffi::constructor]
     pub fn new() -> Self {
         Self {}
     }
 
+    /// 세션과 함께 [`PersonalCourseScheduleApplication`]을 만듭니다.
     pub async fn build(
         &self,
         session: Arc<USaintSession>,
