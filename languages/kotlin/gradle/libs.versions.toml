@@ -5,17 +5,19 @@
 commons-math3 = "3.6.1"
 guava = "33.2.1-jre"
 junit-jupiter-engine = "5.10.3"
-agp = "8.2.0"
+agp = "8.2.2"
 kotlin = "1.9.23"
 core-ktx = "1.13.1"
 junit = "4.13.2"
 junit-version = "1.2.1"
 espresso-core = "3.6.1"
-lifecycle-runtime-ktx = "2.8.3"
-activity-compose = "1.9.0"
-compose-bom = "2024.04.01"
+kotlinx-coroutines-android = "1.7.3"
+lifecycle-runtime-ktx = "2.8.6"
+activity-compose = "1.9.3"
+compose-bom = "2024.10.00"
 appcompat = "1.7.0"
 material = "1.12.0"
+rust-android = "0.9.4"
 
 [libraries]
 commons-math3 = { module = "org.apache.commons:commons-math3", version.ref = "commons-math3" }
@@ -25,6 +27,7 @@ core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junit-version" }
 espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso-core" }
+kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinx-coroutines-android" }
 lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle-runtime-ktx" }
 activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activity-compose" }
 compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "compose-bom" }
@@ -44,3 +47,4 @@ android-application = { id = "com.android.application", version.ref = "agp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 jetbrains-kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+rust-android = { id = "org.mozilla.rust-android-gradle.rust-android", version.ref = "rust-android"}
