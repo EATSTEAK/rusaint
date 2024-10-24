@@ -1,23 +1,24 @@
-Created with reference to https://github.com/bitwarden/sdk/blob/main/languages/kotlin/README.md
-
 # Android
 
+rusaint library for Android
+
+## Prerequisites
+
+- Basic build tools for Android(`gradle`... etc.)
+- Android NDK
+- [Rust](https://www.rust-lang.org/tools/install) toolchain
+- Install `rustup` targets: see below for instructions
+
 ```bash
-cargo install cross --locked --git https://github.com/cross-rs/cross.git --rev 185398b1b885820515a212de720a306b08e2c8c9
+rustup target add armv7-linux-androideabi   # for arm
+rustup target add i686-linux-android        # for x86
+rustup target add aarch64-linux-android     # for arm64
+rustup target add x86_64-linux-android      # for x86_64
 ```
 
-## building
+## Building
 
 ```bash
-mkdir -p ./lib/src/main/jniLibs/{arm64-v8a,x86_64}
-
-cross build -p rusaint-ffi --release --target=aarch64-linux-android
-mv ../../target/aarch64-linux-android/release/librusaint_ffi.so ./lib/src/main/jniLibs/arm64-v8a/librusaint_ffi.so
-
-cross build -p rusaint-ffi --release --target=x86_64-linux-android
-mv ../../target/x86_64-linux-android/release/librusaint_ffi.so ./lib/src/main/jniLibs/x86_64/librusaint_ffi.so
-```
-
-```bash
-./build-bindings.sh
+# Make sure rust toolchain and android targets are installed
+./gradlew build
 ```
