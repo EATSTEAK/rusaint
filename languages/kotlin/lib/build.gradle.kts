@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.io.ByteArrayOutputStream
 
 plugins {
     alias(libs.plugins.rust.android)
@@ -50,14 +51,35 @@ tasks.withType<KotlinCompile> {
 
 task<Exec>("generateBindings") {
     dependsOn("cargoBuild")
+
+    inputs.files(fileTree("build/rustJniLibs"))
+    outputs.dir("src/main/kotlin")
+
+    doFirst {
+        mkdir("src/main/kotlin")
+    }
+
+    // Use the first available .so file from any architecture
+    val soFile = fileTree("build/rustJniLibs").matching {
+        include("**/librusaint_ffi.so")
+    }.firstOrNull() ?: throw GradleException("No .so file found")
+
     commandLine("cargo", "run", "-p", "uniffi-bindgen", "generate",
-        "./build/rustJniLibs/android/arm64-v8a/librusaint_ffi.so",
+        soFile.absolutePath,
         "--library",
         "--language",
         "kotlin",
         "--no-format",
         "--out-dir",
         "src/main/kotlin")
+
+    // Add error handling
+    errorOutput = ByteArrayOutputStream()
+    doLast {
+        if (executionResult.get().exitValue != 0) {
+            throw GradleException("Failed to generate bindings: ${errorOutput}")
+        }
+    }
 }
 
 dependencies {
