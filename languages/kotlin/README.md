@@ -1,7 +1,9 @@
 # Android
+
 rusaint library for Android
 
 ## Prerequisites
+
 - Basic build tools for Android(`gradle`... etc.)
 - Android NDK
 - [Rust](https://www.rust-lang.org/tools/install) toolchain
