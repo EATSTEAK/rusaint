@@ -31,13 +31,7 @@ android {
     }
 
     buildTypes {
-        release {
-            isMinifyEnabled = true
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-        }
+        getByName("release") {}
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
