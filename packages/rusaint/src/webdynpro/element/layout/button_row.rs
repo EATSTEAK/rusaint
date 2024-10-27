@@ -34,7 +34,7 @@ impl<'a> ButtonRow<'a> {
     /// 내부 [`Button`]을 반환합니다.
     pub fn buttons(
         &'a self,
-    ) -> impl Iterator<Item=&<Button<'a> as Element<'a>>::Def> + ExactSizeIterator {
+    ) -> impl Iterator<Item = &<Button<'a> as Element<'a>>::Def> + ExactSizeIterator {
         self.buttons
             .get_or_init(|| {
                 let button_selector = &Selector::parse(r#":root [ct="B"]"#).unwrap();

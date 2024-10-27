@@ -135,14 +135,14 @@ impl<'a> SapTableBody {
     }
 
     /// 내부 행의 Iterator를 반환합니다.
-    pub fn iter(&'a self) -> impl Iterator<Item=&SapTableRow> + ExactSizeIterator {
+    pub fn iter(&'a self) -> impl Iterator<Item = &SapTableRow> + ExactSizeIterator {
         self.rows.iter()
     }
 
     /// 내부 행에 헤더 행을 포함한 튜플의 Iterator를 반환합니다.
     pub fn zip_header(
         &'a self,
-    ) -> impl Iterator<Item=(&SapTableHeader, &SapTableRow)> + ExactSizeIterator {
+    ) -> impl Iterator<Item = (&SapTableHeader, &SapTableRow)> + ExactSizeIterator {
         self.rows.iter().map(|row| (self.header(), row))
     }
 

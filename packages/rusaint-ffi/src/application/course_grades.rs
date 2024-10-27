@@ -6,7 +6,6 @@ use rusaint::{
 };
 use tokio::sync::RwLock;
 
-use crate::application::chapel::{ChapelApplication, ChapelApplicationBuilder};
 use crate::{error::RusaintError, session::USaintSession};
 
 /// [학생 성적 조회](https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/ZCMB3W0017)
