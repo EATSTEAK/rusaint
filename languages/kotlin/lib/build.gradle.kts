@@ -1,34 +1,37 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jreleaser.model.Active
 import java.io.ByteArrayOutputStream
 
 plugins {
+    alias(libs.plugins.jreleaser)
     alias(libs.plugins.rust.android)
     alias(libs.plugins.android.library)
     alias(libs.plugins.jetbrains.kotlin.android)
+    `maven-publish`
 }
+
+group = "dev.eatsteak"
+description = "Easy and Reliable SSU u-saint scraper"
+version = "0.6.2"
 
 android {
     namespace = "dev.eatsteak.rusaint"
+
+    buildToolsVersion = "34.0.0"
     ndkVersion = "27.2.12479018"
     compileSdk = 34
 
     defaultConfig {
         minSdk = 24
 
-        version = "0.6.2"
+        version = project.version
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
     }
 
     buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-        }
+        getByName("release") {}
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
@@ -36,6 +39,12 @@ android {
     }
     kotlinOptions {
         jvmTarget = "1.8"
+    }
+
+    publishing {
+        singleVariant("release") {
+            withJavadocJar()
+        }
     }
 }
 
@@ -51,35 +60,30 @@ tasks.withType<KotlinCompile> {
     dependsOn("generateBindings")
 }
 
-task<Exec>("generateBindings") {
+tasks.register<Exec>("generateBindings") {
     dependsOn("cargoBuild")
-
-    inputs.files(fileTree("build/rustJniLibs"))
     outputs.dir("src/main/kotlin")
 
     doFirst {
         mkdir("src/main/kotlin")
     }
 
-    // Use the first available .so file from any architecture
-    val soFile = fileTree("build/rustJniLibs").matching {
-        include("**/librusaint_ffi.so")
-    }.firstOrNull() ?: throw GradleException("No .so file found")
-
-    commandLine("cargo", "run", "-p", "uniffi-bindgen", "generate",
-        soFile.absolutePath,
+    commandLine(
+        "cargo", "run", "-p", "uniffi-bindgen", "generate",
+        "./build/rustJniLibs/android/arm64-v8a/librusaint_ffi.so",
         "--library",
         "--language",
         "kotlin",
         "--no-format",
         "--out-dir",
-        "src/main/kotlin")
+        "src/main/kotlin"
+    )
 
     // Add error handling
     errorOutput = ByteArrayOutputStream()
     doLast {
         if (executionResult.get().exitValue != 0) {
-            throw GradleException("Failed to generate bindings: ${errorOutput}")
+            throw GradleException("Failed to generate bindings: $errorOutput")
         }
     }
 }
@@ -93,4 +97,89 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
+}
+
+jreleaser {
+    gitRootSearch = true
+
+    project {
+        name = "rusaint"
+        copyright = "2024 EATSTEAK"
+        author("EATSTEAK")
+    }
+
+    release {
+        github {
+            repoOwner = "EATSTEAK"
+            name = "rusaint"
+            releaseName = "{{tagName}}"
+        }
+    }
+
+    signing {
+        active = Active.ALWAYS
+        armored = true
+        verify = true
+    }
+
+    deploy {
+        maven {
+            mavenCentral {
+                create("sonatype") {
+                    active = Active.ALWAYS
+                    url = "https://central.sonatype.com/api/v1/publisher"
+                    stagingRepository("build/staging-deploy")
+                    applyMavenCentralRules = false
+                    sign = true
+                    checksums = true
+                    javadocJar = true
+                }
+            }
+        }
+    }
+}
+
+publishing {
+    repositories {
+        maven {
+            url = uri(layout.buildDirectory.dir("staging-deploy"))
+        }
+    }
+
+    publications {
+        register<MavenPublication>("release") {
+            groupId = project.group.toString()
+            artifactId = "rusaint"
+            setVersion(project.version)
+
+            afterEvaluate {
+                from(components["release"])
+            }
+
+            pom {
+                name.set("rusaint")
+                description.set(project.description)
+                url.set("https://github.com/eatsteak/rusaint")
+                licenses {
+                    license {
+                        name.set("MIT License")
+                        url.set("https://raw.githubusercontent.com/EATSTEAK/rusaint/refs/heads/main/LICENSE")
+                    }
+                }
+                developers {
+                    developer {
+                        id.set("eatsteak")
+                        name.set("Koo Hyomin")
+                        url.set("https://eatsteak.dev")
+                        email.set("me@eatsteak.dev")
+                    }
+                }
+                scm {
+                    connection = "scm:git:https://github.com/eatsteak/rusaint.git"
+                    developerConnection = "scm:git:ssh://github.com/eatsteak/rusaint.git"
+                    url = "https://github.com/eatsteak/rusaint"
+                }
+            }
+        }
+    }
 }
