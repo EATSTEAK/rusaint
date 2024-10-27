@@ -1,5 +1,7 @@
 use rusaint::{
-    application::{personal_course_schedule::PersonalCourseScheduleApplication, USaintClientBuilder},
+    application::{
+        personal_course_schedule::PersonalCourseScheduleApplication, USaintClientBuilder,
+    },
     model::SemesterType,
     ApplicationError, RusaintError,
 };

@@ -32,16 +32,16 @@ impl<'a> SapTableCellWrapper<'a> {
                     &SapTableNormalCellDef::new_dynamic(table_def, subct_value.id()?.to_owned()),
                     elem_ref,
                 )
-                    .ok()?
-                    .wrap(),
+                .ok()?
+                .wrap(),
             ),
             Some(SapTableHeaderCell::SUBCONTROL_ID) => Some(
                 SapTableHeaderCell::from_ref(
                     &SapTableHeaderCellDef::new_dynamic(table_def, subct_value.id()?.to_owned()),
                     elem_ref,
                 )
-                    .ok()?
-                    .wrap(),
+                .ok()?
+                .wrap(),
             ),
             Some(SapTableHierarchicalCell::SUBCONTROL_ID) => Some(
                 SapTableHierarchicalCell::from_ref(
@@ -51,24 +51,24 @@ impl<'a> SapTableCellWrapper<'a> {
                     ),
                     elem_ref,
                 )
-                    .ok()?
-                    .wrap(),
+                .ok()?
+                .wrap(),
             ),
             Some(SapTableMatrixCell::SUBCONTROL_ID) => Some(
                 SapTableMatrixCell::from_ref(
                     &SapTableMatrixCellDef::new_dynamic(table_def, subct_value.id()?.to_owned()),
                     elem_ref,
                 )
-                    .ok()?
-                    .wrap(),
+                .ok()?
+                .wrap(),
             ),
             Some(SapTableSelectionCell::SUBCONTROL_ID) => Some(
                 SapTableSelectionCell::from_ref(
                     &SapTableSelectionCellDef::new_dynamic(table_def, subct_value.id()?.to_owned()),
                     elem_ref,
                 )
-                    .ok()?
-                    .wrap(),
+                .ok()?
+                .wrap(),
             ),
             _ => None,
         }

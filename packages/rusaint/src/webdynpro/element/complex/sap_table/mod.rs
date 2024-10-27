@@ -66,9 +66,9 @@ impl<'a> SapTable<'a> {
                     field: "id".to_string()
                 })?
             )
-                .as_str(),
+            .as_str(),
         )
-            .or(Err(BodyError::InvalidSelector))?;
+        .or(Err(BodyError::InvalidSelector))?;
         let Some(tbody) = element.select(&tbody_selector).next() else {
             return Err(ElementError::NoSuchContent {
                 element: self.id.clone().into_owned(),

@@ -1,6 +1,5 @@
 use std::sync::Arc;
 
-use crate::application::chapel::{ChapelApplication, ChapelApplicationBuilder};
 use crate::{error::RusaintError, session::USaintSession};
 use rusaint::application::graduation_requirements::model::{
     GraduationRequirements, GraduationStudent,

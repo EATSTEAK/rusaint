@@ -1,4 +1,6 @@
-use rusaint::application::{graduation_requirements::GraduationRequirementsApplication, USaintClientBuilder};
+use rusaint::application::{
+    graduation_requirements::GraduationRequirementsApplication, USaintClientBuilder,
+};
 use serial_test::serial;
 
 use crate::get_session;

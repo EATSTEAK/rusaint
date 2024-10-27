@@ -40,7 +40,7 @@ impl<'a> SapTableCell<'a> for SapTableMatrixCell<'a> {
                         .next()?
                         .to_owned(),
                 )
-                    .ok()
+                .ok()
             })
             .to_owned()
     }

@@ -52,7 +52,7 @@ impl<'body> FromSapTable<'body> for Vec<String> {
             },
             Err(err) => Err(err),
         })
-            .collect::<Result<Vec<String>, WebDynproError>>()
+        .collect::<Result<Vec<String>, WebDynproError>>()
     }
 }
 
