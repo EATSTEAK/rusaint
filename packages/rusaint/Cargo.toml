@@ -1,0 +1,55 @@
+[package]
+name = "rusaint"
+description = "Easy-to-use SSU u-saint client"
+categories = ["web-programming"]
+
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+homepage.workspace = true
+repository.workspace = true
+license.workspace = true
+keywords.workspace = true
+readme.workspace = true
+
+[features]
+default = ["application", "element"]
+element = ["dep:scraper"]
+application = ["element"]
+uniffi = ["dep:uniffi", "application"]
+
+[dependencies]
+uniffi = { version = "0.28.1", optional = true }
+derive_builder = "0.20.0"
+reqwest = { version = "0.12.7", features = [
+    "charset",
+    "http2",
+    "macos-system-configuration",
+    "rustls-tls",
+    "cookies",
+    "gzip",
+    "brotli",
+], default-features = false }
+thiserror = { workspace = true }
+tokio = { workspace = true, features = ["sync"] }
+html-escape = "0.2.13"
+url = "2.5.2"
+roxmltree = "0.20.0"
+lol_html = "1.2.1"
+scraper = { version = "0.20.0", features = ["atomic"], optional = true }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+custom_debug_derive = "0.6.1"
+regex-lite = "0.1.6"
+
+
+[dev-dependencies]
+anyhow = "1"
+dotenv = "0.15.0"
+futures = "0.3.30"
+serial_test = "3.1.1"
+tokio-test = "0.4.4"
+tokio = { workspace = true, features = ["macros", "test-util"] }
+
+[build-dependencies]
+uniffi = { version = "0.28.1", features = ["build"] }
