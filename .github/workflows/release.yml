@@ -3,6 +3,7 @@ name: Release (Publish to Maven Central)
 on:
   push:
     branches: [ main ]
+  workflow_dispatch:
 
 env:
   CARGO_TERM_COLOR: always
@@ -42,3 +43,10 @@ jobs:
           chmod +x ./gradlew
           ./gradlew publish
           ./gradlew jreleaserFullRelease
+      - name: JReleaser release output
+        uses: actions/upload-artifact@v4
+        with:
+          name: jreleaser-release
+          path: |
+            languages/kotlin/build/jreleaser/trace.log
+            languages/kotlin/build/jreleaser/output.properties
