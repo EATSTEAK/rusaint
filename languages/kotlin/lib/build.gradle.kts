@@ -12,7 +12,7 @@ plugins {
 
 group = "dev.eatsteak"
 description = "Easy and Reliable SSU u-saint scraper"
-version = "0.7.0"
+version = "0.7.1"
 
 android {
     namespace = "dev.eatsteak.rusaint"
@@ -30,9 +30,6 @@ android {
         consumerProguardFiles("consumer-rules.pro")
     }
 
-    buildTypes {
-        getByName("release") {}
-    }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
@@ -113,6 +110,12 @@ jreleaser {
             repoOwner = "EATSTEAK"
             name = "rusaint"
             releaseName = "{{tagName}}"
+            releaseNotes {
+                enabled = true
+            }
+            changelog {
+                enabled = false
+            }
         }
     }
 
