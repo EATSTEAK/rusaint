@@ -30,9 +30,6 @@ android {
         consumerProguardFiles("consumer-rules.pro")
     }
 
-    buildTypes {
-        getByName("release") {}
-    }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
@@ -113,6 +110,12 @@ jreleaser {
             repoOwner = "EATSTEAK"
             name = "rusaint"
             releaseName = "{{tagName}}"
+            releaseNotes {
+                enabled = true
+            }
+            changelog {
+                enabled = false
+            }
         }
     }
 
