@@ -63,5 +63,5 @@ jobs:
         with:
           name: jreleaser-release
           path: |
-            ./languages/kotlin/build/jreleaser/trace.log
-            ./languages/kotlin/build/jreleaser/output.properties
+            ./languages/kotlin/lib/build/jreleaser/trace.log
+            ./languages/kotlin/lib/build/jreleaser/output.properties
