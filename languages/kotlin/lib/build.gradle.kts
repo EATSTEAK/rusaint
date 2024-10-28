@@ -113,6 +113,12 @@ jreleaser {
             repoOwner = "EATSTEAK"
             name = "rusaint"
             releaseName = "{{tagName}}"
+            releaseNotes {
+                enabled = true
+            }
+            changelog {
+                enabled = false
+            }
         }
     }
 
