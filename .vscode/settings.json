@@ -1,3 +1,7 @@
 {
-  "rust-analyzer.linkedProjects": ["./Cargo.toml", "./rusaint/Cargo.toml", "./rusaint-ffi/Cargo.toml"]
+  "rust-analyzer.linkedProjects": [
+    "Cargo.toml",
+    "packages/rusaint/Cargo.toml",
+    "packages/rusaint-ffi/Cargo.toml"
+  ]
 }
