@@ -1,3 +1,4 @@
+import com.android.build.gradle.tasks.SourceJarTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.jreleaser.model.Active
 import java.io.ByteArrayOutputStream
@@ -12,7 +13,7 @@ plugins {
 
 group = "dev.eatsteak"
 description = "Easy and Reliable SSU u-saint scraper"
-version = "0.7.1"
+version = "0.7.2"
 
 android {
     namespace = "dev.eatsteak.rusaint"
@@ -38,11 +39,6 @@ android {
         jvmTarget = "1.8"
     }
 
-    publishing {
-        singleVariant("release") {
-            withJavadocJar()
-        }
-    }
 }
 
 cargo {
@@ -52,6 +48,12 @@ cargo {
     profile = "release"
     targetIncludes = arrayOf("librusaint_ffi.so")
 }
+
+tasks.whenTaskAdded(closureOf<Task> {
+    if (this.name == "releaseSourcesJar") {
+        this.dependsOn("generateBindings")
+    }
+})
 
 tasks.withType<KotlinCompile> {
     dependsOn("generateBindings")
@@ -136,6 +138,8 @@ jreleaser {
                     sign = true
                     checksums = true
                     javadocJar = true
+                    retryDelay = 30
+                    maxRetries = 240
                 }
             }
         }
