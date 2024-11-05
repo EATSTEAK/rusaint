@@ -138,6 +138,8 @@ jreleaser {
                     sign = true
                     checksums = true
                     javadocJar = true
+                    retryDelay = 30
+                    maxRetries = 240
                 }
             }
         }
