@@ -13,7 +13,7 @@ plugins {
 
 group = "dev.eatsteak"
 description = "Easy and Reliable SSU u-saint scraper"
-version = "0.7.1"
+version = "0.7.2"
 
 android {
     namespace = "dev.eatsteak.rusaint"
