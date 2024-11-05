@@ -1,3 +1,4 @@
+import com.android.build.gradle.tasks.SourceJarTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.jreleaser.model.Active
 import java.io.ByteArrayOutputStream
@@ -38,11 +39,6 @@ android {
         jvmTarget = "1.8"
     }
 
-    publishing {
-        singleVariant("release") {
-            withJavadocJar()
-        }
-    }
 }
 
 cargo {
@@ -52,6 +48,12 @@ cargo {
     profile = "release"
     targetIncludes = arrayOf("librusaint_ffi.so")
 }
+
+tasks.whenTaskAdded(closureOf<Task> {
+    if (this.name == "releaseSourcesJar") {
+        this.dependsOn("generateBindings")
+    }
+})
 
 tasks.withType<KotlinCompile> {
     dependsOn("generateBindings")
