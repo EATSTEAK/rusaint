@@ -55,3 +55,45 @@ async fn print_grades() -> Result<(), RusaintError> {
     Ok(())
 }
 ```
+
+## 멀티 플랫폼
+rusaint는 [uniffi](https://github.com/mozilla/uniffi-rs)를 이용한 FFI 멀티플랫폼을 지원합니다. 현재 지원하는 플랫폼은 다음과 같습니다.
+
+- Android (Kotlin)
+- Swift(로컬 빌드만 가능)
+
+### Android (Kotlin)
+
+#### Maven Central에서 설치하기
+
+1. Maven Central을 gradle 저장소에 추가
+
+```kotlin
+repositories {
+  mavenCentral()
+  // ... any other repositories
+}
+```
+
+2. rusaint를 의존성에 추가
+
+```kotlin
+dependencies {
+  implementation("dev.eatsteak:rusaint:0.7.3")
+}
+```
+
+#### 소스 코드에서 빌드
+
+[languages/kotlin](/languages/kotlin) 내부의 README.md 파일을 참고하세요.
+
+### Swift
+
+#### SPM을 이용하여 설치
+
+현재 SPM은 지원되지 않습니다. 소스코드에서 수동으로 설치하셔야 합니다.
+
+#### 소스 코드에서 빌드
+
+[languages/swift](/languages/swift) 내부의 build.sh 파일을 실행하여 .xcframework 형태로 빌드할 수 있습니다.
+  
