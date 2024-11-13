@@ -1,0 +1,3 @@
+[submodule "languages/swift/Rusaint"]
+	path = languages/swift/Rusaint
+	url = https://github.com/eatsteak/rusaint-ios
