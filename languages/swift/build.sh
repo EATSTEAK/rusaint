@@ -1,7 +1,7 @@
 # Generate an xcframework for the Swift bindings.
 
 # Cleanup dirs
-rm -r RusaintFFI.xcframework
+rm -r ./Rusaint/Artifacts/RusaintFFI.xcframework
 rm -r tmp
 
 mkdir tmp
@@ -28,7 +28,7 @@ cargo run -p uniffi-bindgen generate \
   --out-dir tmp/bindings
 
 # Move generated swift bindings
-mv ./tmp/bindings/*.swift ./Sources/Rusaint/
+mv ./tmp/bindings/*.swift ./Rusaint/Sources/Rusaint/
 
 # Massage the generated files to fit xcframework
 mkdir tmp/Headers
@@ -41,7 +41,7 @@ xcodebuild -create-xcframework \
   -headers ./tmp/Headers \
   -library ./tmp/target/universal-ios-sim/release/librusaint_ffi.a \
   -headers ./tmp/Headers \
-  -output ./RusaintFFI.xcframework
+  -output ./Rusaint/Artifacts/RusaintFFI.xcframework
 
 # Cleanup temporary files
 rm -r tmp

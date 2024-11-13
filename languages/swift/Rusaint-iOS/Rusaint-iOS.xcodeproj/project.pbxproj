@@ -12,6 +12,7 @@
 		02E819F32C7B5178008EFDF7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 02E819F22C7B5178008EFDF7 /* Assets.xcassets */; };
 		02E819F62C7B5178008EFDF7 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 02E819F52C7B5178008EFDF7 /* Preview Assets.xcassets */; };
 		02E819FE2C7B51F7008EFDF7 /* Rusaint in Frameworks */ = {isa = PBXBuildFile; productRef = 02E819FD2C7B51F7008EFDF7 /* Rusaint */; };
+		5C8986CC2CE4B55F005AC4FF /* Rusaint in Frameworks */ = {isa = PBXBuildFile; productRef = 5C8986CB2CE4B55F005AC4FF /* Rusaint */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +29,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				02E819FE2C7B51F7008EFDF7 /* Rusaint in Frameworks */,
+				5C8986CC2CE4B55F005AC4FF /* Rusaint in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -87,6 +89,7 @@
 			name = "Rusaint-iOS";
 			packageProductDependencies = (
 				02E819FD2C7B51F7008EFDF7 /* Rusaint */,
+				5C8986CB2CE4B55F005AC4FF /* Rusaint */,
 			);
 			productName = "Rusaint-iOS";
 			productReference = 02E819EB2C7B5177008EFDF7 /* Rusaint-iOS.app */;
@@ -117,7 +120,7 @@
 			);
 			mainGroup = 02E819E22C7B5177008EFDF7;
 			packageReferences = (
-				02E819FC2C7B51F7008EFDF7 /* XCLocalSwiftPackageReference ".." */,
+				5C8986CA2CE4B55F005AC4FF /* XCLocalSwiftPackageReference "../Rusaint" */,
 			);
 			productRefGroup = 02E819EC2C7B5177008EFDF7 /* Products */;
 			projectDirPath = "";
@@ -280,7 +283,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Rusaint-iOS/Preview Content\"";
-				DEVELOPMENT_TEAM = SP5RUYUBZY;
+				DEVELOPMENT_TEAM = A8UD4ZS328;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -309,7 +312,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Rusaint-iOS/Preview Content\"";
-				DEVELOPMENT_TEAM = SP5RUYUBZY;
+				DEVELOPMENT_TEAM = A8UD4ZS328;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -354,14 +357,18 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		02E819FC2C7B51F7008EFDF7 /* XCLocalSwiftPackageReference ".." */ = {
+		5C8986CA2CE4B55F005AC4FF /* XCLocalSwiftPackageReference "../Rusaint" */ = {
 			isa = XCLocalSwiftPackageReference;
-			relativePath = ..;
+			relativePath = ../Rusaint;
 		};
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
 		02E819FD2C7B51F7008EFDF7 /* Rusaint */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Rusaint;
+		};
+		5C8986CB2CE4B55F005AC4FF /* Rusaint */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = Rusaint;
 		};
