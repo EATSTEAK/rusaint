@@ -17,7 +17,7 @@ pub async fn get_session() -> Result<Arc<USaintSession>> {
         let _ = SESSION.set(Arc::new(session));
         SESSION
             .get()
-            .and_then(|arc| Some(arc.to_owned()))
+            .map(|arc| arc.to_owned())
             .ok_or(Error::msg("Session is not initsiated"))
     }
 }

@@ -36,18 +36,12 @@ impl<'a> SapTableRow {
             table_def,
             cells,
             row_index: row.attr("rr").and_then(|s| s.parse::<u32>().ok()),
-            user_data: row.attr("uDat").and_then(|s| Some(s.to_owned())),
-            drag_data: row.attr("ddData").and_then(|s| Some(s.to_owned())),
-            drop_target_info: row.attr("ddDti").and_then(|s| Some(s.to_owned())),
-            parent_drop_target_info: row.attr("ddPDti").and_then(|s| Some(s.to_owned())),
-            selection_state: row
-                .attr("sst")
-                .and_then(|s| Some(s.into()))
-                .unwrap_or(SapTableSelectionState::default()),
-            row_type: row
-                .attr("rt")
-                .and_then(|s| Some(s.into()))
-                .unwrap_or(SapTableRowType::default()),
+            user_data: row.attr("uDat").map(|s| s.to_owned()),
+            drag_data: row.attr("ddData").map(|s| s.to_owned()),
+            drop_target_info: row.attr("ddDti").map(|s| s.to_owned()),
+            parent_drop_target_info: row.attr("ddPDti").map(|s| s.to_owned()),
+            selection_state: row.attr("sst").map(|s| s.into()).unwrap_or_default(),
+            row_type: row.attr("rt").map(|s| s.into()).unwrap_or_default(),
         })
     }
 
@@ -56,8 +50,14 @@ impl<'a> SapTableRow {
         self.cells.len()
     }
 
+    /// 행 내부 셀의 존재 여부를 반환합니다.
+    #[must_use]
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+
     /// 행 내부 셀 정의의 [`Iterator`]를 반환합니다.
-    pub fn iter(&self) -> impl Iterator<Item = &SapTableCellDefWrapper> + ExactSizeIterator {
+    pub fn iter(&self) -> impl ExactSizeIterator<Item = &SapTableCellDefWrapper> {
         self.cells.iter()
     }
 
@@ -65,8 +65,7 @@ impl<'a> SapTableRow {
     pub fn iter_value(
         &'a self,
         parser: &'a ElementParser,
-    ) -> impl Iterator<Item = Result<SapTableCellWrapper<'a>, WebDynproError>> + ExactSizeIterator
-    {
+    ) -> impl ExactSizeIterator<Item = Result<SapTableCellWrapper<'a>, WebDynproError>> {
         self.cells
             .iter()
             .map(|def| SapTableCellWrapper::from_def(def, parser))
@@ -84,22 +83,22 @@ impl<'a> SapTableRow {
 
     /// 유저 데이터를 반환합니다.
     pub fn user_data(&self) -> Option<&str> {
-        self.user_data.as_ref().map(|x| x.as_str())
+        self.user_data.as_deref()
     }
 
     /// 드레그 데이터를 반환합니다.
     pub fn drag_data(&self) -> Option<&str> {
-        self.drag_data.as_ref().map(|x| x.as_str())
+        self.drag_data.as_deref()
     }
 
     /// 드롭 타겟 정보를 반환합니다.
     pub fn drop_target_info(&self) -> Option<&str> {
-        self.drop_target_info.as_ref().map(|x| x.as_str())
+        self.drop_target_info.as_deref()
     }
 
     /// 부모의 드롭 타겟 정보를 반환합니다.
     pub fn parent_drop_target_info(&self) -> Option<&str> {
-        self.parent_drop_target_info.as_ref().map(|x| x.as_str())
+        self.parent_drop_target_info.as_deref()
     }
 
     /// 선택 상태를 반환합니다.
@@ -122,7 +121,7 @@ impl<'a> SapTableRow {
     }
 }
 
-impl<'a> Index<usize> for SapTableRow {
+impl Index<usize> for SapTableRow {
     type Output = SapTableCellDefWrapper;
 
     fn index(&self, index: usize) -> &Self::Output {

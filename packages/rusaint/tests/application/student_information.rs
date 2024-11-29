@@ -36,11 +36,11 @@ async fn graduation() {
                 element: _,
                 content: _,
             },
-        ))) => assert!(true),
+        ))) => (),
         Err(err) => {
             panic!("{:?}", err);
         }
-        Ok(_) => assert!(true),
+        Ok(_) => (),
     }
     println!("{:?}", student_info);
 }

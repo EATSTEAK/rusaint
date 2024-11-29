@@ -18,10 +18,7 @@ pub fn escape_str(text: &str) -> String {
     let mut owned: Vec<u8> = vec![];
 
     for char in chars {
-        let special = match char {
-            '0'..='9' | 'a'..='z' | 'A'..='Z' | '-' | '.' | '_' => false,
-            _ => true,
-        };
+        let special = !matches!(char, '0'..='9' | 'a'..='z' | 'A'..='Z' | '-' | '.' | '_');
 
         if special {
             owned.extend(
@@ -57,8 +54,8 @@ pub fn unescape_str(text: &str) -> Result<Cow<str>, EventStrUnescapeError> {
                 special = Some(vec![]);
             }
             b'A'..=b'F' | b'0'..=b'9' => {
-                if special.is_some() {
-                    special.as_mut().unwrap().push(bytes[pos]);
+                if let Some(special) = special.as_mut() {
+                    special.push(bytes[pos]);
                 }
             }
             _ => special = None,
@@ -115,8 +112,8 @@ impl Display for Event {
         owned.push_str(EVENT_DATA_END);
         owned.push_str(&self.ucf_parameters.serialize());
         owned.push_str(EVENT_DATA_START);
-        let mut custom_params = self.custom_parameters.iter().peekable();
-        while let Some((key, val)) = custom_params.next() {
+        let custom_params = self.custom_parameters.iter().peekable();
+        for (key, val) in custom_params {
             owned.push_str(key);
             owned.push_str(EVENT_DATA_COLON);
             owned.push_str(escape_str(val).as_str());

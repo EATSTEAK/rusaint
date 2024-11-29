@@ -73,13 +73,12 @@ impl<'a> Element<'a> for Unknown<'a> {
     }
 
     fn children(&self) -> Vec<super::ElementWrapper<'a>> {
-        children_element(self.element_ref().clone())
+        children_element(*self.element_ref())
     }
 
     fn lsdata(&self) -> &Self::ElementLSData {
         self.lsdata.get_or_init(|| {
-            parse_lsdata(self.element_ref.value().attr("lsdata").unwrap_or(""))
-                .unwrap_or(Value::default())
+            parse_lsdata(self.element_ref.value().attr("lsdata").unwrap_or("")).unwrap_or_default()
         })
     }
 
@@ -123,7 +122,7 @@ impl<'a> Unknown<'a> {
                 self.element_ref
                     .value()
                     .attr("ct")
-                    .and_then(|str| Some(str.to_string()))
+                    .map(|str| str.to_string())
             })
             .as_ref()
     }

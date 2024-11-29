@@ -54,7 +54,7 @@ impl<'a> SapTable<'a> {
             if let Cow::Borrowed(id) = self.id {
                 SapTableDef::new(id)
             } else {
-                SapTableDef::new_dynamic((&self.id).to_string())
+                SapTableDef::new_dynamic(self.id.to_string())
             }
         };
         let element = self.element_ref;
@@ -99,6 +99,7 @@ impl<'a> SapTable<'a> {
     }
 
     /// 테이블의 내부 셀을 선택하는 이벤트를 반환합니다.
+    #[allow(clippy::too_many_arguments)]
     pub fn cell_select(
         &self,
         cell_id: &str,
@@ -123,6 +124,7 @@ impl<'a> SapTable<'a> {
     }
 
     /// 테이블을 상하로 스크롤하는 이벤트를 반환합니다.
+    #[allow(clippy::too_many_arguments)]
     pub fn vertical_scroll(
         &self,
         first_visible_item_index: u32,

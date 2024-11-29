@@ -157,7 +157,7 @@ impl<'a> CourseGradesApplication {
         if year_combobox_lsdata.key().map(String::as_str) != Some(year) {
             let year_select_event = parser.read(ComboBoxSelectEventCommand::new(
                 Self::PERIOD_YEAR,
-                &year,
+                year,
                 false,
             ))?;
             self.client.process_event(false, year_select_event).await?;
@@ -415,7 +415,7 @@ impl<'a> CourseGradesApplication {
             .filter_map(|(btn_event, row)| {
                 row.try_row_into::<HashMap<String, String>>(grade_table_body.header(), &parser)
                     .ok()
-                    .and_then(|row| Some((btn_event, row)))
+                    .map(|row| (btn_event, row))
             })
             .collect()
         };
@@ -518,7 +518,7 @@ impl<'a> CourseGradesApplication {
                 field: format!("details of class {}", code),
             }))?;
         };
-        Ok(self.class_detail_in_popup(btn).await?)
+        self.class_detail_in_popup(btn).await
     }
 
     fn body(&self) -> &Body {

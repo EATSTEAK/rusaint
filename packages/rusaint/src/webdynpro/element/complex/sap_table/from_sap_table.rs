@@ -84,7 +84,7 @@ impl<'body> FromSapTable<'body> for Vec<(String, Option<String>)> {
             .collect::<Result<Vec<Option<String>>, WebDynproError>>()?;
         let zip = header_string
             .into_iter()
-            .zip(row_string.into_iter())
+            .zip(row_string)
             .collect::<Vec<(String, Option<String>)>>();
         Ok(zip)
     }
@@ -120,7 +120,7 @@ impl<'body> FromSapTable<'body> for Vec<(String, String)> {
             .collect::<Result<Vec<String>, WebDynproError>>()?;
         let zip = header_string
             .into_iter()
-            .zip(row_string.into_iter())
+            .zip(row_string)
             .collect::<Vec<(String, String)>>();
         Ok(zip)
     }

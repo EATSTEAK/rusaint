@@ -208,12 +208,12 @@ impl<'a> StudentInformation {
 
     /// 전공을 반환합니다.
     pub fn major(&self) -> Option<&str> {
-        self.major.as_ref().map(String::as_str)
+        self.major.as_deref()
     }
 
     /// 분반을 반환합니다.
     pub fn division(&self) -> Option<&str> {
-        self.division.as_ref().map(String::as_str)
+        self.division.as_deref()
     }
 
     /// 학년을 반환합니다.
@@ -233,40 +233,37 @@ impl<'a> StudentInformation {
 
     /// 통칭 이름을 반환합니다.
     pub fn alias(&self) -> Option<&str> {
-        self.alias.as_ref().map(String::as_str)
+        self.alias.as_deref()
     }
 
     /// 한자 이름을 반환합니다.
     pub fn kanji_name(&self) -> Option<&str> {
-        self.kanji_name.as_ref().map(String::as_str)
+        self.kanji_name.as_deref()
     }
 
     /// 이메일을 반환합니다.
     pub fn email(&self) -> Option<&str> {
-        self.email.as_ref().map(String::as_str)
+        self.email.as_deref()
     }
 
     /// 집전화 번호를 반환합니다.
     pub fn tel_number(&self) -> Option<&str> {
-        self.tel_number.as_ref().map(String::as_str)
+        self.tel_number.as_deref()
     }
 
     /// 휴대전화 번호를 반환합니다.
     pub fn mobile_number(&self) -> Option<&str> {
-        self.mobile_number.as_ref().map(String::as_str)
+        self.mobile_number.as_deref()
     }
 
     /// 우편번호를 반환합니다.
     pub fn post_code(&self) -> Option<&str> {
-        self.post_code.as_ref().map(String::as_str)
+        self.post_code.as_deref()
     }
 
     /// 주소를 반환합니다.
     pub fn address(&self) -> (Option<&str>, Option<&str>) {
-        (
-            self.address.as_ref().map(String::as_str),
-            self.specific_address.as_ref().map(String::as_str),
-        )
+        (self.address.as_deref(), self.specific_address.as_deref())
     }
 
     /// 편입학생 여부를 반환합니다.
@@ -291,22 +288,22 @@ impl<'a> StudentInformation {
 
     /// 복수전공을 반환합니다.
     pub fn plural_major(&self) -> Option<&str> {
-        self.plural_major.as_ref().map(String::as_str)
+        self.plural_major.as_deref()
     }
 
     /// 부전공을 반환합니다.
     pub fn sub_major(&self) -> Option<&str> {
-        self.sub_major.as_ref().map(String::as_str)
+        self.sub_major.as_deref()
     }
 
     /// 연계전공을 반환합니다.
     pub fn connected_major(&self) -> Option<&str> {
-        self.connected_major.as_ref().map(String::as_str)
+        self.connected_major.as_deref()
     }
 
     /// 공학인증을 반환합니다.
     pub fn abeek(&self) -> Option<&str> {
-        self.abeek.as_ref().map(String::as_str)
+        self.abeek.as_deref()
     }
 }
 mod academic_record;
