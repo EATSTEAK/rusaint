@@ -26,9 +26,7 @@ impl<'a> SapTableBody {
         table_def: SapTableDef,
         elem_ref: ElementRef<'a>,
     ) -> Result<SapTableBody, ElementError> {
-        let ref_iter = elem_ref
-            .children()
-            .filter_map(|node| ElementRef::wrap(node));
+        let ref_iter = elem_ref.children().filter_map(ElementRef::wrap);
         let mut header_iter = ref_iter
             .clone()
             .filter_map(|row_ref| SapTableHeader::new(table_def.clone(), row_ref).ok());
@@ -52,7 +50,7 @@ impl<'a> SapTableBody {
             let row_type = row_ref
                 .value()
                 .attr("rt")
-                .and_then(|s| Some(s.into()))
+                .map(|s| s.into())
                 .unwrap_or(SapTableRowType::default());
             let row_count = row_ref
                 .value()
@@ -134,15 +132,19 @@ impl<'a> SapTableBody {
         self.rows.len()
     }
 
+    /// 헤더 행을 제외한 행이 비어있는지 확인합니다.
+    #[must_use]
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+
     /// 내부 행의 Iterator를 반환합니다.
-    pub fn iter(&'a self) -> impl Iterator<Item = &SapTableRow> + ExactSizeIterator {
+    pub fn iter(&'a self) -> impl ExactSizeIterator<Item = &SapTableRow> {
         self.rows.iter()
     }
 
     /// 내부 행에 헤더 행을 포함한 튜플의 Iterator를 반환합니다.
-    pub fn zip_header(
-        &'a self,
-    ) -> impl Iterator<Item = (&SapTableHeader, &SapTableRow)> + ExactSizeIterator {
+    pub fn zip_header(&'a self) -> impl ExactSizeIterator<Item = (&SapTableHeader, &SapTableRow)> {
         self.rows.iter().map(|row| (self.header(), row))
     }
 
@@ -167,7 +169,7 @@ impl<'a> SapTableBody {
     }
 }
 
-impl<'a> Index<usize> for SapTableBody {
+impl Index<usize> for SapTableBody {
     type Output = SapTableRow;
 
     fn index(&self, index: usize) -> &Self::Output {

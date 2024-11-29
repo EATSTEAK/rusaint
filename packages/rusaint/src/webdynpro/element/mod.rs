@@ -307,7 +307,8 @@ pub trait Element<'a>: Sized {
 /// 이벤트를 통해 상호작용 할 수 있는 [`Element`]의 기본 동작
 pub trait Interactable<'a>: Element<'a> {
     /// 엘리먼트가 이벤트를 발생시킬 수 있는가와 관계 없이 이벤트를 발생시킵니다.
-    /// > | **주의** | 엘리먼트가 이벤트를 발생시킬 수 있는지 여부를 확인하지 않으므로 예상치 않은 오류가 발생할 수 있습니다.
+    /// # Safety
+    /// 엘리먼트가 이벤트를 발생시킬 수 있는지 여부를 확인하고 이 함수를 호출해야 합니다.
     unsafe fn fire_event_unchecked(
         event: String,
         parameters: HashMap<String, String>,

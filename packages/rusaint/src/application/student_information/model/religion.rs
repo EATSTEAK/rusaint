@@ -133,71 +133,71 @@ impl<'a> StudentReligion {
 
     /// 종교 분류를 반환합니다.
     pub fn religion_type(&self) -> Option<&str> {
-        self.religion_type.as_ref().map(String::as_str)
+        self.religion_type.as_deref()
     }
 
     /// 신앙시작일을 반환합니다.
     pub fn start_date(&self) -> Option<&str> {
-        self.start_date.as_ref().map(String::as_str)
+        self.start_date.as_deref()
     }
 
     /// 출석교회를 반환합니다.
     pub fn church(&self) -> Option<&str> {
-        self.church.as_ref().map(String::as_str)
+        self.church.as_deref()
     }
 
     /// 담임목사를 반환합니다.
     pub fn church_man(&self) -> Option<&str> {
-        self.church_man.as_ref().map(String::as_str)
+        self.church_man.as_deref()
     }
 
     /// 직분을 반환합니다.
     pub fn baptism_level(&self) -> Option<&str> {
-        self.baptism_level.as_ref().map(String::as_str)
+        self.baptism_level.as_deref()
     }
 
     /// 교단을 반환합니다.
     pub fn baptism_grp(&self) -> Option<&str> {
-        self.baptism_grp.as_ref().map(String::as_str)
+        self.baptism_grp.as_deref()
     }
 
     /// 봉사부서를 반환합니다.
     pub fn service_department(&self) -> Option<&str> {
-        self.service_department.as_ref().map(String::as_str)
+        self.service_department.as_deref()
     }
 
     /// 직책을 반환합니다.
     pub fn service_department_title(&self) -> Option<&str> {
-        self.service_department_title.as_ref().map(String::as_str)
+        self.service_department_title.as_deref()
     }
 
     /// 교회주소를 반환합니다.
     pub fn church_address(&self) -> Option<&str> {
-        self.church_address.as_ref().map(String::as_str)
+        self.church_address.as_deref()
     }
 
     /// 신급을 반환합니다.
     pub fn singeub(&self) -> Option<&str> {
-        self.singeub.as_ref().map(String::as_str)
+        self.singeub.as_deref()
     }
 
     /// 세례일자를 반환합니다.
     pub fn baptism_date(&self) -> Option<&str> {
-        self.baptism_date.as_ref().map(String::as_str)
+        self.baptism_date.as_deref()
     }
 
     /// 세례교회를 반환합니다.
     pub fn baptism_church(&self) -> Option<&str> {
-        self.baptism_church.as_ref().map(String::as_str)
+        self.baptism_church.as_deref()
     }
 
     /// 집례목사를 반환합니다.
     pub fn baptism_man(&self) -> Option<&str> {
-        self.baptism_man.as_ref().map(String::as_str)
+        self.baptism_man.as_deref()
     }
 
     /// 교단을 반환합니다.
     pub fn church_grp(&self) -> Option<&str> {
-        self.church_grp.as_ref().map(String::as_str)
+        self.church_grp.as_deref()
     }
 }

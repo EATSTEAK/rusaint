@@ -23,8 +23,8 @@ impl LectureAssessmentApplication {
         lecture_code: Option<u32>,
         professor_name: Option<String>,
     ) -> Result<Vec<LectureAssessmentResult>, RusaintError> {
-        let lecture_name = lecture_name.as_ref().map(String::as_str);
-        let professor_name = professor_name.as_ref().map(String::as_str);
+        let lecture_name = lecture_name.as_deref();
+        let professor_name = professor_name.as_deref();
         Ok(self
             .0
             .write()
@@ -57,5 +57,11 @@ impl LectureAssessmentApplicationBuilder {
             .build_into::<rusaint::application::lecture_assessment::LectureAssessmentApplication>()
             .await?;
         Ok(LectureAssessmentApplication(RwLock::new(original_app)))
+    }
+}
+
+impl Default for LectureAssessmentApplicationBuilder {
+    fn default() -> Self {
+        Self::new()
     }
 }

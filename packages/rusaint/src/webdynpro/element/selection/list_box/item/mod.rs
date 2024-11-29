@@ -205,7 +205,7 @@ impl<'a> ListBoxItem<'a> {
                 self.element_ref
                     .value()
                     .attr("data-itemdisabled")
-                    .and_then(|str| str.parse::<bool>().ok().and_then(|b| Some(!b)))
+                    .and_then(|str| str.parse::<bool>().ok().map(|b| !b))
             })
             .to_owned()
     }

@@ -237,7 +237,7 @@ pub(crate) fn deserialize_option_u32_string<'de, D: Deserializer<'de>>(
     value
         .trim()
         .parse()
-        .and_then(|num| Ok(Some(num)))
+        .map(Some)
         .map_err(serde::de::Error::custom)
 }
 
@@ -251,7 +251,7 @@ pub(crate) fn deserialize_option_f32_string<'de, D: Deserializer<'de>>(
     value
         .trim()
         .parse()
-        .and_then(|num| Ok(Some(num)))
+        .map(Some)
         .map_err(serde::de::Error::custom)
 }
 

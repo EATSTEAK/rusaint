@@ -715,3 +715,9 @@ impl LectureCategoryBuilder {
         LectureCategory::cyber()
     }
 }
+
+impl Default for LectureCategoryBuilder {
+    fn default() -> Self {
+        Self::new()
+    }
+}

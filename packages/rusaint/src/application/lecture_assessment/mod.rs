@@ -86,8 +86,7 @@ impl<'a> LectureAssessmentApplication {
         let year_combobox_lsdata = parser.read(ComboBoxLSDataCommand::new(Self::DDLB_01))?;
         let semester_combobox_lsdata = parser.read(ComboBoxLSDataCommand::new(Self::DDLB_02))?;
         if year_combobox_lsdata.key().map(String::as_str) != Some(year) {
-            let event =
-                parser.read(ComboBoxSelectEventCommand::new(Self::DDLB_01, &year, false))?;
+            let event = parser.read(ComboBoxSelectEventCommand::new(Self::DDLB_01, year, false))?;
             self.client.process_event(false, event).await?;
         }
         if semester_combobox_lsdata.key().map(String::as_str) != Some(semester) {

@@ -54,7 +54,7 @@ impl<'a> SapTable<'a> {
             if let Cow::Borrowed(id) = self.id {
                 SapTableDef::new(id)
             } else {
-                SapTableDef::new_dynamic((&self.id).to_string())
+                SapTableDef::new_dynamic(self.id.to_string())
             }
         };
         let element = self.element_ref;

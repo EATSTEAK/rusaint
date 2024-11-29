@@ -65,7 +65,7 @@ impl<'a> PersonalCourseScheduleApplication {
         let year_combobox_lsdata = parser.read(ComboBoxLSDataCommand::new(Self::PERYR))?;
         let semester_combobox_lsdata = parser.read(ComboBoxLSDataCommand::new(Self::PERID))?;
         if year_combobox_lsdata.key().map(String::as_str) != Some(year) {
-            let event = parser.read(ComboBoxSelectEventCommand::new(Self::PERYR, &year, false))?;
+            let event = parser.read(ComboBoxSelectEventCommand::new(Self::PERYR, year, false))?;
             self.client.process_event(false, event).await?;
         }
         if semester_combobox_lsdata.key().map(String::as_str) != Some(semester) {
@@ -95,19 +95,14 @@ impl<'a> PersonalCourseScheduleApplication {
                     table_body.try_table_into::<Vec<Option<String>>>(&parser)?;
                 let mut schedule: HashMap<Weekday, Vec<CourseScheduleInformation>> =
                     Default::default();
-                for (_row_idx, row) in row_string.into_iter().skip(1).enumerate() {
+                for row in row_string.into_iter().skip(1) {
                     row.into_iter()
                         .skip(1)
                         .enumerate()
-                        .filter_map(|(col_idx, option)| match option {
-                            Some(str) => Some((col_idx, str)),
-                            None => None,
-                        })
+                        .filter_map(|(col_idx, option)| option.map(|str| (col_idx, str)))
                         .for_each(|(col_idx, str)| match col_idx {
                             0 => {
-                                if !schedule.contains_key(&Weekday::Mon) {
-                                    schedule.insert(Weekday::Mon, Vec::new());
-                                }
+                                schedule.entry(Weekday::Mon).or_default();
                                 str.split("\n\n").for_each(|str| {
                                     schedule
                                         .get_mut(&Weekday::Mon)
@@ -116,9 +111,7 @@ impl<'a> PersonalCourseScheduleApplication {
                                 });
                             }
                             1 => {
-                                if !schedule.contains_key(&Weekday::Tue) {
-                                    schedule.insert(Weekday::Tue, Vec::new());
-                                }
+                                schedule.entry(Weekday::Tue).or_default();
                                 str.split("\n\n").for_each(|str| {
                                     schedule
                                         .get_mut(&Weekday::Tue)
@@ -127,9 +120,7 @@ impl<'a> PersonalCourseScheduleApplication {
                                 });
                             }
                             2 => {
-                                if !schedule.contains_key(&Weekday::Wed) {
-                                    schedule.insert(Weekday::Wed, Vec::new());
-                                }
+                                schedule.entry(Weekday::Wed).or_default();
                                 str.split("\n\n").for_each(|str| {
                                     schedule
                                         .get_mut(&Weekday::Wed)
@@ -138,9 +129,7 @@ impl<'a> PersonalCourseScheduleApplication {
                                 });
                             }
                             3 => {
-                                if !schedule.contains_key(&Weekday::Thu) {
-                                    schedule.insert(Weekday::Thu, Vec::new());
-                                }
+                                schedule.entry(Weekday::Thu).or_default();
                                 str.split("\n\n").for_each(|str| {
                                     schedule
                                         .get_mut(&Weekday::Thu)
@@ -149,9 +138,7 @@ impl<'a> PersonalCourseScheduleApplication {
                                 });
                             }
                             4 => {
-                                if !schedule.contains_key(&Weekday::Fri) {
-                                    schedule.insert(Weekday::Fri, Vec::new());
-                                }
+                                schedule.entry(Weekday::Fri).or_default();
                                 str.split("\n\n").for_each(|str| {
                                     schedule
                                         .get_mut(&Weekday::Fri)
@@ -160,9 +147,7 @@ impl<'a> PersonalCourseScheduleApplication {
                                 });
                             }
                             5 => {
-                                if !schedule.contains_key(&Weekday::Sat) {
-                                    schedule.insert(Weekday::Sat, Vec::new());
-                                }
+                                schedule.entry(Weekday::Sat).or_default();
                                 str.split("\n\n").for_each(|str| {
                                     schedule
                                         .get_mut(&Weekday::Sat)

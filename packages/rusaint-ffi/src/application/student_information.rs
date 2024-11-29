@@ -93,3 +93,9 @@ impl StudentInformationApplicationBuilder {
         Ok(StudentInformationApplication(RwLock::new(original_app)))
     }
 }
+
+impl Default for StudentInformationApplicationBuilder {
+    fn default() -> Self {
+        Self::new()
+    }
+}
