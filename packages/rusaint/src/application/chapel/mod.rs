@@ -67,7 +67,7 @@ impl<'a> ChapelApplication {
         if year_combobox_lsdata.key().map(String::as_str) != Some(year) {
             let year_select_event = parser.read(ComboBoxSelectEventCommand::new(
                 Self::SEL_PERYR,
-                &year,
+                year,
                 false,
             ))?;
             self.client.process_event(false, year_select_event).await?;

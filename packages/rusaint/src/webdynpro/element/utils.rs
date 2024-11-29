@@ -20,16 +20,40 @@ pub(super) fn parse_lsevents(raw_lsevents: &str) -> Result<EventParameterMap, We
             "Cannot deserialize lsevents field".to_string(),
         )))?
         .to_owned();
-    Ok(json.into_iter().flat_map(|(key, value)| -> Result<(String, (UcfParameters, HashMap<String, String>)), BodyError> {
-        let mut parameters = value.as_array().ok_or(BodyError::Invalid("Cannot deserialize lsevents field".to_string()))?.to_owned().into_iter();
-        let raw_ucf = parameters.next().ok_or(BodyError::Invalid("Cannot deserialize lsevents field".to_string()))?;
-        let ucf: UcfParameters = serde_json::from_value(raw_ucf).or(Err(BodyError::Invalid("Cannot deserialize lsevents field".to_string())))?;
-        let mut custom = parameters.next().ok_or(BodyError::Invalid("Cannot deserialize lsevents field".to_string()))?.as_object().ok_or(BodyError::Invalid("Cannot deserialize lsevents field".to_string()))?.to_owned();
-        let custom_map = custom.iter_mut().map(|(key, value)| {
-            (key.to_owned(), value.to_string())
-        }).collect::<HashMap<String, String>>();
-        Ok((key, (ucf, custom_map)))
-    }).collect::<EventParameterMap>())
+    type EventParameters = (String, (UcfParameters, HashMap<String, String>));
+    Ok(json
+        .into_iter()
+        .flat_map(|(key, value)| -> Result<EventParameters, BodyError> {
+            let mut parameters = value
+                .as_array()
+                .ok_or(BodyError::Invalid(
+                    "Cannot deserialize lsevents field".to_string(),
+                ))?
+                .iter()
+                .cloned();
+            let raw_ucf = parameters.next().ok_or(BodyError::Invalid(
+                "Cannot deserialize lsevents field".to_string(),
+            ))?;
+            let ucf: UcfParameters = serde_json::from_value(raw_ucf).or(Err(
+                BodyError::Invalid("Cannot deserialize lsevents field".to_string()),
+            ))?;
+            let mut custom = parameters
+                .next()
+                .ok_or(BodyError::Invalid(
+                    "Cannot deserialize lsevents field".to_string(),
+                ))?
+                .as_object()
+                .ok_or(BodyError::Invalid(
+                    "Cannot deserialize lsevents field".to_string(),
+                ))?
+                .to_owned();
+            let custom_map = custom
+                .iter_mut()
+                .map(|(key, value)| (key.to_owned(), value.to_string()))
+                .collect::<HashMap<String, String>>();
+            Ok((key, (ucf, custom_map)))
+        })
+        .collect::<EventParameterMap>())
 }
 
 /// 엘리먼트의 자식 엘리먼트를 가져옵니다.

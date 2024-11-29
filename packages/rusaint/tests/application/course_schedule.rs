@@ -27,7 +27,6 @@ async fn find_major() {
     for lecture in lectures {
         println!("{:?}", lecture);
     }
-    assert!(true);
 }
 
 #[tokio::test]
@@ -47,7 +46,6 @@ async fn find_required_elective() {
     for lecture in lectures {
         println!("{:?}", lecture);
     }
-    assert!(true);
 }
 
 #[tokio::test]
@@ -67,7 +65,6 @@ async fn find_optional_elective() {
     for lecture in lectures {
         println!("{:?}", lecture);
     }
-    assert!(true);
 }
 
 #[tokio::test]
@@ -87,7 +84,6 @@ async fn find_chapel() {
     for lecture in lectures {
         println!("{:?}", lecture);
     }
-    assert!(true);
 }
 
 #[tokio::test]
@@ -107,7 +103,6 @@ async fn find_education() {
     for lecture in lectures {
         println!("{:?}", lecture);
     }
-    assert!(true);
 }
 
 #[tokio::test]
@@ -127,7 +122,6 @@ async fn find_graduated() {
     for lecture in lectures {
         println!("{:?}", lecture);
     }
-    assert!(true);
 }
 
 #[tokio::test]
@@ -147,7 +141,6 @@ async fn find_connected_major() {
     for lecture in lectures {
         println!("{:?}", lecture);
     }
-    assert!(true);
 }
 
 #[tokio::test]
@@ -167,7 +160,6 @@ async fn find_united_major() {
     for lecture in lectures {
         println!("{:?}", lecture);
     }
-    assert!(true);
 }
 
 #[tokio::test]
@@ -187,7 +179,6 @@ async fn find_recognized_other_major() {
     for lecture in lectures {
         println!("{:?}", lecture);
     }
-    assert!(true);
 }
 
 #[tokio::test]
@@ -207,7 +198,6 @@ async fn find_cyber() {
     for lecture in lectures {
         println!("{:?}", lecture);
     }
-    assert!(true);
 }
 
 #[tokio::test]

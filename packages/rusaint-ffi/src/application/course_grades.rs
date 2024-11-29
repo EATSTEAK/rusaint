@@ -106,3 +106,9 @@ impl CourseGradesApplicationBuilder {
         Ok(CourseGradesApplication(RwLock::new(original_app)))
     }
 }
+
+impl Default for CourseGradesApplicationBuilder {
+    fn default() -> Self {
+        Self::new()
+    }
+}

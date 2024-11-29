@@ -93,22 +93,22 @@ impl<'a> StudentTeachingMajorInformation {
 
     /// 표시과목을 반환합니다.
     pub fn major_name(&self) -> Option<&str> {
-        self.major_name.as_ref().map(String::as_str)
+        self.major_name.as_deref()
     }
 
     /// 교원자격증번호를 반환합니다.
     pub fn qualification_number(&self) -> Option<&str> {
-        self.qualification_number.as_ref().map(String::as_str)
+        self.qualification_number.as_deref()
     }
 
     /// 선발일자를 반환합니다.
     pub fn initiation_date(&self) -> Option<&str> {
-        self.initiation_date.as_ref().map(String::as_str)
+        self.initiation_date.as_deref()
     }
 
     /// 교원자격증 발급일자를 반환합니다.
     pub fn qualification_date(&self) -> Option<&str> {
-        self.qualification_date.as_ref().map(String::as_str)
+        self.qualification_date.as_deref()
     }
 }
 
@@ -150,17 +150,17 @@ impl<'a> StudentTeachingPluralMajorInformation {
 
     /// 표시과목을 반환합니다.
     pub fn major_name(&self) -> Option<&str> {
-        self.major_name.as_ref().map(String::as_str)
+        self.major_name.as_deref()
     }
 
     /// 교원자격증번호를 반환합니다.
     pub fn qualification_number(&self) -> Option<&str> {
-        self.qualification_number.as_ref().map(String::as_str)
+        self.qualification_number.as_deref()
     }
 
     /// 교원자격증 발급일자를 반환합니다.
     pub fn qualification_date(&self) -> Option<&str> {
-        self.qualification_date.as_ref().map(String::as_str)
+        self.qualification_date.as_deref()
     }
 }
 
@@ -208,22 +208,22 @@ impl<'a> StudentLifelongInformation {
 
     /// 신청일자를 반환합니다.
     pub fn apply_date(&self) -> Option<&str> {
-        self.apply_date.as_ref().map(String::as_str)
+        self.apply_date.as_deref()
     }
 
     /// 자격구분을 반환합니다.
     pub fn lifelong_type(&self) -> Option<&str> {
-        self.lifelong_type.as_ref().map(String::as_str)
+        self.lifelong_type.as_deref()
     }
 
     /// 자격증번호를 반환합니다.
     pub fn qualification_number(&self) -> Option<&str> {
-        self.qualification_number.as_ref().map(String::as_str)
+        self.qualification_number.as_deref()
     }
 
     /// 자격증 발급일자를 반환합니다.
     pub fn qualification_date(&self) -> Option<&str> {
-        self.qualification_date.as_ref().map(String::as_str)
+        self.qualification_date.as_deref()
     }
 }
 
@@ -265,16 +265,16 @@ impl<'a> StudentForignStudyInformation {
 
     /// 신청일자를 반환합니다.
     pub fn approval_date(&self) -> Option<&str> {
-        self.approval_date.as_ref().map(String::as_str)
+        self.approval_date.as_deref()
     }
 
     /// 인증서번호를 반환합니다.
     pub fn authentication_number(&self) -> Option<&str> {
-        self.authentication_number.as_ref().map(String::as_str)
+        self.authentication_number.as_deref()
     }
 
     /// 발급일자를 반환합니다.
     pub fn issue_date(&self) -> Option<&str> {
-        self.issue_date.as_ref().map(String::as_str)
+        self.issue_date.as_deref()
     }
 }

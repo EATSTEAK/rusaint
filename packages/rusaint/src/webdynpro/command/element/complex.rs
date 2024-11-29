@@ -23,6 +23,7 @@ pub struct SapTableVerticalScrollEventCommand {
 
 impl SapTableVerticalScrollEventCommand {
     /// 새로운 명령 객체를 생성합니다.
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
         element_def: SapTableDef,
         first_visible_item_index: u32,

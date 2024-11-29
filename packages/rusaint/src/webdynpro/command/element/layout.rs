@@ -17,7 +17,7 @@ pub struct TabStripTabSelectEventCommand {
     first_visible_item_index: u32,
 }
 
-impl<'a> TabStripTabSelectEventCommand {
+impl TabStripTabSelectEventCommand {
     /// 새로운 명령 객체를 생성합니다.
     pub fn new(
         element_def: TabStripDef,

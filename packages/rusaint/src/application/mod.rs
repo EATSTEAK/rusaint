@@ -149,6 +149,12 @@ impl USaintClientBuilder {
         T::from_client(client)
     }
 }
+
+impl Default for USaintClientBuilder {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 /// 학생 성적 조회: [`CourseGradesApplication`](course_grades::CourseGradesApplication)
 pub mod course_grades;
 

@@ -108,49 +108,46 @@ impl<'a> StudentWorkInformation {
     }
     /// 직업을 반환합니다.
     pub fn job(&self) -> Option<&str> {
-        self.job.as_ref().map(String::as_str)
+        self.job.as_deref()
     }
 
     /// 공무원 구분을 반환합니다.
     pub fn public_official(&self) -> Option<&str> {
-        self.public_official.as_ref().map(String::as_str)
+        self.public_official.as_deref()
     }
 
     /// 직장명을 반환합니다.
     pub fn company_name(&self) -> Option<&str> {
-        self.company_name.as_ref().map(String::as_str)
+        self.company_name.as_deref()
     }
 
     /// 부서명을 반환합니다.
     pub fn department_name(&self) -> Option<&str> {
-        self.department_name.as_ref().map(String::as_str)
+        self.department_name.as_deref()
     }
 
     /// 직위를 반환합니다.
     pub fn title(&self) -> Option<&str> {
-        self.title.as_ref().map(String::as_str)
+        self.title.as_deref()
     }
 
     /// 우편번호를 반환합니다.
     pub fn zip_code(&self) -> Option<&str> {
-        self.zip_code.as_ref().map(String::as_str)
+        self.zip_code.as_deref()
     }
 
     /// 주소를 반환합니다.
     pub fn address(&self) -> (Option<&str>, Option<&str>) {
-        (
-            self.address.as_ref().map(String::as_str),
-            self.specific_address.as_ref().map(String::as_str),
-        )
+        (self.address.as_deref(), self.specific_address.as_deref())
     }
 
     /// 전화번호를 반환합니다.
     pub fn tel_number(&self) -> Option<&str> {
-        self.tel_number.as_ref().map(String::as_str)
+        self.tel_number.as_deref()
     }
 
     /// 팩스 번호를 반환합니다.
     pub fn fax_number(&self) -> Option<&str> {
-        self.fax_number.as_ref().map(String::as_str)
+        self.fax_number.as_deref()
     }
 }
