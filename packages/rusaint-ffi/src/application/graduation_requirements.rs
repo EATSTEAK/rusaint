@@ -50,3 +50,9 @@ impl GraduationRequirementsApplicationBuilder {
         Ok(GraduationRequirementsApplication(RwLock::new(original_app)))
     }
 }
+
+impl Default for GraduationRequirementsApplicationBuilder {
+    fn default() -> Self {
+        Self::new()
+    }
+}

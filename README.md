@@ -9,7 +9,7 @@
 
 ---
 
-rusaint는 [숭실대학교 u-saint](https://saint.ssu.ac.kr)를 정확하고 빠르게, 간편하게 파싱하고 다양한 환경에서 조작할 수 있는 Rust 기반 비공식 u-saint 클라이언트입니다.
+rusaint(_ru-saint, 루세인트_)는 [숭실대학교 u-saint](https://saint.ssu.ac.kr)를 정확하고 빠르게, 간편하게 파싱하고 다양한 환경에서 조작할 수 있는 Rust 기반 비공식 u-saint 클라이언트입니다.
 
 u-saint의 기반인 [SAP Web Dynpro](https://en.wikipedia.org/wiki/Web_Dynpro)에서 사용하는 Lightspeed 라이브러리의 최소 동작을 구현하여 안전하게 u-saint 내부 요소들을 조작하고 파싱할 수 있습니다.
 
@@ -91,7 +91,7 @@ dependencies {
 
 #### SPM을 이용하여 설치
 
-현재 SPM은 지원되지 않습니다. 소스코드에서 수동으로 설치하셔야 합니다.
+[SPM 레포지토리](https://github.com/EATSTEAK/rusaint-ios)로 설치할 수 있습니다.
 
 #### 소스 코드에서 빌드
 

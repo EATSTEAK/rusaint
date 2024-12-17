@@ -114,11 +114,14 @@ impl USaintSession {
             if str.contains("MYSAPSSO2") {
                 Ok(session_store)
             } else {
-                Err(ClientError::NoSuchCookie("MYSAPSSO2".to_string()))
-                    .map_err(WebDynproError::from)?
+                Err(WebDynproError::from(ClientError::NoSuchCookie(
+                    "MYSAPSSO2".to_string(),
+                )))?
             }
         } else {
-            Err(ClientError::NoCookies(res.url().to_string())).map_err(WebDynproError::from)?
+            Err(WebDynproError::from(ClientError::NoCookies(
+                res.url().to_string(),
+            )))?
         }
     }
 
@@ -165,7 +168,7 @@ pub async fn obtain_ssu_sso_token(id: &str, password: &str) -> Result<String, Ss
     let cookie_token = {
         res.cookies()
             .find(|cookie| cookie.name() == "sToken" && !cookie.value().is_empty())
-            .and_then(|cookie| Some(cookie.value().to_string()))
+            .map(|cookie| cookie.value().to_string())
     };
     let message = if cookie_token.is_none() {
         let mut content = res.text().await?;
@@ -177,13 +180,13 @@ pub async fn obtain_ssu_sso_token(id: &str, password: &str) -> Result<String, Ss
     } else {
         None
     };
-    Ok(cookie_token.ok_or(SsuSsoError::CantFindToken(
+    cookie_token.ok_or(SsuSsoError::CantFindToken(
         message.unwrap_or("Internal Error".to_string()),
-    ))?)
+    ))
 }
 
 fn parse_login_form(body: &str) -> Result<(String, String), SsuSsoError> {
-    let document = scraper::Html::parse_document(&body);
+    let document = scraper::Html::parse_document(body);
     let in_tp_bit_selector = scraper::Selector::parse(r#"input[name="in_tp_bit"]"#).unwrap();
     let rqst_caus_cd_selector = scraper::Selector::parse(r#"input[name="rqst_caus_cd"]"#).unwrap();
     let in_tp_bit = document

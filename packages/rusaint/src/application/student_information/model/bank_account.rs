@@ -63,16 +63,16 @@ impl<'a> StudentBankAccount {
 
     /// 학생 계좌의 은행을 반환합니다.
     pub fn bank(&self) -> Option<&str> {
-        self.bank.as_ref().map(String::as_str)
+        self.bank.as_deref()
     }
 
     /// 학생 계좌번호를 반환합니다.
     pub fn account_number(&self) -> Option<&str> {
-        self.account_number.as_ref().map(String::as_str)
+        self.account_number.as_deref()
     }
 
     /// 학생 계좌의 예금주를 반환합니다.
     pub fn holder(&self) -> Option<&str> {
-        self.holder.as_ref().map(String::as_str)
+        self.holder.as_deref()
     }
 }

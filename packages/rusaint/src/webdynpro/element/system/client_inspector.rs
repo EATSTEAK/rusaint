@@ -179,7 +179,7 @@ impl<'a> Element<'a> for ClientInspector<'a> {
     }
 
     fn children(&self) -> Vec<ElementWrapper<'a>> {
-        children_element(self.element_ref().clone())
+        children_element(*self.element_ref())
     }
 
     fn lsdata(&self) -> &Self::ElementLSData {

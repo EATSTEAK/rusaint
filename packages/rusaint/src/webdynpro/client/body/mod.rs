@@ -179,7 +179,7 @@ impl Body {
                             element!(
                                 format!(r#"[id="{}_root_"] [id="{}"]"#, windowid, control_id),
                                 move |el| {
-                                    el.replace(&content, ContentType::Html);
+                                    el.replace(content, ContentType::Html);
                                     Ok(())
                                 }
                             )
@@ -300,6 +300,5 @@ mod test {
             .unwrap();
         let ssr_client = parse_sap_ssr_client(&result.text().await.unwrap()).unwrap();
         dbg!(ssr_client);
-        assert!(true);
     }
 }

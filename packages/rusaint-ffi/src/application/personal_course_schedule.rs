@@ -48,3 +48,9 @@ impl PersonalCourseScheduleApplicationBuilder {
         Ok(PersonalCourseScheduleApplication(RwLock::new(original_app)))
     }
 }
+
+impl Default for PersonalCourseScheduleApplicationBuilder {
+    fn default() -> Self {
+        Self::new()
+    }
+}

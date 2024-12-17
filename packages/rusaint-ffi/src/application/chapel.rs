@@ -46,3 +46,9 @@ impl ChapelApplicationBuilder {
         Ok(ChapelApplication(RwLock::new(original_app)))
     }
 }
+
+impl Default for ChapelApplicationBuilder {
+    fn default() -> Self {
+        Self::new()
+    }
+}

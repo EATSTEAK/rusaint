@@ -68,3 +68,9 @@ impl USaintSessionBuilder {
         Ok(USaintSession(Arc::new(original)))
     }
 }
+
+impl Default for USaintSessionBuilder {
+    fn default() -> Self {
+        Self::new()
+    }
+}

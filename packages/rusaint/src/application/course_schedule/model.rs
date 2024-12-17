@@ -417,6 +417,7 @@ impl LectureCategory {
         Ok(())
     }
 
+    #[allow(clippy::too_many_arguments)]
     async fn request_lv3(
         client: &mut WebDynproClient,
         tab_item: TabStripItemDef,
@@ -451,6 +452,7 @@ impl LectureCategory {
         Ok(())
     }
 
+    #[allow(clippy::too_many_arguments)]
     async fn request_lv2(
         client: &mut WebDynproClient,
         tab_item: TabStripItemDef,
@@ -713,5 +715,11 @@ impl LectureCategoryBuilder {
     /// 숭실사이버대 분류의 [`LectureCategory`]를 만듭니다.
     pub fn cyber(&self) -> LectureCategory {
         LectureCategory::cyber()
+    }
+}
+
+impl Default for LectureCategoryBuilder {
+    fn default() -> Self {
+        Self::new()
     }
 }

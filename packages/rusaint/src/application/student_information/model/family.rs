@@ -113,36 +113,36 @@ pub struct StudentFamilyMember {
 impl StudentFamilyMember {
     /// 가족관계 유형을 반환합니다.
     pub fn relation_type(&self) -> Option<&str> {
-        self.relation_type.as_ref().map(String::as_str)
+        self.relation_type.as_deref()
     }
     /// 전화번호를 반환합니다.
     pub fn tel_number(&self) -> Option<&str> {
-        self.tel_number.as_ref().map(String::as_str)
+        self.tel_number.as_deref()
     }
 
     /// 성명을 반환합니다.
     pub fn name(&self) -> Option<&str> {
-        self.name.as_ref().map(String::as_str)
+        self.name.as_deref()
     }
 
     /// 휴대전화 번호를 반환합니다.
     pub fn mobile_number(&self) -> Option<&str> {
-        self.mobile_number.as_ref().map(String::as_str)
+        self.mobile_number.as_deref()
     }
 
     /// 근무처(직장명)을 반환합니다.
     pub fn office(&self) -> Option<&str> {
-        self.office.as_ref().map(String::as_str)
+        self.office.as_deref()
     }
 
     /// 직업을 반환합니다.
     pub fn job(&self) -> Option<&str> {
-        self.job.as_ref().map(String::as_str)
+        self.job.as_deref()
     }
 
     /// 직위를 반환합니다.
     pub fn position(&self) -> Option<&str> {
-        self.position.as_ref().map(String::as_str)
+        self.position.as_deref()
     }
 
     /// 보호자 여부를 반환합니다.

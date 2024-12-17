@@ -7,6 +7,7 @@ use crate::webdynpro::{
 
 /// [`ListBox`](crate::webdynpro::element::selection::list_box::ListBox)의 아이템을 위한 Wrapper
 #[derive(Debug)]
+#[allow(clippy::large_enum_variant)]
 pub enum ListBoxItemWrapper<'a> {
     /// [`ListBox`](crate::webdynpro::element::selection::list_box::ListBox)의 일반 아이템
     Item(ListBoxItem<'a>),
@@ -205,7 +206,7 @@ impl<'a> ListBoxItem<'a> {
                 self.element_ref
                     .value()
                     .attr("data-itemdisabled")
-                    .and_then(|str| str.parse::<bool>().ok().and_then(|b| Some(!b)))
+                    .and_then(|str| str.parse::<bool>().ok().map(|b| !b))
             })
             .to_owned()
     }

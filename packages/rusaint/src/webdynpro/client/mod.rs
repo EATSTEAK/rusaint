@@ -57,11 +57,11 @@ impl<'a> WebDynproClient {
     /// 실제로 요청하는 애플리케이션의 URL을 반환합니다.
     pub fn client_url(&self) -> String {
         let mut url = "".to_owned();
-        url.push_str(&self.base_url().as_str());
+        url.push_str(self.base_url().as_str());
         if !url.ends_with('/') {
-            url.push_str("/");
+            url.push('/');
         }
-        url.push_str(&self.name());
+        url.push_str(self.name());
         url.push_str("?sap-wd-stableids=X#");
         url
     }
@@ -242,7 +242,7 @@ impl Requests for reqwest::Client {
         let mut url = "".to_owned();
         url.push_str(base_url.as_str());
         if !url.ends_with('/') {
-            url.push_str("/");
+            url.push('/');
         }
         url.push_str(app_name);
         url.push_str("?sap-wd-stableids=X");
@@ -264,7 +264,7 @@ impl Requests for reqwest::Client {
             return Err(ClientError::InvalidBaseUrl(base_url.to_string()))?;
         }
         if let Some(port) = base_url.port() {
-            url.push_str(":");
+            url.push(':');
             url.push_str(port.to_string().as_str());
         }
         url.push_str(ssr_client.action.as_str());

@@ -105,28 +105,16 @@ impl UcfParameters {
     /// 이 파라메터를 가진 이벤트를 큐에 저장할 수 있다면 참을 반환합니다.
     /// [`UcfAction`]값이 `Enqueue`이면 참입니다.
     pub fn is_enqueable(&self) -> bool {
-        if let Some(action) = &self.action {
-            match action {
-                UcfAction::Enqueue => true,
-                _ => false,
-            }
-        } else {
-            false
-        }
+        matches!(self.action, Some(UcfAction::Enqueue))
     }
 
     /// 이 파라메터를 가진 이벤트를 큐에 저장했을 때 바로 전송할 수 있다면 참을 반환합니다.
     /// [`UcfAction`]값이 `Submit`이거나 `SubmitAsync`일 경우 참을 반환합니다.
     pub fn is_submitable(&self) -> bool {
-        if let Some(action) = &self.action {
-            match action {
-                UcfAction::Submit => true,
-                UcfAction::SubmitAsync => true,
-                _ => false,
-            }
-        } else {
-            false
-        }
+        matches!(
+            self.action,
+            Some(UcfAction::Submit) | Some(UcfAction::SubmitAsync)
+        )
     }
 }
 

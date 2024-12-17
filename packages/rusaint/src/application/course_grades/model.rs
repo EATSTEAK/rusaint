@@ -287,6 +287,7 @@ pub struct ClassGrade {
 }
 
 impl ClassGrade {
+    #[allow(clippy::too_many_arguments)]
     pub(crate) fn new(
         year: String,
         semester: String,
