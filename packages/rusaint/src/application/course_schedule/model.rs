@@ -718,6 +718,7 @@ impl LectureCategoryBuilder {
     }
 }
 
+#[cfg(feature = "uniffi")]
 impl Default for LectureCategoryBuilder {
     fn default() -> Self {
         Self::new()

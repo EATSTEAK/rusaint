@@ -81,6 +81,7 @@ uniffi::setup_scaffolding!();
 pub mod uniffi_support;
 
 #[cfg(test)]
+#[allow(missing_docs)]
 pub mod global_test_utils {
     use anyhow::{Error, Result};
     use dotenv::dotenv;

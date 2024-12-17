@@ -85,7 +85,7 @@ impl CustomDef {
     }
 }
 
-impl<'body> ElementDefinition<'body> for CustomDef {
+impl ElementDefinition<'_> for CustomDef {
     type Element = Custom;
 
     fn new_dynamic(id: String) -> Self {
