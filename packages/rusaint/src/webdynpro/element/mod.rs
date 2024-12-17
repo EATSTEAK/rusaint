@@ -94,7 +94,7 @@ macro_rules! register_elements {
 
         impl<'a> ElementWrapper<'a> {
         	/// 분류를 알 수 없는 엘리먼트의 `scraper::ElementRef`로 [`ElementWrapper`]를 반환합니다.
-            pub fn from_ref(element: scraper::ElementRef<'a>) -> Result<ElementWrapper, WebDynproError> {
+            pub fn from_ref(element: scraper::ElementRef<'a>) -> Result<ElementWrapper<'a>, WebDynproError> {
                 let value = element.value();
                 let id = value.id().ok_or(BodyError::NoSuchAttribute("id".to_owned()))?.to_owned();
                 #[allow(unreachable_patterns)]
@@ -364,7 +364,7 @@ pub trait Interactable<'a>: Element<'a> {
     fn lsevents(&self) -> Option<&EventParameterMap>;
 }
 
-impl<'a> ElementWrapper<'a> {
+impl ElementWrapper<'_> {
     /// 주어진 엘리먼트를 텍스트 형태로 변환하려고 시도합니다.
     pub fn textise(&self) -> Result<String, WebDynproError> {
         match self {
