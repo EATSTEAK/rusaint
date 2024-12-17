@@ -3,7 +3,7 @@ use crate::webdynpro::{
     error::{ElementError, WebDynproError},
 };
 
-impl<'a> InputField<'a> {
+impl InputField<'_> {
     pub(crate) fn value_string(&self) -> Result<String, WebDynproError> {
         Ok(self
             .value()

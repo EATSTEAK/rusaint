@@ -18,8 +18,8 @@ pub struct StudentQualification {
     forign_study: Option<StudentForignStudyInformation>,
 }
 
-impl<'a> StudentQualification {
-    pub(crate) fn with_parser(parser: &'a ElementParser) -> StudentQualification {
+impl StudentQualification {
+    pub(crate) fn with_parser(parser: &ElementParser) -> StudentQualification {
         Self {
             teaching_major: StudentTeachingMajorInformation::with_parser(parser).ok(),
             teaching_plural_major: StudentTeachingPluralMajorInformation::with_parser(parser).ok(),
