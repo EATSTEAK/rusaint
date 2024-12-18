@@ -67,7 +67,7 @@ async fn classes_with_detail() {
         .await
         .unwrap();
     let details = app
-        .classes(CourseType::Bachelor, "2022", SemesterType::Two, true)
+        .classes(CourseType::Bachelor, 2022, SemesterType::Two, true)
         .await
         .unwrap();
     println!("{:?}", details);
@@ -80,7 +80,7 @@ async fn classes_with_detail() {
     let detail = app
         .class_detail(
             CourseType::Bachelor,
-            "2022",
+            2022,
             SemesterType::Two,
             detail_code.code(),
         )

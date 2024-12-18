@@ -362,7 +362,7 @@ impl<'a> CourseGradesApplication {
     /// # use rusaint::model::SemesterType;
     /// # let session = Arc::new(USaintSession::with_password("20212345", "password").await.unwrap());
     /// let mut app = USaintClientBuilder::new().session(session).build_into::<CourseGradesApplication>().await.unwrap();
-    /// let classes = app.classes(CourseType::Bachelor, "2022", SemesterType::Two, false).await.unwrap();
+    /// let classes = app.classes(CourseType::Bachelor, 2022, SemesterType::Two, false).await.unwrap();
     /// println!("{:?}", classes); // around 3s(depends on network environment)
     /// // [ClassGrade { ... }, ClassGrade { ... }]
     /// # })
@@ -377,7 +377,7 @@ impl<'a> CourseGradesApplication {
     /// # use rusaint::application::USaintClientBuilder;
     /// # let session = Arc::new(USaintSession::with_password("20212345", "password").await.unwrap());
     /// let mut app = USaintClientBuilder::new().session(session).build_into::<CourseGradesApplication>().await.unwrap();
-    /// let classes = app.classes(CourseType::Bachelor, "2022", SemesterType::Two, true).await.unwrap();
+    /// let classes = app.classes(CourseType::Bachelor, 2022, SemesterType::Two, true).await.unwrap();
     /// println!("{:?}", classes); // around 10s(depends on network environment)
     /// // [ClassGrade { ... }, ClassGrade { ... }]
     /// # })
@@ -385,15 +385,16 @@ impl<'a> CourseGradesApplication {
     pub async fn classes(
         &mut self,
         course_type: CourseType,
-        year: &str,
+        year: u64,
         semester: SemesterType,
         include_details: bool,
     ) -> Result<Vec<ClassGrade>, RusaintError> {
+        let year = year.to_string();
         {
             self.close_popups().await?;
             let parser = ElementParser::new(self.client.body());
             self.select_course(&parser, course_type).await?;
-            self.select_semester(&parser, year, semester).await?;
+            self.select_semester(&parser, &year, semester).await?;
         }
         let parser = ElementParser::new(self.client.body());
         let class_grades: Vec<(Option<Event>, HashMap<String, String>)> = {
@@ -461,9 +462,9 @@ impl<'a> CourseGradesApplication {
     /// # use rusaint::application::USaintClientBuilder;
     /// # let session = Arc::new(USaintSession::with_password("20212345", "password").await.unwrap());
     /// let mut app = USaintClientBuilder::new().session(session).build_into::<CourseGradesApplication>().await.unwrap();
-    /// let classes = app.classes(CourseType::Bachelor, "2022", SemesterType::Two, false).await.unwrap();
+    /// let classes = app.classes(CourseType::Bachelor, 2022, SemesterType::Two, false).await.unwrap();
     /// let class = classes.iter().next().unwrap();
-    /// let class_detail = app.class_detail(CourseType::Bachelor, "2022", SemesterType::Two, class.code()).await.unwrap();
+    /// let class_detail = app.class_detail(CourseType::Bachelor, 2022, SemesterType::Two, class.code()).await.unwrap();
     /// println!("{:?}", class_detail);
     /// // {"출석(20.000)": 20.0, "중간고사(30.000)": 30.0, "과제(20.000)": 20.0, "기말고사(30.000)": 28.0}
     /// # })
@@ -471,15 +472,16 @@ impl<'a> CourseGradesApplication {
     pub async fn class_detail(
         &mut self,
         course_type: CourseType,
-        year: &str,
+        year: u64,
         semester: SemesterType,
         code: &str,
     ) -> Result<HashMap<String, f32>, RusaintError> {
+        let year = year.to_string();
         {
             self.close_popups().await?;
             let parser = ElementParser::new(self.client.body());
             self.select_course(&parser, course_type).await?;
-            self.select_semester(&parser, year, semester).await?;
+            self.select_semester(&parser, &year, semester).await?;
         }
         let parser = ElementParser::new(self.client.body());
         let table = parser.read(SapTableBodyCommand::new(Self::GRADE_BY_CLASSES_TABLE))?;
