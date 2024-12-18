@@ -1,11 +1,10 @@
+use crate::{get_semester, get_session, get_year};
+use rusaint::model::SemesterType;
 use rusaint::{
     application::{chapel::ChapelApplication, USaintClientBuilder},
-    model::SemesterType,
     ApplicationError, RusaintError,
 };
 use serial_test::serial;
-
-use crate::get_session;
 
 #[tokio::test]
 #[serial]
@@ -16,7 +15,10 @@ async fn chapel() {
         .build_into::<ChapelApplication>()
         .await
         .unwrap();
-    let info = app.information(2022, SemesterType::Two).await.unwrap();
+    let info = app
+        .information(get_year().unwrap(), get_semester().unwrap())
+        .await
+        .unwrap();
     println!("{:?}", info);
 }
 
@@ -29,7 +31,7 @@ async fn no_chapel() {
         .build_into::<ChapelApplication>()
         .await
         .unwrap();
-    let info = app.information(2024, SemesterType::Two).await.unwrap_err();
+    let info = app.information(2017, SemesterType::Two).await.unwrap_err();
     assert!(matches!(
         info,
         RusaintError::ApplicationError(ApplicationError::NoChapelInformation)
