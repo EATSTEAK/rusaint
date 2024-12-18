@@ -1,13 +1,10 @@
-use rusaint::{
-    application::{
-        course_grades::{model::CourseType, CourseGradesApplication},
-        USaintClientBuilder,
-    },
-    model::SemesterType,
+use rusaint::application::{
+    course_grades::{model::CourseType, CourseGradesApplication},
+    USaintClientBuilder,
 };
 use serial_test::serial;
 
-use crate::get_session;
+use crate::{get_semester, get_session, get_year};
 
 #[tokio::test]
 #[serial]
@@ -67,7 +64,12 @@ async fn classes_with_detail() {
         .await
         .unwrap();
     let details = app
-        .classes(CourseType::Bachelor, 2022, SemesterType::Two, true)
+        .classes(
+            CourseType::Bachelor,
+            get_year().unwrap(),
+            get_semester().unwrap(),
+            true,
+        )
         .await
         .unwrap();
     println!("{:?}", details);
@@ -80,8 +82,8 @@ async fn classes_with_detail() {
     let detail = app
         .class_detail(
             CourseType::Bachelor,
-            2022,
-            SemesterType::Two,
+            get_year().unwrap(),
+            get_semester().unwrap(),
             detail_code.code(),
         )
         .await
