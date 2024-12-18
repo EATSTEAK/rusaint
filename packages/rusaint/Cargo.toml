@@ -19,9 +19,9 @@ application = ["element"]
 uniffi = ["dep:uniffi", "application"]
 
 [dependencies]
-uniffi = { version = "0.28.1", optional = true }
-derive_builder = "0.20.0"
-reqwest = { version = "0.12.7", features = [
+uniffi = { version = "0.28.3", optional = true }
+derive_builder = "0.20.2"
+reqwest = { version = "0.12.9", features = [
     "charset",
     "http2",
     "macos-system-configuration",
@@ -33,10 +33,10 @@ reqwest = { version = "0.12.7", features = [
 thiserror = { workspace = true }
 tokio = { workspace = true, features = ["sync"] }
 html-escape = "0.2.13"
-url = "2.5.2"
+url = "2.5.4"
 roxmltree = "0.20.0"
 lol_html = "1.2.1"
-scraper = { version = "0.20.0", features = ["atomic"], optional = true }
+scraper = { version = "0.22.0", features = ["atomic"], optional = true }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 custom_debug_derive = "0.6.1"
@@ -52,4 +52,4 @@ tokio-test = "0.4.4"
 tokio = { workspace = true, features = ["macros", "test-util"] }
 
 [build-dependencies]
-uniffi = { version = "0.28.1", features = ["build"] }
+uniffi = { version = "0.28.3", features = ["build"] }
