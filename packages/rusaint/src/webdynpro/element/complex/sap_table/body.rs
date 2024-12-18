@@ -22,6 +22,7 @@ pub struct SapTableBody {
 }
 
 impl<'a> SapTableBody {
+    /// TODO: Implement unit test for rowspan/colspan handling
     pub(super) fn new(
         table_def: SapTableDef,
         elem_ref: ElementRef<'a>,
@@ -96,7 +97,7 @@ impl<'a> SapTableBody {
                     if rowspan > 1 {
                         spans.insert(col_counter, (cell.clone(), rowspan, colspan));
                     }
-                    for _ in 0..rowspan {
+                    for _ in 0..colspan {
                         cells.push(cell.clone());
                         col_counter += 1;
                     }
