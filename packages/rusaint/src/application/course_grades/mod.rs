@@ -385,7 +385,7 @@ impl<'a> CourseGradesApplication {
     pub async fn classes(
         &mut self,
         course_type: CourseType,
-        year: u64,
+        year: u32,
         semester: SemesterType,
         include_details: bool,
     ) -> Result<Vec<ClassGrade>, RusaintError> {
@@ -472,7 +472,7 @@ impl<'a> CourseGradesApplication {
     pub async fn class_detail(
         &mut self,
         course_type: CourseType,
-        year: u64,
+        year: u32,
         semester: SemesterType,
         code: &str,
     ) -> Result<HashMap<String, f32>, RusaintError> {
