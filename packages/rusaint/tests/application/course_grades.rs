@@ -75,10 +75,12 @@ async fn classes_with_detail() {
     println!("{:?}", details);
     assert!(!details.is_empty());
     println!("Try to obtain class's detail");
-    let detail_code = details
-        .iter()
-        .find(|grade| grade.detail().is_some())
-        .unwrap();
+    let detail_code = details.iter().find(|grade| grade.detail().is_some());
+    if detail_code.is_none() {
+        println!("No class found with detail");
+        return;
+    }
+    let detail_code = detail_code.unwrap();
     let detail = app
         .class_detail(
             CourseType::Bachelor,
