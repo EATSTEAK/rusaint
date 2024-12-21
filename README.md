@@ -9,9 +9,11 @@
 
 ---
 
-rusaint(_ru-saint, 루세인트_)는 [숭실대학교 u-saint](https://saint.ssu.ac.kr)를 정확하고 빠르게, 간편하게 파싱하고 다양한 환경에서 조작할 수 있는 Rust 기반 비공식 u-saint 클라이언트입니다.
+rusaint(_ru-saint, 루세인트_)는 [숭실대학교 u-saint](https://saint.ssu.ac.kr)를 정확하고 빠르게, 간편하게 파싱하고 다양한 환경에서 조작할 수 있는 Rust 기반 비공식
+u-saint 클라이언트입니다.
 
-u-saint의 기반인 [SAP Web Dynpro](https://en.wikipedia.org/wiki/Web_Dynpro)에서 사용하는 Lightspeed 라이브러리의 최소 동작을 구현하여 안전하게 u-saint 내부 요소들을 조작하고 파싱할 수 있습니다.
+u-saint의 기반인 [SAP Web Dynpro](https://en.wikipedia.org/wiki/Web_Dynpro)에서 사용하는 Lightspeed 라이브러리의 최소 동작을 구현하여 안전하게
+u-saint 내부 요소들을 조작하고 파싱할 수 있습니다.
 
 - **JS 런타임 없음** — JS 런타임 없이 자체적으로 요청과 응답에 따른 처리를 수행하므로 HTTPS 요청이 가능한 모든 환경에서 실행 가능합니다.
 - **빠른 속도** — 네이티브 환경으로 컴파일되는 Rust를 이용하고, 휴리스틱 없이 요청이 완료되면 곧바로 실행되어 빠르게 u-saint 를 조작 및 파싱 가능합니다.
@@ -27,7 +29,6 @@ cargo add rusaint
 ## 문서
 
 [docs.rs](https://docs.rs/rusaint)
-
 
 ## 예시
 
@@ -57,10 +58,11 @@ async fn print_grades() -> Result<(), RusaintError> {
 ```
 
 ## 멀티 플랫폼
+
 rusaint는 [uniffi](https://github.com/mozilla/uniffi-rs)를 이용한 FFI 멀티플랫폼을 지원합니다. 현재 지원하는 플랫폼은 다음과 같습니다.
 
 - Android (Kotlin)
-- Swift(로컬 빌드만 가능)
+- Swift
 
 ### Android (Kotlin)
 
@@ -79,7 +81,7 @@ repositories {
 
 ```kotlin
 dependencies {
-  implementation("dev.eatsteak:rusaint:0.7.3")
+  implementation("dev.eatsteak:rusaint:0.8.1")
 }
 ```
 
