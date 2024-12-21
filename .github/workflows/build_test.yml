@@ -24,7 +24,7 @@ jobs:
       - name: Retrieve cache
         uses: Leafwing-Studios/cargo-cache@v2
         with:
-          cache-key: "build-test-${{ hashFiles('**/Cargo.lock') }}"
+          cache-group: build
       - name: Build
         run: cargo build --verbose
       - name: Run tests

@@ -15,8 +15,6 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
       - name: Retrieve cache
         uses: Leafwing-Studios/cargo-cache@v2
-        with:
-          cache-key: "dry-run-${{ hashFiles('**/Cargo.lock') }}"
       - name: Publish dry-run
         run: cargo publish -p rusaint --dry-run --verbose
       - name: Run tests
