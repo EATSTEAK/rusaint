@@ -47,7 +47,7 @@ impl<'a> ChapelApplication {
             SemesterType::One => "090",
             SemesterType::Summer => "091",
             SemesterType::Two => "092",
-            SemesterType::Winter => "0923",
+            SemesterType::Winter => "093",
         }
     }
 
