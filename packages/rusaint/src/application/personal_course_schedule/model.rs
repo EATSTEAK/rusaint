@@ -38,13 +38,16 @@ pub struct CourseScheduleInformation {
 }
 
 impl CourseScheduleInformation {
-    pub(crate) fn from_string(str: &str) -> CourseScheduleInformation {
-        let mut splited = str.split("\n");
+    pub(crate) fn from_iter<'a>(
+        iter: &mut impl Iterator<Item = &'a str>,
+    ) -> CourseScheduleInformation {
+        let mut iter = iter.skip_while(|s| s.is_empty());
+        // Consume empty strings at start
         CourseScheduleInformation {
-            name: splited.next().unwrap().to_string(),
-            professor: splited.next().unwrap().to_string(),
-            time: splited.next().unwrap().to_string(),
-            classroom: splited.next().unwrap_or("").to_string(),
+            name: iter.next().unwrap().to_string(),
+            professor: iter.next().unwrap().to_string(),
+            time: iter.next().unwrap().to_string(),
+            classroom: iter.next().unwrap_or("").to_string(),
         }
     }
 
