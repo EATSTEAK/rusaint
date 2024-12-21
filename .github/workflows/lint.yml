@@ -5,7 +5,7 @@ on:
   pull_request:
     branches: [ "main", "dev" ]
 jobs:
-  build:
+  lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -16,7 +16,7 @@ jobs:
       - name: Retrieve cache
         uses: Leafwing-Studios/cargo-cache@v2
         with:
-          cache-key: "lint-${{ hashFiles('**/Cargo.lock') }}"
+          cache-group: build
       - name: Check rustfmt
         run: cargo +nightly fmt
       - name: Check clippy
