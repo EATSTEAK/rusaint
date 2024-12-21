@@ -336,13 +336,14 @@ impl<'a> CourseGradesApplication {
                 .into_iter();
             zip.skip(4)
                 .map(|(key, val)| {
-                    let float =
-                        val.trim()
-                            .parse::<f32>()
-                            .or(Err(ElementError::InvalidContent {
-                                element: format!("TABLE: {}, key: {}", table_elem.id(), key),
-                                content: "(not an correct f32)".to_string(),
-                            }))?;
+                    let str = val.trim();
+                    if str.is_empty() {
+                        return Ok((key, -1.0));
+                    }
+                    let float = str.parse::<f32>().or(Err(ElementError::InvalidContent {
+                        element: format!("TABLE: {}, key: {}", table_elem.id(), key),
+                        content: "(not an correct f32)".to_string(),
+                    }))?;
                     Ok((key, float))
                 })
                 .collect::<Result<HashMap<String, f32>, WebDynproError>>()
@@ -355,7 +356,7 @@ impl<'a> CourseGradesApplication {
     /// 주어진 학기의 수업별 성적을 가져옵니다. `include_details`가 `true`인 경우 수업의 상세 성적도 가져옵니다.
     /// 수업의 상세 성적까지 가져올 경우 상세 성적이 있는 수업의 수 만큼 서버에 요청을 보내므로 반드시 상세 성적도 한번에 가져와야 할 때에만 사용하십시오.
     ///
-    /// 수업 성적을 가져온 이후 상세 성적 또한 가져오려면 `[class_detail()]`함수를 이용하십시오.
+    /// 수업 성적을 가져온 이후 상세 성적 또한 가져오려면 [`class_detail()`]함수를 이용하십시오.
     /// ### 예시
     /// 상세 성적을 가져오지 않을 경우
     /// ```no_run
@@ -456,7 +457,7 @@ impl<'a> CourseGradesApplication {
         Ok(ret)
     }
 
-    /// 주어진 수업의 상세 성적 정보를 가져옵니다.
+    /// 주어진 수업의 상세 성적 정보를 가져옵니다. 만약 상세 성적이 음수라면, 성적이 비어 있다는 의미입니다.
     /// ### 예시
     /// ```no_run
     /// # tokio_test::block_on(async {
