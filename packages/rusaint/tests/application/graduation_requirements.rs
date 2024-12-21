@@ -1,14 +1,11 @@
+use crate::get_session;
 use rusaint::application::{
     graduation_requirements::GraduationRequirementsApplication, USaintClientBuilder,
 };
-use serial_test::serial;
-
-use crate::get_session;
 
 #[tokio::test]
-#[serial]
 async fn student_info() {
-    let session = get_session().await.unwrap();
+    let session = get_session().await.unwrap().clone();
     let app = USaintClientBuilder::new()
         .session(session)
         .build_into::<GraduationRequirementsApplication>()
@@ -19,9 +16,8 @@ async fn student_info() {
 }
 
 #[tokio::test]
-#[serial]
 async fn graduation_requirements() {
-    let session = get_session().await.unwrap();
+    let session = get_session().await.unwrap().clone();
     let mut app = USaintClientBuilder::new()
         .session(session)
         .build_into::<GraduationRequirementsApplication>()

@@ -1,4 +1,4 @@
-use crate::{get_semester, get_session, get_year};
+use crate::{get_session, TARGET_SEMESTER, TARGET_YEAR};
 use rusaint::model::SemesterType;
 use rusaint::{
     application::{
@@ -6,28 +6,22 @@ use rusaint::{
     },
     ApplicationError, RusaintError,
 };
-use serial_test::serial;
 
 #[tokio::test]
-#[serial]
 async fn schedule() {
-    let session = get_session().await.unwrap();
+    let session = get_session().await.unwrap().clone();
     let mut app = USaintClientBuilder::new()
         .session(session)
         .build_into::<PersonalCourseScheduleApplication>()
         .await
         .unwrap();
-    let info = app
-        .schedule(get_year().unwrap(), get_semester().unwrap())
-        .await
-        .unwrap();
+    let info = app.schedule(*TARGET_YEAR, *TARGET_SEMESTER).await.unwrap();
     println!("{:?}", info);
 }
 
 #[tokio::test]
-#[serial]
 async fn no_schedule() {
-    let session = get_session().await.unwrap();
+    let session = get_session().await.unwrap().clone();
     let mut app = USaintClientBuilder::new()
         .session(session)
         .build_into::<PersonalCourseScheduleApplication>()
