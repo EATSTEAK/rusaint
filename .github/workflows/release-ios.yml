@@ -29,7 +29,7 @@ jobs:
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer ${{ secrets.IOS_GITHUB_TOKEN }}" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
-            https://api.github.com/repos/EATSTEAK/rusaint/releases \
+            https://api.github.com/repos/EATSTEAK/rusaint-ios/releases \
             | jq '.[0].tag_name | "result=" + .' \
             | tr -d '"' >> $GITHUB_OUTPUT
       - name: Cancel workflow if version is not updated
@@ -39,6 +39,10 @@ jobs:
         run: |
           gh run cancel ${{ github.run_id }}
           gh run watch ${{ github.run_id }}
+      - name: Clear directory
+        run: |
+          rm -rf ./*
+          rm -rf ./.git
       - name: Checkout the repository
         uses: actions/checkout@v4
         with:
@@ -81,10 +85,13 @@ jobs:
           RUSTFLAGS: '-C link-arg=-Wl,-application_extension'
         run: |
           mkdir $RUNNER_TEMP/target
-          CARGO_TARGET_DIR=$RUNNER_TEMP/target
+          export CARGO_TARGET_DIR=$RUNNER_TEMP/target
           cargo build --package rusaint-ffi --target aarch64-apple-ios-sim --release
           cargo build --package rusaint-ffi --target aarch64-apple-ios --release
           cargo build --package rusaint-ffi --target x86_64-apple-ios --release
+      - name: List directory contents
+        run: |
+          ls -alhR $RUNNER_TEMP/target
       - name: Create universal libraries for simulator
         run: |
           mkdir -p $RUNNER_TEMP/target/universal-ios-sim/release
@@ -100,7 +107,7 @@ jobs:
             --language swift \
             --no-format \
             --out-dir $RUNNER_TEMP/bindings
-      - name: Move generated swift bindgs
+      - name: Move generated swift bindings
         run: mv $RUNNER_TEMP/bindings/*.swift ./languages/swift/Rusaint/Sources/Rusaint/
       - name: Massage the generated files to fit xcframework
         run: |
@@ -109,7 +116,7 @@ jobs:
           cat $RUNNER_TEMP/bindings/*.modulemap > $RUNNER_TEMP/Headers/module.modulemap
       - name: Create xcframework
         run: |
-          rm -r ./languages/swift/Rusaint/Artifacts/RusaintFFI.xcframework
+          rm -rf ./languages/swift/Rusaint/Artifacts/RusaintFFI.xcframework
           xcodebuild -create-xcframework \
               -library $RUNNER_TEMP/target/aarch64-apple-ios/release/librusaint_ffi.a \
               -headers $RUNNER_TEMP/Headers \
@@ -121,7 +128,7 @@ jobs:
           KEYCHAIN_PASSWORD: ${{ secrets.IOS_KEYCHAIN_PASSWORD }}
         run: |
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" $RUNNER_TEMP/signing.keychain-db
-          codesign --timestam-p -s "Apple Development" ./languages/swift/Rusaint/Artifacts/RusaintFFI.xcframework
+          codesign --timestamp -s "Apple Development" ./languages/swift/Rusaint/Artifacts/RusaintFFI.xcframework
       - name: Push to submodule
         working-directory: languages/swift/Rusaint
         run: |
