@@ -386,6 +386,8 @@ pub enum ClassScore {
     Failed,
     /// 일반 과목의 점수
     Score(u32),
+    /// 성적 없음
+    Empty,
 }
 
 impl FromStr for ClassScore {
@@ -395,6 +397,7 @@ impl FromStr for ClassScore {
         Ok(match s {
             "P" => Self::Pass,
             "F" => Self::Failed,
+            "" => Self::Empty,
             _ => Self::Score(s.parse::<u32>()?),
         })
     }
