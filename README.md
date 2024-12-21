@@ -81,7 +81,7 @@ repositories {
 
 ```kotlin
 dependencies {
-  implementation("dev.eatsteak:rusaint:0.8.1")
+  implementation("dev.eatsteak:rusaint:0.8.2")
 }
 ```
 
