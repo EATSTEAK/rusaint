@@ -4,17 +4,9 @@ on:
   workflow_dispatch:
   pull_request:
     branches: [ "main", "dev" ]
-env:
-  CARGO_TERM_COLOR: always
 jobs:
   build:
     runs-on: ubuntu-latest
-    environment: testing
-    env:
-      SSO_ID: ${{ vars.SSO_ID }}
-      SSO_PASSWORD: ${{ secrets.SSO_PASSWORD }}
-      TARGET_YEAR: ${{ vars.TARGET_YEAR }}
-      TARGET_SEMESTER: ${{ vars.TARGET_SEMESTER }}
     steps:
       - uses: actions/checkout@v4
       - name: Setup Rust
