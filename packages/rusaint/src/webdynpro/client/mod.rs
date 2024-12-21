@@ -38,7 +38,7 @@ fn wd_xhr_header() -> HeaderMap {
     headers
 }
 
-impl<'a> WebDynproClient {
+impl WebDynproClient {
     /// WebDynpro 애플리케이션의 이름을 반환합니다.
     pub fn name(&self) -> &str {
         &self.name

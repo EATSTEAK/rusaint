@@ -21,7 +21,7 @@ lipo -create ../../target/aarch64-apple-ios-sim/release/librusaint_ffi.a \
 
 # Generate swift bindings
 cargo run -p uniffi-bindgen generate \
-  ../../target/aarch64-apple-ios-sim/release/librusaint_ffi.dylib \
+  ../../target/aarch64-apple-ios/release/librusaint_ffi.dylib \
   --library \
   --language swift \
   --no-format \

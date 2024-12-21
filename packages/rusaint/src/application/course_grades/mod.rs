@@ -1,5 +1,6 @@
 use self::model::{ClassGrade, CourseType, GradeSummary, SemesterGrade};
 use super::{USaintApplication, USaintClient};
+use crate::application::utils::sap_table::try_table_into_with_scroll;
 use crate::webdynpro::client::body::Body;
 use crate::webdynpro::command::WebDynproCommandExecutor;
 use crate::webdynpro::element::complex::sap_table::cell::SapTableCellWrapper;
@@ -295,13 +296,17 @@ impl<'a> CourseGradesApplication {
         self.close_popups().await?;
         let parser = ElementParser::new(self.client.body());
         self.select_course(&parser, course_type).await?;
-        self.read_semesters()
+        self.read_semesters().await
     }
 
-    fn read_semesters(&self) -> Result<Vec<SemesterGrade>, RusaintError> {
+    async fn read_semesters(&mut self) -> Result<Vec<SemesterGrade>, RusaintError> {
         let parser = ElementParser::new(self.client.body());
-        let table = parser.read(SapTableBodyCommand::new(Self::GRADES_SUMMARY_TABLE))?;
-        let ret = table.try_table_into::<SemesterGrade>(&parser)?;
+        let ret = try_table_into_with_scroll::<SemesterGrade>(
+            &mut self.client,
+            parser,
+            Self::GRADES_SUMMARY_TABLE,
+        )
+        .await?;
         Ok(ret)
     }
 

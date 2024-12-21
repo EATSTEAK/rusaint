@@ -3,7 +3,7 @@ name: Build & Test
 on:
   workflow_dispatch:
   pull_request:
-    branches: [ "main", "dev" ]
+    branches: [ "dev" ]
   schedule:
     - cron: "23 3 * * *"
 env:
@@ -12,6 +12,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     environment: testing
+    concurrency:
+      group: testing
+      cancel-in-progress: true
     env:
       SSO_ID: ${{ vars.SSO_ID }}
       SSO_PASSWORD: ${{ secrets.SSO_PASSWORD }}
@@ -21,6 +24,10 @@ jobs:
       - uses: actions/checkout@v4
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
+      - name: Retrieve cache
+        uses: Leafwing-Studios/cargo-cache@v2
+        with:
+          cache-group: build
       - name: Build
         run: cargo build --verbose
       - name: Run tests
