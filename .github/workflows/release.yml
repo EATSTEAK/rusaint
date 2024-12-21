@@ -11,6 +11,35 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout Cargo.toml to check version
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.IOS_GITHUB_TOKEN }}
+          sparse-checkout: |
+            Cargo.toml
+          sparse-checkout-cone-mode: false
+      - name: Get rusaint version
+        id: current_version
+        uses: mikefarah/yq@v4
+        with:
+          cmd: yq '.workspace.package.version | "v" + .' Cargo.toml
+      - name: Fetch latest release tag
+        id: latest_release
+        run: |
+          curl -L \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.IOS_GITHUB_TOKEN }}" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            https://api.github.com/repos/EATSTEAK/rusaint/releases \
+            | jq '.[0].tag_name | "result=" + .' \
+            | tr -d '"' >> $GITHUB_OUTPUT
+      - name: Cancel workflow if version is not updated
+        if: steps.current_version.outputs.result == steps.latest_release.outputs.result
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh run cancel ${{ github.run_id }}
+          gh run watch ${{ github.run_id }}
       - name: Checkout
         uses: actions/checkout@v4
       - name: Setup Rust
