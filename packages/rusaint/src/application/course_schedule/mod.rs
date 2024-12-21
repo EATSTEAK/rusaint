@@ -1,4 +1,5 @@
 use super::{USaintApplication, USaintClient};
+use crate::application::utils::sap_table::try_table_into_with_scroll;
 use crate::webdynpro::command::WebDynproCommandExecutor;
 use crate::webdynpro::element::parser::ElementParser;
 use crate::{
@@ -128,7 +129,9 @@ impl<'a> CourseScheduleApplication {
                 }
             }
         }
-        let lectures = table.try_table_into::<Lecture>(&parser)?;
+        let lectures =
+            try_table_into_with_scroll::<Lecture>(&mut self.client, parser, Self::MAIN_TABLE)
+                .await?;
         Ok(lectures.into_iter())
     }
 
