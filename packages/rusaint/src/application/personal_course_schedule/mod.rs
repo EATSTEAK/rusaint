@@ -103,57 +103,63 @@ impl<'a> PersonalCourseScheduleApplication {
                         .for_each(|(col_idx, str)| match col_idx {
                             0 => {
                                 schedule.entry(Weekday::Mon).or_default();
-                                str.split("\n\n").for_each(|str| {
+                                let mut iter = str.split("\n").peekable();
+                                while iter.peek().is_some() {
                                     schedule
                                         .get_mut(&Weekday::Mon)
                                         .unwrap()
-                                        .push(CourseScheduleInformation::from_string(str))
-                                });
+                                        .push(CourseScheduleInformation::from_iter(&mut iter))
+                                }
                             }
                             1 => {
                                 schedule.entry(Weekday::Tue).or_default();
-                                str.split("\n\n").for_each(|str| {
+                                let mut iter = str.split("\n").peekable();
+                                while iter.peek().is_some() {
                                     schedule
                                         .get_mut(&Weekday::Tue)
                                         .unwrap()
-                                        .push(CourseScheduleInformation::from_string(str))
-                                });
+                                        .push(CourseScheduleInformation::from_iter(&mut iter))
+                                }
                             }
                             2 => {
                                 schedule.entry(Weekday::Wed).or_default();
-                                str.split("\n\n").for_each(|str| {
+                                let mut iter = str.split("\n").peekable();
+                                while iter.peek().is_some() {
                                     schedule
                                         .get_mut(&Weekday::Wed)
                                         .unwrap()
-                                        .push(CourseScheduleInformation::from_string(str))
-                                });
+                                        .push(CourseScheduleInformation::from_iter(&mut iter))
+                                }
                             }
                             3 => {
                                 schedule.entry(Weekday::Thu).or_default();
-                                str.split("\n\n").for_each(|str| {
+                                let mut iter = str.split("\n").peekable();
+                                while iter.peek().is_some() {
                                     schedule
                                         .get_mut(&Weekday::Thu)
                                         .unwrap()
-                                        .push(CourseScheduleInformation::from_string(str))
-                                });
+                                        .push(CourseScheduleInformation::from_iter(&mut iter))
+                                }
                             }
                             4 => {
                                 schedule.entry(Weekday::Fri).or_default();
-                                str.split("\n\n").for_each(|str| {
+                                let mut iter = str.split("\n").peekable();
+                                while iter.peek().is_some() {
                                     schedule
                                         .get_mut(&Weekday::Fri)
                                         .unwrap()
-                                        .push(CourseScheduleInformation::from_string(str))
-                                });
+                                        .push(CourseScheduleInformation::from_iter(&mut iter))
+                                }
                             }
                             5 => {
                                 schedule.entry(Weekday::Sat).or_default();
-                                str.split("\n\n").for_each(|str| {
+                                let mut iter = str.split("\n").peekable();
+                                while iter.peek().is_some() {
                                     schedule
                                         .get_mut(&Weekday::Sat)
                                         .unwrap()
-                                        .push(CourseScheduleInformation::from_string(str))
-                                });
+                                        .push(CourseScheduleInformation::from_iter(&mut iter))
+                                }
                             }
                             _ => {}
                         });
