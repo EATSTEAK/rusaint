@@ -8,6 +8,15 @@ env:
 jobs:
   dry-run:
     runs-on: ubuntu-latest
+    environment: testing
+    concurrency:
+      group: testing
+      cancel-in-progress: true
+    env:
+      SSO_ID: ${{ vars.SSO_ID }}
+      SSO_PASSWORD: ${{ secrets.SSO_PASSWORD }}
+      TARGET_YEAR: ${{ vars.TARGET_YEAR }}
+      TARGET_SEMESTER: ${{ vars.TARGET_SEMESTER }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
