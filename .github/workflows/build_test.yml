@@ -27,4 +27,4 @@ jobs:
       - name: Retrieve cache
         uses: Leafwing-Studios/cargo-cache@v2
       - name: Run tests
-        run: cargo test --verbose
+        run: cargo test -p rusaint -p rusaint-ffi --verbose
