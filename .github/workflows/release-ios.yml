@@ -9,7 +9,7 @@ on:
 permissions:
   actions: write
 jobs:
-  release:
+  release-ios:
     runs-on: macos-latest
     steps:
       - name: Checkout Cargo.toml to check version
