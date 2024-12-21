@@ -15,8 +15,6 @@ jobs:
           components: clippy, rustfmt
       - name: Retrieve cache
         uses: Leafwing-Studios/cargo-cache@v2
-        with:
-          cache-group: build
       - name: Check rustfmt
         run: cargo +nightly fmt
       - name: Check clippy
