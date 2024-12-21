@@ -12,6 +12,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     environment: testing
+    concurrency:
+      group: testing
+      cancel-in-progress: true
     env:
       SSO_ID: ${{ vars.SSO_ID }}
       SSO_PASSWORD: ${{ secrets.SSO_PASSWORD }}
