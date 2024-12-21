@@ -26,8 +26,6 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
       - name: Retrieve cache
         uses: Leafwing-Studios/cargo-cache@v2
-        with:
-          cache-group: build
       - name: Build
         run: cargo build --verbose
       - name: Run tests
