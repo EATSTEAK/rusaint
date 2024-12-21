@@ -3,6 +3,8 @@ name: Release
 on:
   push:
     branches: [ main ]
+    paths:
+      - './Cargo.toml'
   workflow_dispatch:
 
 env:
@@ -48,7 +50,6 @@ jobs:
           targets: 'armv7-linux-androideabi, i686-linux-android, aarch64-linux-android, x86_64-linux-android'
       - name: Retrieve cache
         uses: Leafwing-Studios/cargo-cache@v2
-        with:
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
