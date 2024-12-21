@@ -1,6 +1,7 @@
 use model::LectureAssessmentResult;
 
 use super::{USaintApplication, USaintClient};
+use crate::application::utils::sap_table::try_table_into_with_scroll;
 use crate::webdynpro::command::WebDynproCommandExecutor;
 use crate::webdynpro::element::parser::ElementParser;
 use crate::{
@@ -10,9 +11,7 @@ use crate::{
         client::body::Body,
         command::element::{
             action::ButtonPressEventCommand,
-            complex::{
-                SapTableBodyCommand, SapTableLSDataCommand, SapTableVerticalScrollEventCommand,
-            },
+            complex::{SapTableBodyCommand, SapTableLSDataCommand},
             selection::{
                 ComboBoxChangeEventCommand, ComboBoxLSDataCommand, ComboBoxSelectEventCommand,
             },
@@ -143,8 +142,8 @@ impl<'a> LectureAssessmentApplication {
             professor_name,
         )
         .await?;
-        let mut parser = ElementParser::new(self.body());
-        let row_count = parser
+        let parser = ElementParser::new(self.body());
+        let row_count: u32 = parser
             .read(SapTableLSDataCommand::new(Self::TABLE))?
             .row_count()
             .map(|u| u.to_owned())
@@ -156,7 +155,7 @@ impl<'a> LectureAssessmentApplication {
             })?
             .try_into()
             .unwrap();
-        let mut table = parser.read(SapTableBodyCommand::new(Self::TABLE))?;
+        let table = parser.read(SapTableBodyCommand::new(Self::TABLE))?;
         if row_count == 1 {
             let Some(first_row) = table.iter().next() else {
                 return Err(ApplicationError::NoLectureAssessments.into());
@@ -173,31 +172,7 @@ impl<'a> LectureAssessmentApplication {
                 }
             }
         }
-        let mut results: Vec<LectureAssessmentResult> = Vec::with_capacity(row_count);
-        while results.len() < row_count {
-            let mut partial_results = table.try_table_into::<LectureAssessmentResult>(&parser)?;
-            if results.len() + partial_results.len() > row_count {
-                let overflowed = results.len() + partial_results.len() - row_count;
-                partial_results.drain(0..overflowed);
-            }
-            results.append(&mut partial_results);
-            if results.len() < row_count {
-                let event = parser.read(SapTableVerticalScrollEventCommand::new(
-                    Self::TABLE,
-                    results.len().try_into().unwrap(),
-                    "",
-                    "SCROLLBAR",
-                    false,
-                    false,
-                    false,
-                    false,
-                ))?;
-                self.client.process_event(false, event).await?;
-                parser = ElementParser::new(self.body());
-                table = parser.read(SapTableBodyCommand::new(Self::TABLE))?;
-            }
-        }
-        Ok(results)
+        Ok(try_table_into_with_scroll(&mut self.client, parser, Self::TABLE).await?)
     }
 }
 

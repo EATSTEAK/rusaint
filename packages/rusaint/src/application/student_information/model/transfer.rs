@@ -5,13 +5,14 @@ use serde::{
     Deserialize,
 };
 
+use crate::application::utils::sap_table::try_table_into_with_scroll;
 use crate::webdynpro::command::WebDynproCommandExecutor;
 use crate::webdynpro::element::parser::ElementParser;
 use crate::{
     application::{student_information::StudentInformationApplication, USaintClient},
     define_elements,
     webdynpro::{
-        command::element::{complex::SapTableBodyCommand, layout::TabStripTabSelectEventCommand},
+        command::element::layout::TabStripTabSelectEventCommand,
         element::{
             complex::{sap_table::FromSapTable, SapTable},
             definition::ElementDefinition,
@@ -47,8 +48,12 @@ impl<'a> StudentTransferRecords {
         ))?;
         client.process_event(false, event).await?;
         parser = ElementParser::new(client.body());
-        let table = parser.read(SapTableBodyCommand::new(Self::TABLE_TRANSFER))?;
-        let records = table.try_table_into::<StudentTransferRecord>(&parser)?;
+        let records = try_table_into_with_scroll::<StudentTransferRecord>(
+            client,
+            parser,
+            Self::TABLE_TRANSFER,
+        )
+        .await?;
         Ok(Self { records })
     }
 
