@@ -1,3 +1,4 @@
+use crate::get_session;
 use rusaint::{
     application::{
         course_schedule::{model::LectureCategory, CourseScheduleApplication},
@@ -6,14 +7,10 @@ use rusaint::{
     model::SemesterType,
     ApplicationError, RusaintError,
 };
-use serial_test::serial;
-
-use crate::get_session;
 
 #[tokio::test]
-#[serial]
 async fn find_major() {
-    let session = get_session().await.unwrap();
+    let session = get_session().await.unwrap().clone();
     let mut app = USaintClientBuilder::new()
         .session(session)
         .build_into::<CourseScheduleApplication>()
@@ -30,9 +27,8 @@ async fn find_major() {
 }
 
 #[tokio::test]
-#[serial]
 async fn find_required_elective() {
-    let session = get_session().await.unwrap();
+    let session = get_session().await.unwrap().clone();
     let mut app = USaintClientBuilder::new()
         .session(session)
         .build_into::<CourseScheduleApplication>()
@@ -49,9 +45,8 @@ async fn find_required_elective() {
 }
 
 #[tokio::test]
-#[serial]
 async fn find_optional_elective() {
-    let session = get_session().await.unwrap();
+    let session = get_session().await.unwrap().clone();
     let mut app = USaintClientBuilder::new()
         .session(session)
         .build_into::<CourseScheduleApplication>()
@@ -68,9 +63,8 @@ async fn find_optional_elective() {
 }
 
 #[tokio::test]
-#[serial]
 async fn find_chapel() {
-    let session = get_session().await.unwrap();
+    let session = get_session().await.unwrap().clone();
     let mut app = USaintClientBuilder::new()
         .session(session)
         .build_into::<CourseScheduleApplication>()
@@ -87,9 +81,8 @@ async fn find_chapel() {
 }
 
 #[tokio::test]
-#[serial]
 async fn find_education() {
-    let session = get_session().await.unwrap();
+    let session = get_session().await.unwrap().clone();
     let mut app = USaintClientBuilder::new()
         .session(session)
         .build_into::<CourseScheduleApplication>()
@@ -106,9 +99,8 @@ async fn find_education() {
 }
 
 #[tokio::test]
-#[serial]
 async fn find_graduated() {
-    let session = get_session().await.unwrap();
+    let session = get_session().await.unwrap().clone();
     let mut app = USaintClientBuilder::new()
         .session(session)
         .build_into::<CourseScheduleApplication>()
@@ -125,9 +117,8 @@ async fn find_graduated() {
 }
 
 #[tokio::test]
-#[serial]
 async fn find_connected_major() {
-    let session = get_session().await.unwrap();
+    let session = get_session().await.unwrap().clone();
     let mut app = USaintClientBuilder::new()
         .session(session)
         .build_into::<CourseScheduleApplication>()
@@ -144,9 +135,8 @@ async fn find_connected_major() {
 }
 
 #[tokio::test]
-#[serial]
 async fn find_united_major() {
-    let session = get_session().await.unwrap();
+    let session = get_session().await.unwrap().clone();
     let mut app = USaintClientBuilder::new()
         .session(session)
         .build_into::<CourseScheduleApplication>()
@@ -163,9 +153,8 @@ async fn find_united_major() {
 }
 
 #[tokio::test]
-#[serial]
 async fn find_recognized_other_major() {
-    let session = get_session().await.unwrap();
+    let session = get_session().await.unwrap().clone();
     let mut app = USaintClientBuilder::new()
         .session(session)
         .build_into::<CourseScheduleApplication>()
@@ -182,9 +171,8 @@ async fn find_recognized_other_major() {
 }
 
 #[tokio::test]
-#[serial]
 async fn find_cyber() {
-    let session = get_session().await.unwrap();
+    let session = get_session().await.unwrap().clone();
     let mut app = USaintClientBuilder::new()
         .session(session)
         .build_into::<CourseScheduleApplication>()
@@ -201,9 +189,8 @@ async fn find_cyber() {
 }
 
 #[tokio::test]
-#[serial]
 async fn find_nothing() {
-    let session = get_session().await.unwrap();
+    let session = get_session().await.unwrap().clone();
     let mut app = USaintClientBuilder::new()
         .session(session)
         .build_into::<CourseScheduleApplication>()

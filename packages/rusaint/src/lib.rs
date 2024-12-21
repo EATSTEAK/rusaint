@@ -83,63 +83,48 @@ pub mod uniffi_support;
 #[cfg(test)]
 #[allow(missing_docs)]
 pub mod global_test_utils {
+    use crate::{model::SemesterType, USaintSession};
     use anyhow::{Error, Result};
     use dotenv::dotenv;
+    use lazy_static::lazy_static;
     use std::sync::{Arc, OnceLock};
+    use tokio::sync::Mutex;
 
-    use crate::{model::SemesterType, USaintSession};
+    lazy_static! {
+        pub(crate) static ref SESSION: Mutex<OnceLock<Arc<USaintSession>>> =
+            Mutex::new(OnceLock::new());
+        pub(crate) static ref TARGET_YEAR: u32 =
+            std::env::var("TARGET_YEAR").unwrap().parse().unwrap();
+        pub(crate) static ref TARGET_SEMESTER: SemesterType = {
+            let semester = std::env::var("TARGET_SEMESTER").unwrap();
+            match semester.to_uppercase().as_str() {
+                "1" | "ONE" => SemesterType::One,
+                "SUMMER" => SemesterType::Summer,
+                "2" | "TWO" => SemesterType::Two,
+                "WINTER" => SemesterType::Winter,
+                _ => Err(Error::msg("Invalid semester")).unwrap(),
+            }
+        };
+    }
 
     pub async fn get_session() -> Result<Arc<USaintSession>> {
-        static SESSION: OnceLock<Arc<USaintSession>> = OnceLock::new();
-        if let Some(session) = SESSION.get() {
+        let session_lock = SESSION.lock().await;
+        if let Some(session) = session_lock.get() {
+            // Throttle session access to prevent 500 error at server response
+            tokio::time::sleep(std::time::Duration::from_millis(700)).await;
             Ok(session.to_owned())
         } else {
             dotenv().ok();
             let id = std::env::var("SSO_ID")?;
             let password = std::env::var("SSO_PASSWORD")?;
             let session = USaintSession::with_password(&id, &password).await?;
-            let _ = SESSION.set(Arc::new(session));
-            SESSION
+            let _ = session_lock.set(Arc::new(session));
+            // Throttle session access to prevent 500 error at server response
+            tokio::time::sleep(std::time::Duration::from_millis(1500)).await;
+            session_lock
                 .get()
                 .map(|arc| arc.to_owned())
-                .ok_or(Error::msg("Session is not initsiated"))
-        }
-    }
-
-    #[cfg(feature = "application")]
-    pub async fn get_year() -> Result<i32> {
-        static TARGET_YEAR: OnceLock<i32> = OnceLock::new();
-        if let Some(year) = TARGET_YEAR.get() {
-            Ok(*year)
-        } else {
-            let year = std::env::var("TARGET_YEAR")?.parse()?;
-            let _ = TARGET_YEAR.set(year);
-            TARGET_YEAR
-                .get()
-                .copied()
-                .ok_or(Error::msg("Year is not initsiated"))
-        }
-    }
-
-    #[cfg(feature = "application")]
-    pub fn get_semester() -> Result<SemesterType> {
-        static TARGET_SEMESTER: OnceLock<SemesterType> = OnceLock::new();
-        if let Some(semester) = TARGET_SEMESTER.get() {
-            Ok(*semester)
-        } else {
-            let semester = std::env::var("TARGET_SEMESTER")?;
-            let semester_type = match semester.to_uppercase().as_str() {
-                "1" | "ONE" => SemesterType::One,
-                "SUMMER" => SemesterType::Summer,
-                "2" | "TWO" => SemesterType::Two,
-                "WINTER" => SemesterType::Winter,
-                _ => return Err(Error::msg("Invalid semester")),
-            };
-            let _ = TARGET_SEMESTER.set(semester_type);
-            TARGET_SEMESTER
-                .get()
-                .copied()
-                .ok_or(Error::msg("Semester is not initsiated"))
+                .ok_or(Error::msg("Session is not initiated"))
         }
     }
 }
