@@ -20,6 +20,8 @@ jobs:
           targets: 'armv7-linux-androideabi, i686-linux-android, aarch64-linux-android, x86_64-linux-android'
       - name: Retrieve cache
         uses: Leafwing-Studios/cargo-cache@v2
+        with:
+          cache-key: "release-${{ hashFiles('**/Cargo.lock') }}"
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
