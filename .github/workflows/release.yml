@@ -22,9 +22,7 @@ jobs:
           sparse-checkout-cone-mode: false
       - name: Get rusaint version
         id: current_version
-        uses: mikefarah/yq@v4
-        with:
-          cmd: yq '.workspace.package.version | "v" + .' Cargo.toml
+        run: yq '.workspace.package.version | "result=v" + .' Cargo.toml >> $GITHUB_OUTPUT
       - name: Fetch latest release tag
         id: latest_release
         run: |
