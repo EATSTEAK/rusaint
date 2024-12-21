@@ -1,15 +1,12 @@
+use crate::get_session;
 use rusaint::{
     application::{lecture_assessment::LectureAssessmentApplication, USaintClientBuilder},
     model::SemesterType,
 };
-use serial_test::serial;
-
-use crate::get_session;
 
 #[tokio::test]
-#[serial]
 async fn lecture_assessment() {
-    let session = get_session().await.unwrap();
+    let session = get_session().await.unwrap().clone();
     let mut app = USaintClientBuilder::new()
         .session(session)
         .build_into::<LectureAssessmentApplication>()

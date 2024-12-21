@@ -2,14 +2,12 @@ use rusaint::application::{
     course_grades::{model::CourseType, CourseGradesApplication},
     USaintClientBuilder,
 };
-use serial_test::serial;
 
-use crate::{get_semester, get_session, get_year};
+use crate::{get_session, TARGET_SEMESTER, TARGET_YEAR};
 
 #[tokio::test]
-#[serial]
 async fn recorded_summary() {
-    let session = get_session().await.unwrap();
+    let session = get_session().await.unwrap().clone();
     let mut app = USaintClientBuilder::new()
         .session(session)
         .build_into::<CourseGradesApplication>()
@@ -25,9 +23,8 @@ async fn recorded_summary() {
 }
 
 #[tokio::test]
-#[serial]
 async fn certificated_summary() {
-    let session = get_session().await.unwrap();
+    let session = get_session().await.unwrap().clone();
     let mut app = USaintClientBuilder::new()
         .session(session)
         .build_into::<CourseGradesApplication>()
@@ -41,9 +38,8 @@ async fn certificated_summary() {
 }
 
 #[tokio::test]
-#[serial]
 async fn semesters() {
-    let session = get_session().await.unwrap();
+    let session = get_session().await.unwrap().clone();
     let mut app = USaintClientBuilder::new()
         .session(session)
         .build_into::<CourseGradesApplication>()
@@ -55,21 +51,15 @@ async fn semesters() {
 }
 
 #[tokio::test]
-#[serial]
 async fn classes_with_detail() {
-    let session = get_session().await.unwrap();
+    let session = get_session().await.unwrap().clone();
     let mut app = USaintClientBuilder::new()
         .session(session)
         .build_into::<CourseGradesApplication>()
         .await
         .unwrap();
     let details = app
-        .classes(
-            CourseType::Bachelor,
-            get_year().unwrap(),
-            get_semester().unwrap(),
-            true,
-        )
+        .classes(CourseType::Bachelor, *TARGET_YEAR, *TARGET_SEMESTER, true)
         .await
         .unwrap();
     println!("{:?}", details);
@@ -84,8 +74,8 @@ async fn classes_with_detail() {
     let detail = app
         .class_detail(
             CourseType::Bachelor,
-            get_year().unwrap(),
-            get_semester().unwrap(),
+            *TARGET_YEAR,
+            *TARGET_SEMESTER,
             detail_code.code(),
         )
         .await

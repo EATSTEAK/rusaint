@@ -1,16 +1,13 @@
+use crate::get_session;
 use rusaint::{
     application::{student_information::StudentInformationApplication, USaintClientBuilder},
     webdynpro::error::{ElementError, WebDynproError},
     RusaintError,
 };
-use serial_test::serial;
-
-use crate::get_session;
 
 #[tokio::test]
-#[serial]
 async fn general() {
-    let session = get_session().await.unwrap();
+    let session = get_session().await.unwrap().clone();
     let app = USaintClientBuilder::new()
         .session(session)
         .build_into::<StudentInformationApplication>()
@@ -21,9 +18,8 @@ async fn general() {
 }
 
 #[tokio::test]
-#[serial]
 async fn graduation() {
-    let session = get_session().await.unwrap();
+    let session = get_session().await.unwrap().clone();
     let app = USaintClientBuilder::new()
         .session(session)
         .build_into::<StudentInformationApplication>()
@@ -46,9 +42,8 @@ async fn graduation() {
 }
 
 #[tokio::test]
-#[serial]
 async fn qualifications() {
-    let session = get_session().await.unwrap();
+    let session = get_session().await.unwrap().clone();
     let app = USaintClientBuilder::new()
         .session(session)
         .build_into::<StudentInformationApplication>()
@@ -59,9 +54,8 @@ async fn qualifications() {
 }
 
 #[tokio::test]
-#[serial]
 async fn work() {
-    let session = get_session().await.unwrap();
+    let session = get_session().await.unwrap().clone();
     let mut app = USaintClientBuilder::new()
         .session(session)
         .build_into::<StudentInformationApplication>()
@@ -72,9 +66,8 @@ async fn work() {
 }
 
 #[tokio::test]
-#[serial]
 async fn family() {
-    let session = get_session().await.unwrap();
+    let session = get_session().await.unwrap().clone();
     let mut app = USaintClientBuilder::new()
         .session(session)
         .build_into::<StudentInformationApplication>()
@@ -85,9 +78,8 @@ async fn family() {
 }
 
 #[tokio::test]
-#[serial]
 async fn religion() {
-    let session = get_session().await.unwrap();
+    let session = get_session().await.unwrap().clone();
     let mut app = USaintClientBuilder::new()
         .session(session)
         .build_into::<StudentInformationApplication>()
@@ -98,9 +90,8 @@ async fn religion() {
 }
 
 #[tokio::test]
-#[serial]
 async fn transfer() {
-    let session = get_session().await.unwrap();
+    let session = get_session().await.unwrap().clone();
     let mut app = USaintClientBuilder::new()
         .session(session)
         .build_into::<StudentInformationApplication>()
@@ -111,9 +102,8 @@ async fn transfer() {
 }
 
 #[tokio::test]
-#[serial]
 async fn bank_account() {
-    let session = get_session().await.unwrap();
+    let session = get_session().await.unwrap().clone();
     let mut app = USaintClientBuilder::new()
         .session(session)
         .build_into::<StudentInformationApplication>()
@@ -124,9 +114,8 @@ async fn bank_account() {
 }
 
 #[tokio::test]
-#[serial]
 async fn academic_record() {
-    let session = get_session().await.unwrap();
+    let session = get_session().await.unwrap().clone();
     let mut app = USaintClientBuilder::new()
         .session(session)
         .build_into::<StudentInformationApplication>()
@@ -137,9 +126,8 @@ async fn academic_record() {
 }
 
 #[tokio::test]
-#[serial]
 async fn research_bank_account() {
-    let session = get_session().await.unwrap();
+    let session = get_session().await.unwrap().clone();
     let mut app = USaintClientBuilder::new()
         .session(session)
         .build_into::<StudentInformationApplication>()
