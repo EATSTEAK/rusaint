@@ -47,9 +47,9 @@ regex-lite = "0.1.6"
 anyhow = "1"
 dotenv = "0.15.0"
 futures = "0.3.30"
-serial_test = "3.1.1"
 tokio-test = "0.4.4"
 tokio = { workspace = true, features = ["macros", "test-util"] }
+lazy_static = "1.5.0"
 
 [build-dependencies]
 uniffi = { version = "0.28.3", features = ["build"] }

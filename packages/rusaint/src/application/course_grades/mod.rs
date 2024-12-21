@@ -539,8 +539,6 @@ pub mod model;
 
 #[cfg(test)]
 mod test {
-    use serial_test::serial;
-
     use crate::webdynpro::element::parser::ElementParser;
     use crate::{
         application::{course_grades::CourseGradesApplication, USaintClientBuilder},
@@ -549,7 +547,6 @@ mod test {
     };
 
     #[tokio::test]
-    #[serial]
     async fn close_popups() {
         let session = get_session().await.unwrap();
         let mut app = USaintClientBuilder::new()

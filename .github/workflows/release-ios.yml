@@ -1,10 +1,11 @@
 name: Release (iOS)
 
 on:
-  push:
-    branches: [ dev ]
-    paths:
-      - 'Cargo.toml'
+  workflow_run:
+    workflows: [ 'Dry-run before publish' ]
+    types: [ completed ]
+    branches:
+      - dev
   workflow_dispatch:
 permissions:
   actions: write

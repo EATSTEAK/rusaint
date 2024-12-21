@@ -168,8 +168,6 @@ pub mod model;
 
 #[cfg(test)]
 mod test {
-    use serial_test::serial;
-
     use crate::webdynpro::command::WebDynproCommandExecutor;
     use crate::webdynpro::element::parser::ElementParser;
     use crate::{
@@ -181,7 +179,6 @@ mod test {
     };
 
     #[tokio::test]
-    #[serial]
     async fn read_table() {
         let session = get_session().await.unwrap();
         let app = USaintClientBuilder::new()
