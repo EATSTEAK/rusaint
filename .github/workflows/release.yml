@@ -10,7 +10,6 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-    environment: testing
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -18,6 +17,10 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: 'armv7-linux-androideabi, i686-linux-android, aarch64-linux-android, x86_64-linux-android'
+      - name: Retrieve cache
+        uses: Leafwing-Studios/cargo-cache@v2
+        with:
+          cache-key: "release-${{ hashFiles('**/Cargo.lock') }}"
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
@@ -27,7 +30,10 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
       - name: Setup Android NDK
-        run: 'sdkmanager "ndk;27.2.12479018"'
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r27c
+          link-to-sdk: true
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
       - name: Build with Gradle

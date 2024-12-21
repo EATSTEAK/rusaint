@@ -8,17 +8,15 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-    environment: testing
-    env:
-      SSO_ID: ${{ vars.SSO_ID }}
-      SSO_PASSWORD: ${{ secrets.SSO_PASSWORD }}
-      TARGET_YEAR: ${{ vars.TARGET_YEAR }}
-      TARGET_SEMESTER: ${{ vars.TARGET_SEMESTER }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
+      - name: Retrieve cache
+        uses: Leafwing-Studios/cargo-cache@v2
+        with:
+          cache-key: "dry-run-${{ hashFiles('**/Cargo.lock') }}"
       - name: Publish dry-run
         run: cargo publish -p rusaint --dry-run --verbose
       - name: Run tests

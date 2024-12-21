@@ -143,7 +143,7 @@ impl<'a> LectureAssessmentApplication {
         )
         .await?;
         let parser = ElementParser::new(self.body());
-        let row_count: u32 = parser
+        let row_count = parser
             .read(SapTableLSDataCommand::new(Self::TABLE))?
             .row_count()
             .map(|u| u.to_owned())
@@ -152,9 +152,7 @@ impl<'a> LectureAssessmentApplication {
                     element: Self::TABLE.id().to_string(),
                     field: "row_count".to_string(),
                 })
-            })?
-            .try_into()
-            .unwrap();
+            })?;
         let table = parser.read(SapTableBodyCommand::new(Self::TABLE))?;
         if row_count == 1 {
             let Some(first_row) = table.iter().next() else {
