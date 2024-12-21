@@ -79,7 +79,7 @@ jobs:
           security list-keychain -d user -s $KEYCHAIN_PATH
       - name: Build native library
         env:
-          IPHONEOS_DEPLOYMENT_TARGET: 14.0
+          IPHONEOS_DEPLOYMENT_TARGET: ${{ vars.IOS_DEPLOYMENT_TARGET || '14.0' }}
           RUSTFLAGS: '-C link-arg=-Wl,-application_extension'
         run: |
           mkdir $RUNNER_TEMP/target
