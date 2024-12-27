@@ -47,6 +47,12 @@ pub async fn get_session() -> Result<Arc<USaintSession>> {
     }
 }
 
+#[cfg(test)]
+#[tokio::test]
+async fn test_session() {
+    let _ = get_session().await.unwrap();
+}
+
 mod application;
 #[cfg(test)]
 mod webdynpro;
