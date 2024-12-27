@@ -12,7 +12,7 @@ pub(crate) fn default_header() -> HeaderMap {
             .parse()
             .unwrap(),
     );
-    headers.insert(ACCEPT_ENCODING, "gzip, deflate, br".parse().unwrap());
+    headers.insert(ACCEPT_ENCODING, "deflate, br".parse().unwrap());
     headers.insert(ACCEPT_LANGUAGE, "ko,en;q=0.9,en-US;q=0.8".parse().unwrap());
     headers.insert(CACHE_CONTROL, "max-age=0".parse().unwrap());
     headers.insert(CONNECTION, "keep-alive".parse().unwrap());
