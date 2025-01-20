@@ -15,8 +15,9 @@ use crate::{
         error::WebDynproError,
     },
 };
+use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
 /// 학생의 직업 정보
 pub struct StudentWorkInformation {

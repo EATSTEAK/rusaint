@@ -1,7 +1,8 @@
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 /// 한 주의 요일을 표현합니다.
-#[derive(Clone, Debug, Hash, PartialEq, Eq)]
+#[derive(Clone, Debug, Hash, PartialEq, Eq, Serialize, Deserialize)]
 #[cfg_attr(feature = "uniffi", derive(uniffi::Enum))]
 pub enum Weekday {
     /// 월요일
@@ -21,14 +22,14 @@ pub enum Weekday {
 }
 
 /// 개인의 수업 시간표 정보를 조회합니다.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
 pub struct PersonalCourseSchedule {
     schedule: HashMap<Weekday, Vec<CourseScheduleInformation>>,
 }
 
 /// 강의의 시간표 정보입니다.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
 pub struct CourseScheduleInformation {
     name: String,

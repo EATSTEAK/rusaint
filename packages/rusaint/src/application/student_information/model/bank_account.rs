@@ -15,8 +15,9 @@ use crate::{
         error::WebDynproError,
     },
 };
+use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
 /// 학생의 은행 계좌 정보
 pub struct StudentBankAccount {

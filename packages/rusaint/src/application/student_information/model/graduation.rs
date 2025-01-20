@@ -6,8 +6,9 @@ use crate::{
         error::{ElementError, WebDynproError},
     },
 };
+use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
 /// 학생의 졸업 정보를 반환합니다. 졸업하지 않았다면 반환되지 않습니다.
 pub struct StudentGraduation {
