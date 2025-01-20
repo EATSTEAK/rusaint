@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use serde::{
     de::{value::MapDeserializer, IntoDeserializer},
-    Deserialize,
+    Deserialize, Serialize,
 };
 
 use crate::application::utils::de_with::deserialize_optional_string;
@@ -34,6 +34,7 @@ use crate::{
 /// 강의를 찾을 때 사용하는 강의 카테고리
 #[allow(unused)]
 #[cfg_attr(feature = "uniffi", derive(uniffi::Enum))]
+#[derive(Debug, Serialize, Deserialize)]
 pub enum LectureCategory {
     /// 전공 강의
     Major {
@@ -542,7 +543,7 @@ impl LectureCategory {
 
 /// 과목 정보
 #[allow(unused)]
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 #[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
 pub struct Lecture {
     /// 계획

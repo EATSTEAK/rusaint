@@ -7,8 +7,9 @@ use crate::{
         error::WebDynproError,
     },
 };
+use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
 /// 학생의 자격(교직이수, 평생교육사, 7+1 프로그램) 정보
 pub struct StudentQualification {
@@ -49,7 +50,7 @@ impl StudentQualification {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
 /// 교직이수(주전공) 정보
 pub struct StudentTeachingMajorInformation {
@@ -112,7 +113,7 @@ impl<'a> StudentTeachingMajorInformation {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
 /// 교직이수(복수전공) 정보
 pub struct StudentTeachingPluralMajorInformation {
@@ -164,7 +165,7 @@ impl<'a> StudentTeachingPluralMajorInformation {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
 /// 평생교육사 정보
 pub struct StudentLifelongInformation {
@@ -227,7 +228,7 @@ impl<'a> StudentLifelongInformation {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
 /// 7+1 프로그램 정보를 반환합니다.
 pub struct StudentForignStudyInformation {

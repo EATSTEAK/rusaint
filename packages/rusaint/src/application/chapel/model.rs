@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use serde::{
     de::{value::MapDeserializer, IntoDeserializer},
-    Deserialize,
+    Deserialize, Serialize,
 };
 
 use crate::application::utils::de_with::{deserialize_semester_type, deserialize_u32_string};
@@ -30,7 +30,7 @@ use crate::{
     RusaintError,
 };
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
 /// 학기별 채플 정보
 pub struct ChapelInformation {
@@ -84,7 +84,7 @@ impl ChapelInformation {
     }
 }
 
-#[derive(Clone, Debug, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
 /// 채플 기본 정보(좌석번호, 결석현황, 성적결과)
 pub struct GeneralChapelInformation {
@@ -195,7 +195,7 @@ impl<'body> FromSapTable<'body> for GeneralChapelInformation {
     }
 }
 
-#[derive(Clone, Debug, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
 /// 채플 수업별 출석정보
 pub struct ChapelAttendance {
@@ -307,7 +307,7 @@ impl<'body> FromSapTable<'body> for ChapelAttendance {
     }
 }
 
-#[derive(Clone, Debug, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
 /// 채플 결석신청 정보
 pub struct ChapelAbsenceRequest {
