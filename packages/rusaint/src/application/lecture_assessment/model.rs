@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use serde::{
     de::{value::MapDeserializer, IntoDeserializer},
-    Deserialize,
+    Deserialize, Serialize,
 };
 
 use crate::application::utils::de_with::{
@@ -18,7 +18,7 @@ use crate::{
 };
 
 /// 강의평가 결과
-#[derive(Clone, Debug, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
 pub struct LectureAssessmentResult {
     #[serde(rename(deserialize = "년도"))]

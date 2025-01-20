@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use serde::{
     de::{value::MapDeserializer, IntoDeserializer},
-    Deserialize,
+    Deserialize, Serialize,
 };
 
 use crate::application::utils::sap_table::try_table_into_with_scroll;
@@ -22,7 +22,7 @@ use crate::{
     },
 };
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
 /// 학생의 학적상태 정보
 pub struct StudentAcademicRecords {
@@ -60,7 +60,7 @@ impl<'a> StudentAcademicRecords {
     }
 }
 
-#[derive(Clone, Debug, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
 /// 학생의 학적상태 기록
 pub struct StudentAcademicRecord {

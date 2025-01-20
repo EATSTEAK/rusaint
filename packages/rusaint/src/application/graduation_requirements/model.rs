@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use serde::{
     de::{value::MapDeserializer, IntoDeserializer},
-    Deserialize, Deserializer,
+    Deserialize, Deserializer, Serialize,
 };
 
 use crate::application::utils::de_with::deserialize_with_trim;
@@ -14,6 +14,7 @@ use crate::webdynpro::{
 
 #[derive(Debug)]
 #[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
+#[derive(Serialize, Deserialize)]
 /// 졸업 학생 정보
 pub struct GraduationStudent {
     number: u32,
@@ -153,7 +154,7 @@ impl GraduationRequirements {
     }
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
 /// 졸업 요건
 pub struct GraduationRequirement {

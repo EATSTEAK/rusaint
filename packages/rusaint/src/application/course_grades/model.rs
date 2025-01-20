@@ -2,7 +2,7 @@ use std::{collections::HashMap, num::ParseIntError, str::FromStr};
 
 use serde::{
     de::{value::MapDeserializer, IntoDeserializer},
-    Deserialize, Deserializer,
+    Deserialize, Deserializer, Serialize,
 };
 
 use crate::application::utils::de_with::{
@@ -15,7 +15,7 @@ use crate::webdynpro::{
 };
 
 /// 전체 성적(학적부, 증명)
-#[derive(Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 #[allow(unused)]
 #[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
 pub struct GradeSummary {
@@ -83,7 +83,7 @@ impl GradeSummary {
 }
 
 /// 학기별 성적
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 #[allow(unused)]
 #[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
 pub struct SemesterGrade {
@@ -262,7 +262,7 @@ impl<'body> FromSapTable<'body> for SemesterGrade {
 }
 
 /// 과목별 성적
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 #[allow(unused)]
 #[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
 pub struct ClassGrade {
@@ -359,7 +359,7 @@ impl ClassGrade {
 }
 
 /// 학위과정
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 #[allow(unused)]
 #[cfg_attr(feature = "uniffi", derive(uniffi::Enum))]
 pub enum CourseType {
@@ -376,7 +376,7 @@ pub enum CourseType {
 }
 
 /// 과목 점수
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 #[allow(unused)]
 #[cfg_attr(feature = "uniffi", derive(uniffi::Enum))]
 pub enum ClassScore {

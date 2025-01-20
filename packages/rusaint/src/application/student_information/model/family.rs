@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use serde::{
     de::{value::MapDeserializer, IntoDeserializer},
-    Deserialize,
+    Deserialize, Serialize,
 };
 
 use crate::application::utils::de_with::{deserialize_bool_string, deserialize_optional_string};
@@ -23,7 +23,7 @@ use crate::{
     },
 };
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
 /// 학생의 가족관계 정보
 pub struct StudentFamily {
@@ -61,7 +61,7 @@ impl<'a> StudentFamily {
     }
 }
 
-#[derive(Clone, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
 /// 학생의 가족 구성원
 pub struct StudentFamilyMember {
