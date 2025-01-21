@@ -108,7 +108,7 @@ jobs:
             --out-dir $RUNNER_TEMP/bindings
       - name: Compress generated swift bindings
         run: |
-          tar -czvf $RUNNER_TEMP/bindings.tar.gz $RUNNER_TEMP/bindings
+          tar -czvf $RUNNER_TEMP/bindings.tar.gz $RUNNER_TEMP/bindings/*.swift
       - name: Massage the generated files to fit xcframework
         run: |
           mkdir $RUNNER_TEMP/Headers
@@ -136,12 +136,12 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: rusaint-ios-bindings
-          path: $RUNNER_TEMP/bindings.tar.gz
+          path: ${{ runner.temp }}/bindings.tar.gz
       - name: Upload xcframework
         uses: actions/upload-artifact@v4
         with:
           name: RusaintFFI.xcframework
-          path: $RUNNER_TEMP/RusaintFFI.xcframework.tar.gz
+          path: ${{ runner.temp }}/RusaintFFI.xcframework.tar.gz
   release-ios:
     runs-on: ubuntu-latest
     needs: build-ios
@@ -156,12 +156,12 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: rusaint-ios-bindings
-          path: $RUNNER_TEMP/bindings.tar.gz
+          path: ${{ runner.temp }}
       - name: Download xcframework
         uses: actions/download-artifact@v4
         with:
           name: RusaintFFI.xcframework
-          path: $RUNNER_TEMP/RusaintFFI.xcframework.tar.gz
+          path: ${{ runner.temp }}
       - name: Extract bindings
         run: |
           rm -rf Sources/Rusaint
