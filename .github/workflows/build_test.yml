@@ -3,7 +3,7 @@ name: Build & Test
 on:
   workflow_dispatch:
   pull_request:
-    branches: [ "dev" ]
+    branches: ["dev"]
   schedule:
     - cron: "23 3 * * *"
 env:
@@ -23,8 +23,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@nightly
+        with:
+          components: llvm-tools-preview
+      - name: Install cargo-llvm-cov
+        run: curl -LsSf https://github.com/taiki-e/cargo-llvm-cov/releases/latest/download/cargo-llvm-cov-x86_64-unknown-linux-gnu.tar.gz | tar xzf - -C ~/.cargo/bin
       - name: Retrieve cache
         uses: Leafwing-Studios/cargo-cache@v2
-      - name: Run tests
-        run: cargo test -p rusaint -p rusaint-ffi --verbose
+      - name: Generate code coverage
+        run: cargo llvm-cov --all-features --workspace --lcov --output-path lcov.info
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: EATSTEAK/rusaint
+          files: lcov.info
+          fail_ci_if_error: true
