@@ -31,7 +31,7 @@ reqwest = { version = "0.12.9", features = [
     "brotli",
 ], default-features = false }
 thiserror = { workspace = true }
-tokio = { workspace = true, features = ["sync"] }
+tokio = { workspace = true, features = ["full"] }
 html-escape = "0.2.13"
 url = "2.5.4"
 roxmltree = "0.20.0"
@@ -44,6 +44,8 @@ log = { version = "0.4.27", features = ["kv"] }
 serde_json = "1.0.140"
 reqwest_cookie_store = { version = "0.8.0", features = ["serde"] }
 cookie_store = "0.21.1"
+clap = { version = "4.5.27", features = ["derive"] }
+dotenv = "0.15.0"
 
 
 [dev-dependencies]
