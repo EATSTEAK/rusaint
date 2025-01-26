@@ -1,10 +1,11 @@
+use clap::ValueEnum;
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 
 /// 학기 종류
 ///
 /// 각 애플리케이션에서의 변환은 애플리케이션 내에서 직접 처리하여야 합니다.
-#[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, Serialize, Deserialize, ValueEnum)]
 #[cfg_attr(feature = "uniffi", derive(uniffi::Enum))]
 pub enum SemesterType {
     /// 1학기
