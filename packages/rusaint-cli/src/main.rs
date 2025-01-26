@@ -1,3 +1,5 @@
+mod semester_type;
+
 use std::{fs::File, io::Write, sync::Arc};
 
 use clap::{Parser, Subcommand};
@@ -9,11 +11,11 @@ use rusaint::{
         },
         USaintClientBuilder,
     },
-    model::SemesterType,
     RusaintError, USaintSession,
 };
 
 use dotenv::dotenv;
+use semester_type::SemesterType;
 use serde_json::to_string_pretty;
 
 #[derive(Parser)]
@@ -233,7 +235,7 @@ async fn find_major(
         .build_into::<CourseScheduleApplication>()
         .await?;
     let category = LectureCategory::major(college, department, None);
-    let lectures = app.find_lectures(year, semester, &category).await?;
+    let lectures = app.find_lectures(year, *semester, &category).await?;
     Ok(lectures.collect())
 }
 
@@ -249,7 +251,7 @@ async fn find_required_elective(
         .await
         .unwrap();
     let category = LectureCategory::required_elective(course_name);
-    let lectures = app.find_lectures(year, semester, &category).await.unwrap();
+    let lectures = app.find_lectures(year, *semester, &category).await.unwrap();
     Ok(lectures.collect())
 }
 
@@ -265,7 +267,7 @@ async fn find_optional_elective(
         .await
         .unwrap();
     let category = LectureCategory::optional_elective(course_name);
-    let lectures = app.find_lectures(year, semester, &category).await.unwrap();
+    let lectures = app.find_lectures(year, *semester, &category).await.unwrap();
     Ok(lectures.collect())
 }
 
@@ -281,7 +283,7 @@ async fn find_chapel(
         .await
         .unwrap();
     let category = LectureCategory::chapel(chapel_name);
-    let lectures = app.find_lectures(year, semester, &category).await.unwrap();
+    let lectures = app.find_lectures(year, *semester, &category).await.unwrap();
     Ok(lectures.collect())
 }
 
@@ -296,7 +298,7 @@ async fn find_education(
         .await
         .unwrap();
     let category = LectureCategory::education();
-    let lectures = app.find_lectures(year, semester, &category).await.unwrap();
+    let lectures = app.find_lectures(year, *semester, &category).await.unwrap();
     Ok(lectures.collect())
 }
 
@@ -312,7 +314,7 @@ async fn find_connected_major(
         .await
         .unwrap();
     let category = LectureCategory::connected_major(major_name);
-    let lectures = app.find_lectures(year, semester, &category).await.unwrap();
+    let lectures = app.find_lectures(year, *semester, &category).await.unwrap();
     Ok(lectures.collect())
 }
 
@@ -328,7 +330,7 @@ async fn find_united_major(
         .await
         .unwrap();
     let category = LectureCategory::united_major(major_name);
-    let lectures = app.find_lectures(year, semester, &category).await.unwrap();
+    let lectures = app.find_lectures(year, *semester, &category).await.unwrap();
     Ok(lectures.collect())
 }
 
@@ -345,7 +347,7 @@ async fn find_recognized_other_major(
         .await
         .unwrap();
     let category = LectureCategory::recognized_other_major(college, department, None);
-    let lectures = app.find_lectures(year, semester, &category).await.unwrap();
+    let lectures = app.find_lectures(year, *semester, &category).await.unwrap();
     Ok(lectures.collect())
 }
 
@@ -360,6 +362,6 @@ async fn find_cyber(
         .await
         .unwrap();
     let category = LectureCategory::cyber();
-    let lectures = app.find_lectures(year, semester, &category).await.unwrap();
+    let lectures = app.find_lectures(year, *semester, &category).await.unwrap();
     Ok(lectures.collect())
 }
