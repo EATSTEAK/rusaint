@@ -1,5 +1,6 @@
 use super::{USaintApplication, USaintClient};
 use crate::application::utils::sap_table::try_table_into_with_scroll;
+use crate::application::utils::semester::get_selected_semester;
 use crate::webdynpro::command::WebDynproCommandExecutor;
 use crate::webdynpro::element::parser::ElementParser;
 use crate::{
@@ -100,6 +101,16 @@ impl<'a> CourseScheduleApplication {
 
     fn body(&self) -> &Body {
         self.client.body()
+    }
+
+    /// 현재 페이지에 선택된 년도와 학기를 가져옵니다. 최초 로드 시 현재 학기를 가져올 가능성이 있습니다.
+    /// 하지만 이 애플리케이션의 다른 함수를 호출하여 한번 정보를 가져왔다면 마지막으로 가져온 정보의 학기가 반환되므로 주의하여야 하며, 신뢰할 수 있는 현재 학기의 원천으로 사용되어서는 안됩니다.
+    pub fn get_selected_semester(&self) -> Result<(u32, SemesterType), RusaintError> {
+        Ok(get_selected_semester(
+            &self.client,
+            &Self::PERIOD_YEAR,
+            &Self::PERIOD_ID,
+        )?)
     }
 
     /// 학기, 학년도, 강의 분류를 통해 강의를 찾습니다.
