@@ -1,0 +1,17 @@
+[package]
+name = "rusaint-cli"
+version = "0.1.0"
+authors = ["JOONGGON LEE <2wndrhs@gmai.com>"]
+description = "CLI for fetching course schedules"
+repository = "https://github.com/2wndrhs/rusaint"
+license.workspace = true
+edition.workspace = true
+readme.workspace = true
+
+[dependencies]
+rusaint = { path = "../rusaint" }
+tokio = { workspace = true, features = ["full"] }
+clap = { version = "4.5.27", features = ["derive"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+dotenv = "0.15.0"
