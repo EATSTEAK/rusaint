@@ -1,12 +1,12 @@
 [package]
 name = "rusaint-cli"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["JOONGGON LEE <2wndrhs@gmai.com>"]
 description = "CLI for fetching course schedules"
 repository = "https://github.com/2wndrhs/rusaint"
+readme = "README.md"
 license.workspace = true
 edition.workspace = true
-readme.workspace = true
 
 [dependencies]
 rusaint = "0.8.4"
