@@ -86,7 +86,7 @@ jobs:
           JRELEASER_GPG_SECRET_KEY: ${{ secrets.GPG_SECRET_KEY }}
         run: |
           cd ./languages/kotlin
-          ./gradlew jreleaserPublish
+          ./gradlew jreleaserDeploy
       - name: JReleaser release output
         if: always()
         uses: actions/upload-artifact@v4
