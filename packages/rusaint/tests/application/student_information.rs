@@ -1,30 +1,48 @@
 use crate::get_session;
+use lazy_static::lazy_static;
 use rusaint::{
     application::{student_information::StudentInformationApplication, USaintClientBuilder},
     webdynpro::error::{ElementError, WebDynproError},
     RusaintError,
 };
+use std::sync::{Arc, OnceLock};
+use tokio::sync::{Mutex, RwLock};
+
+lazy_static! {
+    static ref APP: Mutex<OnceLock<Arc<RwLock<StudentInformationApplication>>>> =
+        Mutex::new(OnceLock::new());
+}
+
+async fn get_app() -> Result<Arc<RwLock<StudentInformationApplication>>, RusaintError> {
+    let app_lock = APP.lock().await;
+    if let Some(lock) = app_lock.get() {
+        Ok(lock.clone())
+    } else {
+        let session = get_session().await.unwrap().clone();
+        app_lock
+            .set(Arc::new(RwLock::new(
+                USaintClientBuilder::new()
+                    .session(session)
+                    .build_into()
+                    .await?,
+            )))
+            .unwrap();
+        Ok(app_lock.get().unwrap().clone())
+    }
+}
 
 #[tokio::test]
 async fn general() {
-    let session = get_session().await.unwrap().clone();
-    let app = USaintClientBuilder::new()
-        .session(session)
-        .build_into::<StudentInformationApplication>()
-        .await
-        .unwrap();
+    let lock = get_app().await.unwrap();
+    let app = lock.read().await;
     let student_info = app.general().unwrap();
     println!("{:?}", student_info);
 }
 
 #[tokio::test]
 async fn graduation() {
-    let session = get_session().await.unwrap().clone();
-    let app = USaintClientBuilder::new()
-        .session(session)
-        .build_into::<StudentInformationApplication>()
-        .await
-        .unwrap();
+    let lock = get_app().await.unwrap();
+    let app = lock.read().await;
     let student_info = app.graduation();
     match student_info {
         Err(RusaintError::WebDynproError(WebDynproError::Element(
@@ -43,96 +61,64 @@ async fn graduation() {
 
 #[tokio::test]
 async fn qualifications() {
-    let session = get_session().await.unwrap().clone();
-    let app = USaintClientBuilder::new()
-        .session(session)
-        .build_into::<StudentInformationApplication>()
-        .await
-        .unwrap();
+    let lock = get_app().await.unwrap();
+    let app = lock.read().await;
     let student_info = app.qualifications();
     println!("{:?}", student_info);
 }
 
 #[tokio::test]
 async fn work() {
-    let session = get_session().await.unwrap().clone();
-    let mut app = USaintClientBuilder::new()
-        .session(session)
-        .build_into::<StudentInformationApplication>()
-        .await
-        .unwrap();
+    let lock = get_app().await.unwrap();
+    let mut app = lock.write().await;
     let student_info = app.work().await.unwrap();
     println!("{:?}", student_info);
 }
 
 #[tokio::test]
 async fn family() {
-    let session = get_session().await.unwrap().clone();
-    let mut app = USaintClientBuilder::new()
-        .session(session)
-        .build_into::<StudentInformationApplication>()
-        .await
-        .unwrap();
+    let lock = get_app().await.unwrap();
+    let mut app = lock.write().await;
     let student_info = app.family().await.unwrap();
     println!("{:?}", student_info);
 }
 
 #[tokio::test]
 async fn religion() {
-    let session = get_session().await.unwrap().clone();
-    let mut app = USaintClientBuilder::new()
-        .session(session)
-        .build_into::<StudentInformationApplication>()
-        .await
-        .unwrap();
+    let lock = get_app().await.unwrap();
+    let mut app = lock.write().await;
     let student_info = app.religion().await.unwrap();
     println!("{:?}", student_info);
 }
 
 #[tokio::test]
 async fn transfer() {
-    let session = get_session().await.unwrap().clone();
-    let mut app = USaintClientBuilder::new()
-        .session(session)
-        .build_into::<StudentInformationApplication>()
-        .await
-        .unwrap();
+    let lock = get_app().await.unwrap();
+    let mut app = lock.write().await;
     let student_info = app.transfer().await.unwrap();
     println!("{:?}", student_info);
 }
 
 #[tokio::test]
 async fn bank_account() {
-    let session = get_session().await.unwrap().clone();
-    let mut app = USaintClientBuilder::new()
-        .session(session)
-        .build_into::<StudentInformationApplication>()
-        .await
-        .unwrap();
+    let lock = get_app().await.unwrap();
+    let mut app = lock.write().await;
     let student_info = app.bank_account().await.unwrap();
     println!("{:?}", student_info);
 }
 
 #[tokio::test]
 async fn academic_record() {
-    let session = get_session().await.unwrap().clone();
-    let mut app = USaintClientBuilder::new()
-        .session(session)
-        .build_into::<StudentInformationApplication>()
-        .await
-        .unwrap();
+    let lock = get_app().await.unwrap();
+    let mut app = lock.write().await;
     let student_info = app.academic_record().await.unwrap();
     println!("{:?}", student_info);
 }
 
 #[tokio::test]
 async fn research_bank_account() {
-    let session = get_session().await.unwrap().clone();
-    let mut app = USaintClientBuilder::new()
-        .session(session)
-        .build_into::<StudentInformationApplication>()
-        .await
-        .unwrap();
+    let lock = get_app().await.unwrap();
+    let mut app = lock.write().await;
     let student_info = app.research_bank_account().await.unwrap();
     println!("{:?}", student_info);
 }
