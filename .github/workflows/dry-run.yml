@@ -3,6 +3,8 @@ name: Dry-run before publish
 on:
   pull_request:
     branches: [ "main" ]
+    paths:
+      - 'Cargo.toml'
 env:
   CARGO_TERM_COLOR: always
 jobs:
@@ -11,7 +13,6 @@ jobs:
     environment: testing
     concurrency:
       group: testing
-      cancel-in-progress: true
     env:
       SSO_ID: ${{ vars.SSO_ID }}
       SSO_PASSWORD: ${{ secrets.SSO_PASSWORD }}
