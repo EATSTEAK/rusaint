@@ -30,6 +30,7 @@ use scraper::Selector;
 use std::collections::HashMap;
 
 /// [학생 성적 조회](https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/ZCMB3W0017)
+#[derive(Debug)]
 pub struct CourseGradesApplication {
     client: USaintClient,
 }

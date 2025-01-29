@@ -15,6 +15,7 @@ use tokio::sync::Mutex;
 use url::Url;
 
 /// WebDynpro 애플리케이션의 웹 요청 및 페이지 문서 처리를 담당하는 클라이언트
+#[derive(Debug)]
 pub struct WebDynproClient {
     base_url: Url,
     name: String,

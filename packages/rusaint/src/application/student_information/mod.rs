@@ -13,6 +13,7 @@ use crate::{
 };
 
 /// [학생 정보 수정 및 조회](https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/ZCMW1001n)
+#[derive(Debug)]
 pub struct StudentInformationApplication {
     client: USaintClient,
 }

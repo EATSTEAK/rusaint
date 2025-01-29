@@ -19,6 +19,7 @@ use crate::{
 };
 
 /// [채플정보조회](https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/ZCMW3681)
+#[derive(Debug)]
 pub struct ChapelApplication {
     client: USaintClient,
 }

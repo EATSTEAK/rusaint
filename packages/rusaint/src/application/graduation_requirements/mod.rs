@@ -21,6 +21,7 @@ use crate::{
 };
 
 /// [졸업사정표](https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/ZCMW8015)
+#[derive(Debug)]
 pub struct GraduationRequirementsApplication {
     client: USaintClient,
 }
