@@ -103,21 +103,13 @@ jreleaser {
 
     project {
         name = "rusaint"
-        copyright = "2024 EATSTEAK"
+        copyright = "2024-2025 EATSTEAK"
         author("EATSTEAK")
     }
 
     release {
         github {
-            repoOwner = "EATSTEAK"
-            name = "rusaint"
-            releaseName = "{{tagName}}"
-            releaseNotes {
-                enabled = true
-            }
-            changelog {
-                enabled = false
-            }
+            enabled = false
         }
     }
 
