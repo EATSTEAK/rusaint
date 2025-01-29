@@ -5,6 +5,9 @@ use serde::{
     Deserialize, Serialize,
 };
 
+use crate::application::course_schedule::utils::{
+    request, request_lv1, request_lv2, request_lv3, request_text,
+};
 use crate::application::utils::de_with::deserialize_optional_string;
 use crate::webdynpro::command::WebDynproCommandExecutor;
 use crate::webdynpro::element::parser::ElementParser;
@@ -18,14 +21,8 @@ use crate::{
             selection::{ComboBoxChangeEventCommand, ComboBoxSelectByValue1EventCommand},
         },
         element::{
-            action::{Button, ButtonDef},
-            complex::sap_table::FromSapTable,
-            definition::ElementDefinition,
-            layout::{
-                tab_strip::item::{TabStripItem, TabStripItemDef},
-                TabStrip,
-            },
-            selection::{ComboBox, ComboBoxDef},
+            action::Button, complex::sap_table::FromSapTable, definition::ElementDefinition,
+            layout::tab_strip::item::TabStripItem, selection::ComboBox,
         },
         error::{ElementError, WebDynproError},
     },
@@ -103,10 +100,6 @@ pub enum LectureCategory {
 }
 
 impl LectureCategory {
-    define_elements! {
-        TABSTRIP: TabStrip<'static> = "ZCMW2100.ID_0001:VIW_MAIN.MODULE_TABSTRIP";
-    }
-
     /// 전공과목 분류의 [`LectureCategory`]를 만듭니다.
     pub fn major(collage: &str, department: &str, major: Option<&str>) -> Self {
         Self::Major {
@@ -211,7 +204,7 @@ impl LectureCategory {
                     SEARCH_OTHERS: Button<'_> = "ZCMW2100.ID_0001:VIW_TAB_OTHERS.BUTTON";
                 }
                 if let Some(major) = major {
-                    Self::request_lv3(
+                    request_lv3(
                         client,
                         TAB_OTHERS,
                         0,
@@ -225,7 +218,7 @@ impl LectureCategory {
                     )
                     .await?;
                 } else {
-                    Self::request_lv2(
+                    request_lv2(
                         client,
                         TAB_OTHERS,
                         0,
@@ -245,7 +238,7 @@ impl LectureCategory {
                     GENERAL_REQ_TYPE: ComboBox<'_> = "ZCMW2100.ID_0001:VIW_TAB_GENERAL_REQ.SM_OBJID";
                     SEARCH_GENERAL_REQ: Button<'_> = "ZCMW2100.ID_0001:VIW_TAB_GENERAL_REQ.BUTTON_SEARCH";
                 }
-                Self::request_lv1(
+                request_lv1(
                     client,
                     TAB_GENERAL_REQ,
                     1,
@@ -262,7 +255,7 @@ impl LectureCategory {
                     GENERAL_OPT_DISCIPLINES: ComboBox<'_> = "ZCMW2100.ID_0001:VIW_TAB_GENERAL_OPT.DISCIPLINES";
                     SEARCH_GENERAL_OPT: Button<'_> = "ZCMW2100.ID_0001:VIW_TAB_GENERAL_OPT.BUTTON_SEARCH";
                 }
-                Self::request_lv1(
+                request_lv1(
                     client,
                     TAB_GENERAL_OPT,
                     2,
@@ -279,7 +272,7 @@ impl LectureCategory {
                     CHAPEL_TYPE: ComboBox<'_> = "ZCMW2100.ID_0001:VIW_TAB_CHAPEL_REQ.SM_OBJID";
                     SEARCH_CHAPEL: Button<'_> = "ZCMW2100.ID_0001:VIW_TAB_CHAPEL_REQ.BUTTON_SEARCH";
                 }
-                Self::request_lv1(
+                request_lv1(
                     client,
                     TAB_CHAPEL,
                     3,
@@ -295,7 +288,7 @@ impl LectureCategory {
                     TAB_EDU: TabStripItem<'_> = "ZCMW2100.ID_0001:VIW_MAIN.TAB_EDU";
                     SEARCH_EDU: Button<'_> = "ZCMW2100.ID_0001:VIW_MAIN.BUTTON_EDU";
                 }
-                Self::request(client, TAB_EDU, 4, SEARCH_EDU).await?;
+                request(client, TAB_EDU, 4, SEARCH_EDU).await?;
             }
             LectureCategory::Graduated {
                 collage,
@@ -308,7 +301,7 @@ impl LectureCategory {
                     GRADUATE_DDK_LV4: ComboBox<'_> = "ZCMW2100.ID_0001:VIW_TAB_GRADUATE.DDK_LV4";
                     SEARCH_GRADUATE: Button<'_> = "ZCMW2100.ID_0001:VIW_TAB_GRADUATE.BUTTON";
                 }
-                Self::request_lv2(
+                request_lv2(
                     client,
                     TAB_GRADUATE,
                     7,
@@ -327,7 +320,7 @@ impl LectureCategory {
                     COMBO_YOMA: ComboBox<'_> = "ZCMW2100.ID_0001:VIW_TAB_YOMA.CONNECT_MAJO";
                     SEARCH_YOMA: Button<'_> = "ZCMW2100.ID_0001:VIW_TAB_YOMA.BUTTON_SEARCH";
                 }
-                Self::request_lv1(client, TAB_YOMA, 8, COMBO_YOMA, SEARCH_YOMA, major).await?;
+                request_lv1(client, TAB_YOMA, 8, COMBO_YOMA, SEARCH_YOMA, major).await?;
             }
             LectureCategory::UnitedMajor { major } => {
                 // 융합전공
@@ -336,7 +329,7 @@ impl LectureCategory {
                     COMBO_UNMA: ComboBox<'_> = "ZCMW2100.ID_0001:VIW_TAB_UNMA.CG_OBJID";
                     SEARCH_UNMA: Button<'_> = "ZCMW2100.ID_0001:VIW_TAB_UNMA.BUTTON_SEARCH";
                 }
-                Self::request_lv1(client, TAB_UNMA, 9, COMBO_UNMA, SEARCH_UNMA, major).await?;
+                request_lv1(client, TAB_UNMA, 9, COMBO_UNMA, SEARCH_UNMA, major).await?;
             }
             LectureCategory::FindByProfessor { keyword } => {
                 // 교수명검색
@@ -345,7 +338,7 @@ impl LectureCategory {
                     COMBO_PROFESSOR: ComboBox<'_> = "ZCMW2100.ID_0001:VIW_TAB_PROFESSOR.PROFESSOR"; // TODO: implement ComboBoxString
                     SEARCH_PROFESSOR: Button<'_> = "ZCMW2100.ID_0001:VIW_TAB_PROFESSOR.BUTTON_SEARCH";
                 }
-                Self::request_text(
+                request_text(
                     client,
                     TAB_PROFESSOR,
                     10,
@@ -362,8 +355,7 @@ impl LectureCategory {
                     COMBO_SEARCH: ComboBox<'_> = "ZCMW2100.ID_0001:VIW_TAB_SEARCH.SEARCH_TEXT";
                     SEARCH_SEARCH: Button<'_> = "ZCMW2100.ID_0001:VIW_TAB_SEARCH.BUTTON_SEARCH";
                 }
-                Self::request_text(client, TAB_SEARCH, 11, COMBO_SEARCH, SEARCH_SEARCH, keyword)
-                    .await?;
+                request_text(client, TAB_SEARCH, 11, COMBO_SEARCH, SEARCH_SEARCH, keyword).await?;
             }
             LectureCategory::RecognizedOtherMajor {
                 collage,
@@ -379,7 +371,7 @@ impl LectureCategory {
                     SEARCH_OTHER_GC: Button<'_> = "ZCMW2100.ID_0001:VIW_TAB_OTHER_GC.BTN_OTHER_GC";
                 }
                 if let Some(major) = major {
-                    Self::request_lv3(
+                    request_lv3(
                         client,
                         TAB_OTHER_GC,
                         12,
@@ -393,7 +385,7 @@ impl LectureCategory {
                     )
                     .await?;
                 } else {
-                    Self::request_lv2(
+                    request_lv2(
                         client,
                         TAB_OTHER_GC,
                         12,
@@ -412,131 +404,9 @@ impl LectureCategory {
                     TAB_CYBER: TabStripItem<'_> = "ZCMW2100.ID_0001:VIW_MAIN.TAB_CYBER";
                     SEARCH_CYBER: Button<'_> = "ZCMW2100.ID_0001:VIW_MAIN.BTN_CYBER";
                 }
-                Self::request(client, TAB_CYBER, 14, SEARCH_CYBER).await?;
+                request(client, TAB_CYBER, 14, SEARCH_CYBER).await?;
             }
         }
-        Ok(())
-    }
-
-    #[allow(clippy::too_many_arguments)]
-    async fn request_lv3(
-        client: &mut WebDynproClient,
-        tab_item: TabStripItemDef,
-        tab_index: u32,
-        lv1: ComboBoxDef,
-        lv2: ComboBoxDef,
-        lv3: ComboBoxDef,
-        search_btn: ButtonDef,
-        value_lv1: &str,
-        value_lv2: &str,
-        value_lv3: &str,
-    ) -> Result<(), WebDynproError> {
-        let tab_select = ElementParser::new(client.body()).read(
-            TabStripTabSelectEventCommand::new(Self::TABSTRIP, tab_item, tab_index, 0),
-        )?;
-        client.process_event(false, tab_select).await?;
-        let lv1_event = ElementParser::new(client.body()).read(
-            ComboBoxSelectByValue1EventCommand::new(lv1, value_lv1, false),
-        )?;
-        client.process_event(false, lv1_event).await?;
-        let lv2_event = ElementParser::new(client.body()).read(
-            ComboBoxSelectByValue1EventCommand::new(lv2, value_lv2, false),
-        )?;
-        client.process_event(false, lv2_event).await?;
-        let parser = ElementParser::new(client.body());
-        let lv3_event = parser.read(ComboBoxSelectByValue1EventCommand::new(
-            lv3, value_lv3, false,
-        ))?;
-        client.process_event(false, lv3_event).await?;
-        let btn_press = parser.read(ButtonPressEventCommand::new(search_btn))?;
-        client.process_event(false, btn_press).await?;
-        Ok(())
-    }
-
-    #[allow(clippy::too_many_arguments)]
-    async fn request_lv2(
-        client: &mut WebDynproClient,
-        tab_item: TabStripItemDef,
-        tab_index: u32,
-        lv1: ComboBoxDef,
-        lv2: ComboBoxDef,
-        search_btn: ButtonDef,
-        value_lv1: &str,
-        value_lv2: &str,
-    ) -> Result<(), WebDynproError> {
-        let tab_select = ElementParser::new(client.body()).read(
-            TabStripTabSelectEventCommand::new(Self::TABSTRIP, tab_item, tab_index, 0),
-        )?;
-        client.process_event(false, tab_select).await?;
-        let lv1_event = ElementParser::new(client.body()).read(
-            ComboBoxSelectByValue1EventCommand::new(lv1, value_lv1, false),
-        )?;
-        client.process_event(false, lv1_event).await?;
-        let parser = ElementParser::new(client.body());
-        let lv2_event = parser.read(ComboBoxSelectByValue1EventCommand::new(
-            lv2, value_lv2, false,
-        ))?;
-        client.process_event(false, lv2_event).await?;
-        let btn_press = parser.read(ButtonPressEventCommand::new(search_btn))?;
-        client.process_event(false, btn_press).await?;
-        Ok(())
-    }
-
-    async fn request_lv1(
-        client: &mut WebDynproClient,
-        tab_item: TabStripItemDef,
-        tab_index: u32,
-        lv1: ComboBoxDef,
-        search_btn: ButtonDef,
-        value_lv1: &str,
-    ) -> Result<(), WebDynproError> {
-        let tab_select = ElementParser::new(client.body()).read(
-            TabStripTabSelectEventCommand::new(Self::TABSTRIP, tab_item, tab_index, 0),
-        )?;
-        client.process_event(false, tab_select).await?;
-        let parser = ElementParser::new(client.body());
-        let lv1_event = parser.read(ComboBoxSelectByValue1EventCommand::new(
-            lv1, value_lv1, false,
-        ))?;
-        client.process_event(false, lv1_event).await?;
-        let btn_press = parser.read(ButtonPressEventCommand::new(search_btn))?;
-        client.process_event(false, btn_press).await?;
-        Ok(())
-    }
-
-    async fn request_text(
-        client: &mut WebDynproClient,
-        tab_item: TabStripItemDef,
-        tab_index: u32,
-        text_combo: ComboBoxDef,
-        search_btn: ButtonDef,
-        value: &str,
-    ) -> Result<(), WebDynproError> {
-        let tab_select = ElementParser::new(client.body()).read(
-            TabStripTabSelectEventCommand::new(Self::TABSTRIP, tab_item, tab_index, 0),
-        )?;
-        client.process_event(false, tab_select).await?;
-        let parser = ElementParser::new(client.body());
-        let change = parser.read(ComboBoxChangeEventCommand::new(text_combo, value, false))?;
-        client.process_event(false, change).await?;
-        let btn_press = parser.read(ButtonPressEventCommand::new(search_btn))?;
-        client.process_event(false, btn_press).await?;
-        Ok(())
-    }
-
-    async fn request(
-        client: &mut WebDynproClient,
-        tab_item: TabStripItemDef,
-        tab_index: u32,
-        search_btn: ButtonDef,
-    ) -> Result<(), WebDynproError> {
-        let tab_select = ElementParser::new(client.body()).read(
-            TabStripTabSelectEventCommand::new(Self::TABSTRIP, tab_item, tab_index, 0),
-        )?;
-        client.process_event(false, tab_select).await?;
-        let btn_press =
-            ElementParser::new(client.body()).read(ButtonPressEventCommand::new(search_btn))?;
-        client.process_event(false, btn_press).await?;
         Ok(())
     }
 }

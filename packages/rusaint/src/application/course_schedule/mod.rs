@@ -1,7 +1,11 @@
 use super::{USaintApplication, USaintClient};
+use crate::application::course_schedule::utils::{
+    combo_box_items, select_lv1, select_lv2, select_tab,
+};
 use crate::application::utils::sap_table::try_table_into_with_scroll;
 use crate::application::utils::semester::get_selected_semester;
 use crate::webdynpro::command::WebDynproCommandExecutor;
+use crate::webdynpro::element::layout::tab_strip::item::TabStripItem;
 use crate::webdynpro::element::parser::ElementParser;
 use crate::{
     application::course_schedule::model::{Lecture, LectureCategory},
@@ -43,14 +47,14 @@ impl USaintApplication for CourseScheduleApplication {
 }
 
 #[allow(unused)]
-impl<'a> CourseScheduleApplication {
+impl<'app> CourseScheduleApplication {
     // 메인 요소
     define_elements! {
-        PERIOD_YEAR: ComboBox<'a> = "ZCMW_PERIOD_RE.ID_A61C4ED604A2BFC2A8F6C6038DE6AF18:VIW_MAIN.PERYR";
-        PERIOD_ID: ComboBox<'a> = "ZCMW_PERIOD_RE.ID_A61C4ED604A2BFC2A8F6C6038DE6AF18:VIW_MAIN.PERID";
-        TABLE_ROWS: ComboBox<'a> = "ZCMW2100.ID_0001:VIW_MODULES.ROWS";
-        TABSTRIP: TabStrip<'a> = "ZCMW2100.ID_0001:VIW_MAIN.MODULE_TABSTRIP";
-        MAIN_TABLE: SapTable<'a> = "SALV_WD_TABLE.ID_DE0D9128A4327646C94670E2A892C99C:VIEW_TABLE.SALV_WD_UIE_TABLE";
+        PERIOD_YEAR: ComboBox<'app> = "ZCMW_PERIOD_RE.ID_A61C4ED604A2BFC2A8F6C6038DE6AF18:VIW_MAIN.PERYR";
+        PERIOD_ID: ComboBox<'app> = "ZCMW_PERIOD_RE.ID_A61C4ED604A2BFC2A8F6C6038DE6AF18:VIW_MAIN.PERID";
+        TABLE_ROWS: ComboBox<'app> = "ZCMW2100.ID_0001:VIW_MODULES.ROWS";
+        TABSTRIP: TabStrip<'app> = "ZCMW2100.ID_0001:VIW_MAIN.MODULE_TABSTRIP";
+        MAIN_TABLE: SapTable<'app> = "SALV_WD_TABLE.ID_DE0D9128A4327646C94670E2A892C99C:VIEW_TABLE.SALV_WD_UIE_TABLE";
     }
 
     fn semester_to_key(semester: SemesterType) -> &'static str {
@@ -113,6 +117,216 @@ impl<'a> CourseScheduleApplication {
         )?)
     }
 
+    define_elements! {
+        TAB_OTHERS: TabStripItem<'app> = "ZCMW2100.ID_0001:VIW_MAIN.TAB_OTHERS";
+        OTHERS_DDK_LV3: ComboBox<'app> = "ZCMW2100.ID_0001:VIW_TAB_OTHERS.DDK_LV3";
+        OTHERS_DDK_LV4: ComboBox<'app> = "ZCMW2100.ID_0001:VIW_TAB_OTHERS.DDK_LV4";
+        OTHERS_DDK_LV5: ComboBox<'app> = "ZCMW2100.ID_0001:VIW_TAB_OTHERS.DDK_LV5";
+    }
+
+    /// 선택한 학기 기준 단과대 목록을 가져옵니다.
+    pub async fn collages(
+        &mut self,
+        year: u32,
+        semester: SemesterType,
+    ) -> Result<Vec<String>, RusaintError> {
+        self.select_semester(
+            &ElementParser::new(self.client.body()),
+            &format!("{year}"),
+            semester,
+        )
+        .await;
+        select_tab(&mut self.client.0, Self::TAB_OTHERS, 0).await?;
+        Ok(combo_box_items(&mut self.client.0, Self::OTHERS_DDK_LV3)?)
+    }
+
+    /// 선택한 학기 기준 주어진 단과대의 학과(부) 목록을 가져옵니다.
+    pub async fn departments(
+        &mut self,
+        year: u32,
+        semester: SemesterType,
+        collage: &str,
+    ) -> Result<Vec<String>, RusaintError> {
+        self.select_semester(
+            &ElementParser::new(self.client.body()),
+            &format!("{year}"),
+            semester,
+        )
+        .await;
+        select_tab(&mut self.client.0, Self::TAB_OTHERS, 0).await?;
+        select_lv1(&mut self.client.0, Self::OTHERS_DDK_LV3, collage).await?;
+        Ok(combo_box_items(&mut self.client.0, Self::OTHERS_DDK_LV4)?)
+    }
+
+    /// 선택한 학과(부)의 전공 목록을 가져옵니다.
+    pub async fn majors(
+        &mut self,
+        year: u32,
+        semester: SemesterType,
+        collage: &str,
+        department: &str,
+    ) -> Result<Vec<String>, RusaintError> {
+        self.select_semester(
+            &ElementParser::new(self.client.body()),
+            &format!("{year}"),
+            semester,
+        )
+        .await;
+        select_tab(&mut self.client.0, Self::TAB_OTHERS, 0).await?;
+        select_lv2(
+            &mut self.client.0,
+            Self::OTHERS_DDK_LV3,
+            Self::OTHERS_DDK_LV4,
+            collage,
+            department,
+        )
+        .await?;
+        Ok(combo_box_items(&mut self.client.0, Self::OTHERS_DDK_LV5)?)
+    }
+
+    /// 선택한 학기의 교양필수 과목명 목록을 가져옵니다.
+    pub async fn required_electives(
+        &mut self,
+        year: u32,
+        semester: SemesterType,
+    ) -> Result<Vec<String>, RusaintError> {
+        define_elements! {
+            TAB_GENERAL_REQ: TabStripItem<'_> = "ZCMW2100.ID_0001:VIW_MAIN.TAB_GENERAL_REQ";
+            GENERAL_REQ_TYPE: ComboBox<'_> = "ZCMW2100.ID_0001:VIW_TAB_GENERAL_REQ.SM_OBJID";
+        }
+        self.select_semester(
+            &ElementParser::new(self.client.body()),
+            &format!("{year}"),
+            semester,
+        )
+        .await;
+        select_tab(&mut self.client.0, TAB_GENERAL_REQ, 1).await?;
+        Ok(combo_box_items(&mut self.client.0, GENERAL_REQ_TYPE)?)
+    }
+
+    /// 선택한 학기의 교양선택 분야 목록을 가져옵니다.
+    pub async fn optional_elective_categories(
+        &mut self,
+        year: u32,
+        semester: SemesterType,
+    ) -> Result<Vec<String>, RusaintError> {
+        define_elements! {
+            TAB_GENERAL_OPT: TabStripItem<'_> = "ZCMW2100.ID_0001:VIW_MAIN.TAB_GENERAL_OPT";
+            GENERAL_OPT_DISCIPLINES: ComboBox<'_> = "ZCMW2100.ID_0001:VIW_TAB_GENERAL_OPT.DISCIPLINES";
+        }
+        self.select_semester(
+            &ElementParser::new(self.client.body()),
+            &format!("{year}"),
+            semester,
+        )
+        .await;
+        select_tab(&mut self.client.0, TAB_GENERAL_OPT, 2).await?;
+        Ok(combo_box_items(
+            &mut self.client.0,
+            GENERAL_OPT_DISCIPLINES,
+        )?)
+    }
+
+    /// 선택한 학기의 채플 과목 분류 목록을 가져옵니다.
+    pub async fn chapel_categories(
+        &mut self,
+        year: u32,
+        semester: SemesterType,
+    ) -> Result<Vec<String>, RusaintError> {
+        define_elements! {
+            TAB_CHAPEL: TabStripItem<'_> = "ZCMW2100.ID_0001:VIW_MAIN.TAB_CHAPEL_REQ";
+            CHAPEL_TYPE: ComboBox<'_> = "ZCMW2100.ID_0001:VIW_TAB_CHAPEL_REQ.SM_OBJID";
+        }
+        self.select_semester(
+            &ElementParser::new(self.client.body()),
+            &format!("{year}"),
+            semester,
+        )
+        .await;
+        select_tab(&mut self.client.0, TAB_CHAPEL, 3).await?;
+        Ok(combo_box_items(&mut self.client.0, CHAPEL_TYPE)?)
+    }
+
+    define_elements! {
+        TAB_GRADUATE: TabStripItem<'app> = "ZCMW2100.ID_0001:VIW_MAIN.TAB_GRADUATE";
+        GRADUATE_DDK_LV3: ComboBox<'app> = "ZCMW2100.ID_0001:VIW_TAB_GRADUATE.DDK_LV3";
+        GRADUATE_DDK_LV4: ComboBox<'app> = "ZCMW2100.ID_0001:VIW_TAB_GRADUATE.DDK_LV4";
+    }
+
+    /// 선택한 학기의 대학원 단과대학 목록을 가져옵니다.
+    pub async fn graduated_collages(
+        &mut self,
+        year: u32,
+        semester: SemesterType,
+    ) -> Result<Vec<String>, RusaintError> {
+        self.select_semester(
+            &ElementParser::new(self.client.body()),
+            &format!("{year}"),
+            semester,
+        )
+        .await;
+        select_tab(&mut self.client.0, Self::TAB_GRADUATE, 5).await?;
+        Ok(combo_box_items(&mut self.client.0, Self::GRADUATE_DDK_LV3)?)
+    }
+
+    /// 선택한 학기의 주어진 대학원 단과대의 학과 목록을 가져옵니다.
+    pub async fn graduated_departments(
+        &mut self,
+        year: u32,
+        semester: SemesterType,
+        collage: &str,
+    ) -> Result<Vec<String>, RusaintError> {
+        self.select_semester(
+            &ElementParser::new(self.client.body()),
+            &format!("{year}"),
+            semester,
+        )
+        .await;
+        select_tab(&mut self.client.0, Self::TAB_GRADUATE, 5).await?;
+        select_lv1(&mut self.client.0, Self::GRADUATE_DDK_LV3, collage).await?;
+        Ok(combo_box_items(&mut self.client.0, Self::GRADUATE_DDK_LV4)?)
+    }
+
+    /// 선택한 학기의 연계전공 목록을 가져옵니다.
+    pub async fn connected_majors(
+        &mut self,
+        year: u32,
+        semester: SemesterType,
+    ) -> Result<Vec<String>, RusaintError> {
+        define_elements! {
+            TAB_YOMA: TabStripItem<'_> = "ZCMW2100.ID_0001:VIW_MAIN.TAB_YOMA";
+            COMBO_YOMA: ComboBox<'_> = "ZCMW2100.ID_0001:VIW_TAB_YOMA.CONNECT_MAJO";
+        }
+        self.select_semester(
+            &ElementParser::new(self.client.body()),
+            &format!("{year}"),
+            semester,
+        )
+        .await;
+        select_tab(&mut self.client.0, TAB_YOMA, 8).await?;
+        Ok(combo_box_items(&mut self.client.0, COMBO_YOMA)?)
+    }
+
+    /// 선택한 학기의 융합전공 목록을 가져옵니다.
+    pub async fn united_majors(
+        &mut self,
+        year: u32,
+        semester: SemesterType,
+    ) -> Result<Vec<String>, RusaintError> {
+        define_elements! {
+            TAB_UNMA: TabStripItem<'_> = "ZCMW2100.ID_0001:VIW_MAIN.TAB_UNMA";
+            COMBO_UNMA: ComboBox<'_> = "ZCMW2100.ID_0001:VIW_TAB_UNMA.CG_OBJID";
+        }
+        self.select_semester(
+            &ElementParser::new(self.client.body()),
+            &format!("{year}"),
+            semester,
+        )
+        .await;
+        select_tab(&mut self.client.0, TAB_UNMA, 9).await?;
+        Ok(combo_box_items(&mut self.client.0, COMBO_UNMA)?)
+    }
+
     /// 학기, 학년도, 강의 분류를 통해 강의를 찾습니다.
     pub async fn find_lectures(
         &mut self,
@@ -155,3 +369,4 @@ mod test {}
 
 /// 강의시간표 애플리케이션에서 사용하는 데이터 모델
 pub mod model;
+mod utils;
