@@ -39,6 +39,140 @@ impl CourseScheduleApplication {
         let (year, semester) = self.0.read().await.get_selected_semester()?;
         Ok(YearSemester::new(year, semester))
     }
+
+    /// 선택한 학기 기준 단과대 목록을 가져옵니다.
+    pub async fn collages(
+        &self,
+        year: u32,
+        semester: SemesterType,
+    ) -> Result<Vec<String>, RusaintError> {
+        Ok(self.0.write().await.collages(year, semester).await?)
+    }
+
+    /// 선택한 학기 기준 주어진 단과대의 학과(부) 목록을 가져옵니다.
+    pub async fn departments(
+        &self,
+        year: u32,
+        semester: SemesterType,
+        collage: &str,
+    ) -> Result<Vec<String>, RusaintError> {
+        Ok(self
+            .0
+            .write()
+            .await
+            .departments(year, semester, collage)
+            .await?)
+    }
+
+    /// 선택한 학과(부)의 전공 목록을 가져옵니다.
+    pub async fn majors(
+        &self,
+        year: u32,
+        semester: SemesterType,
+        collage: &str,
+        department: &str,
+    ) -> Result<Vec<String>, RusaintError> {
+        Ok(self
+            .0
+            .write()
+            .await
+            .majors(year, semester, collage, department)
+            .await?)
+    }
+
+    /// 선택한 학기의 교양필수 과목명 목록을 가져옵니다.
+    pub async fn required_electives(
+        &self,
+        year: u32,
+        semester: SemesterType,
+    ) -> Result<Vec<String>, RusaintError> {
+        Ok(self
+            .0
+            .write()
+            .await
+            .required_electives(year, semester)
+            .await?)
+    }
+
+    /// 선택한 학기의 교양선택 분야 목록을 가져옵니다.
+    pub async fn optional_elective_categories(
+        &self,
+        year: u32,
+        semester: SemesterType,
+    ) -> Result<Vec<String>, RusaintError> {
+        Ok(self
+            .0
+            .write()
+            .await
+            .optional_elective_categories(year, semester)
+            .await?)
+    }
+
+    /// 선택한 학기의 채플 과목 분류 목록을 가져옵니다.
+    pub async fn chapel_categories(
+        &self,
+        year: u32,
+        semester: SemesterType,
+    ) -> Result<Vec<String>, RusaintError> {
+        Ok(self
+            .0
+            .write()
+            .await
+            .chapel_categories(year, semester)
+            .await?)
+    }
+
+    /// 선택한 학기의 대학원 단과대학 목록을 가져옵니다.
+    pub async fn graduated_collages(
+        &self,
+        year: u32,
+        semester: SemesterType,
+    ) -> Result<Vec<String>, RusaintError> {
+        Ok(self
+            .0
+            .write()
+            .await
+            .graduated_collages(year, semester)
+            .await?)
+    }
+
+    /// 선택한 학기의 주어진 대학원 단과대의 학과 목록을 가져옵니다.
+    pub async fn graduated_departments(
+        &self,
+        year: u32,
+        semester: SemesterType,
+        collage: &str,
+    ) -> Result<Vec<String>, RusaintError> {
+        Ok(self
+            .0
+            .write()
+            .await
+            .graduated_departments(year, semester, collage)
+            .await?)
+    }
+
+    /// 선택한 학기의 연계전공 목록을 가져옵니다.
+    pub async fn connected_majors(
+        &self,
+        year: u32,
+        semester: SemesterType,
+    ) -> Result<Vec<String>, RusaintError> {
+        Ok(self
+            .0
+            .write()
+            .await
+            .connected_majors(year, semester)
+            .await?)
+    }
+
+    /// 선택한 학기의 융합전공 목록을 가져옵니다.
+    pub async fn united_majors(
+        &self,
+        year: u32,
+        semester: SemesterType,
+    ) -> Result<Vec<String>, RusaintError> {
+        Ok(self.0.write().await.united_majors(year, semester).await?)
+    }
 }
 
 /// [`CourseScheduleApplication`] 생성을 위한 빌더
