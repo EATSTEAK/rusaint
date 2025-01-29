@@ -20,14 +20,14 @@ impl CourseScheduleApplication {
     pub async fn find_lectures(
         &self,
         year: u32,
-        period: SemesterType,
+        semester: SemesterType,
         lecture_category: &LectureCategory,
     ) -> Result<Vec<Lecture>, RusaintError> {
         Ok(self
             .0
             .write()
             .await
-            .find_lectures(year, period, lecture_category)
+            .find_lectures(year, semester, lecture_category)
             .await?
             .collect())
     }

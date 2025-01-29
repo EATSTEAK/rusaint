@@ -44,8 +44,8 @@ impl<'a> PersonalCourseScheduleApplication {
         TABLE: SapTable<'a> = "ZCMW2102.ID_0001:VIW_MAIN.TABLE";
     }
 
-    fn semester_to_key(period: SemesterType) -> &'static str {
-        match period {
+    fn semester_to_key(semester: SemesterType) -> &'static str {
+        match semester {
             SemesterType::One => "090",
             SemesterType::Summer => "091",
             SemesterType::Two => "092",

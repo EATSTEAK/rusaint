@@ -53,8 +53,8 @@ impl<'a> CourseScheduleApplication {
         MAIN_TABLE: SapTable<'a> = "SALV_WD_TABLE.ID_DE0D9128A4327646C94670E2A892C99C:VIEW_TABLE.SALV_WD_UIE_TABLE";
     }
 
-    fn semester_to_key(period: SemesterType) -> &'static str {
-        match period {
+    fn semester_to_key(semester: SemesterType) -> &'static str {
+        match semester {
             SemesterType::One => "090",
             SemesterType::Summer => "091",
             SemesterType::Two => "092",
@@ -62,11 +62,11 @@ impl<'a> CourseScheduleApplication {
         }
     }
 
-    async fn select_period(
+    async fn select_semester(
         &mut self,
         parser: &ElementParser,
         year: &str,
-        period: SemesterType,
+        semester: SemesterType,
     ) -> Result<(), WebDynproError> {
         let year_select_event = parser.read(ComboBoxSelectEventCommand::new(
             Self::PERIOD_YEAR,
@@ -76,7 +76,7 @@ impl<'a> CourseScheduleApplication {
         self.client.process_event(false, year_select_event).await?;
         let semester_select_event = parser.read(ComboBoxSelectEventCommand::new(
             Self::PERIOD_ID,
-            Self::semester_to_key(period),
+            Self::semester_to_key(semester),
             false,
         ))?;
         self.client
@@ -117,14 +117,14 @@ impl<'a> CourseScheduleApplication {
     pub async fn find_lectures(
         &mut self,
         year: u32,
-        period: SemesterType,
+        semester: SemesterType,
         lecture_category: &LectureCategory,
     ) -> Result<impl Iterator<Item = Lecture>, RusaintError> {
         {
             let parser = ElementParser::new(self.body());
             let year_str = format!("{}", year);
             self.select_rows(&parser, 500).await?;
-            self.select_period(&parser, &year_str, period).await?;
+            self.select_semester(&parser, &year_str, semester).await?;
         }
         lecture_category.request_query(&mut self.client.0).await?;
         let parser = ElementParser::new(self.body());

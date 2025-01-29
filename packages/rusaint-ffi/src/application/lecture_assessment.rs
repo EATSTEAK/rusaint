@@ -18,7 +18,7 @@ impl LectureAssessmentApplication {
     pub async fn find_assessments(
         &self,
         year: u32,
-        period: SemesterType,
+        semester: SemesterType,
         lecture_name: Option<String>,
         lecture_code: Option<u32>,
         professor_name: Option<String>,
@@ -29,7 +29,7 @@ impl LectureAssessmentApplication {
             .0
             .write()
             .await
-            .find_assessments(year, period, lecture_name, lecture_code, professor_name)
+            .find_assessments(year, semester, lecture_name, lecture_code, professor_name)
             .await?)
     }
 }
