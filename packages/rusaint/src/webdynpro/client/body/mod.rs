@@ -126,7 +126,9 @@ impl BodyUpdate {
 }
 
 /// WebDynpro 페이지의 상태를 관리하는 구조체
+#[derive(custom_debug_derive::Debug)]
 pub struct Body {
+    #[debug(skip)]
     raw_body: String,
     sap_ssr_client: SapSsrClient,
 }

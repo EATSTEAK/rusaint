@@ -32,6 +32,7 @@ use crate::{
 };
 
 /// [강의평가조회](https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/ZCMB2W1010)
+#[derive(Debug)]
 pub struct LectureAssessmentApplication {
     client: USaintClient,
 }

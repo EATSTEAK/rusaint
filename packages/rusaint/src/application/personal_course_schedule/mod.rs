@@ -19,6 +19,7 @@ use crate::{
 };
 
 /// [개인수업시간표](https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/ZCMW2102)
+#[derive(Debug)]
 pub struct PersonalCourseScheduleApplication {
     client: USaintClient,
 }
