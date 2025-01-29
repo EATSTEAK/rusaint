@@ -159,20 +159,27 @@ macro_rules! def_listbox_subset {
 
     /// [`ListBox`] 분류의 엘리먼트를 위한 공통된 Wrapper
     #[derive(Debug)]
-    pub enum ListBoxWrapper<'a> {
+    pub enum ListBoxWrapper<'body> {
         $(
             $(#[$attr])*
-            $name($name<'a>),
+            $name($name<'body>),
         )+
     }
 
-    impl<'a> ListBoxWrapper<'a> {
+    impl<'body> ListBoxWrapper<'body> {
 
         /// [`ElementWrapper`](crate::webdynpro::element::ElementWrapper)에서 [`ListBoxWrapper`](ListBoxWrapper)로 변환을 시도합니다.
-        pub fn from_elements(elements: $crate::webdynpro::element::ElementWrapper<'a>) -> Option<ListBoxWrapper<'a>> {
+        pub fn from_elements(elements: $crate::webdynpro::element::ElementWrapper<'body>) -> Option<ListBoxWrapper<'body>> {
             match elements {
                 $($crate::webdynpro::element::ElementWrapper::$name(elem) => Some(ListBoxWrapper::$name(elem)),)+
                 _ => None
+            }
+        }
+
+        /// 해당 [`ListBoxWrapper`]의 원본 [`ListBox`]를 반환합니다.
+        pub fn unwrap(&'body self) -> &'body $crate::webdynpro::element::selection::list_box::ListBox<'body> {
+            match self {
+                $(ListBoxWrapper::$name(elem) => elem.list_box(),)+
             }
         }
     }

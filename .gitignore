@@ -47,5 +47,10 @@ languages/swift/RusaintFFI.modulemap
 # xcframework
 languages/swift/RusaintFFI.xcframework/
 
+# JetBrains IDEs
+.idea
+
+# gradle
+.gradle
 
 

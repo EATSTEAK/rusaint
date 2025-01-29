@@ -6,6 +6,7 @@ use rusaint::{
 };
 use tokio::sync::RwLock;
 
+use crate::application::model::YearSemester;
 use crate::{error::RusaintError, session::USaintSession};
 
 /// [학생 성적 조회](https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/ZCMB3W0017)
@@ -78,6 +79,13 @@ impl CourseGradesApplication {
             .await
             .class_detail(course_type, year, semester, code)
             .await?)
+    }
+
+    /// 현재 페이지에 선택된 년도와 학기를 가져옵니다. 최초 로드 시 현재 학기를 가져올 가능성이 있습니다.
+    /// 하지만 이 애플리케이션의 다른 함수를 호출하여 한번 정보를 가져왔다면 마지막으로 가져온 정보의 학기가 반환되므로 주의하여야 하며, 신뢰할 수 있는 현재 학기의 원천으로 사용되어서는 안됩니다.
+    pub async fn get_selected_semester(&self) -> Result<YearSemester, RusaintError> {
+        let (year, semester) = self.0.read().await.get_selected_semester()?;
+        Ok(YearSemester::new(year, semester))
     }
 }
 
