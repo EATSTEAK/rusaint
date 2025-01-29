@@ -1,4 +1,3 @@
-import com.android.build.gradle.tasks.SourceJarTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.jreleaser.model.Active
 import java.io.ByteArrayOutputStream
@@ -109,7 +108,10 @@ jreleaser {
 
     release {
         github {
-            enabled = false
+            repoOwner = "EATSTEAK"
+            name = "rusaint"
+            skipTag = true
+            skipRelease = true
         }
     }
 
