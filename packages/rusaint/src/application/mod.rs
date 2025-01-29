@@ -177,4 +177,6 @@ pub mod personal_course_schedule;
 /// 강의평가 조회: [`LectureAssessmentApplication`](lecture_assessment::LectureAssessmentApplication)
 pub mod lecture_assessment;
 
+/// 장학금 수혜내역 조회: [`ScholarshipsApplication`](scholarships::ScholarshipsApplication)
+pub mod scholarships;
 pub(crate) mod utils;

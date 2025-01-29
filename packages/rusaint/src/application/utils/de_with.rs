@@ -61,3 +61,14 @@ pub(crate) fn deserialize_semester_type<'de, D: Deserializer<'de>>(
         _ => Err(serde::de::Error::custom("Unknown SemesterType varient")),
     }
 }
+
+pub(crate) fn deserialize_comma_u64_string<'de, D: Deserializer<'de>>(
+    deserializer: D,
+) -> Result<u64, D::Error> {
+    let value = String::deserialize(deserializer)?;
+    value
+        .replace(",", "")
+        .trim()
+        .parse()
+        .map_err(serde::de::Error::custom)
+}
