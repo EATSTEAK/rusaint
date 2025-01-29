@@ -2,8 +2,8 @@ name: Release (iOS)
 
 on:
   workflow_run:
-    workflows: ["Release"]
-    types: [completed]
+    workflows: [ "Release" ]
+    types: [ completed ]
     branches:
       - main
   workflow_dispatch:
@@ -18,7 +18,6 @@ jobs:
       - name: Checkout Cargo.toml to check version
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.IOS_GITHUB_TOKEN }}
           sparse-checkout: |
             Cargo.toml
           sparse-checkout-cone-mode: false
@@ -30,7 +29,7 @@ jobs:
         run: |
           curl -L \
             -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer ${{ secrets.IOS_GITHUB_TOKEN }}" \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
             https://api.github.com/repos/EATSTEAK/rusaint-ios/releases \
             | jq '.[0].tag_name | "result=" + .' \
@@ -48,8 +47,6 @@ jobs:
           rm -rf ./.git
       - name: Checkout the repository
         uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.IOS_GITHUB_TOKEN }}
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
         with:

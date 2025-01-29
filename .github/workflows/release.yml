@@ -7,6 +7,9 @@ on:
       - 'Cargo.toml'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 env:
   CARGO_TERM_COLOR: always
 jobs:
@@ -16,7 +19,6 @@ jobs:
       - name: Checkout Cargo.toml to check version
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.IOS_GITHUB_TOKEN }}
           sparse-checkout: |
             Cargo.toml
           sparse-checkout-cone-mode: false
@@ -28,7 +30,7 @@ jobs:
         run: |
           curl -L \
             -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer ${{ secrets.IOS_GITHUB_TOKEN }}" \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
             https://api.github.com/repos/EATSTEAK/rusaint/releases \
             | jq '.[0].tag_name | "result=" + .' \
@@ -52,61 +54,17 @@ jobs:
           targets: 'armv7-linux-androideabi, i686-linux-android, aarch64-linux-android, x86_64-linux-android'
       - name: Retrieve cache
         uses: Leafwing-Studios/cargo-cache@v2
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          java-version: 23
-          distribution: temurin
-          cache: gradle
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-      - name: Setup Android NDK
-        uses: nttld/setup-ndk@v1
-        with:
-          ndk-version: r27c
-          link-to-sdk: true
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
-      - name: Build with Gradle
-        run: |
-          cd ./languages/kotlin
-          chmod +x ./gradlew
-          ./gradlew build
       - name: Publish
         run: cargo publish --package rusaint --verbose --token ${CRATES_TOKEN}
         env:
           CRATES_TOKEN: ${{ secrets.CRATES_TOKEN }}
-      - name: Publish to local Maven repository
+      - name: Create an GitHub Release
         run: |
-          cd ./languages/kotlin
-          ./gradlew publish
-      - name: Release with JReleaser
-        env:
-          JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          JRELEASER_MAVENCENTRAL_USERNAME: ${{ secrets.MAVENCENTRAL_USERNAME }}
-          JRELEASER_MAVENCENTRAL_PASSWORD: ${{ secrets.MAVENCENTRAL_PASSWORD }}
-          JRELEASER_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-          JRELEASER_GPG_PUBLIC_KEY: ${{ secrets.GPG_PUBLIC_KEY }}
-          JRELEASER_GPG_SECRET_KEY: ${{ secrets.GPG_SECRET_KEY }}
-        run: |
-          cd ./languages/kotlin
-          ./gradlew jreleaserRelease
-      - name: Publish with JReleaser
-        env:
-          JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          JRELEASER_MAVENCENTRAL_USERNAME: ${{ secrets.MAVENCENTRAL_USERNAME }}
-          JRELEASER_MAVENCENTRAL_PASSWORD: ${{ secrets.MAVENCENTRAL_PASSWORD }}
-          JRELEASER_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-          JRELEASER_GPG_PUBLIC_KEY: ${{ secrets.GPG_PUBLIC_KEY }}
-          JRELEASER_GPG_SECRET_KEY: ${{ secrets.GPG_SECRET_KEY }}
-        run: |
-          cd ./languages/kotlin
-          ./gradlew jreleaserPublish
-      - name: JReleaser release output
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: jreleaser-release
-          path: |
-            ./languages/kotlin/lib/build/jreleaser/trace.log
-            ./languages/kotlin/lib/build/jreleaser/output.properties
+          curl -L \
+            -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            https://api.github.com/repos/EATSTEAK/rusaint/releases \
+            -d
+          '{"tag_name":"${{ steps.current_version.outputs.result }}","name":"${{ steps.current_version.outputs.result }}","generate_release_notes":true}'
