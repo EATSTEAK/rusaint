@@ -9,17 +9,11 @@ use crate::application::course_schedule::utils::{
     request, request_lv1, request_lv2, request_lv3, request_text,
 };
 use crate::application::utils::de_with::deserialize_optional_string;
-use crate::webdynpro::command::WebDynproCommandExecutor;
 use crate::webdynpro::element::parser::ElementParser;
 use crate::{
     define_elements,
     webdynpro::{
         client::WebDynproClient,
-        command::element::{
-            action::ButtonPressEventCommand,
-            layout::TabStripTabSelectEventCommand,
-            selection::{ComboBoxChangeEventCommand, ComboBoxSelectByValue1EventCommand},
-        },
         element::{
             action::Button, complex::sap_table::FromSapTable, definition::ElementDefinition,
             layout::tab_strip::item::TabStripItem, selection::ComboBox,

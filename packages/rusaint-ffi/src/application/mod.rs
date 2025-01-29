@@ -18,3 +18,6 @@ pub mod personal_course_schedule;
 
 /// 강의평가 조회: [`LectureAssessmentApplication`](lecture_assessment::LectureAssessmentApplication)
 pub mod lecture_assessment;
+
+/// 플랫폼 지원을 위한 데이터
+pub mod model;
