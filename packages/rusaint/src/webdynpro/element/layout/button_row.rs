@@ -40,13 +40,7 @@ impl<'a> ButtonRow<'a> {
                 let button_selector = &Selector::parse(r#":root [ct="B"]"#).unwrap();
                 self.element_ref
                     .select(button_selector)
-                    .filter_map(|elem| {
-                        let def = <Button<'a> as Element<'a>>::Def::from_ref(elem);
-                        match def {
-                            Ok(button_def) => Some(button_def),
-                            _ => None,
-                        }
-                    })
+                    .filter_map(|elem| <Button<'a> as Element<'a>>::Def::from_ref(elem).ok())
                     .collect::<Vec<<Button<'a> as Element<'a>>::Def>>()
             })
             .iter()
