@@ -37,6 +37,8 @@ enum Commands {
         college: String,
         #[arg(long)]
         department: String,
+        #[arg(long)]
+        major: Option<String>,
     },
     FindRequiredElective {
         #[arg(long)]
@@ -93,6 +95,8 @@ enum Commands {
         college: String,
         #[arg(long)]
         department: String,
+        #[arg(long)]
+        major: Option<String>,
     },
     FindCyber {
         #[arg(long)]
@@ -119,14 +123,32 @@ async fn main() -> Result<(), RusaintError> {
             semester,
             college,
             department,
+            major,
         } => {
-            let lectures =
-                find_major(session.clone(), year, semester, &college, &department).await?;
-
-            create_json(
-                format!("{}_{}_{}_{}_전공", year, semester, college, department),
-                lectures,
+            let lectures = find_major(
+                session.clone(),
+                year,
+                semester,
+                &college,
+                &department,
+                major.as_deref(),
             )
+            .await?;
+
+            if let Some(major) = major {
+                create_json(
+                    format!(
+                        "{}_{}_{}_{}_{}_전공",
+                        year, semester, college, department, major
+                    ),
+                    lectures,
+                )
+            } else {
+                create_json(
+                    format!("{}_{}_{}_{}_전공", year, semester, college, department),
+                    lectures,
+                )
+            }
         }
         Commands::FindRequiredElective {
             year,
@@ -195,17 +217,35 @@ async fn main() -> Result<(), RusaintError> {
             semester,
             college,
             department,
+            major,
         } => {
-            let lectures =
-                find_recognized_other_major(session.clone(), year, semester, &college, &department)
-                    .await?;
-            create_json(
-                format!(
-                    "{}_{}_{}_{}_타전공인정",
-                    year, semester, college, department
-                ),
-                lectures,
+            let lectures = find_recognized_other_major(
+                session.clone(),
+                year,
+                semester,
+                &college,
+                &department,
+                major.as_deref(),
             )
+            .await?;
+
+            if let Some(major) = major {
+                create_json(
+                    format!(
+                        "{}_{}_{}_{}_{}_타전공인정",
+                        year, semester, college, department, major
+                    ),
+                    lectures,
+                )
+            } else {
+                create_json(
+                    format!(
+                        "{}_{}_{}_{}_타전공인정",
+                        year, semester, college, department
+                    ),
+                    lectures,
+                )
+            }
         }
         Commands::FindCyber { year, semester } => {
             let lectures = find_cyber(session.clone(), year, semester).await?;
@@ -229,12 +269,13 @@ async fn find_major(
     semester: SemesterType,
     college: &str,
     department: &str,
+    major: Option<&str>,
 ) -> Result<Vec<Lecture>, RusaintError> {
     let mut app = USaintClientBuilder::new()
         .session(session)
         .build_into::<CourseScheduleApplication>()
         .await?;
-    let category = LectureCategory::major(college, department, None);
+    let category = LectureCategory::major(college, department, major);
     let lectures = app.find_lectures(year, *semester, &category).await?;
     Ok(lectures.collect())
 }
@@ -340,13 +381,14 @@ async fn find_recognized_other_major(
     semester: SemesterType,
     college: &str,
     department: &str,
+    major: Option<&str>,
 ) -> Result<Vec<Lecture>, RusaintError> {
     let mut app = USaintClientBuilder::new()
         .session(session)
         .build_into::<CourseScheduleApplication>()
         .await
         .unwrap();
-    let category = LectureCategory::recognized_other_major(college, department, None);
+    let category = LectureCategory::recognized_other_major(college, department, major);
     let lectures = app.find_lectures(year, *semester, &category).await.unwrap();
     Ok(lectures.collect())
 }

@@ -1,6 +1,6 @@
 [package]
 name = "rusaint-cli"
-version = "0.1.1"
+version = "0.2.0"
 authors = ["JOONGGON LEE <2wndrhs@gmai.com>"]
 description = "CLI for fetching course schedules"
 repository = "https://github.com/2wndrhs/rusaint"
@@ -9,7 +9,7 @@ license.workspace = true
 edition.workspace = true
 
 [dependencies]
-rusaint = "0.8.4"
+rusaint = "0.9.0"
 tokio = { workspace = true, features = ["full"] }
 thiserror = { workspace = true }
 clap = { version = "4.5.27", features = ["derive"] }

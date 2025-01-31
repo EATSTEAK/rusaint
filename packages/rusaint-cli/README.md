@@ -40,10 +40,15 @@ SSO_PASSWORD={비밀번호} // 1q2w1q2w!
 ### Usage
 
 ```bash
-rusaint-cli find-major --year <YEAR> --semester <SEMESTER> --college <COLLEGE> --department <DEPARTMENT>
+rusaint-cli find-major --year <YEAR> --semester <SEMESTER> --college <COLLEGE> --department <DEPARTMENT> --major <MAJOR>
 ```
 
 ### Examples
+- 세부 전공이 있는 경우
+```bash
+cargo run -- find-major --year 2025 --semester 1 --college "공과대학" --department "건축학부" --major "건축공학전공" 
+```
+- 세부 전공이 없는 경우
 
 ```bash
 rusaint-cli find-major --year 2025 --semester 1 --college "IT대학" --department "컴퓨터학부"
@@ -304,13 +309,16 @@ rusaint-cli find-united-major --year 2025 --semester 1 --major-name "빅데이�
 - 타전공인정과목 정보를 가져와 json 파일로 추출합니다.
 
 ### Usage
-
 ```bash
-rusaint-cli find-recognized-other-major --year <YEAR> --semester <SEMESTER> --college <COLLEGE> --department <DEPARTMENT>
+rusaint-cli find-recognized-other-major --year <YEAR> --semester <SEMESTER> --college <COLLEGE> --department <DEPARTMENT> --major <MAJOR>
 ```
 
 ### Examples
-
+- 세부 전공이 있는 경우
+```bash
+rusaint-cli find-recognized-other-major --year 2025 --semester 1 --college "공과대학" --department "건축학부" --major "건축공학전공"
+```
+- 세부 전공이 없는 경우
 ```bash
 rusaint-cli find-recognized-other-major --year 2025 --semester 1 --college "IT대학" --department "컴퓨터학부"
 ```
