@@ -33,6 +33,43 @@ SSO_PASSWORD={비밀번호} // 1q2w1q2w!
 
 `rusaint-cli` 는 유세인트 강의시간표 분류에 대응하는 다양한 command가 존재합니다.
 
+## find-by-lecture (과목검색)
+- 검색어에 해당하는 과목 정보를 가져와 json 파일로 추출합니다.
+
+### Usage
+
+```bash
+rusaint-cli find-by-lecture --year <YEAR> --semester <SEMESTER> --keyword <KEYWORD>
+```
+
+### Examples
+
+```bash
+rusaint-cli find-by-lecture --year 2025 --semester 1 --keyword "대학글쓰기"
+```
+
+```json
+[
+  {
+    "syllabus": "SALV_WD_TABLE.ID_DE0D9128A4327646C94670E2A892C99C:VIEW_TABLE.HAS_PLAN_PAPER_SALV_WD_CE.1",
+    "category": "교필",
+    "sub_category": null,
+    "abeek_info": null,
+    "field": null,
+    "code": "SALV_WD_TABLE.ID_DE0D9128A4327646C94670E2A892C99C:VIEW_TABLE.SE_SHORT_SALV_WD_CE.1",
+    "name": "(외국인을위한)대학글쓰기",
+    "division": null,
+    "professor": "김지학",
+    "department": "교양교육운영팀",
+    "time_points": "2.0/2.0",
+    "personeel": "0",
+    "remaining_seats": "30",
+    "schedule_room": "월 11:00-11:50 (전산관 19330-김지학)\n월 12:00-12:50 (전산관 19330-김지학)",
+    "target": "전체학년 전체;순수외국인입학생 (대상외수강제한)"
+  },
+]
+```
+
 ## find-major (학부전공)
 
 - 학부전공별 과목 정보를 가져와 json 파일로 추출합니다.
@@ -46,7 +83,7 @@ rusaint-cli find-major --year <YEAR> --semester <SEMESTER> --college <COLLEGE> -
 ### Examples
 - 세부 전공이 있는 경우
 ```bash
-cargo run -- find-major --year 2025 --semester 1 --college "공과대학" --department "건축학부" --major "건축공학전공" 
+rusaint-cli find-major --year 2025 --semester 1 --college "공과대학" --department "건축학부" --major "건축공학전공" 
 ```
 - 세부 전공이 없는 경우
 

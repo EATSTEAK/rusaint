@@ -28,6 +28,14 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
+    FindByLecture {
+        #[arg(long)]
+        year: u32,
+        #[arg(long)]
+        semester: SemesterType,
+        #[arg(long)]
+        keyword: String,
+    },
     FindMajor {
         #[arg(long)]
         year: u32,
@@ -118,6 +126,14 @@ async fn main() -> Result<(), RusaintError> {
     let session = Arc::new(USaintSession::with_password(&id, &password).await?);
 
     match cli.command {
+        Commands::FindByLecture {
+            year,
+            semester,
+            keyword,
+        } => {
+            let lectures = find_by_lecture(session.clone(), year, semester, &keyword).await?;
+            create_json(format!("{}_{}_{}", year, semester, keyword), lectures)
+        }
         Commands::FindMajor {
             year,
             semester,
@@ -261,6 +277,21 @@ fn create_json(file_name: String, lectures: Vec<Lecture>) {
     let mut file = File::create(format!("{}.json", file_name)).expect("Failed to create .json");
     file.write_all(json.as_bytes())
         .expect("Failed to write to file");
+}
+
+async fn find_by_lecture(
+    session: Arc<USaintSession>,
+    year: u32,
+    semester: SemesterType,
+    keyword: &str,
+) -> Result<Vec<Lecture>, RusaintError> {
+    let mut app = USaintClientBuilder::new()
+        .session(session)
+        .build_into::<CourseScheduleApplication>()
+        .await?;
+    let category = LectureCategory::find_by_lecture(keyword);
+    let lectures = app.find_lectures(year, *semester, &category).await?;
+    Ok(lectures.collect())
 }
 
 async fn find_major(
