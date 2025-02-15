@@ -1,8 +1,6 @@
-use super::EventTestSuite;
-use crate::get_session;
+use super::{EventTestSuite, get_event_test_suite};
 use rusaint::webdynpro::element::parser::ElementParser;
 use rusaint::{
-    application::USaintClientBuilder,
     define_elements,
     webdynpro::{
         element::{
@@ -45,11 +43,7 @@ impl<'a> EventTestSuite {
 
 #[tokio::test]
 async fn test_button_events() {
-    let session = get_session().await.unwrap().clone();
-    let mut suite = USaintClientBuilder::new()
-        .session(session)
-        .build_into::<EventTestSuite>()
-        .await
-        .unwrap();
+    let lock = get_event_test_suite().await.unwrap();
+    let mut suite = lock.write().await;
     suite.test_button().await.unwrap();
 }
