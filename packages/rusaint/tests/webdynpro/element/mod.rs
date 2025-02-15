@@ -39,3 +39,4 @@ impl USaintApplication for EventTestSuite {
 }
 
 mod button;
+mod link;
