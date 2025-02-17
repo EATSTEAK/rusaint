@@ -1,5 +1,7 @@
+use crate::get_session;
+use lazy_static::lazy_static;
 use rusaint::{
-    application::{USaintApplication, USaintClient},
+    application::{USaintApplication, USaintClient, USaintClientBuilder},
     webdynpro::{
         client::{body::Body, EventProcessResult},
         error::WebDynproError,
@@ -7,7 +9,14 @@ use rusaint::{
     },
     RusaintError,
 };
+use std::sync::{Arc, OnceLock};
+use tokio::sync::{Mutex, RwLock};
 
+lazy_static! {
+    static ref SUITE: Mutex<OnceLock<Arc<RwLock<EventTestSuite>>>> = Mutex::new(OnceLock::new());
+}
+
+#[derive(Debug)]
 pub(crate) struct EventTestSuite {
     client: USaintClient,
 }
@@ -38,4 +47,24 @@ impl USaintApplication for EventTestSuite {
     }
 }
 
+pub(crate) async fn get_event_test_suite() -> Result<Arc<RwLock<EventTestSuite>>, RusaintError> {
+    let suite_lock = SUITE.lock().await;
+    if let Some(suite) = suite_lock.get() {
+        Ok(Arc::clone(&suite))
+    } else {
+        let session = get_session().await.unwrap().clone();
+        suite_lock
+            .set(Arc::new(RwLock::new(
+                USaintClientBuilder::new()
+                    .session(session)
+                    .build_into()
+                    .await?
+            )))
+            .unwrap();
+        let suite = suite_lock.get().unwrap();
+        Ok(Arc::clone(&suite))
+    }
+}
+
 mod button;
+mod link;
