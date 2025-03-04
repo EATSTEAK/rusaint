@@ -1,4 +1,6 @@
 #![warn(missing_docs)]
+// TODO: Reduce error size and remove this attr
+#![allow(clippy::result_large_err)]
 //! _빠르고 간편하며 믿을 수 있는 숭실대학교 u-saint 클라이언트_
 //!
 //! <a href="https://github.com/EATSTEAK/rusaint"><img alt="GitHub Badge" src="https://img.shields.io/badge/github-eatsteak/rusaint-8da0cb?style=for-the-badge&labelColor=555555&logo=github"></a>

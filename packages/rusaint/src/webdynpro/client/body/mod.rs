@@ -1,8 +1,7 @@
-use std::collections::HashMap;
-use std::hash::Hash;
-
 use lol_html::{element, html_content::ContentType, rewrite_str, RewriteStrSettings};
 use roxmltree::Node;
+use std::collections::HashMap;
+use std::hash::Hash;
 
 use crate::webdynpro::error::{BodyError, UpdateBodyError};
 
@@ -104,7 +103,7 @@ impl BodyUpdate {
                         );
                     }
                     &_ => {
-                        eprintln!("[WARN] Unknown body update {} is found, ignore.", tag_name);
+                        log::warn!("Unknown body update {} is found, ignore.", tag_name);
                     }
                 };
             }

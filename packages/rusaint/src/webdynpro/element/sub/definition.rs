@@ -37,7 +37,7 @@ pub trait SubElementDefinition<'body>: Sized {
     fn selector(&self) -> Result<Selector, WebDynproError> {
         Selector::parse(format!(r#"[id="{}"] [id="{}"]"#, self.parent().id(), self.id()).as_str())
             .or_else(|e| {
-                println!("{e:?}");
+                log::warn!(e:?; "failed to parse selector");
                 Err(ElementError::InvalidId(format!(
                     "{}, {}",
                     self.parent().id(),

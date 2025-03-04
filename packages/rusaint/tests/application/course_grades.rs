@@ -6,6 +6,7 @@ use rusaint::application::{
 };
 use rusaint::RusaintError;
 use std::sync::{Arc, OnceLock};
+use test_log::test;
 use tokio::sync::{Mutex, RwLock};
 
 lazy_static! {
@@ -31,7 +32,7 @@ async fn get_app() -> Result<Arc<RwLock<CourseGradesApplication>>, RusaintError>
     }
 }
 
-#[tokio::test]
+#[test(tokio::test)]
 async fn recorded_summary() {
     let lock = get_app().await.unwrap();
     let mut app = lock.write().await;
@@ -44,7 +45,7 @@ async fn recorded_summary() {
     println!("Certificated: {:?}", certificated_summary);
 }
 
-#[tokio::test]
+#[test(tokio::test)]
 async fn certificated_summary() {
     let lock = get_app().await.unwrap();
     let mut app = lock.write().await;
@@ -55,7 +56,7 @@ async fn certificated_summary() {
     println!("Certificated: {:?}", certificated_summary);
 }
 
-#[tokio::test]
+#[test(tokio::test)]
 async fn semesters() {
     let lock = get_app().await.unwrap();
     let mut app = lock.write().await;
@@ -64,7 +65,7 @@ async fn semesters() {
     assert!(!semesters.is_empty());
 }
 
-#[tokio::test]
+#[test(tokio::test)]
 async fn classes_with_detail() {
     let lock = get_app().await.unwrap();
     let mut app = lock.write().await;

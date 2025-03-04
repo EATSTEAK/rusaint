@@ -6,6 +6,7 @@ use rusaint::{
     RusaintError,
 };
 use std::sync::{Arc, OnceLock};
+use test_log::test;
 use tokio::sync::{Mutex, RwLock};
 
 lazy_static! {
@@ -31,7 +32,7 @@ async fn get_app() -> Result<Arc<RwLock<StudentInformationApplication>>, Rusaint
     }
 }
 
-#[tokio::test]
+#[test(tokio::test)]
 async fn general() {
     let lock = get_app().await.unwrap();
     let app = lock.read().await;
@@ -39,7 +40,7 @@ async fn general() {
     println!("{:?}", student_info);
 }
 
-#[tokio::test]
+#[test(tokio::test)]
 async fn graduation() {
     let lock = get_app().await.unwrap();
     let app = lock.read().await;
@@ -59,7 +60,7 @@ async fn graduation() {
     println!("{:?}", student_info);
 }
 
-#[tokio::test]
+#[test(tokio::test)]
 async fn qualifications() {
     let lock = get_app().await.unwrap();
     let app = lock.read().await;
@@ -67,7 +68,7 @@ async fn qualifications() {
     println!("{:?}", student_info);
 }
 
-#[tokio::test]
+#[test(tokio::test)]
 async fn work() {
     let lock = get_app().await.unwrap();
     let mut app = lock.write().await;
@@ -75,7 +76,7 @@ async fn work() {
     println!("{:?}", student_info);
 }
 
-#[tokio::test]
+#[test(tokio::test)]
 async fn family() {
     let lock = get_app().await.unwrap();
     let mut app = lock.write().await;
@@ -83,7 +84,7 @@ async fn family() {
     println!("{:?}", student_info);
 }
 
-#[tokio::test]
+#[test(tokio::test)]
 async fn religion() {
     let lock = get_app().await.unwrap();
     let mut app = lock.write().await;
@@ -91,7 +92,7 @@ async fn religion() {
     println!("{:?}", student_info);
 }
 
-#[tokio::test]
+#[test(tokio::test)]
 async fn transfer() {
     let lock = get_app().await.unwrap();
     let mut app = lock.write().await;
@@ -99,7 +100,7 @@ async fn transfer() {
     println!("{:?}", student_info);
 }
 
-#[tokio::test]
+#[test(tokio::test)]
 async fn bank_account() {
     let lock = get_app().await.unwrap();
     let mut app = lock.write().await;
@@ -107,7 +108,7 @@ async fn bank_account() {
     println!("{:?}", student_info);
 }
 
-#[tokio::test]
+#[test(tokio::test)]
 async fn academic_record() {
     let lock = get_app().await.unwrap();
     let mut app = lock.write().await;
@@ -115,7 +116,7 @@ async fn academic_record() {
     println!("{:?}", student_info);
 }
 
-#[tokio::test]
+#[test(tokio::test)]
 async fn research_bank_account() {
     let lock = get_app().await.unwrap();
     let mut app = lock.write().await;

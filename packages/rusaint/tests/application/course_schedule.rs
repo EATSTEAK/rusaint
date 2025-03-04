@@ -9,6 +9,7 @@ use rusaint::{
     ApplicationError, RusaintError,
 };
 use std::sync::{Arc, OnceLock};
+use test_log::test;
 use tokio::sync::{Mutex, RwLock};
 
 lazy_static! {
@@ -34,7 +35,7 @@ async fn get_app() -> Result<Arc<RwLock<CourseScheduleApplication>>, RusaintErro
     }
 }
 
-#[tokio::test]
+#[test(tokio::test)]
 async fn find_major() {
     let lock = get_app().await.unwrap();
     let mut app = lock.write().await;
@@ -48,7 +49,7 @@ async fn find_major() {
     }
 }
 
-#[tokio::test]
+#[test(tokio::test)]
 async fn find_required_elective() {
     let lock = get_app().await.unwrap();
     let mut app = lock.write().await;
@@ -62,7 +63,7 @@ async fn find_required_elective() {
     }
 }
 
-#[tokio::test]
+#[test(tokio::test)]
 async fn find_optional_elective() {
     let lock = get_app().await.unwrap();
     let mut app = lock.write().await;
@@ -76,7 +77,7 @@ async fn find_optional_elective() {
     }
 }
 
-#[tokio::test]
+#[test(tokio::test)]
 async fn find_chapel() {
     let lock = get_app().await.unwrap();
     let mut app = lock.write().await;
@@ -90,7 +91,7 @@ async fn find_chapel() {
     }
 }
 
-#[tokio::test]
+#[test(tokio::test)]
 async fn find_education() {
     let lock = get_app().await.unwrap();
     let mut app = lock.write().await;
@@ -104,7 +105,7 @@ async fn find_education() {
     }
 }
 
-#[tokio::test]
+#[test(tokio::test)]
 async fn find_graduated() {
     let lock = get_app().await.unwrap();
     let mut app = lock.write().await;
@@ -118,7 +119,7 @@ async fn find_graduated() {
     }
 }
 
-#[tokio::test]
+#[test(tokio::test)]
 async fn find_connected_major() {
     let lock = get_app().await.unwrap();
     let mut app = lock.write().await;
@@ -132,7 +133,7 @@ async fn find_connected_major() {
     }
 }
 
-#[tokio::test]
+#[test(tokio::test)]
 async fn find_united_major() {
     let lock = get_app().await.unwrap();
     let mut app = lock.write().await;
@@ -146,7 +147,7 @@ async fn find_united_major() {
     }
 }
 
-#[tokio::test]
+#[test(tokio::test)]
 async fn find_recognized_other_major() {
     let lock = get_app().await.unwrap();
     let mut app = lock.write().await;
@@ -160,7 +161,7 @@ async fn find_recognized_other_major() {
     }
 }
 
-#[tokio::test]
+#[test(tokio::test)]
 async fn find_cyber() {
     let lock = get_app().await.unwrap();
     let mut app = lock.write().await;
@@ -174,7 +175,7 @@ async fn find_cyber() {
     }
 }
 
-#[tokio::test]
+#[test(tokio::test)]
 async fn find_nothing() {
     let lock = get_app().await.unwrap();
     let mut app = lock.write().await;

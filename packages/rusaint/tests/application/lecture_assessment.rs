@@ -3,8 +3,9 @@ use rusaint::{
     application::{lecture_assessment::LectureAssessmentApplication, USaintClientBuilder},
     model::SemesterType,
 };
+use test_log::test;
 
-#[tokio::test]
+#[test(tokio::test)]
 async fn lecture_assessment() {
     let session = get_session().await.unwrap().clone();
     let mut app = USaintClientBuilder::new()

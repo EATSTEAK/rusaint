@@ -1,8 +1,9 @@
 use crate::get_session;
 use rusaint::application::scholarships::ScholarshipsApplication;
 use rusaint::application::USaintClientBuilder;
+use test_log::test;
 
-#[tokio::test]
+#[test(tokio::test)]
 async fn scholarships() {
     let session = get_session().await.unwrap().clone();
     let mut app = USaintClientBuilder::new()
