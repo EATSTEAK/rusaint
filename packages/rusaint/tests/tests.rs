@@ -39,7 +39,7 @@ pub async fn get_session() -> Result<Arc<USaintSession>> {
         let session = USaintSession::with_password(&id, &password).await?;
         let _ = session_lock.set(Arc::new(session));
         // Throttle session access to prevent 500 error at server response
-        tokio::time::sleep(std::time::Duration::from_millis(3000)).await;
+        tokio::time::sleep(std::time::Duration::from_millis(5000)).await;
         session_lock
             .get()
             .map(|arc| arc.to_owned())
