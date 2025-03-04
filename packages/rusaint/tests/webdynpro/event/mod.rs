@@ -1,9 +1,9 @@
-use std::collections::HashMap;
-
 use rusaint::webdynpro::event::{
     ucf_parameters::{UcfAction, UcfParametersBuilder, UcfResponseData},
     EventBuilder,
 };
+use std::collections::HashMap;
+use test_log::test;
 
 #[test]
 fn event_serialize() {

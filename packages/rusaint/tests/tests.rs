@@ -4,6 +4,7 @@ use lazy_static::lazy_static;
 use rusaint::model::SemesterType;
 use rusaint::USaintSession;
 use std::sync::{Arc, OnceLock};
+use test_log::test;
 use tokio::sync::Mutex;
 
 lazy_static! {
@@ -48,7 +49,7 @@ pub async fn get_session() -> Result<Arc<USaintSession>> {
 }
 
 #[cfg(test)]
-#[tokio::test]
+#[test(tokio::test)]
 async fn test_session() {
     let _ = get_session().await.unwrap();
 }

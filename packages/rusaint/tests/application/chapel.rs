@@ -6,6 +6,7 @@ use rusaint::{
     ApplicationError, RusaintError,
 };
 use std::sync::{Arc, OnceLock};
+use test_log::test;
 use tokio::sync::{Mutex, RwLock};
 
 lazy_static! {
@@ -30,7 +31,7 @@ async fn get_app() -> Result<Arc<RwLock<ChapelApplication>>, RusaintError> {
     }
 }
 
-#[tokio::test]
+#[test(tokio::test)]
 async fn chapel() {
     let lock = get_app().await.unwrap();
     let mut app = lock.write().await;
@@ -41,7 +42,7 @@ async fn chapel() {
     println!("{:?}", info);
 }
 
-#[tokio::test]
+#[test(tokio::test)]
 async fn no_chapel() {
     let lock = get_app().await.unwrap();
     let mut app = lock.write().await;

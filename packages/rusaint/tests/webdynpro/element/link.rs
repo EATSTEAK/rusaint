@@ -1,15 +1,13 @@
-use super::{EventTestSuite, get_event_test_suite};
+use super::{get_event_test_suite, EventTestSuite};
 use rusaint::webdynpro::element::parser::ElementParser;
 use rusaint::{
     define_elements,
     webdynpro::{
-        element::{
-            action::Link,
-            text::TextView,
-        },
+        element::{action::Link, text::TextView},
         error::WebDynproError,
     },
 };
+use test_log::test;
 
 impl<'a> EventTestSuite {
     define_elements! {
@@ -41,7 +39,7 @@ impl<'a> EventTestSuite {
     }
 }
 
-#[tokio::test]
+#[test(tokio::test)]
 async fn test_link_event() {
     let lock = get_event_test_suite().await.unwrap();
     let mut suite = lock.write().await;
