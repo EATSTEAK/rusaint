@@ -150,13 +150,10 @@ impl WebDynproClient {
     /// 이벤트 큐 내부 내용을 서버에 전송하고 응답을 받습니다.
     async fn event_request(&mut self) -> Result<String, ClientError> {
         let mut event_queue = self.event_queue.lock().await;
+        let serialized_events = event_queue.serialize_and_clear();
         let res = self
             .client
-            .wd_xhr(
-                &self.base_url,
-                self.body.ssr_client(),
-                &event_queue.serialize_and_clear(),
-            )?
+            .wd_xhr(&self.base_url, self.body.ssr_client(), &serialized_events)?
             .send()
             .await?;
         if !res.status().is_success() {
