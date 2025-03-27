@@ -1,0 +1,3 @@
+rust:
+  directory: ../../
+  manifestPath: packages/rusaint-ffi/Cargo.toml
