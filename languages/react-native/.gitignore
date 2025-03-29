@@ -84,3 +84,15 @@ android/generated
 
 # React Native Nitro Modules
 nitrogen/
+
+# uniffi-bindgen-react-native
+src/*.tsx
+src/*.ts
+src/generated
+cpp
+
+# ubrn android
+android/src
+android/build.gradle
+android/CMakeLists.txt
+android/cpp-adapter.cpp
