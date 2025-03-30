@@ -96,3 +96,7 @@ android/src
 android/build.gradle
 android/CMakeLists.txt
 android/cpp-adapter.cpp
+
+# ubrn ios
+ios/ReactNative.h
+ios/ReactNative.mm
