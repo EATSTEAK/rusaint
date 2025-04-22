@@ -30,7 +30,7 @@ pub struct GradeSummary {
     /// 평점계
     grade_points_sum: f32,
     /// 평점평균
-    grade_points_avarage: f32,
+    grade_points_average: f32,
     /// 산술평균
     arithmetic_mean: f32,
     /// P/F 학점계
@@ -49,7 +49,7 @@ impl GradeSummary {
             attempted_credits,
             earned_credits,
             grade_points_sum: gpa,
-            grade_points_avarage: cgpa,
+            grade_points_average: cgpa,
             arithmetic_mean: avg,
             pf_earned_credits,
         }
@@ -71,8 +71,8 @@ impl GradeSummary {
     }
 
     /// 평점평균
-    pub fn grade_points_avarage(&self) -> f32 {
-        self.grade_points_avarage
+    pub fn grade_points_average(&self) -> f32 {
+        self.grade_points_average
     }
 
     /// 산술평균
@@ -126,7 +126,7 @@ pub struct SemesterGrade {
         rename(deserialize = "평점평균"),
         deserialize_with = "deserialize_f32_string"
     )]
-    grade_points_avarage: f32,
+    grade_points_average: f32,
     /// 평점계
     #[serde(
         rename(deserialize = "평점계"),
@@ -211,8 +211,8 @@ impl SemesterGrade {
     }
 
     /// 평점평균
-    pub fn grade_points_avarage(&self) -> f32 {
-        self.grade_points_avarage
+    pub fn grade_points_average(&self) -> f32 {
+        self.grade_points_average
     }
 
     /// 평점계
