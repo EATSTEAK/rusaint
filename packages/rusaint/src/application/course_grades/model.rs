@@ -5,13 +5,17 @@ use serde::{
     Deserialize, Deserializer, Serialize,
 };
 
-use crate::application::utils::de_with::{
-    deserialize_empty, deserialize_f32_string, deserialize_u32_string,
-};
 use crate::webdynpro::element::parser::ElementParser;
 use crate::webdynpro::{
     element::{complex::sap_table::FromSapTable, definition::ElementDefinition},
     error::{ElementError, WebDynproError},
+};
+use crate::{
+    application::utils::de_with::{
+        deserialize_empty, deserialize_f32_string, deserialize_semester_type,
+        deserialize_u32_string,
+    },
+    model::SemesterType,
 };
 
 /// 전체 성적(학적부, 증명)
@@ -94,8 +98,11 @@ pub struct SemesterGrade {
     )]
     year: u32,
     /// 학기
-    #[serde(rename(deserialize = "학기"))]
-    semester: String,
+    #[serde(
+        rename(deserialize = "학기"),
+        deserialize_with = "deserialize_semester_type"
+    )]
+    semester: SemesterType,
     /// 신청학점
     #[serde(
         rename(deserialize = "신청학점"),
@@ -189,8 +196,8 @@ impl SemesterGrade {
     }
 
     /// 학기
-    pub fn semester(&self) -> &str {
-        self.semester.as_ref()
+    pub fn semester(&self) -> SemesterType {
+        self.semester
     }
 
     /// 취득학점
@@ -267,9 +274,9 @@ impl<'body> FromSapTable<'body> for SemesterGrade {
 #[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
 pub struct ClassGrade {
     /// 이수학년도
-    year: String,
+    year: u32,
     /// 이수학기
-    semester: String,
+    semester: SemesterType,
     /// 과목코드
     code: String,
     /// 과목명
@@ -289,8 +296,8 @@ pub struct ClassGrade {
 impl ClassGrade {
     #[allow(clippy::too_many_arguments)]
     pub(crate) fn new(
-        year: String,
-        semester: String,
+        year: u32,
+        semester: SemesterType,
         code: String,
         class_name: String,
         grade_points: f32,
@@ -313,13 +320,13 @@ impl ClassGrade {
     }
 
     /// 이수학년도
-    pub fn year(&self) -> &str {
-        self.year.as_ref()
+    pub fn year(&self) -> u32 {
+        self.year
     }
 
     /// 이수학기
-    pub fn semester(&self) -> &str {
-        self.semester.as_ref()
+    pub fn semester(&self) -> SemesterType {
+        self.semester
     }
 
     /// 과목코드
