@@ -91,7 +91,7 @@ impl Display for UcfParameters {
             owned.truncate(owned.len() - 5)
         };
         owned.push_str(EVENT_DATA_END);
-        write!(f, "{}", owned)
+        write!(f, "{owned}")
     }
 }
 
@@ -141,7 +141,7 @@ impl Display for UcfAction {
             _ => "none",
         }
         .to_owned();
-        write!(f, "{}", str)
+        write!(f, "{str}")
     }
 }
 
@@ -165,7 +165,7 @@ impl Display for UcfCardinality {
             _ => "none",
         }
         .to_owned();
-        write!(f, "{}", str)
+        write!(f, "{str}")
     }
 }
 
@@ -189,7 +189,7 @@ impl Display for UcfResponseData {
             Self::Inherit => "inherit",
         }
         .to_owned();
-        write!(f, "{}", str)
+        write!(f, "{str}")
     }
 }
 
@@ -208,7 +208,7 @@ impl Display for UcfTransportMethod {
             Self::Partial => "partial",
         }
         .to_owned();
-        write!(f, "{}", str)
+        write!(f, "{str}")
     }
 }
 
@@ -228,6 +228,6 @@ impl Display for UcfDelay {
             _ => "none",
         }
         .to_owned();
-        write!(f, "{}", str)
+        write!(f, "{str}")
     }
 }

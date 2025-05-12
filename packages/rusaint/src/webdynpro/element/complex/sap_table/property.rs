@@ -23,7 +23,7 @@ impl Display for AccessType {
             AccessType::DeselectAll => "DESELECT_ALL",
         }
         .to_owned();
-        write!(f, "{}", str)
+        write!(f, "{str}")
     }
 }
 

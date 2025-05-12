@@ -265,10 +265,9 @@ fn normalize_lsjson(lsjson: &str) -> String {
     let double_quoted = quote_to_double
         .replace_all(&quoted, r#"$1"$2""#)
         .into_owned();
-    let ret = convert_escape_to_rust
+    convert_escape_to_rust
         .replace_all(&double_quoted, r"\u00$1")
-        .into_owned();
-    ret
+        .into_owned()
 }
 
 /// 엘리먼트의 기본 동작

@@ -103,7 +103,7 @@ impl BodyUpdate {
                         );
                     }
                     &_ => {
-                        log::warn!("Unknown body update {} is found, ignore.", tag_name);
+                        log::warn!("Unknown body update {tag_name} is found, ignore.");
                     }
                 };
             }

@@ -336,7 +336,7 @@ impl<'app> CourseScheduleApplication {
     ) -> Result<impl Iterator<Item = Lecture>, RusaintError> {
         {
             let parser = ElementParser::new(self.body());
-            let year_str = format!("{}", year);
+            let year_str = format!("{year}");
             self.select_rows(&parser, 500).await?;
             self.select_semester(&parser, &year_str, semester).await?;
         }

@@ -85,8 +85,7 @@ impl<'a> SapTableHeader {
 
     /// 헤더 행 제목들의 [`Vec`]를 반환합니다.
     pub fn titles(&'a self, parser: &'a ElementParser) -> Result<Vec<String>, WebDynproError> {
-        let vec = self
-            .iter()
+        self.iter()
             .map(|def| -> Result<String, WebDynproError> {
                 let cell_wrapper = SapTableCellWrapper::from_def(def, parser)?;
                 if let SapTableCellWrapper::Header(header_cell) = cell_wrapper {
@@ -117,8 +116,7 @@ impl<'a> SapTableHeader {
                     })?
                 }
             })
-            .collect::<Result<Vec<String>, WebDynproError>>();
-        vec
+            .collect::<Result<Vec<String>, WebDynproError>>()
     }
 
     /// 원본 [`SapTable`](super::SapTable)의 [`ElementDefinition`]를 반환합니다.

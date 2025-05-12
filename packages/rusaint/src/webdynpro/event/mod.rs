@@ -122,7 +122,7 @@ impl Display for Event {
             }
         }
         owned.push_str(EVENT_DATA_END);
-        write!(f, "{}", owned)
+        write!(f, "{owned}")
     }
 }
 

@@ -534,7 +534,7 @@ impl<'a> CourseGradesApplication {
         }) else {
             return Err(WebDynproError::from(ElementError::NoSuchData {
                 element: Self::GRADE_BY_CLASSES_TABLE.id().to_string(),
-                field: format!("details of class {}", code),
+                field: format!("details of class {code}"),
             }))?;
         };
         self.class_detail_in_popup(btn).await
