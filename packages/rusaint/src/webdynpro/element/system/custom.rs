@@ -1,11 +1,11 @@
 use std::{borrow::Cow, collections::HashMap};
 
 use crate::webdynpro::{
-    element::{definition::ElementDefinition, ElementWrapper},
+    element::{ElementWrapper, definition::ElementDefinition},
     error::{BodyError, WebDynproError},
     event::{
-        ucf_parameters::{UcfAction, UcfParametersBuilder, UcfResponseData},
         Event, EventBuilder,
+        ucf_parameters::{UcfAction, UcfParametersBuilder, UcfResponseData},
     },
 };
 

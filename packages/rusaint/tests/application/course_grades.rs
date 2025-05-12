@@ -1,10 +1,10 @@
-use crate::{get_session, TARGET_SEMESTER, TARGET_YEAR};
+use crate::{TARGET_SEMESTER, TARGET_YEAR, get_session};
 use lazy_static::lazy_static;
-use rusaint::application::{
-    course_grades::{model::CourseType, CourseGradesApplication},
-    USaintClientBuilder,
-};
 use rusaint::RusaintError;
+use rusaint::application::{
+    USaintClientBuilder,
+    course_grades::{CourseGradesApplication, model::CourseType},
+};
 use std::sync::{Arc, OnceLock};
 use test_log::test;
 use tokio::sync::{Mutex, RwLock};

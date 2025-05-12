@@ -1,7 +1,7 @@
 use crate::webdynpro::command::WebDynproCommandExecutor;
 use crate::webdynpro::element::parser::ElementParser;
 use crate::{
-    application::{student_information::StudentInformationApplication, USaintClient},
+    application::{USaintClient, student_information::StudentInformationApplication},
     define_elements,
     webdynpro::{
         command::element::{

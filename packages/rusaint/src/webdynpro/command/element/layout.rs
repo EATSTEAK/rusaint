@@ -4,7 +4,7 @@ use crate::webdynpro::{
     command::WebDynproCommand,
     element::{
         definition::ElementDefinition,
-        layout::{tab_strip::item::TabStripItemDef, TabStripDef},
+        layout::{TabStripDef, tab_strip::item::TabStripItemDef},
     },
     error::WebDynproError,
 };

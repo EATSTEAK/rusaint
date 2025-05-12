@@ -4,7 +4,7 @@ use crate::webdynpro::element::utils::{children_element, parse_lsdata, parse_lse
 use crate::webdynpro::error::{BodyError, WebDynproError};
 use serde_json::Value;
 
-use super::{definition::ElementDefinition, Element, EventParameterMap, Interactable};
+use super::{Element, EventParameterMap, Interactable, definition::ElementDefinition};
 
 // Type for unimplemented elements
 /// rusaint에 구현되지 않은 엘리먼트를 위한 가상 엘리먼트

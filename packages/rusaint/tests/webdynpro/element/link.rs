@@ -1,4 +1,4 @@
-use super::{get_event_test_suite, EventTestSuite};
+use super::{EventTestSuite, get_event_test_suite};
 use rusaint::webdynpro::element::parser::ElementParser;
 use rusaint::{
     define_elements,

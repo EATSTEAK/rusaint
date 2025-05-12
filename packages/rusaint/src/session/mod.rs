@@ -1,15 +1,15 @@
 use std::{borrow::BorrowMut, sync::Arc};
 
 use reqwest::{
-    cookie::{CookieStore, Jar},
-    header::{HeaderValue, COOKIE, HOST, SET_COOKIE},
     Client,
+    cookie::{CookieStore, Jar},
+    header::{COOKIE, HOST, HeaderValue, SET_COOKIE},
 };
 use url::Url;
 
 use crate::{
     error::{RusaintError, SsuSsoError},
-    utils::{default_header, DEFAULT_USER_AGENT},
+    utils::{DEFAULT_USER_AGENT, default_header},
     webdynpro::error::{ClientError, WebDynproError},
 };
 

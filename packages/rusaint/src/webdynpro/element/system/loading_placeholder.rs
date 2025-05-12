@@ -3,7 +3,7 @@ use std::{borrow::Cow, cell::OnceCell, collections::HashMap};
 use crate::webdynpro::error::WebDynproError;
 use crate::webdynpro::event::Event;
 
-use crate::webdynpro::element::{macros::define_element_interactable, Interactable};
+use crate::webdynpro::element::{Interactable, macros::define_element_interactable};
 
 define_element_interactable! {
     #[doc = "페이지가 로드되기 전 내부 컨텐츠가 로드될 위치의 자리 표시자"]

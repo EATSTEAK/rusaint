@@ -3,8 +3,8 @@ use std::{collections::HashMap, ops::Index};
 use scraper::ElementRef;
 
 use super::{
-    cell::SapTableCellDefWrapper, property::SapTableRowType, row::SapTableRow, FromSapTable,
-    SapTableDef, SapTableHeader,
+    FromSapTable, SapTableDef, SapTableHeader, cell::SapTableCellDefWrapper,
+    property::SapTableRowType, row::SapTableRow,
 };
 use crate::webdynpro::element::parser::ElementParser;
 use crate::webdynpro::{

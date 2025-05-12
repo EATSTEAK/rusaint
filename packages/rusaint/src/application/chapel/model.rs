@@ -1,33 +1,32 @@
 use std::collections::HashMap;
 
 use serde::{
-    de::{value::MapDeserializer, IntoDeserializer},
     Deserialize, Serialize,
+    de::{IntoDeserializer, value::MapDeserializer},
 };
 
 use crate::application::utils::de_with::{deserialize_semester_type, deserialize_u32_string};
 use crate::webdynpro::command::WebDynproCommandExecutor;
 use crate::webdynpro::element::parser::ElementParser;
 use crate::{
-    define_elements,
+    RusaintError, define_elements,
     error::ApplicationError,
     model::SemesterType,
     webdynpro::{
         command::element::complex::SapTableBodyCommand,
         element::{
+            ElementDefWrapper,
             complex::{
-                sap_table::{
-                    cell::{SapTableCell, SapTableCellWrapper},
-                    FromSapTable,
-                },
                 SapTable,
+                sap_table::{
+                    FromSapTable,
+                    cell::{SapTableCell, SapTableCellWrapper},
+                },
             },
             definition::ElementDefinition,
-            ElementDefWrapper,
         },
         error::{ElementError, WebDynproError},
     },
-    RusaintError,
 };
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

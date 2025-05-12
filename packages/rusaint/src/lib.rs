@@ -85,7 +85,7 @@ pub mod uniffi_support;
 #[cfg(test)]
 #[allow(missing_docs)]
 pub mod global_test_utils {
-    use crate::{model::SemesterType, USaintSession};
+    use crate::{USaintSession, model::SemesterType};
     use anyhow::{Error, Result};
     use dotenv::dotenv;
     use lazy_static::lazy_static;
@@ -107,7 +107,7 @@ pub mod global_test_utils {
                 "SUMMER" => SemesterType::Summer,
                 "2" | "TWO" => SemesterType::Two,
                 "WINTER" => SemesterType::Winter,
-                _ => Err(Error::msg("Invalid semester")).unwrap(),
+                _ => panic!("{:?}", Error::msg("Invalid semester")),
             }
         };
     }

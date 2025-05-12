@@ -3,7 +3,7 @@ use std::{borrow::Cow, cell::OnceCell};
 use scraper::Node;
 
 use crate::webdynpro::element::{
-    macros::define_element_interactable, property::Visibility, Element,
+    Element, macros::define_element_interactable, property::Visibility,
 };
 
 define_element_interactable! {

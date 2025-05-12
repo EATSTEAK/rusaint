@@ -1,6 +1,6 @@
 use crate::get_session;
-use rusaint::application::scholarships::ScholarshipsApplication;
 use rusaint::application::USaintClientBuilder;
+use rusaint::application::scholarships::ScholarshipsApplication;
 use test_log::test;
 
 #[test(tokio::test)]

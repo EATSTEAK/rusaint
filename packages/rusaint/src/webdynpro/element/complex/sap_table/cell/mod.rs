@@ -1,6 +1,6 @@
 use crate::webdynpro::element::parser::ElementParser;
-use crate::webdynpro::element::sub::definition::SubElementDefinition;
 use crate::webdynpro::element::sub::SubElement;
+use crate::webdynpro::element::sub::definition::SubElementDefinition;
 use crate::webdynpro::element::{Element, ElementDefWrapper};
 use crate::webdynpro::error::WebDynproError;
 

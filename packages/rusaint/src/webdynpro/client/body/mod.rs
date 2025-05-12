@@ -1,4 +1,4 @@
-use lol_html::{element, html_content::ContentType, rewrite_str, RewriteStrSettings};
+use lol_html::{RewriteStrSettings, element, html_content::ContentType, rewrite_str};
 use roxmltree::Node;
 use std::collections::HashMap;
 use std::hash::Hash;
@@ -276,8 +276,8 @@ fn parse_sap_ssr_client(document: &str) -> Result<SapSsrClient, BodyError> {
 #[cfg(test)]
 mod test {
     use crate::utils::DEFAULT_USER_AGENT;
-    use crate::webdynpro::client::body::parse_sap_ssr_client;
     use crate::webdynpro::client::Requests;
+    use crate::webdynpro::client::body::parse_sap_ssr_client;
     use reqwest::cookie::Jar;
     use std::sync::Arc;
     use url::Url;

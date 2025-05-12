@@ -1,7 +1,7 @@
 use crate::application::USaintClient;
 use crate::model::SemesterType;
-use crate::webdynpro::command::element::selection::ComboBoxLSDataCommand;
 use crate::webdynpro::command::WebDynproCommandExecutor;
+use crate::webdynpro::command::element::selection::ComboBoxLSDataCommand;
 use crate::webdynpro::element::definition::ElementDefinition;
 use crate::webdynpro::element::parser::ElementParser;
 use crate::webdynpro::element::selection::ComboBoxDef;

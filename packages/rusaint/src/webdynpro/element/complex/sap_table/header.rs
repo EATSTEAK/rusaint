@@ -3,13 +3,13 @@ use std::ops::Index;
 use scraper::ElementRef;
 
 use super::{
+    SapTableDef,
     cell::{SapTableCell, SapTableCellDefWrapper, SapTableCellWrapper},
     property::{SapTableRowType, SapTableSelectionState},
-    SapTableDef,
 };
 use crate::webdynpro::element::parser::ElementParser;
 use crate::webdynpro::{
-    element::{definition::ElementDefinition, Element, ElementDefWrapper},
+    element::{Element, ElementDefWrapper, definition::ElementDefinition},
     error::{ElementError, WebDynproError},
 };
 

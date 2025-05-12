@@ -10,7 +10,7 @@ use crate::webdynpro::{error::ElementError, event::Event};
 use self::property::ComboBoxBehavior;
 use crate::webdynpro::element::parser::ElementParser;
 use crate::webdynpro::element::{
-    macros::define_element_interactable, Element, ElementDefWrapper, Interactable,
+    Element, ElementDefWrapper, Interactable, macros::define_element_interactable,
 };
 
 use super::list_box::ListBoxDefWrapper;

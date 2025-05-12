@@ -4,12 +4,12 @@ use crate::webdynpro::event::Event;
 use crate::webdynpro::{
     command::WebDynproCommand,
     element::{
+        Element,
         definition::ElementDefinition,
         selection::{
-            list_box::{item::ListBoxItemInfo, ListBoxDefWrapper, ListBoxWrapper},
             ComboBoxDef, ComboBoxLSData,
+            list_box::{ListBoxDefWrapper, ListBoxWrapper, item::ListBoxItemInfo},
         },
-        Element,
     },
     error::{ElementError, WebDynproError},
 };

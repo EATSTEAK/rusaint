@@ -1,9 +1,9 @@
 use crate::get_session;
 use lazy_static::lazy_static;
 use rusaint::{
-    application::{student_information::StudentInformationApplication, USaintClientBuilder},
-    webdynpro::error::{ElementError, WebDynproError},
     RusaintError,
+    application::{USaintClientBuilder, student_information::StudentInformationApplication},
+    webdynpro::error::{ElementError, WebDynproError},
 };
 use std::sync::{Arc, OnceLock};
 use test_log::test;

@@ -8,6 +8,7 @@ use crate::webdynpro::command::WebDynproCommandExecutor;
 use crate::webdynpro::element::layout::tab_strip::item::TabStripItem;
 use crate::webdynpro::element::parser::ElementParser;
 use crate::{
+    ApplicationError, RusaintError,
     application::course_schedule::model::{Lecture, LectureCategory},
     define_elements,
     model::SemesterType,
@@ -15,17 +16,16 @@ use crate::{
         client::body::Body,
         command::element::{complex::SapTableBodyCommand, selection::ComboBoxSelectEventCommand},
         element::{
+            ElementDefWrapper,
             complex::{
-                sap_table::cell::{SapTableCell, SapTableCellWrapper},
                 SapTable,
+                sap_table::cell::{SapTableCell, SapTableCellWrapper},
             },
             layout::TabStrip,
             selection::ComboBox,
-            ElementDefWrapper,
         },
         error::WebDynproError,
     },
-    ApplicationError, RusaintError,
 };
 
 /// [강의시간표](https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/ZCMW2100)

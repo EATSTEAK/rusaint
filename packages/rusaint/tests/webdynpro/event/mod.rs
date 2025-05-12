@@ -1,6 +1,6 @@
 use rusaint::webdynpro::event::{
-    ucf_parameters::{UcfAction, UcfParametersBuilder, UcfResponseData},
     EventBuilder,
+    ucf_parameters::{UcfAction, UcfParametersBuilder, UcfResponseData},
 };
 use std::collections::HashMap;
 use test_log::test;
@@ -21,5 +21,8 @@ fn event_serialize() {
         .ucf_parameters(ucf_params)
         .build()
         .unwrap();
-    assert_eq!(event.to_string(), "Button_Press~E002Id~E004WD01A8~E003~E002ClientAction~E004submit~E005ResponseData~E004delta~E003~E002~E003");
+    assert_eq!(
+        event.to_string(),
+        "Button_Press~E002Id~E004WD01A8~E003~E002ClientAction~E004submit~E005ResponseData~E004delta~E003~E002~E003"
+    );
 }

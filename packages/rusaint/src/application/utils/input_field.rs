@@ -1,5 +1,5 @@
 use crate::webdynpro::{
-    element::{text::InputField, Element},
+    element::{Element, text::InputField},
     error::{ElementError, WebDynproError},
 };
 

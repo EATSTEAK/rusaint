@@ -1,13 +1,13 @@
 use crate::get_session;
 use lazy_static::lazy_static;
 use rusaint::{
+    RusaintError,
     application::{USaintApplication, USaintClient, USaintClientBuilder},
     webdynpro::{
-        client::{body::Body, EventProcessResult},
+        client::{EventProcessResult, body::Body},
         error::WebDynproError,
         event::Event,
     },
-    RusaintError,
 };
 use std::sync::{Arc, OnceLock};
 use tokio::sync::{Mutex, RwLock};
@@ -50,7 +50,7 @@ impl USaintApplication for EventTestSuite {
 pub(crate) async fn get_event_test_suite() -> Result<Arc<RwLock<EventTestSuite>>, RusaintError> {
     let suite_lock = SUITE.lock().await;
     if let Some(suite) = suite_lock.get() {
-        Ok(Arc::clone(&suite))
+        Ok(Arc::clone(suite))
     } else {
         let session = get_session().await.unwrap().clone();
         suite_lock
@@ -58,11 +58,11 @@ pub(crate) async fn get_event_test_suite() -> Result<Arc<RwLock<EventTestSuite>>
                 USaintClientBuilder::new()
                     .session(session)
                     .build_into()
-                    .await?
+                    .await?,
             )))
             .unwrap();
         let suite = suite_lock.get().unwrap();
-        Ok(Arc::clone(&suite))
+        Ok(Arc::clone(suite))
     }
 }
 

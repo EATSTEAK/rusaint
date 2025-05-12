@@ -7,9 +7,8 @@ use model::{
 use super::{USaintApplication, USaintClient};
 use crate::webdynpro::element::parser::ElementParser;
 use crate::{
-    define_elements,
+    RusaintError, define_elements,
     webdynpro::{client::body::Body, element::layout::TabStrip},
-    RusaintError,
 };
 
 /// [학생 정보 수정 및 조회](https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/ZCMW1001n)
