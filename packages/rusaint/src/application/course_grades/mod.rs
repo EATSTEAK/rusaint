@@ -407,12 +407,12 @@ impl<'a> CourseGradesApplication {
         semester: SemesterType,
         include_details: bool,
     ) -> Result<Vec<ClassGrade>, RusaintError> {
-        let year = year.to_string();
         {
             self.close_popups().await?;
             let parser = ElementParser::new(self.client.body());
             self.select_course(&parser, course_type).await?;
-            self.select_semester(&parser, &year, semester).await?;
+            self.select_semester(&parser, &year.to_string(), semester)
+                .await?;
         }
         let parser = ElementParser::new(self.client.body());
         let class_grades: Vec<(Option<Event>, HashMap<String, String>)> = {
@@ -451,8 +451,8 @@ impl<'a> CourseGradesApplication {
             };
             let parsed: Option<ClassGrade> = (|| {
                 Some(ClassGrade::new(
-                    year.to_owned(),
-                    semester.to_string(),
+                    year,
+                    semester,
                     values["과목코드"].trim().to_owned(),
                     values["과목명"].trim().to_owned(),
                     values["과목학점"].parse().ok()?,
