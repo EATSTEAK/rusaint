@@ -1,14 +1,14 @@
 use crate::webdynpro::event::ucf_parameters::UcfParameters;
 use crate::webdynpro::event::{EventBuilder, EventBuilderError};
 use crate::{
-    utils::{default_header, DEFAULT_USER_AGENT},
+    utils::{DEFAULT_USER_AGENT, default_header},
     webdynpro::{
         error::{ClientError, WebDynproError},
-        event::{event_queue::EventQueue, Event},
+        event::{Event, event_queue::EventQueue},
     },
 };
 use body::{Body, BodyUpdate};
-use reqwest::{cookie::Jar, header::*, RequestBuilder};
+use reqwest::{RequestBuilder, cookie::Jar, header::*};
 use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::sync::Mutex;

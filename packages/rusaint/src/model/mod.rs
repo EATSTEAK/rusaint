@@ -25,6 +25,6 @@ impl Display for SemesterType {
             Self::Two => "2학기".to_string(),
             Self::Winter => "겨울학기".to_string(),
         };
-        write!(f, "{}", str)
+        write!(f, "{str}")
     }
 }

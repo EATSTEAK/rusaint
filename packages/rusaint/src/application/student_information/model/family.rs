@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
 use serde::{
-    de::{value::MapDeserializer, IntoDeserializer},
     Deserialize, Serialize,
+    de::{IntoDeserializer, value::MapDeserializer},
 };
 
 use crate::application::utils::de_with::{deserialize_bool_string, deserialize_optional_string};
@@ -10,12 +10,12 @@ use crate::application::utils::sap_table::try_table_into_with_scroll;
 use crate::webdynpro::command::WebDynproCommandExecutor;
 use crate::webdynpro::element::parser::ElementParser;
 use crate::{
-    application::{student_information::StudentInformationApplication, USaintClient},
+    application::{USaintClient, student_information::StudentInformationApplication},
     define_elements,
     webdynpro::{
         command::element::layout::TabStripTabSelectEventCommand,
         element::{
-            complex::{sap_table::FromSapTable, SapTable},
+            complex::{SapTable, sap_table::FromSapTable},
             definition::ElementDefinition,
             layout::tab_strip::item::TabStripItem,
         },

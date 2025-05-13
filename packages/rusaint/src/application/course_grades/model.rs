@@ -1,8 +1,8 @@
 use std::{collections::HashMap, num::ParseIntError, str::FromStr};
 
 use serde::{
-    de::{value::MapDeserializer, IntoDeserializer},
     Deserialize, Deserializer, Serialize,
+    de::{IntoDeserializer, value::MapDeserializer},
 };
 
 use crate::webdynpro::element::parser::ElementParser;

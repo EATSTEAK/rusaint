@@ -1,7 +1,7 @@
 use crate::webdynpro::client::body::Body;
-use crate::webdynpro::element::sub::definition::SubElementDefinition;
 use crate::webdynpro::element::sub::SubElement;
-use crate::webdynpro::element::{definition::ElementDefinition, Element};
+use crate::webdynpro::element::sub::definition::SubElementDefinition;
+use crate::webdynpro::element::{Element, definition::ElementDefinition};
 use crate::webdynpro::error::{ElementError, WebDynproError};
 use scraper::Html;
 

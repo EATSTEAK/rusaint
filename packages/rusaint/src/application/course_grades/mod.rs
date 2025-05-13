@@ -7,7 +7,7 @@ use crate::webdynpro::command::WebDynproCommandExecutor;
 use crate::webdynpro::element::complex::sap_table::cell::SapTableCellWrapper;
 use crate::webdynpro::element::parser::ElementParser;
 use crate::{
-    define_elements,
+    RusaintError, define_elements,
     model::SemesterType,
     webdynpro::{
         command::element::{
@@ -15,17 +15,16 @@ use crate::{
             selection::{ComboBoxLSDataCommand, ComboBoxSelectEventCommand},
         },
         element::{
-            complex::sap_table::{cell::SapTableCell, SapTable},
+            Element, ElementDefWrapper, ElementWrapper,
+            complex::sap_table::{SapTable, cell::SapTableCell},
             definition::ElementDefinition,
             layout::PopupWindow,
             selection::ComboBox,
             text::InputField,
-            Element, ElementDefWrapper, ElementWrapper,
         },
         error::{BodyError, ElementError, WebDynproError},
         event::Event,
     },
-    RusaintError,
 };
 use scraper::Selector;
 use std::collections::HashMap;
@@ -535,7 +534,7 @@ impl<'a> CourseGradesApplication {
         }) else {
             return Err(WebDynproError::from(ElementError::NoSuchData {
                 element: Self::GRADE_BY_CLASSES_TABLE.id().to_string(),
-                field: format!("details of class {}", code),
+                field: format!("details of class {code}"),
             }))?;
         };
         self.class_detail_in_popup(btn).await
@@ -553,9 +552,9 @@ pub mod model;
 mod test {
     use crate::webdynpro::element::parser::ElementParser;
     use crate::{
-        application::{course_grades::CourseGradesApplication, USaintClientBuilder},
+        application::{USaintClientBuilder, course_grades::CourseGradesApplication},
         global_test_utils::get_session,
-        webdynpro::element::{layout::PopupWindow, Element},
+        webdynpro::element::{Element, layout::PopupWindow},
     };
 
     #[tokio::test]

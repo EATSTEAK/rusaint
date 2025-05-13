@@ -7,7 +7,7 @@ use crate::application::utils::semester::get_selected_semester;
 use crate::webdynpro::command::WebDynproCommandExecutor;
 use crate::webdynpro::element::parser::ElementParser;
 use crate::{
-    define_elements,
+    RusaintError, define_elements,
     error::ApplicationError,
     model::SemesterType,
     webdynpro::{
@@ -16,7 +16,6 @@ use crate::{
         element::{complex::SapTable, selection::ComboBox},
         error::{ElementError, WebDynproError},
     },
-    RusaintError,
 };
 
 /// [개인수업시간표](https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/ZCMW2102)

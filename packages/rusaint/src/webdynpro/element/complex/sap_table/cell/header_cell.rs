@@ -4,19 +4,19 @@ use scraper::Selector;
 
 use crate::webdynpro::{
     element::{
+        ElementDefWrapper,
         complex::{
+            SapTable,
             sap_table::{
+                SapTableDef,
                 property::{
                     SapTableHeaderCellDesign, SapTableHeaderCellType,
                     SapTableRowSelectionMassState, SapTableSelectionColumnAction,
                 },
-                SapTableDef,
             },
-            SapTable,
         },
         property::SortState,
         sub::macros::define_subelement,
-        ElementDefWrapper,
     },
     error::BodyError,
 };

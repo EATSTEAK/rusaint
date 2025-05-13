@@ -10,9 +10,10 @@ authors = ["Hyomin Koo <me@eatsteak.dev>"]
 license = "MIT"
 homepage = "https://eatsteak.dev"
 repository = "https://github.com/EATSTEAK/rusaint"
-edition = "2021"
+edition = "2024"
 readme = "README.md"
 
 [workspace.dependencies]
-thiserror = "2.0.8"
-tokio = { version = "1.29.1" }
+thiserror = "2.0.12"
+tokio = "1.45.0"
+uniffi = "0.29.2"

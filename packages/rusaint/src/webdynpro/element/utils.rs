@@ -1,4 +1,4 @@
-use crate::webdynpro::element::{normalize_lsjson, ElementWrapper, EventParameterMap};
+use crate::webdynpro::element::{ElementWrapper, EventParameterMap, normalize_lsjson};
 use crate::webdynpro::error::{BodyError, ElementError, WebDynproError};
 use crate::webdynpro::event::ucf_parameters::UcfParameters;
 use scraper::ElementRef;

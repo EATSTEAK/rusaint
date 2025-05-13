@@ -1,15 +1,15 @@
 use std::{borrow::BorrowMut, sync::Arc};
 
 use reqwest::{
-    cookie::{CookieStore, Jar},
-    header::{HeaderValue, COOKIE, HOST, SET_COOKIE},
     Client,
+    cookie::{CookieStore, Jar},
+    header::{COOKIE, HOST, HeaderValue, SET_COOKIE},
 };
 use url::Url;
 
 use crate::{
     error::{RusaintError, SsuSsoError},
-    utils::{default_header, DEFAULT_USER_AGENT},
+    utils::{DEFAULT_USER_AGENT, default_header},
     webdynpro::error::{ClientError, WebDynproError},
 };
 
@@ -76,12 +76,9 @@ impl USaintSession {
             &waf_cookie_str,
             &Url::parse("https://saint.ssu.ac.kr").unwrap(),
         );
-        let token_cookie_str = format!("sToken={}; domain=.ssu.ac.kr; path=/; secure", token);
+        let token_cookie_str = format!("sToken={token}; domain=.ssu.ac.kr; path=/; secure");
         let req = client
-            .get(format!(
-                "{}?sToken={}&sIdno={}",
-                SSU_USAINT_SSO_URL, token, id
-            ))
+            .get(format!("{SSU_USAINT_SSO_URL}?sToken={token}&sIdno={id}"))
             .query(&[("sToken", token), ("sIdno", id)])
             .headers(default_header())
             .header(

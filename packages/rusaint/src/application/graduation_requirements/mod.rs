@@ -4,7 +4,7 @@ use super::{USaintApplication, USaintClient};
 use crate::webdynpro::command::WebDynproCommandExecutor;
 use crate::webdynpro::element::parser::ElementParser;
 use crate::{
-    define_elements,
+    RusaintError, define_elements,
     webdynpro::{
         client::body::Body,
         command::element::{
@@ -17,7 +17,6 @@ use crate::{
             text::{InputField, InputFieldDef},
         },
     },
-    RusaintError,
 };
 
 /// [졸업사정표](https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/ZCMW8015)
@@ -173,7 +172,7 @@ mod test {
     use crate::webdynpro::element::parser::ElementParser;
     use crate::{
         application::{
-            graduation_requirements::GraduationRequirementsApplication, USaintClientBuilder,
+            USaintClientBuilder, graduation_requirements::GraduationRequirementsApplication,
         },
         global_test_utils::get_session,
         webdynpro::command::element::complex::SapTableBodyCommand,

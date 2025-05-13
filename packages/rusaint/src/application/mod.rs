@@ -4,10 +4,11 @@ use url::Url;
 use crate::webdynpro::command::WebDynproCommandExecutor;
 use crate::webdynpro::element::parser::ElementParser;
 use crate::{
+    RusaintError,
     session::USaintSession,
     utils::DEFAULT_USER_AGENT,
     webdynpro::{
-        client::{body::Body, EventProcessResult, WebDynproClient, WebDynproClientBuilder},
+        client::{EventProcessResult, WebDynproClient, WebDynproClientBuilder, body::Body},
         command::element::system::{
             ClientInspectorNotifyEventCommand, CustomClientInfoEventCommand,
             LoadingPlaceholderLoadEventCommand,
@@ -19,7 +20,6 @@ use crate::{
         error::WebDynproError,
         event::Event,
     },
-    RusaintError,
 };
 
 const SSU_WEBDYNPRO_BASE_URL: &str = "https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/";

@@ -3,7 +3,7 @@ use std::{borrow::Cow, cell::OnceCell, collections::HashMap};
 use scraper::Selector;
 
 use crate::webdynpro::{
-    element::{definition::ElementDefinition, macros::define_element_interactable, Interactable},
+    element::{Interactable, definition::ElementDefinition, macros::define_element_interactable},
     error::{BodyError, ElementError, WebDynproError},
     event::Event,
 };
@@ -89,7 +89,7 @@ impl<'a> SapTable<'a> {
     ) -> Result<Event, WebDynproError> {
         let parameters: HashMap<String, String> = HashMap::from([
             ("Id".to_string(), self.id.clone().to_string()),
-            ("RowIndex".to_string(), format!("{}", row_index)),
+            ("RowIndex".to_string(), format!("{row_index}")),
             ("RowUserData".to_string(), row_user_data.to_owned()),
             ("CellUserData".to_string(), cell_user_data.to_owned()),
             ("AccessType".to_string(), access_type.to_string()),
@@ -114,8 +114,8 @@ impl<'a> SapTable<'a> {
             ("Id".to_string(), self.id.clone().to_string()),
             ("CellId".to_string(), cell_id.to_owned()),
             ("CellType".to_string(), cell_type.to_owned()),
-            ("RowIndex".to_string(), format!("{}", row_index)),
-            ("ColIndex".to_string(), format!("{}", col_index)),
+            ("RowIndex".to_string(), format!("{row_index}")),
+            ("ColIndex".to_string(), format!("{col_index}")),
             ("RowUserData".to_string(), row_user_data.to_owned()),
             ("CellUserData".to_string(), cell_user_data.to_owned()),
             ("AccessType".to_string(), access_type.to_string()),

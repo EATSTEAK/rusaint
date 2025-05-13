@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
-use super::{cell::SapTableCell, SapTableHeader, SapTableRow};
-use crate::webdynpro::element::parser::ElementParser;
+use super::{SapTableHeader, SapTableRow, cell::SapTableCell};
 use crate::webdynpro::element::ElementWrapper;
+use crate::webdynpro::element::parser::ElementParser;
 use crate::webdynpro::error::{ElementError, WebDynproError};
 
 /// [`SapTable`](super::SapTable)의 내부 데이터로 표현될 수 있는 형에 구현하는 트레이트

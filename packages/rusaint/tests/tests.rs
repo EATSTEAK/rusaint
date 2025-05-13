@@ -1,8 +1,8 @@
 use anyhow::{Error, Result};
 use dotenv::dotenv;
 use lazy_static::lazy_static;
-use rusaint::model::SemesterType;
 use rusaint::USaintSession;
+use rusaint::model::SemesterType;
 use std::sync::{Arc, OnceLock};
 use test_log::test;
 use tokio::sync::Mutex;
@@ -22,7 +22,7 @@ lazy_static! {
             "SUMMER" => SemesterType::Summer,
             "2" | "TWO" => SemesterType::Two,
             "WINTER" => SemesterType::Winter,
-            _ => Err(Error::msg("Invalid semester")).unwrap(),
+            _ => panic!("{:?}", Error::msg("Invalid semester")),
         }
     };
 }

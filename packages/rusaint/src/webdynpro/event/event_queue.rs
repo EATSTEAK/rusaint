@@ -1,4 +1,4 @@
-use super::{Event, EVENT_SPECTATOR};
+use super::{EVENT_SPECTATOR, Event};
 use std::collections::LinkedList;
 
 #[derive(Debug)]
@@ -37,9 +37,9 @@ mod test {
     use std::collections::HashMap;
 
     use crate::webdynpro::event::{
+        EventBuilder,
         event_queue::EventQueue,
         ucf_parameters::{UcfAction, UcfParametersBuilder, UcfResponseData},
-        EventBuilder,
     };
 
     #[test]

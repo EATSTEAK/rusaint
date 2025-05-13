@@ -10,7 +10,7 @@ use crate::webdynpro::{error::ElementError, event::Event};
 use self::property::ComboBoxBehavior;
 use crate::webdynpro::element::parser::ElementParser;
 use crate::webdynpro::element::{
-    macros::define_element_interactable, Element, ElementDefWrapper, Interactable,
+    Element, ElementDefWrapper, Interactable, macros::define_element_interactable,
 };
 
 use super::list_box::ListBoxDefWrapper;
@@ -94,7 +94,7 @@ impl<'a> ComboBox<'a> {
                 element: self.id().to_string(),
                 field: "item_list_box_id".to_string(),
             })?;
-        let selector = scraper::Selector::parse(format!(r#"[id="{}"]"#, listbox_id).as_str())
+        let selector = scraper::Selector::parse(format!(r#"[id="{listbox_id}"]"#).as_str())
             .or(Err(ElementError::InvalidId(listbox_id.to_owned())))?;
         let elem = parser
             .document()

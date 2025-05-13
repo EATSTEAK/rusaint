@@ -1,7 +1,7 @@
 use std::{borrow::Cow, cell::OnceCell};
 
 use crate::webdynpro::{
-    element::{macros::define_element_base, ElementWrapper},
+    element::{ElementWrapper, macros::define_element_base},
     error::{ElementError, WebDynproError},
 };
 

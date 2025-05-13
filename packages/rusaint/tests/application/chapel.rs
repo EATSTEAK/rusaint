@@ -1,9 +1,9 @@
-use crate::{get_session, TARGET_SEMESTER, TARGET_YEAR};
+use crate::{TARGET_SEMESTER, TARGET_YEAR, get_session};
 use lazy_static::lazy_static;
 use rusaint::model::SemesterType;
 use rusaint::{
-    application::{chapel::ChapelApplication, USaintClientBuilder},
     ApplicationError, RusaintError,
+    application::{USaintClientBuilder, chapel::ChapelApplication},
 };
 use std::sync::{Arc, OnceLock};
 use test_log::test;

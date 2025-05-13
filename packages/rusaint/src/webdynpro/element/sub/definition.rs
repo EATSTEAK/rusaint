@@ -3,7 +3,7 @@ use std::borrow::Cow;
 use scraper::Selector;
 
 use crate::webdynpro::{
-    element::{definition::ElementDefinition, sub::SubElement, Element},
+    element::{Element, definition::ElementDefinition, sub::SubElement},
     error::{ElementError, WebDynproError},
 };
 

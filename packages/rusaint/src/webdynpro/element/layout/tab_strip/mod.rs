@@ -4,8 +4,8 @@ use scraper::Selector;
 
 use crate::webdynpro::{
     element::{
-        definition::ElementDefinition, macros::define_element_interactable, property::Visibility,
-        Element, Interactable,
+        Element, Interactable, definition::ElementDefinition, macros::define_element_interactable,
+        property::Visibility,
     },
     error::{BodyError, WebDynproError},
     event::Event,

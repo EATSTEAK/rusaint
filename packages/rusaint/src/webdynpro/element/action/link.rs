@@ -2,9 +2,9 @@ use std::{borrow::Cow, cell::OnceCell, collections::HashMap};
 
 use crate::webdynpro::{
     element::{
+        Interactable,
         macros::define_element_interactable,
         property::{HotkeyValue, Visibility},
-        Interactable,
     },
     error::WebDynproError,
     event::Event,

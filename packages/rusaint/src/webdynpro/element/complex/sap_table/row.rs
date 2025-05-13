@@ -3,9 +3,9 @@ use std::ops::Index;
 use scraper::ElementRef;
 
 use super::{
+    FromSapTable, SapTableDef, SapTableHeader,
     cell::{SapTableCellDefWrapper, SapTableCellWrapper},
     property::{SapTableRowType, SapTableSelectionState},
-    FromSapTable, SapTableDef, SapTableHeader,
 };
 use crate::webdynpro::element::parser::ElementParser;
 use crate::webdynpro::error::{ElementError, WebDynproError};

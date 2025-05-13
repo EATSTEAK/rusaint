@@ -3,8 +3,8 @@ use crate::webdynpro::event::Event;
 use crate::webdynpro::{
     command::WebDynproCommand,
     element::{
-        complex::{sap_table::SapTableBody, SapTableDef, SapTableLSData},
         Element,
+        complex::{SapTableDef, SapTableLSData, sap_table::SapTableBody},
     },
     error::WebDynproError,
 };
