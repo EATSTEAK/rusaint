@@ -2,8 +2,8 @@ name: Release (Android)
 
 on:
   workflow_run:
-    workflows: [ "Release" ]
-    types: [ completed ]
+    workflows: ["Release"]
+    types: [completed]
     branches:
       - main
   workflow_dispatch:
@@ -47,9 +47,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@1.86.0
         with:
-          targets: 'armv7-linux-androideabi, i686-linux-android, aarch64-linux-android, x86_64-linux-android'
+          targets: "armv7-linux-androideabi, i686-linux-android, aarch64-linux-android, x86_64-linux-android"
       - name: Retrieve cache
         uses: Leafwing-Studios/cargo-cache@v2
       - name: Setup Java
