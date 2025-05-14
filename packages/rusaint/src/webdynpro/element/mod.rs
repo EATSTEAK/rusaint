@@ -371,6 +371,10 @@ impl ElementWrapper<'_> {
             ElementWrapper::TextView(tv) => Ok(tv.text().to_string()),
             ElementWrapper::Caption(cp) => Ok(cp.text().to_string()),
             ElementWrapper::CheckBox(c) => Ok(format!("{}", c.checked())),
+            ElementWrapper::ComboBox(cb) => Ok(cb.value().unwrap_or_default().to_string()),
+            ElementWrapper::InputField(ifield) => {
+                Ok(ifield.value().unwrap_or_default().to_string())
+            }
             _ => Err(WebDynproError::Element(ElementError::InvalidContent {
                 element: self.id().to_string(),
                 content: "This element is cannot be textised.".to_string(),
