@@ -2,8 +2,8 @@ name: Release (iOS)
 
 on:
   workflow_run:
-    workflows: [ "Release" ]
-    types: [ completed ]
+    workflows: ["Release"]
+    types: [completed]
     branches:
       - main
   workflow_dispatch:
@@ -48,7 +48,7 @@ jobs:
       - name: Checkout the repository
         uses: actions/checkout@v4
       - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@1.86.0
         with:
           targets: "aarch64-apple-ios, x86_64-apple-ios, aarch64-apple-ios-sim"
       - name: Retrieve cache
