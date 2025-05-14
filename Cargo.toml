@@ -3,7 +3,7 @@ members = ["packages/rusaint", "packages/rusaint-ffi", "uniffi-bindgen"]
 resolver = "3"
 
 [workspace.package]
-version = "0.9.0"
+version = "0.10.0"
 
 keywords = ["ssu", "u-saint", "scraping", "parser"]
 authors = ["Hyomin Koo <me@eatsteak.dev>"]

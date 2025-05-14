@@ -81,7 +81,7 @@ repositories {
 
 ```kotlin
 dependencies {
-  implementation("dev.eatsteak:rusaint:0.9.0")
+  implementation("dev.eatsteak:rusaint:0.10.0")
 }
 ```
 
@@ -98,4 +98,3 @@ dependencies {
 #### 소스 코드에서 빌드
 
 [languages/swift](/languages/swift) 내부의 build.sh 파일을 실행하여 .xcframework 형태로 빌드할 수 있습니다.
-  
