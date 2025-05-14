@@ -365,8 +365,18 @@ pub trait Interactable<'a>: Element<'a> {
 }
 
 impl ElementWrapper<'_> {
-    /// 주어진 엘리먼트를 텍스트 형태로 변환하려고 시도합니다.
-    pub fn textise(&self) -> Result<String, WebDynproError> {
+    /// Attempts to extract a textual representation from the wrapped element.
+    ///
+    /// Returns the element's text, checked state, or value as a string for supported element types (`TextView`, `Caption`, `CheckBox`, `ComboBox`, `InputField`).  
+    /// Returns an error if the element type does not support text extraction.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let text_view = ElementWrapper::TextView(some_text_view);
+    /// let text = text_view.textise().unwrap();
+    /// assert_eq!(text, "Some text");
+    /// ```    pub fn textise(&self) -> Result<String, WebDynproError> {
         match self {
             ElementWrapper::TextView(tv) => Ok(tv.text().to_string()),
             ElementWrapper::Caption(cp) => Ok(cp.text().to_string()),
