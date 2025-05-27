@@ -87,7 +87,7 @@ pub mod uniffi_support;
 pub mod global_test_utils {
     use crate::{USaintSession, model::SemesterType};
     use anyhow::{Error, Result};
-    use dotenv::dotenv;
+    use dotenvy::dotenv;
     use lazy_static::lazy_static;
     use std::sync::{Arc, OnceLock};
     use tokio::sync::Mutex;

@@ -47,7 +47,7 @@ reqwest_cookie_store = { version = "0.8.0", features = ["serde"] }
 
 [dev-dependencies]
 anyhow = "1"
-dotenv = "0.15.0"
+dotenvy = "0.15.7"
 futures = "0.3.31"
 tokio-test = "0.4.4"
 tokio = { workspace = true, features = ["macros", "test-util"] }

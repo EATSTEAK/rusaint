@@ -1,5 +1,5 @@
 use anyhow::{Error, Result};
-use dotenv::dotenv;
+use dotenvy::dotenv;
 use lazy_static::lazy_static;
 use rusaint::USaintSession;
 use rusaint::model::SemesterType;
