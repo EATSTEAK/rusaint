@@ -57,6 +57,17 @@ async fn print_grades() -> Result<(), RusaintError> {
 }
 ```
 
+## 개발
+
+개발 및 테스트를 위해 아래와 같은 요구사항이 필요합니다:
+
+- `SSO_ID`, `SSO_PASSWORD` 환경 변수 (숭실대학교 SSO ID/비밀번호)
+- `TARGET_YEAR`, `TARGET_SEMESTER` 환경 변수 (학년도/학기, 예시: `2022`, `1`)
+- 테스트를 실행하기 전에, `cargo run -p rusaint-session-helper >> session.json`을 실행하여 세션을 파일로 생성하여야 합니다 (사용하는 쉘에 따라 정확한 명령어는 달라질 수 있습니다).
+  - 세션 파일 경로를 변경하고 싶다면, `SSO_SESSION_FILE` 환경 변수에 경로를 입력하여 변경할 수 있습니다.
+- `rusaint`는 빠른 테스트 실행을 위해 `cargo-nextest`를 사용합니다. (`cargo install cargo-nextest`를 통해 설치할 수 있습니다)
+- `cargo nextest run` 을 실행하여 테스트를 실행합니다.
+
 ## 멀티 플랫폼
 
 rusaint는 [uniffi](https://github.com/mozilla/uniffi-rs)를 이용한 FFI 멀티플랫폼을 지원합니다. 현재 지원하는 플랫폼은 다음과 같습니다.

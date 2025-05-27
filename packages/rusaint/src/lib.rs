@@ -87,14 +87,11 @@ pub mod uniffi_support;
 pub mod global_test_utils {
     use crate::{USaintSession, model::SemesterType};
     use anyhow::{Error, Result};
-    use dotenv::dotenv;
+    use dotenvy::dotenv;
     use lazy_static::lazy_static;
-    use std::sync::{Arc, OnceLock};
-    use tokio::sync::Mutex;
+    use std::{fs::File, io::BufReader, sync::Arc};
 
     lazy_static! {
-        pub(crate) static ref SESSION: Mutex<OnceLock<Arc<USaintSession>>> =
-            Mutex::new(OnceLock::new());
         pub(crate) static ref TARGET_YEAR: u32 = {
             dotenv().ok();
             std::env::var("TARGET_YEAR").unwrap().parse().unwrap()
@@ -113,23 +110,14 @@ pub mod global_test_utils {
     }
 
     pub async fn get_session() -> Result<Arc<USaintSession>> {
-        let session_lock = SESSION.lock().await;
-        if let Some(session) = session_lock.get() {
-            // Throttle session access to prevent 500 error at server response
-            tokio::time::sleep(std::time::Duration::from_millis(1000)).await;
-            Ok(session.to_owned())
-        } else {
-            dotenv().ok();
-            let id = std::env::var("SSO_ID")?;
-            let password = std::env::var("SSO_PASSWORD")?;
-            let session = USaintSession::with_password(&id, &password).await?;
-            let _ = session_lock.set(Arc::new(session));
-            // Throttle session access to prevent 500 error at server response
-            tokio::time::sleep(std::time::Duration::from_millis(1000)).await;
-            session_lock
-                .get()
-                .map(|arc| arc.to_owned())
-                .ok_or(Error::msg("Session is not initiated"))
-        }
+        let session_file_path =
+            std::env::var("SSO_SESSION_FILE").unwrap_or("session.json".to_string());
+        let f = File::open(&session_file_path)
+            .map_err(|e| Error::msg(format!("Failed to open session file: {}", e)))?;
+        let reader = BufReader::new(f);
+        let session: USaintSession = USaintSession::from_json(reader)
+            .map_err(|e| Error::msg(format!("Failed to parse session file: {}", e)))?;
+        let session = Arc::new(session);
+        Ok(session)
     }
 }
