@@ -43,6 +43,7 @@ regex-lite = "0.1.6"
 log = { version = "0.4.27", features = ["kv"] }
 serde_json = "1.0.140"
 reqwest_cookie_store = { version = "0.8.0", features = ["serde"] }
+cookie_store = "0.21.1"
 
 
 [dev-dependencies]

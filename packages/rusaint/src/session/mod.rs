@@ -1,12 +1,16 @@
-use std::{borrow::BorrowMut, sync::Arc};
+use std::{
+    borrow::BorrowMut,
+    io::{BufRead, Write},
+    sync::Arc,
+};
 
+use cookie_store::serde::json::{load_all, save_incl_expired_and_nonpersistent};
 use reqwest::{
     Client,
     cookie::{CookieStore, Jar},
     header::{COOKIE, HOST, HeaderValue, SET_COOKIE},
 };
 use reqwest_cookie_store::CookieStoreRwLock;
-use serde::{Deserialize, Serialize};
 use url::Url;
 
 use crate::{
@@ -21,7 +25,7 @@ const SMARTID_LOGIN_URL: &str = "https://smartid.ssu.ac.kr/Symtra_sso/smln.asp";
 const SMARTID_LOGIN_FORM_REQUEST_URL: &str = "https://smartid.ssu.ac.kr/Symtra_sso/smln_pcs.asp";
 
 /// u-saint 로그인이 필요한 애플리케이션 사용 시 애플리케이션에 제공하는 세션
-#[derive(Debug, Default, Serialize, Deserialize)]
+#[derive(Debug, Default)]
 pub struct USaintSession(CookieStoreRwLock);
 
 impl CookieStore for USaintSession {
@@ -133,6 +137,25 @@ impl USaintSession {
     pub async fn with_password(id: &str, password: &str) -> Result<USaintSession, RusaintError> {
         let token = obtain_ssu_sso_token(id, password).await?;
         Self::with_token(id, &token).await
+    }
+
+    /// 현재 세션의 쿠키를 json 형식으로 저장합니다.
+    pub fn save_to_json<W: Write>(&self, writer: &mut W) -> Result<(), RusaintError> {
+        let store = self.0.read().unwrap();
+        save_incl_expired_and_nonpersistent(&store, writer).map_err(|_| {
+            WebDynproError::from(ClientError::NoCookies("Failed to save cookies".to_string()))
+        })?;
+
+        Ok(())
+    }
+
+    /// json 형식으로 저장된 쿠키를 읽어 세션을 생성합니다.
+    pub fn from_json<R: BufRead>(reader: R) -> Result<USaintSession, RusaintError> {
+        let store = load_all(reader).map_err(|_| {
+            WebDynproError::from(ClientError::NoCookies("Failed to load cookies".to_string()))
+        })?;
+        let store = CookieStoreRwLock::new(store);
+        Ok(USaintSession(store))
     }
 }
 
