@@ -17,3 +17,7 @@ readme = "README.md"
 thiserror = "2.0.12"
 tokio = "1.45.0"
 uniffi = "0.29.2"
+rusaint = { path = "packages/rusaint" }
+
+[workspace.lints.clippy]
+collapsible_if = "allow"
