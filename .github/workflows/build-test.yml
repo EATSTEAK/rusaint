@@ -22,7 +22,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Setup Rust
-        uses: dtolnay/rust-toolchain@nightly
+        uses: dtolnay/rust-toolchain@stable
         with:
           components: llvm-tools-preview
       - uses: taiki-e/install-action@cargo-llvm-cov
@@ -39,7 +39,7 @@ jobs:
         if: steps.changes.outputs.version == 'true'
         run: cargo publish -p rusaint --dry-run --verbose
       - name: Generate session
-        run: cargo run -p rusaint-session-helper >> session.json
+        run: cargo run -p rusaint-session-helper >> ./packages/rusaint/session.json
       - name: Generate code coverage
         env:
           RUST_LOG: info

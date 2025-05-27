@@ -3,19 +3,19 @@ name: Lint
 on:
   workflow_dispatch:
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Setup Rust
-        uses: dtolnay/rust-toolchain@nightly
+        uses: dtolnay/rust-toolchain@stable
         with:
           components: clippy, rustfmt
       - name: Retrieve cache
         uses: Leafwing-Studios/cargo-cache@v2
       - name: Check rustfmt
-        run: cargo +nightly fmt
+        run: cargo fmt
       - name: Check clippy
-        run: cargo +nightly clippy -- -D warnings
+        run: cargo clippy -- -D warnings
