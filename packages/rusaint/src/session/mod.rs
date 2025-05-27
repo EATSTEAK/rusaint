@@ -5,6 +5,8 @@ use reqwest::{
     cookie::{CookieStore, Jar},
     header::{COOKIE, HOST, HeaderValue, SET_COOKIE},
 };
+use reqwest_cookie_store::CookieStoreRwLock;
+use serde::{Deserialize, Serialize};
 use url::Url;
 
 use crate::{
@@ -19,8 +21,8 @@ const SMARTID_LOGIN_URL: &str = "https://smartid.ssu.ac.kr/Symtra_sso/smln.asp";
 const SMARTID_LOGIN_FORM_REQUEST_URL: &str = "https://smartid.ssu.ac.kr/Symtra_sso/smln_pcs.asp";
 
 /// u-saint 로그인이 필요한 애플리케이션 사용 시 애플리케이션에 제공하는 세션
-#[derive(Debug, Default)]
-pub struct USaintSession(Jar);
+#[derive(Debug, Default, Serialize, Deserialize)]
+pub struct USaintSession(CookieStoreRwLock);
 
 impl CookieStore for USaintSession {
     fn set_cookies(&self, cookie_headers: &mut dyn Iterator<Item = &HeaderValue>, url: &Url) {
@@ -35,7 +37,7 @@ impl CookieStore for USaintSession {
 impl USaintSession {
     /// 익명 세션을 반환합니다. 인증이 필요 없는 애플리케이션에서의 세션 동작과 동일합니다.
     pub fn anonymous() -> USaintSession {
-        USaintSession(Jar::default())
+        USaintSession(CookieStoreRwLock::default())
     }
 
     /// SSO 로그인 토큰과 학번으로 인증된 세션을 반환합니다.
@@ -72,10 +74,15 @@ impl USaintSession {
                 .borrow_mut(),
             portal.url(),
         );
-        session_store.0.add_cookie_str(
-            &waf_cookie_str,
-            &Url::parse("https://saint.ssu.ac.kr").unwrap(),
-        );
+        session_store
+            .0
+            .write()
+            .unwrap()
+            .parse(
+                &waf_cookie_str,
+                &Url::parse("https://saint.ssu.ac.kr").unwrap(),
+            )
+            .unwrap();
         let token_cookie_str = format!("sToken={token}; domain=.ssu.ac.kr; path=/; secure");
         let req = client
             .get(format!("{SSU_USAINT_SSO_URL}?sToken={token}&sIdno={id}"))
@@ -126,11 +133,6 @@ impl USaintSession {
     pub async fn with_password(id: &str, password: &str) -> Result<USaintSession, RusaintError> {
         let token = obtain_ssu_sso_token(id, password).await?;
         Self::with_token(id, &token).await
-    }
-
-    /// 세션의 내부 [`request::cookie::Jar`]의 레퍼런스를 반환합니다.
-    pub fn jar(&self) -> &Jar {
-        &self.0
     }
 }
 
