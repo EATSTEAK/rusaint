@@ -1,6 +1,6 @@
 {
   "name": "@rusaint/react-native",
-  "version": "0.1.0",
+  "version": "0.10.0-dev.1",
   "description": "React native implementation of the rusaint, scraper library for SSU u-saint",
   "source": "./src/index.tsx",
   "main": "./lib/commonjs/index.js",
@@ -21,6 +21,7 @@
     "src",
     "lib",
     "android",
+    "build",
     "ios",
     "cpp",
     "*.podspec",
@@ -40,6 +41,7 @@
     "ubrn:ios": "ubrn build ios     --config ubrn.config.yaml --and-generate && (cd example/ios && pod install)",
     "ubrn:android": "ubrn build android --config ubrn.config.yaml --and-generate",
     "ubrn:checkout": "ubrn checkout      --config ubrn.config.yaml",
+    "ubrn:release-build": "ubrn build ios --config ubrn.config.yaml --and-generate --release && ubrn build android --config ubrn.config.yaml --and-generate --release",
     "ubrn:clean": "rm -Rf cpp/ android/src/main/java ios/ src/Native* src/generated/ src/index.ts*",
     "example": "yarn workspace @rusaint/react-native-example",
     "test": "jest",
