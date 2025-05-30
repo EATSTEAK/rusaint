@@ -9,6 +9,7 @@ on:
   workflow_dispatch:
 permissions:
   actions: write
+  id-token: write
 jobs:
   build-rn:
     runs-on: macos-latest
