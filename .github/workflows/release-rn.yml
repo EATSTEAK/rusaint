@@ -102,7 +102,7 @@ jobs:
           node-version: 22
           cache-dependency-path: languages/react-native/yarn.lock
           scope: "@rusaint"
-          token: ${{ secrets.NPM_TOKEN }}
+          registry-url: https://registry.npmjs.org
       - name: Install dependencies
         working-directory: languages/react-native
         run: yarn install --frozen-lockfile
@@ -118,4 +118,6 @@ jobs:
           codesign --timestamp -s "Apple Development" ./build/RusaintReactNativeFramework.xcframework
       - name: Publish to npm
         working-directory: languages/react-native
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm publish --access public --scope @rusaint --provenance
