@@ -1,0 +1,27 @@
+{
+  "folders": [
+	{
+		"name": "rusaint",
+		"path": "."
+	},
+	{
+		"name": "languages/react-native",
+		"path": "languages/react-native"
+	},
+	{
+		"name": "languages/kotlin",
+		"path": "languages/kotlin"
+	},
+	{
+		"name": "languages/swift",
+		"path": "languages/swift"
+	}
+],
+  "settings": {
+    "rust-analyzer.linkedProjects": [
+      "Cargo.toml",
+      "packages/rusaint/Cargo.toml",
+      "packages/rusaint-ffi/Cargo.toml"
+    ]
+  }
+}
