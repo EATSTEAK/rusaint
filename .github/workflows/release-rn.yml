@@ -9,6 +9,7 @@ on:
   workflow_dispatch:
 permissions:
   actions: write
+  id-token: write
 jobs:
   build-rn:
     runs-on: macos-latest
@@ -46,7 +47,7 @@ jobs:
       - name: Checkout the repository
         uses: actions/checkout@v4
       - name: Setup Rust
-        uses: dtolnay/rust-toolchain@1.86.0
+        uses: dtolnay/rust-toolchain@stable
         with:
           targets: "aarch64-apple-ios, x86_64-apple-ios, aarch64-apple-ios-sim, armv7-linux-androideabi, i686-linux-android, aarch64-linux-android, x86_64-linux-android"
       - name: Retrieve cache
@@ -102,7 +103,7 @@ jobs:
           node-version: 22
           cache-dependency-path: languages/react-native/yarn.lock
           scope: "@rusaint"
-          token: ${{ secrets.NPM_TOKEN }}
+          registry-url: https://registry.npmjs.org
       - name: Install dependencies
         working-directory: languages/react-native
         run: yarn install --frozen-lockfile
@@ -118,4 +119,6 @@ jobs:
           codesign --timestamp -s "Apple Development" ./build/RusaintReactNativeFramework.xcframework
       - name: Publish to npm
         working-directory: languages/react-native
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm publish --access public --scope @rusaint --provenance
