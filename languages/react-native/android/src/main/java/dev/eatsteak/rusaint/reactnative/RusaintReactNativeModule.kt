@@ -5,9 +5,9 @@ import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.module.annotations.ReactModule
 import com.facebook.react.turbomodule.core.interfaces.CallInvokerHolder
 
-@ReactModule(name = ReactNativeModule.NAME)
-class ReactNativeModule(reactContext: ReactApplicationContext) :
-  NativeReactNativeSpec(reactContext) {
+@ReactModule(name = RusaintReactNativeModule.NAME)
+class RusaintReactNativeModule(reactContext: ReactApplicationContext) :
+  NativeRusaintReactNativeSpec(reactContext) {
 
   override fun getName(): String {
     return NAME
@@ -34,7 +34,7 @@ class ReactNativeModule(reactContext: ReactApplicationContext) :
   }
 
   companion object {
-    const val NAME = "ReactNative"
+    const val NAME = "RusaintReactNative"
 
     init {
       System.loadLibrary("rusaint-react-native")

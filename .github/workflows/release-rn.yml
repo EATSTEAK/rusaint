@@ -116,7 +116,7 @@ jobs:
         working-directory: languages/react-native
         run: |
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" $RUNNER_TEMP/signing.keychain-db
-          codesign --timestamp -s "Apple Development" ./build/RusaintReactNativeFramework.xcframework
+          codesign --timestamp -s "Apple Development" ./build/RusaintReactNative.xcframework
       - name: Publish to npm
         working-directory: languages/react-native
         env:

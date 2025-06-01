@@ -4,13 +4,13 @@
 #endif
 
 #ifdef RCT_NEW_ARCH_ENABLED
-#import "RNReactNativeSpec.h"
+#import "RNRusaintSpec.h"
 
-@interface ReactNative : NSObject <NativeReactNativeSpec>
+@interface RusaintReactNative : NSObject <NativeRusaintReactNativeSpec>
 #else
 #import <React/RCTBridgeModule.h>
 
-@interface ReactNative : NSObject <RCTBridgeModule>
+@interface RusaintReactNative : NSObject <RCTBridgeModule>
 #endif
 
 @end

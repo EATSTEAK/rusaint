@@ -7,18 +7,18 @@
 namespace jsi = facebook::jsi;
 namespace react = facebook::react;
 
-// Automated testing checks Java_dev_eatsteak_rusaint_reactnative_ReactNativeModule and rusaint_reactnative
+// Automated testing checks Java_dev_eatsteak_rusaint_reactnative_RusaintReactNativeModule and rusaintreactnative
 // by comparing the whole line here.
 /*
-Java_dev_eatsteak_rusaint_reactnative_ReactNativeModule_nativeMultiply(JNIEnv *env, jclass type, jdouble a, jdouble b) {
-    return rusaint_reactnative::multiply(a, b);
+Java_dev_eatsteak_rusaint_reactnative_RusaintReactNativeModule_nativeMultiply(JNIEnv *env, jclass type, jdouble a, jdouble b) {
+    return rusaintreactnative::multiply(a, b);
 }
 */
 
-// Installer coming from ReactNativeModule
+// Installer coming from RusaintReactNativeModule
 extern "C"
 JNIEXPORT jboolean JNICALL
-Java_dev_eatsteak_rusaint_reactnative_ReactNativeModule_nativeInstallRustCrate(
+Java_dev_eatsteak_rusaint_reactnative_RusaintReactNativeModule_nativeInstallRustCrate(
     JNIEnv *env,
     jclass type,
     jlong rtPtr,
@@ -52,12 +52,12 @@ Java_dev_eatsteak_rusaint_reactnative_ReactNativeModule_nativeInstallRustCrate(
     auto jsCallInvoker = nativePointer->getCallInvoker();
 
     auto runtime = reinterpret_cast<jsi::Runtime *>(rtPtr);
-    return rusaint_reactnative::installRustCrate(*runtime, jsCallInvoker);
+    return rusaintreactnative::installRustCrate(*runtime, jsCallInvoker);
 }
 
 extern "C"
 JNIEXPORT jboolean JNICALL
-Java_dev_eatsteak_rusaint_reactnative_ReactNativeModule_nativeCleanupRustCrate(JNIEnv *env, jclass type, jlong rtPtr) {
+Java_dev_eatsteak_rusaint_reactnative_RusaintReactNativeModule_nativeCleanupRustCrate(JNIEnv *env, jclass type, jlong rtPtr) {
     auto runtime = reinterpret_cast<jsi::Runtime *>(rtPtr);
-    return rusaint_reactnative::cleanupRustCrate(*runtime);
+    return rusaintreactnative::cleanupRustCrate(*runtime);
 }

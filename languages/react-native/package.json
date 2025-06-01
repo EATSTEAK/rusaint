@@ -165,7 +165,7 @@
     ]
   },
   "codegenConfig": {
-    "name": "RNReactNativeSpec",
+    "name": "RNRusaintSpec",
     "type": "modules",
     "jsSrcsDir": "src",
     "outputDir": {

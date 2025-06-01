@@ -8,10 +8,10 @@ import com.facebook.react.module.model.ReactModuleInfo
 import com.facebook.react.module.model.ReactModuleInfoProvider
 import java.util.HashMap
 
-class ReactNativePackage : TurboReactPackage() {
+class RusaintReactNativePackage : TurboReactPackage() {
   override fun getModule(name: String, reactContext: ReactApplicationContext): NativeModule? {
-    return if (name == ReactNativeModule.NAME) {
-      ReactNativeModule(reactContext)
+    return if (name == RusaintReactNativeModule.NAME) {
+      RusaintReactNativeModule(reactContext)
     } else {
       null
     }
@@ -20,9 +20,9 @@ class ReactNativePackage : TurboReactPackage() {
   override fun getReactModuleInfoProvider(): ReactModuleInfoProvider {
     return ReactModuleInfoProvider {
       val moduleInfos: MutableMap<String, ReactModuleInfo> = HashMap()
-      moduleInfos[ReactNativeModule.NAME] = ReactModuleInfo(
-        ReactNativeModule.NAME,
-        ReactNativeModule.NAME,
+      moduleInfos[RusaintReactNativeModule.NAME] = ReactModuleInfo(
+        RusaintReactNativeModule.NAME,
+        RusaintReactNativeModule.NAME,
         false,  // canOverrideExistingModule
         false,  // needsEagerInit
         false,  // isCxxModule
