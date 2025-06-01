@@ -15,7 +15,8 @@
         "types": "./lib/typescript/commonjs/src/index.d.ts",
         "default": "./lib/commonjs/index.js"
       }
-    }
+    },
+    "./package.json": "./package.json"
   },
   "files": [
     "src",
@@ -143,15 +144,14 @@
     "source": "src",
     "output": "lib",
     "targets": [
-      "codegen",
       [
-        "commonjs",
+        "module",
         {
           "esm": true
         }
       ],
       [
-        "module",
+        "commonjs",
         {
           "esm": true
         }
@@ -181,5 +181,9 @@
     "type": "turbo-module",
     "languages": "cpp",
     "version": "0.48.6"
-  }
+  },
+  "eslintIgnore": [
+    "node_modules/",
+    "lib/"
+  ]
 }
