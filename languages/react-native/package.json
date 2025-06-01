@@ -1,6 +1,6 @@
 {
   "name": "@rusaint/react-native",
-  "version": "0.10.0-dev.4",
+  "version": "0.10.0-dev.5",
   "description": "React native implementation of the rusaint, scraper library for SSU u-saint",
   "source": "./src/index.tsx",
   "main": "./lib/commonjs/index.js",
@@ -165,7 +165,7 @@
     ]
   },
   "codegenConfig": {
-    "name": "RNRusaintSpec",
+    "name": "NativeRusaintReactNativeSpec",
     "type": "modules",
     "jsSrcsDir": "src",
     "outputDir": {
