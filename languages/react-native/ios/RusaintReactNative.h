@@ -4,7 +4,7 @@
 #endif
 
 #ifdef RCT_NEW_ARCH_ENABLED
-#import "NativeRusaintReactNativeSpec.h"
+#import "RNRusaintSpec.h"
 
 @interface RusaintReactNative : NSObject <NativeRusaintReactNativeSpec>
 #else

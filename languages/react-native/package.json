@@ -89,7 +89,7 @@
     "prettier": "^3.5.3",
     "react": "19.1.0",
     "react-native": "0.79.2",
-    "react-native-builder-bob": "^0.39.0",
+    "react-native-builder-bob": "^0.40.0",
     "release-it": "^18.1.2",
     "turbo": "^2.4.4",
     "typescript": "^5.6.3",
@@ -165,8 +165,8 @@
     ]
   },
   "codegenConfig": {
-    "name": "NativeRusaintReactNativeSpec",
-    "type": "modules",
+    "name": "RNRusaintSpec",
+    "type": "all",
     "jsSrcsDir": "src",
     "outputDir": {
       "ios": "ios/generated",

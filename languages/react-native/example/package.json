@@ -11,19 +11,19 @@
   },
   "dependencies": {
     "react": "19.1.0",
-    "react-native": "0.78.1"
+    "react-native": "0.79.2"
   },
   "devDependencies": {
     "@babel/core": "^7.26.10",
     "@babel/preset-env": "^7.26.9",
     "@babel/runtime": "^7.27.0",
-    "@react-native-community/cli": "17.0.0",
-    "@react-native-community/cli-platform-android": "17.0.0",
-    "@react-native-community/cli-platform-ios": "17.0.0",
-    "@react-native/babel-preset": "0.78.1",
-    "@react-native/metro-config": "0.78.1",
-    "@react-native/typescript-config": "0.78.1",
-    "react-native-builder-bob": "^0.39.0"
+    "@react-native-community/cli": "18.0.0",
+    "@react-native-community/cli-platform-android": "18.0.0",
+    "@react-native-community/cli-platform-ios": "18.0.0",
+    "@react-native/babel-preset": "0.79.2",
+    "@react-native/metro-config": "0.79.2",
+    "@react-native/typescript-config": "0.79.2",
+    "react-native-builder-bob": "^0.40.0"
   },
   "engines": {
     "node": ">=22"
