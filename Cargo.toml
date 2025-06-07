@@ -8,7 +8,7 @@ members = [
 resolver = "3"
 
 [workspace.package]
-version = "0.10.0"
+version = "0.11.0"
 
 keywords = ["ssu", "u-saint", "scraping", "parser"]
 authors = ["Hyomin Koo <me@eatsteak.dev>"]
@@ -21,7 +21,7 @@ readme = "README.md"
 [workspace.dependencies]
 thiserror = "2.0.12"
 tokio = "1.45.0"
-uniffi = "0.29.2"
+uniffi = "0.29.3"
 rusaint = { path = "packages/rusaint" }
 
 [workspace.lints.clippy]
