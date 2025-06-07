@@ -12,7 +12,7 @@ plugins {
 
 group = "dev.eatsteak"
 description = "Easy and Reliable SSU u-saint scraper"
-version = "0.10.0"
+version = "0.11.0"
 
 android {
     namespace = "dev.eatsteak.rusaint"
@@ -102,8 +102,8 @@ jreleaser {
 
     project {
         name = "rusaint"
-        copyright = "2024-2025 EATSTEAK"
-        author("EATSTEAK")
+        copyright = "2024-2025 EATSTEAK (Koo Hyomin)"
+        author("Koo Hyomin <me@eatsteak.dev>")
     }
 
     release {

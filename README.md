@@ -17,7 +17,7 @@ u-saint 내부 요소들을 조작하고 파싱할 수 있습니다.
 
 - **JS 런타임 없음** — JS 런타임 없이 자체적으로 요청과 응답에 따른 처리를 수행하므로 HTTPS 요청이 가능한 모든 환경에서 실행 가능합니다.
 - **빠른 속도** — 네이티브 환경으로 컴파일되는 Rust를 이용하고, 휴리스틱 없이 요청이 완료되면 곧바로 실행되어 빠르게 u-saint 를 조작 및 파싱 가능합니다.
-- **멀티플랫폼 지원** — UniFFI를 통한 Kotlin, Swift, React-Native, Python(예정) 지원을 제공하여 다양한 플랫폼에서 간편하게 이용할 수 있습니다.
+- **멀티플랫폼 지원** — UniFFI를 통한 Kotlin, Swift, React-Native, Python 지원을 제공하여 다양한 플랫폼에서 간편하게 이용할 수 있습니다.
 - **간편한 기능 정의** — rusaint 에서 지원하지 않는 u-saint 애플리케이션에 대한 파싱 및 지원을 제공하는 API를 이용해 간편하게 정의할 수 있습니다.
 
 ## 설치
@@ -73,8 +73,9 @@ async fn print_grades() -> Result<(), RusaintError> {
 rusaint는 [uniffi](https://github.com/mozilla/uniffi-rs)를 이용한 FFI 멀티플랫폼을 지원합니다. 현재 지원하는 플랫폼은 다음과 같습니다.
 
 - Android (Kotlin)
-- Swift
+- iOS (Swift)
 - React Native
+- Python
 
 ### Android (Kotlin)
 
@@ -104,7 +105,7 @@ dependencies {
 
 [languages/kotlin](/languages/kotlin) 내부의 README.md 파일을 참고하세요.
 
-### Swift
+### iOS (Swift)
 
 <a href="https://github.com/EATSTEAK/rusaint-ios"><img alt="SwiftPM Release" src="https://img.shields.io/github/v/release/eatsteak/rusaint-ios?style=for-the-badge&logo=swift&label=SwiftPM&color=F05138">
 </a>
@@ -156,4 +157,28 @@ EXPO_USE_COMMUNITY_AUTOLINKING=1 # Enable autolinking by @react-native-community
 yarn install
 yarn ubrn:release-build # REQUIREMENTS: Cargo and android/ios targets for building rust binaries
 yarn prepare # Run codegen
+```
+
+### Python
+
+<a href="https://pypi.org/project/rusaint/"><img alt="PyPI - Version" src="https://img.shields.io/pypi/v/rusaint?style=for-the-badge&logo=pypi&color=3775A9"></a>
+
+#### PyPI에서 설치
+
+```bash
+# Using pip
+pip install rusaint
+# Using uv
+uv add rusaint
+```
+
+#### 소스 코드에서 빌드
+
+rusaint는 [maturin](https://www.maturin.rs/)을 사용하여 Python wheel을 빌드합니다.
+
+```bash
+# ./languages/python
+# with uv
+uv tool install maturin
+uvx maturin build --release --out dist --find-interpreter # Creates an release wheel in ./dist directory
 ```
