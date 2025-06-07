@@ -2,7 +2,7 @@
 <p align="center" style="font-style: italic;">빠르고 간편하며 믿을 수 있는 숭실대학교 u-saint 클라이언트</p>
 <p align="center">
     <a href="https://github.com/EATSTEAK/rusaint"><img alt="GitHub Badge" src="https://img.shields.io/badge/github-eatsteak/rusaint-8da0cb?style=for-the-badge&labelColor=555555&logo=github"></a>
-    <a href="https://www.npmjs.com/package/@rusaint/react-native"><img alt="NPM Destribution" src="https://img.shields.io/npm/v/%40rusaint%2Freact-native?style=for-the-badge&logo=npm&color=CB3837"></a>
+    <a href="https://www.npmjs.com/package/@rusaint/react-native"><img alt="NPM Distribution" src="https://img.shields.io/npm/v/%40rusaint%2Freact-native?style=for-the-badge&logo=npm&color=CB3837"></a>
     <a href="https://docs.rs/rusaint"><img alt="docs.rs" src="https://img.shields.io/badge/docs.rs-rusaint-66c2a5?style=for-the-badge&labelColor=555555&logo=docs.rs"></a>
    <a href="https://github.com/EATSTEAK/rusaint/LICENSE.md"><img alt="License" src="https://img.shields.io/github/license/EATSTEAK/rusaint?style=for-the-badge"></a>
 </p>

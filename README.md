@@ -121,7 +121,7 @@ dependencies {
 
 ### React Native (Turbo Module)
 
-<a href="https://www.npmjs.com/package/@rusaint/react-native"><img alt="NPM Destribution" src="https://img.shields.io/npm/v/%40rusaint%2Freact-native?style=for-the-badge&logo=npm&color=CB3837"></a>
+<a href="https://www.npmjs.com/package/@rusaint/react-native"><img alt="NPM Distribution" src="https://img.shields.io/npm/v/%40rusaint%2Freact-native?style=for-the-badge&logo=npm&color=CB3837"></a>
 
 #### 패키지 매니저를 이용하여 설치
 
