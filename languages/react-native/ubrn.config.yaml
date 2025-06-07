@@ -1,5 +1,6 @@
+name: rusaint-react-native
 rust:
   directory: ../../
   manifestPath: packages/rusaint-ffi/Cargo.toml
 ios:
-  frameworkName: build/RusaintReactNativeFramework
+  frameworkName: build/RusaintReactNative
