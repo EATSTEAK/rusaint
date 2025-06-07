@@ -1,7 +1,3 @@
-[build-system]
-requires = ["maturin>=1.8,<2.0"]
-build-backend = "maturin"
-
 [project]
 name = "rusaint"
 requires-python = ">=3.8"
@@ -10,7 +6,12 @@ classifiers = [
     "Programming Language :: Python :: Implementation :: CPython",
     "Programming Language :: Python :: Implementation :: PyPy",
 ]
-dynamic = ["version"]
+readme = "README.md"
+dynamic = ["version", "authors", "license"]
+
+[build-system]
+requires = ["maturin>=1.8,<2.0"]
+build-backend = "maturin"
 
 [tool.maturin]
 bindings = "uniffi"
