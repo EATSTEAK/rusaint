@@ -7,3 +7,6 @@ android = true
 ffi_module_name = "RusaintFFI"
 module_name = "Rusaint"
 generate_immutable_records = true
+
+[bindings.python]
+cdylib_name = "rusaint_ffi"
