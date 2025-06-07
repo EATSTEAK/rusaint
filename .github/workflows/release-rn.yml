@@ -106,7 +106,7 @@ jobs:
           registry-url: https://registry.npmjs.org
       - name: Install dependencies
         working-directory: languages/react-native
-        run: yarn install --frozen-lockfile
+        run: yarn install --immutable
       - name: Build the library
         working-directory: languages/react-native
         run: "yarn ubrn:release-build"
