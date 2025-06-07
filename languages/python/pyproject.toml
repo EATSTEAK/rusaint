@@ -14,5 +14,6 @@ requires = ["maturin>=1.8,<2.0"]
 build-backend = "maturin"
 
 [tool.maturin]
+module-name = "rusaint"
 bindings = "uniffi"
 manifest-path = "../../packages/rusaint-ffi/Cargo.toml"
