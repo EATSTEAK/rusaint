@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.rust.android)
     alias(libs.plugins.android.library)
     alias(libs.plugins.jetbrains.kotlin.android)
+    alias(libs.plugins.dokka)
     `maven-publish`
 }
 
@@ -92,6 +93,7 @@ dependencies {
     implementation("net.java.dev.jna:jna:5.14.0@aar")
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.core.ktx)
+    dokkaPlugin(libs.dokka.android)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
