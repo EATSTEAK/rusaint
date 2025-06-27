@@ -59,11 +59,8 @@ impl USaintSession {
             .send()
             .await
             .map_err(|e| WebDynproError::from(ClientError::from(e)))?;
-        let waf = portal
-            .cookies()
-            .find(|cookie| cookie.name() == "WAF")
-            .ok_or_else(|| WebDynproError::from(ClientError::NoSuchCookie("WAF".to_string())))?;
-        let waf_cookie_str = format!("WAF={}; domain=saint.ssu.ac.kr; path=/;", waf.value());
+        let waf = portal.cookies().find(|cookie| cookie.name() == "WAF");
+
         session_store.set_cookies(
             portal
                 .headers()
@@ -78,15 +75,21 @@ impl USaintSession {
                 .borrow_mut(),
             portal.url(),
         );
-        session_store
-            .0
-            .write()
-            .unwrap()
-            .parse(
-                &waf_cookie_str,
-                &Url::parse("https://saint.ssu.ac.kr").unwrap(),
-            )
-            .unwrap();
+
+        if let Some(waf) = waf {
+            let waf_cookie_str = format!("WAF={}; domain=saint.ssu.ac.kr; path=/;", waf.value());
+            session_store
+                .0
+                .write()
+                .unwrap()
+                .parse(
+                    &waf_cookie_str,
+                    &Url::parse("https://saint.ssu.ac.kr").unwrap(),
+                )
+                .unwrap();
+        } else {
+            log::warn!("WAF cookie not found in portal response");
+        }
         let token_cookie_str = format!("sToken={token}; domain=.ssu.ac.kr; path=/; secure");
         let req = client
             .get(format!("{SSU_USAINT_SSO_URL}?sToken={token}&sIdno={id}"))
