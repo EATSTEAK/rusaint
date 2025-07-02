@@ -54,9 +54,9 @@ pub(crate) fn deserialize_semester_type<'de, D: Deserializer<'de>>(
 ) -> Result<SemesterType, D::Error> {
     let value = String::deserialize(deserializer)?;
     match value.trim() {
-        "1 학기" => Ok(SemesterType::One),
+        "1 학기" | "1학기" => Ok(SemesterType::One),
         "여름학기" | "여름 학기" => Ok(SemesterType::Summer),
-        "2 학기" => Ok(SemesterType::Two),
+        "2 학기" | "2학기" => Ok(SemesterType::Two),
         "겨울학기" | "겨울 학기" => Ok(SemesterType::Winter),
         _ => Err(serde::de::Error::custom("Unknown SemesterType variant")),
     }
