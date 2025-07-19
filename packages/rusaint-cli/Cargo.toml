@@ -1,7 +1,7 @@
 [package]
 name = "rusaint-cli"
 version = "0.3.0"
-authors = ["JOONGGON LEE <2wndrhs@gmai.com>"]
+authors = ["JOONGGON LEE <2wndrhs@gmail.com>"]
 description = "CLI for fetching course schedules"
 repository = "https://github.com/2wndrhs/rusaint"
 readme = "README.md"
