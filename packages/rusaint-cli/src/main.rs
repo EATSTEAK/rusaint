@@ -4,14 +4,14 @@ use std::{fs::File, io::Write, sync::Arc};
 
 use clap::{Parser, Subcommand};
 use rusaint::{
-    application::{
-        course_schedule::{
-            model::{Lecture, LectureCategory},
-            CourseScheduleApplication,
-        },
-        USaintClientBuilder,
-    },
     RusaintError, USaintSession,
+    application::{
+        USaintClientBuilder,
+        course_schedule::{
+            CourseScheduleApplication,
+            model::{Lecture, LectureCategory},
+        },
+    },
 };
 
 use dotenv::dotenv;
