@@ -9,7 +9,7 @@ license.workspace = true
 edition.workspace = true
 
 [dependencies]
-rusaint = "0.9.0"
+rusaint = { workspace = true }
 tokio = { workspace = true, features = ["full"] }
 thiserror = { workspace = true }
 clap = { version = "4.5.27", features = ["derive"] }
