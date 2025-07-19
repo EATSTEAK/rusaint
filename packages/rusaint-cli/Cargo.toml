@@ -10,7 +10,7 @@ edition.workspace = true
 
 [dependencies]
 rusaint = { workspace = true }
-tokio = { workspace = true, features = ["full"] }
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
 thiserror = { workspace = true }
 clap = { version = "4.5.27", features = ["derive"] }
 serde = { version = "1", features = ["derive"] }
