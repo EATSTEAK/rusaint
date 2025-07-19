@@ -1,5 +1,6 @@
 use std::{fmt::Display, ops::Deref, str::FromStr};
 
+use clap::ValueEnum;
 use thiserror::Error;
 
 #[derive(Debug, Clone, Copy)]
@@ -21,7 +22,7 @@ impl Display for SemesterType {
             rusaint::model::SemesterType::Two => "2학기",
             rusaint::model::SemesterType::Winter => "겨울학기",
         };
-        write!(f, "{}", semester)
+        write!(f, "{semester}")
     }
 }
 
@@ -41,6 +42,30 @@ impl FromStr for SemesterType {
             "2" | "two" => Ok(SemesterType(rusaint::model::SemesterType::Two)),
             "winter" => Ok(SemesterType(rusaint::model::SemesterType::Winter)),
             _ => Err(ParseSemesterTypeError::InvalidSemesterType),
+        }
+    }
+}
+
+impl ValueEnum for SemesterType {
+    fn value_variants<'a>() -> &'a [Self] {
+        &[
+            SemesterType(rusaint::model::SemesterType::One),
+            SemesterType(rusaint::model::SemesterType::Summer),
+            SemesterType(rusaint::model::SemesterType::Two),
+            SemesterType(rusaint::model::SemesterType::Winter),
+        ]
+    }
+
+    fn to_possible_value(&self) -> Option<clap::builder::PossibleValue> {
+        match self.0 {
+            rusaint::model::SemesterType::One => Some(clap::builder::PossibleValue::new("one")),
+            rusaint::model::SemesterType::Summer => {
+                Some(clap::builder::PossibleValue::new("summer"))
+            }
+            rusaint::model::SemesterType::Two => Some(clap::builder::PossibleValue::new("two")),
+            rusaint::model::SemesterType::Winter => {
+                Some(clap::builder::PossibleValue::new("winter"))
+            }
         }
     }
 }
