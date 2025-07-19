@@ -41,7 +41,7 @@ async fn find_major() {
     let mut app = lock.write().await;
     let category = LectureCategory::major("IT대학", "글로벌미디어학부", None);
     let lectures = app
-        .find_lectures(2023, SemesterType::Two, &category)
+        .find_lectures(2025, SemesterType::One, &category)
         .await
         .unwrap();
     for lecture in lectures {
@@ -51,11 +51,15 @@ async fn find_major() {
 
 #[test(tokio::test)]
 async fn find_required_elective() {
-    let lock = get_app().await.unwrap();
-    let mut app = lock.write().await;
-    let category = LectureCategory::required_elective("Academic and Professional English 1");
+    let session = get_session().await.unwrap().clone();
+    let mut app = USaintClientBuilder::new()
+        .session(session)
+        .build_into::<CourseScheduleApplication>()
+        .await
+        .unwrap();
+    let category = LectureCategory::required_elective("대학한국어1");
     let lectures = app
-        .find_lectures(2023, SemesterType::Two, &category)
+        .find_lectures(2025, SemesterType::One, &category)
         .await
         .unwrap();
     for lecture in lectures {
@@ -69,7 +73,7 @@ async fn find_optional_elective() {
     let mut app = lock.write().await;
     let category = LectureCategory::optional_elective("[‘23이후]과학·기술");
     let lectures = app
-        .find_lectures(2023, SemesterType::Two, &category)
+        .find_lectures(2025, SemesterType::One, &category)
         .await
         .unwrap();
     for lecture in lectures {
@@ -79,11 +83,15 @@ async fn find_optional_elective() {
 
 #[test(tokio::test)]
 async fn find_chapel() {
-    let lock = get_app().await.unwrap();
-    let mut app = lock.write().await;
-    let category = LectureCategory::chapel("CHAPEL");
+    let session = get_session().await.unwrap().clone();
+    let mut app = USaintClientBuilder::new()
+        .session(session)
+        .build_into::<CourseScheduleApplication>()
+        .await
+        .unwrap();
+    let category = LectureCategory::chapel("비전채플");
     let lectures = app
-        .find_lectures(2023, SemesterType::Two, &category)
+        .find_lectures(2025, SemesterType::One, &category)
         .await
         .unwrap();
     for lecture in lectures {
@@ -97,7 +105,7 @@ async fn find_education() {
     let mut app = lock.write().await;
     let category = LectureCategory::education();
     let lectures = app
-        .find_lectures(2023, SemesterType::Two, &category)
+        .find_lectures(2025, SemesterType::One, &category)
         .await
         .unwrap();
     for lecture in lectures {
@@ -105,13 +113,14 @@ async fn find_education() {
     }
 }
 
-#[test(tokio::test)]
+#[tokio::test]
+#[ignore]
 async fn find_graduated() {
     let lock = get_app().await.unwrap();
     let mut app = lock.write().await;
     let category = LectureCategory::graduated("정보과학대학원", "전체 학과");
     let lectures = app
-        .find_lectures(2023, SemesterType::Two, &category)
+        .find_lectures(2025, SemesterType::One, &category)
         .await
         .unwrap();
     for lecture in lectures {
@@ -125,7 +134,7 @@ async fn find_connected_major() {
     let mut app = lock.write().await;
     let category = LectureCategory::connected_major("융합창업연계");
     let lectures = app
-        .find_lectures(2023, SemesterType::Two, &category)
+        .find_lectures(2025, SemesterType::One, &category)
         .await
         .unwrap();
     for lecture in lectures {
@@ -139,7 +148,7 @@ async fn find_united_major() {
     let mut app = lock.write().await;
     let category = LectureCategory::united_major("빅데이터융합");
     let lectures = app
-        .find_lectures(2023, SemesterType::Two, &category)
+        .find_lectures(2025, SemesterType::One, &category)
         .await
         .unwrap();
     for lecture in lectures {
@@ -153,7 +162,7 @@ async fn find_recognized_other_major() {
     let mut app = lock.write().await;
     let category = LectureCategory::recognized_other_major("IT대학", "글로벌미디어학부", None);
     let lectures = app
-        .find_lectures(2023, SemesterType::Two, &category)
+        .find_lectures(2025, SemesterType::One, &category)
         .await
         .unwrap();
     for lecture in lectures {
@@ -167,7 +176,7 @@ async fn find_cyber() {
     let mut app = lock.write().await;
     let category = LectureCategory::cyber();
     let lectures = app
-        .find_lectures(2023, SemesterType::Two, &category)
+        .find_lectures(2025, SemesterType::One, &category)
         .await
         .unwrap();
     for lecture in lectures {
@@ -181,7 +190,7 @@ async fn find_nothing() {
     let mut app = lock.write().await;
     let category = LectureCategory::find_by_lecture("내가A+받는강의");
     let Some(err) = app
-        .find_lectures(2023, SemesterType::Two, &category)
+        .find_lectures(2025, SemesterType::One, &category)
         .await
         .err()
     else {

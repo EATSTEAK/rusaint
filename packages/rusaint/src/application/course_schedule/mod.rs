@@ -358,6 +358,7 @@ impl<'app> CourseScheduleApplication {
         let lectures =
             try_table_into_with_scroll::<Lecture>(&mut self.client, parser, Self::MAIN_TABLE)
                 .await?;
+
         Ok(lectures.into_iter())
     }
 
