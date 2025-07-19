@@ -29,87 +29,87 @@ struct Cli {
 #[derive(Subcommand)]
 enum Commands {
     ByLecture {
-        #[arg(long)]
+        #[arg(short = 'y', long)]
         year: u32,
-        #[arg(long)]
+        #[arg(short = 's', long)]
         semester: SemesterType,
-        #[arg(long)]
+        #[arg(short = 'k', long)]
         keyword: String,
     },
     Major {
-        #[arg(long)]
+        #[arg(short = 'y', long)]
         year: u32,
-        #[arg(long)]
+        #[arg(short = 's', long)]
         semester: SemesterType,
-        #[arg(long)]
+        #[arg(short = 'c', long)]
         college: String,
-        #[arg(long)]
+        #[arg(short = 'd', long)]
         department: String,
-        #[arg(long)]
+        #[arg(short = 'm', long)]
         major: Option<String>,
     },
     RequiredElective {
-        #[arg(long)]
+        #[arg(short = 'y', long)]
         year: u32,
-        #[arg(long)]
+        #[arg(short = 's', long)]
         semester: SemesterType,
-        #[arg(long)]
+        #[arg(short = 'n', long)]
         course_name: String,
     },
     OptionalElective {
-        #[arg(long)]
+        #[arg(short = 'y', long)]
         year: u32,
-        #[arg(long)]
+        #[arg(short = 's', long)]
         semester: SemesterType,
-        #[arg(long)]
+        #[arg(short = 'n', long)]
         course_name: String,
     },
     Chapel {
-        #[arg(long)]
+        #[arg(short = 'y', long)]
         year: u32,
-        #[arg(long)]
+        #[arg(short = 's', long)]
         semester: SemesterType,
-        #[arg(long)]
+        #[arg(short = 'n', long)]
         chapel_name: String,
     },
     Education {
-        #[arg(long)]
+        #[arg(short = 'y', long)]
         year: u32,
-        #[arg(long)]
+        #[arg(short = 's', long)]
         semester: SemesterType,
     },
     ConnectedMajor {
-        #[arg(long)]
+        #[arg(short = 'y', long)]
         year: u32,
-        #[arg(long)]
+        #[arg(short = 's', long)]
         semester: SemesterType,
-        #[arg(long)]
+        #[arg(short = 'n', long)]
         major_name: String,
     },
     UnitedMajor {
-        #[arg(long)]
+        #[arg(short = 'y', long)]
         year: u32,
-        #[arg(long)]
+        #[arg(short = 's', long)]
         semester: SemesterType,
-        #[arg(long)]
+        #[arg(short = 'n', long)]
         major_name: String,
     },
     RecognizedOtherMajor {
-        #[arg(long)]
+        #[arg(short = 'y', long)]
         year: u32,
-        #[arg(long)]
+        #[arg(short = 's', long)]
         semester: SemesterType,
-        #[arg(long)]
+        #[arg(short = 'c', long)]
         college: String,
-        #[arg(long)]
+        #[arg(short = 'd', long)]
         department: String,
-        #[arg(long)]
+        #[arg(short = 'm', long)]
         major: Option<String>,
     },
     Cyber {
-        #[arg(long)]
+        #[arg(short = 'y', long)]
         year: u32,
-        #[arg(long)]
+        #[arg(short = 's', long)]
         semester: SemesterType,
     },
 }

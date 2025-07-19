@@ -33,19 +33,37 @@ SSO_PASSWORD={비밀번호} // 1q2w1q2w!
 
 `rusaint-cli` 는 유세인트 강의시간표 분류에 대응하는 다양한 command가 존재합니다.
 
-## find-by-lecture (과목검색)
+## short 옵션 사용법
+
+편의를 위해 자주 사용하는 옵션들에 대해 짧은 형태를 제공합니다:
+
+- `-y` : `--year` (연도)
+- `-s` : `--semester` (학기)
+- `-k` : `--keyword` (검색어)
+- `-c` : `--college` (대학)
+- `-d` : `--department` (학과)
+- `-m` : `--major` (전공)
+- `-n` : `--course-name`, `--chapel-name`, `--major-name` (이름)
+
+## by-lecture (과목검색)
 - 검색어에 해당하는 과목 정보를 가져와 json 파일로 추출합니다.
 
 ### Usage
 
 ```bash
-rusaint-cli find-by-lecture --year <YEAR> --semester <SEMESTER> --keyword <KEYWORD>
+rusaint-cli by-lecture --year <YEAR> --semester <SEMESTER> --keyword <KEYWORD>
+
+# 짧은 옵션 사용
+rusaint-cli by-lecture -y <YEAR> -s <SEMESTER> -k <KEYWORD>
 ```
 
 ### Examples
 
 ```bash
-rusaint-cli find-by-lecture --year 2025 --semester 1 --keyword "대학글쓰기"
+rusaint-cli by-lecture --year 2025 --semester 1 --keyword "대학글쓰기"
+
+# 짧은 옵션 사용
+rusaint-cli by-lecture -y 2025 -s 1 -k "대학글쓰기"
 ```
 
 ```json
@@ -70,25 +88,34 @@ rusaint-cli find-by-lecture --year 2025 --semester 1 --keyword "대학글쓰기"
 ]
 ```
 
-## find-major (학부전공)
+## major (학부전공)
 
 - 학부전공별 과목 정보를 가져와 json 파일로 추출합니다.
 
 ### Usage
 
 ```bash
-rusaint-cli find-major --year <YEAR> --semester <SEMESTER> --college <COLLEGE> --department <DEPARTMENT> --major <MAJOR>
+rusaint-cli major --year <YEAR> --semester <SEMESTER> --college <COLLEGE> --department <DEPARTMENT> --major <MAJOR>
+
+# 짧은 옵션 사용
+rusaint-cli major -y <YEAR> -s <SEMESTER> -c <COLLEGE> -d <DEPARTMENT> -m <MAJOR>
 ```
 
 ### Examples
 - 세부 전공이 있는 경우
 ```bash
-rusaint-cli find-major --year 2025 --semester 1 --college "공과대학" --department "건축학부" --major "건축공학전공" 
+rusaint-cli major --year 2025 --semester 1 --college "공과대학" --department "건축학부" --major "건축공학전공"
+
+# 짧은 옵션 사용
+rusaint-cli major -y 2025 -s 1 -c "공과대학" -d "건축학부" -m "건축공학전공"
 ```
 - 세부 전공이 없는 경우
 
 ```bash
-rusaint-cli find-major --year 2025 --semester 1 --college "IT대학" --department "컴퓨터학부"
+rusaint-cli major --year 2025 --semester 1 --college "IT대학" --department "컴퓨터학부"
+
+# 짧은 옵션 사용
+rusaint-cli major -y 2025 -s 1 -c "IT대학" -d "컴퓨터학부"
 ```
 
 ```json
@@ -113,20 +140,26 @@ rusaint-cli find-major --year 2025 --semester 1 --college "IT대학" --departmen
 ]
 ```
 
-## find-required-elective (교양필수)
+## required-elective (교양필수)
 
 - 교양필수 과목 정보를 가져와 json 파일로 추출합니다.
 
 ### Usage
 
 ```bash
-rusaint-cli find-required-elective --year <YEAR> --semester <SEMESTER> --course-name <COURSE_NAME>
+rusaint-cli required-elective --year <YEAR> --semester <SEMESTER> --course-name <COURSE_NAME>
+
+# 짧은 옵션 사용
+rusaint-cli required-elective -y <YEAR> -s <SEMESTER> -n <COURSE_NAME>
 ```
 
 ### Examples
 
 ```bash
-rusaint-cli find-required-elective --year 2025 --semester 1 --course-name "대학한국어1"
+rusaint-cli required-elective --year 2025 --semester 1 --course-name "대학한국어1"
+
+# 짧은 옵션 사용
+rusaint-cli required-elective -y 2025 -s 1 -n "대학한국어1"
 ```
 
 ```json
@@ -151,20 +184,26 @@ rusaint-cli find-required-elective --year 2025 --semester 1 --course-name "대�
 ]
 ```
 
-## find-optional-elective (교양선택)
+## optional-elective (교양선택)
 
 - 교양선택 과목 정보를 가져와 json 파일로 추출합니다.
 
 ### Usage
 
 ```bash
-rusaint-cli find-optional-elective --year <YEAR> --semester <SEMESTER> --course-name <COURSE_NAME>
+rusaint-cli optional-elective --year <YEAR> --semester <SEMESTER> --course-name <COURSE_NAME>
+
+# 짧은 옵션 사용
+rusaint-cli optional-elective -y <YEAR> -s <SEMESTER> -n <COURSE_NAME>
 ```
 
 ### Examples
 
 ```bash
-rusaint-cli find-optional-elective --year 2025 --semester 1 --course-name "[‘23이후]과학·기술" 
+rusaint-cli optional-elective --year 2025 --semester 1 --course-name "['23이후]과학·기술"
+
+# 짧은 옵션 사용
+rusaint-cli optional-elective -y 2025 -s 1 -n "['23이후]과학·기술"
 ```
 
 ```json
@@ -189,20 +228,26 @@ rusaint-cli find-optional-elective --year 2025 --semester 1 --course-name "[‘2
 ]
 ```
 
-## find-chapel (채플)
+## chapel (채플)
 
 - 채플 과목 정보를 가져와 json 파일로 추출합니다.
 
 ### Usage
 
 ```bash
-rusaint-cli find-chapel --year <YEAR> --semester <SEMESTER> --chapel-name <CHAPEL_NAME>
+rusaint-cli chapel --year <YEAR> --semester <SEMESTER> --chapel-name <CHAPEL_NAME>
+
+# 짧은 옵션 사용
+rusaint-cli chapel -y <YEAR> -s <SEMESTER> -n <CHAPEL_NAME>
 ```
 
 ### Examples
 
 ```bash
-rusaint-cli find-chapel --year 2025 --semester 1 --chapel-name "비전채플"
+rusaint-cli chapel --year 2025 --semester 1 --chapel-name "비전채플"
+
+# 짧은 옵션 사용
+rusaint-cli chapel -y 2025 -s 1 -n "비전채플"
 ```
 
 ```json
@@ -227,20 +272,26 @@ rusaint-cli find-chapel --year 2025 --semester 1 --chapel-name "비전채플"
 ]
 ```
 
-## find-education (교직)
+## education (교직)
 
 - 교직 과목 정보를 가져와 json 파일로 추출합니다.
 
 ### Usage
 
 ```bash
-rusaint-cli find-education --year <YEAR> --semester <SEMESTER>
+rusaint-cli education --year <YEAR> --semester <SEMESTER>
+
+# 짧은 옵션 사용
+rusaint-cli education -y <YEAR> -s <SEMESTER>
 ```
 
 ### Examples
 
 ```bash
-rusaint-cli find-education --year 2025 --semester 1
+rusaint-cli education --year 2025 --semester 1
+
+# 짧은 옵션 사용
+rusaint-cli education -y 2025 -s 1
 ```
 
 ```json
@@ -265,20 +316,26 @@ rusaint-cli find-education --year 2025 --semester 1
 ]
 ```
 
-## find-connected-major (연계전공)
+## connected-major (연계전공)
 
 - 연계전공 과목 정보를 가져와 json 파일로 추출합니다.
 
 ### Usage
 
 ```bash
-rusaint-cli find-connected-major --year <YEAR> --semester <SEMESTER> --major-name <MAJOR_NAME>
+rusaint-cli connected-major --year <YEAR> --semester <SEMESTER> --major-name <MAJOR_NAME>
+
+# 짧은 옵션 사용
+rusaint-cli connected-major -y <YEAR> -s <SEMESTER> -n <MAJOR_NAME>
 ```
 
 ### Examples
 
 ```bash
-rusaint-cli find-connected-major --year 2025 --semester 1 --major-name "융합창업연계" 
+rusaint-cli connected-major --year 2025 --semester 1 --major-name "융합창업연계"
+
+# 짧은 옵션 사용
+rusaint-cli connected-major -y 2025 -s 1 -n "융합창업연계"
 ```
 
 ```json
@@ -303,20 +360,26 @@ rusaint-cli find-connected-major --year 2025 --semester 1 --major-name "융합�
 ]
 ```
 
-## find-united-major (융합전공)
+## united-major (융합전공)
 
 - 융합전공 과목 정보를 가져와 json 파일로 추출합니다.
 
 ### Usage
 
 ```bash
-rusaint-cli find-united-major --year <YEAR> --semester <SEMESTER> --major-name <MAJOR_NAME>
+rusaint-cli united-major --year <YEAR> --semester <SEMESTER> --major-name <MAJOR_NAME>
+
+# 짧은 옵션 사용
+rusaint-cli united-major -y <YEAR> -s <SEMESTER> -n <MAJOR_NAME>
 ```
 
 ### Examples
 
 ```bash
-rusaint-cli find-united-major --year 2025 --semester 1 --major-name "빅데이터융합"
+rusaint-cli united-major --year 2025 --semester 1 --major-name "빅데이터융합"
+
+# 짧은 옵션 사용
+rusaint-cli united-major -y 2025 -s 1 -n "빅데이터융합"
 ```
 
 ```json
@@ -341,23 +404,32 @@ rusaint-cli find-united-major --year 2025 --semester 1 --major-name "빅데이�
 ]
 ```
 
-## find-recognized-other-major (타전공인정과목)
+## recognized-other-major (타전공인정과목)
 
 - 타전공인정과목 정보를 가져와 json 파일로 추출합니다.
 
 ### Usage
 ```bash
-rusaint-cli find-recognized-other-major --year <YEAR> --semester <SEMESTER> --college <COLLEGE> --department <DEPARTMENT> --major <MAJOR>
+rusaint-cli recognized-other-major --year <YEAR> --semester <SEMESTER> --college <COLLEGE> --department <DEPARTMENT> --major <MAJOR>
+
+# 짧은 옵션 사용
+rusaint-cli recognized-other-major -y <YEAR> -s <SEMESTER> -c <COLLEGE> -d <DEPARTMENT> -m <MAJOR>
 ```
 
 ### Examples
 - 세부 전공이 있는 경우
 ```bash
-rusaint-cli find-recognized-other-major --year 2025 --semester 1 --college "공과대학" --department "건축학부" --major "건축공학전공"
+rusaint-cli recognized-other-major --year 2025 --semester 1 --college "공과대학" --department "건축학부" --major "건축공학전공"
+
+# 짧은 옵션 사용
+rusaint-cli recognized-other-major -y 2025 -s 1 -c "공과대학" -d "건축학부" -m "건축공학전공"
 ```
 - 세부 전공이 없는 경우
 ```bash
-rusaint-cli find-recognized-other-major --year 2025 --semester 1 --college "IT대학" --department "컴퓨터학부"
+rusaint-cli recognized-other-major --year 2025 --semester 1 --college "IT대학" --department "컴퓨터학부"
+
+# 짧은 옵션 사용
+rusaint-cli recognized-other-major -y 2025 -s 1 -c "IT대학" -d "컴퓨터학부"
 ```
 
 ```json
@@ -382,20 +454,26 @@ rusaint-cli find-recognized-other-major --year 2025 --semester 1 --college "IT�
 ]
 ```
 
-## find-cyber (숭실사이버대)
+## cyber (숭실사이버대)
 
 - 숭실사이버대 과목 정보를 가져와 json 파일로 추출합니다.
 
 ### Usage
 
 ```bash
-rusaint-cli find-cyber --year <YEAR> --semester <SEMESTER>
+rusaint-cli cyber --year <YEAR> --semester <SEMESTER>
+
+# 짧은 옵션 사용
+rusaint-cli cyber -y <YEAR> -s <SEMESTER>
 ```
 
 ### Examples
 
 ```bash
-rusaint-cli find-cyber --year 2025 --semester 1
+rusaint-cli cyber --year 2025 --semester 1
+
+# 짧은 옵션 사용
+rusaint-cli cyber -y 2025 -s 1
 ```
 
 ```json
