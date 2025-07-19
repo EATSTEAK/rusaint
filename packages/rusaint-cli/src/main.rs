@@ -28,7 +28,7 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
-    FindByLecture {
+    ByLecture {
         #[arg(long)]
         year: u32,
         #[arg(long)]
@@ -36,7 +36,7 @@ enum Commands {
         #[arg(long)]
         keyword: String,
     },
-    FindMajor {
+    Major {
         #[arg(long)]
         year: u32,
         #[arg(long)]
@@ -48,7 +48,7 @@ enum Commands {
         #[arg(long)]
         major: Option<String>,
     },
-    FindRequiredElective {
+    RequiredElective {
         #[arg(long)]
         year: u32,
         #[arg(long)]
@@ -56,7 +56,7 @@ enum Commands {
         #[arg(long)]
         course_name: String,
     },
-    FindOptionalElective {
+    OptionalElective {
         #[arg(long)]
         year: u32,
         #[arg(long)]
@@ -64,7 +64,7 @@ enum Commands {
         #[arg(long)]
         course_name: String,
     },
-    FindChapel {
+    Chapel {
         #[arg(long)]
         year: u32,
         #[arg(long)]
@@ -72,21 +72,13 @@ enum Commands {
         #[arg(long)]
         chapel_name: String,
     },
-    FindEducation {
+    Education {
         #[arg(long)]
         year: u32,
         #[arg(long)]
         semester: SemesterType,
     },
-    FindConnectedMajor {
-        #[arg(long)]
-        year: u32,
-        #[arg(long)]
-        semester: SemesterType,
-        #[arg(long)]
-        major_name: String,
-    },
-    FindUnitedMajor {
+    ConnectedMajor {
         #[arg(long)]
         year: u32,
         #[arg(long)]
@@ -94,7 +86,15 @@ enum Commands {
         #[arg(long)]
         major_name: String,
     },
-    FindRecognizedOtherMajor {
+    UnitedMajor {
+        #[arg(long)]
+        year: u32,
+        #[arg(long)]
+        semester: SemesterType,
+        #[arg(long)]
+        major_name: String,
+    },
+    RecognizedOtherMajor {
         #[arg(long)]
         year: u32,
         #[arg(long)]
@@ -106,7 +106,7 @@ enum Commands {
         #[arg(long)]
         major: Option<String>,
     },
-    FindCyber {
+    Cyber {
         #[arg(long)]
         year: u32,
         #[arg(long)]
@@ -126,7 +126,7 @@ async fn main() -> Result<(), RusaintError> {
     let session = Arc::new(USaintSession::with_password(&id, &password).await?);
 
     match cli.command {
-        Commands::FindByLecture {
+        Commands::ByLecture {
             year,
             semester,
             keyword,
@@ -134,7 +134,7 @@ async fn main() -> Result<(), RusaintError> {
             let lectures = find_by_lecture(session.clone(), year, semester, &keyword).await?;
             create_json(format!("{}_{}_{}", year, semester, keyword), lectures)
         }
-        Commands::FindMajor {
+        Commands::Major {
             year,
             semester,
             college,
@@ -166,7 +166,7 @@ async fn main() -> Result<(), RusaintError> {
                 )
             }
         }
-        Commands::FindRequiredElective {
+        Commands::RequiredElective {
             year,
             semester,
             course_name,
@@ -178,7 +178,7 @@ async fn main() -> Result<(), RusaintError> {
                 lectures,
             )
         }
-        Commands::FindOptionalElective {
+        Commands::OptionalElective {
             year,
             semester,
             course_name,
@@ -190,7 +190,7 @@ async fn main() -> Result<(), RusaintError> {
                 lectures,
             )
         }
-        Commands::FindChapel {
+        Commands::Chapel {
             year,
             semester,
             chapel_name,
@@ -201,11 +201,11 @@ async fn main() -> Result<(), RusaintError> {
                 lectures,
             )
         }
-        Commands::FindEducation { year, semester } => {
+        Commands::Education { year, semester } => {
             let lectures = find_education(session.clone(), year, semester).await?;
             create_json(format!("{}_{}_교직", year, semester), lectures)
         }
-        Commands::FindConnectedMajor {
+        Commands::ConnectedMajor {
             year,
             semester,
             major_name,
@@ -217,7 +217,7 @@ async fn main() -> Result<(), RusaintError> {
                 lectures,
             )
         }
-        Commands::FindUnitedMajor {
+        Commands::UnitedMajor {
             year,
             semester,
             major_name,
@@ -228,7 +228,7 @@ async fn main() -> Result<(), RusaintError> {
                 lectures,
             )
         }
-        Commands::FindRecognizedOtherMajor {
+        Commands::RecognizedOtherMajor {
             year,
             semester,
             college,
@@ -263,7 +263,7 @@ async fn main() -> Result<(), RusaintError> {
                 )
             }
         }
-        Commands::FindCyber { year, semester } => {
+        Commands::Cyber { year, semester } => {
             let lectures = find_cyber(session.clone(), year, semester).await?;
             create_json(format!("{}_{}_숭사대", year, semester), lectures)
         }
