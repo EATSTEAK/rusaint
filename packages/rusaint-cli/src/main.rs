@@ -115,7 +115,7 @@ enum Commands {
 }
 
 #[tokio::main]
-async fn main() -> Result<(), RusaintError> {
+async fn main() -> Result<(), Box<RusaintError>> {
     let cli = Cli::parse();
 
     dotenv().ok();
@@ -132,7 +132,7 @@ async fn main() -> Result<(), RusaintError> {
             keyword,
         } => {
             let lectures = find_by_lecture(session.clone(), year, semester, &keyword).await?;
-            create_json(format!("{}_{}_{}", year, semester, keyword), lectures)
+            create_json(format!("{year}_{semester}_{keyword}"), lectures)
         }
         Commands::Major {
             year,
@@ -153,15 +153,12 @@ async fn main() -> Result<(), RusaintError> {
 
             if let Some(major) = major {
                 create_json(
-                    format!(
-                        "{}_{}_{}_{}_{}_전공",
-                        year, semester, college, department, major
-                    ),
+                    format!("{year}_{semester}_{college}_{department}_{major}_전공"),
                     lectures,
                 )
             } else {
                 create_json(
-                    format!("{}_{}_{}_{}_전공", year, semester, college, department),
+                    format!("{year}_{semester}_{college}_{department}_전공"),
                     lectures,
                 )
             }
@@ -174,7 +171,7 @@ async fn main() -> Result<(), RusaintError> {
             let lectures =
                 find_required_elective(session.clone(), year, semester, &course_name).await?;
             create_json(
-                format!("{}_{}_{}_교양필수", year, semester, course_name),
+                format!("{year}_{semester}_{course_name}_교양필수"),
                 lectures,
             )
         }
@@ -186,7 +183,7 @@ async fn main() -> Result<(), RusaintError> {
             let lectures =
                 find_optional_elective(session.clone(), year, semester, &course_name).await?;
             create_json(
-                format!("{}_{}_{}_교양선택", year, semester, course_name),
+                format!("{year}_{semester}_{course_name}_교양선택"),
                 lectures,
             )
         }
@@ -196,14 +193,11 @@ async fn main() -> Result<(), RusaintError> {
             chapel_name,
         } => {
             let lectures = find_chapel(session.clone(), year, semester, &chapel_name).await?;
-            create_json(
-                format!("{}_{}_{}_채플", year, semester, chapel_name),
-                lectures,
-            )
+            create_json(format!("{year}_{semester}_{chapel_name}_채플"), lectures)
         }
         Commands::Education { year, semester } => {
             let lectures = find_education(session.clone(), year, semester).await?;
-            create_json(format!("{}_{}_교직", year, semester), lectures)
+            create_json(format!("{year}_{semester}_교직"), lectures)
         }
         Commands::ConnectedMajor {
             year,
@@ -212,10 +206,7 @@ async fn main() -> Result<(), RusaintError> {
         } => {
             let lectures =
                 find_connected_major(session.clone(), year, semester, &major_name).await?;
-            create_json(
-                format!("{}_{}_{}_연계전공", year, semester, major_name),
-                lectures,
-            )
+            create_json(format!("{year}_{semester}_{major_name}_연계전공"), lectures)
         }
         Commands::UnitedMajor {
             year,
@@ -223,10 +214,7 @@ async fn main() -> Result<(), RusaintError> {
             major_name,
         } => {
             let lectures = find_united_major(session.clone(), year, semester, &major_name).await?;
-            create_json(
-                format!("{}_{}_{}_융합전공", year, semester, major_name),
-                lectures,
-            )
+            create_json(format!("{year}_{semester}_{major_name}_융합전공"), lectures)
         }
         Commands::RecognizedOtherMajor {
             year,
@@ -247,25 +235,19 @@ async fn main() -> Result<(), RusaintError> {
 
             if let Some(major) = major {
                 create_json(
-                    format!(
-                        "{}_{}_{}_{}_{}_타전공인정",
-                        year, semester, college, department, major
-                    ),
+                    format!("{year}_{semester}_{college}_{department}_{major}_타전공인정"),
                     lectures,
                 )
             } else {
                 create_json(
-                    format!(
-                        "{}_{}_{}_{}_타전공인정",
-                        year, semester, college, department
-                    ),
+                    format!("{year}_{semester}_{college}_{department}_타전공인정"),
                     lectures,
                 )
             }
         }
         Commands::Cyber { year, semester } => {
             let lectures = find_cyber(session.clone(), year, semester).await?;
-            create_json(format!("{}_{}_숭사대", year, semester), lectures)
+            create_json(format!("{year}_{semester}_숭사대"), lectures)
         }
     };
 
@@ -274,7 +256,7 @@ async fn main() -> Result<(), RusaintError> {
 
 fn create_json(file_name: String, lectures: Vec<Lecture>) {
     let json = to_string_pretty(&lectures).expect("Failed to serialize lectures to JSON");
-    let mut file = File::create(format!("{}.json", file_name)).expect("Failed to create .json");
+    let mut file = File::create(format!("{file_name}.json")).expect("Failed to create .json");
     file.write_all(json.as_bytes())
         .expect("Failed to write to file");
 }

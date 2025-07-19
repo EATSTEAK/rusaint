@@ -110,13 +110,13 @@ impl Display for LectureCategory {
                 )
             }
             LectureCategory::RequiredElective { lecture_name } => {
-                write!(f, "교양필수: {}", lecture_name)
+                write!(f, "교양필수: {lecture_name}")
             }
             LectureCategory::OptionalElective { category } => {
-                write!(f, "교양선택: {}", category)
+                write!(f, "교양선택: {category}")
             }
             LectureCategory::Chapel { lecture_name } => {
-                write!(f, "채플: {}", lecture_name)
+                write!(f, "채플: {lecture_name}")
             }
             LectureCategory::Education => {
                 write!(f, "교직")
@@ -125,19 +125,19 @@ impl Display for LectureCategory {
                 collage,
                 department,
             } => {
-                write!(f, "대학원: {} {}", collage, department)
+                write!(f, "대학원: {collage} {department}")
             }
             LectureCategory::ConnectedMajor { major } => {
-                write!(f, "연계전공: {}", major)
+                write!(f, "연계전공: {major}")
             }
             LectureCategory::UnitedMajor { major } => {
-                write!(f, "융합전공: {}", major)
+                write!(f, "융합전공: {major}")
             }
             LectureCategory::FindByProfessor { keyword } => {
-                write!(f, "교수명: {}", keyword)
+                write!(f, "교수명: {keyword}")
             }
             LectureCategory::FindByLecture { keyword } => {
-                write!(f, "과목명: {}", keyword)
+                write!(f, "과목명: {keyword}")
             }
             LectureCategory::RecognizedOtherMajor {
                 collage,
