@@ -55,7 +55,7 @@ async fn graduation() {
             },
         ))) => (),
         Err(err) => {
-            panic!("{:?}", err);
+            panic!("{err:?}");
         }
         Ok(_) => (),
     }
