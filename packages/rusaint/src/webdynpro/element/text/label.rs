@@ -1,7 +1,5 @@
 use std::{borrow::Cow, cell::OnceCell};
 
-use scraper::Node;
-
 use crate::webdynpro::element::{
     Element as _, macros::define_element_interactable, property::Visibility,
 };
@@ -56,22 +54,8 @@ impl<'a> Label<'a> {
 
     /// 내부 텍스트를 반환합니다.
     pub fn text(&self) -> &str {
-        self.text.get_or_init(|| {
-            self.element_ref()
-                .children()
-                .filter_map(|node| match node.value() {
-                    Node::Text(text) => Some(text.to_string()),
-                    Node::Element(elem) => {
-                        if elem.name() == "br" {
-                            Some("\n".to_string())
-                        } else {
-                            None
-                        }
-                    }
-                    _ => None,
-                })
-                .collect::<String>()
-        })
+        self.text
+            .get_or_init(|| self.element_ref().text().collect::<String>())
     }
 }
 

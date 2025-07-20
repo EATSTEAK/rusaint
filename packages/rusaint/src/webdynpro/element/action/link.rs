@@ -1,7 +1,5 @@
 use std::{borrow::Cow, cell::OnceCell, collections::HashMap};
 
-use scraper::Node;
-
 use crate::webdynpro::{
     element::{
         Element as _, Interactable,
@@ -51,22 +49,8 @@ impl<'a> Link<'a> {
 
     /// 내부 텍스트를 반환합니다.
     pub fn text(&self) -> &str {
-        self.text.get_or_init(|| {
-            self.element_ref()
-                .children()
-                .filter_map(|node| match node.value() {
-                    Node::Text(text) => Some(text.to_string()),
-                    Node::Element(elem) => {
-                        if elem.name() == "br" {
-                            Some("\n".to_string())
-                        } else {
-                            None
-                        }
-                    }
-                    _ => None,
-                })
-                .collect::<String>()
-        })
+        self.text
+            .get_or_init(|| self.element_ref().text().collect::<String>())
     }
 
     /// 링크 활성화 이벤트를 반환합니다. `ctrl` 이나 `shift` 가 참일 경우 각 버튼을 누른 채로 클릭한 것으로 간주합니다.
