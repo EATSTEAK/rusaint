@@ -23,7 +23,7 @@ readme = "README.md"
 thiserror = "2.0.12"
 tokio = "1.45.0"
 uniffi = "0.29.3"
-rusaint = { path = "packages/rusaint" }
+rusaint = { version = "0.11.3", path = "packages/rusaint" }
 
 [workspace.lints.clippy]
 collapsible_if = "allow"
