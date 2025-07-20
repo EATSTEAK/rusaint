@@ -3,9 +3,10 @@ use rusaint::webdynpro::event::{
     ucf_parameters::{UcfAction, UcfParametersBuilder, UcfResponseData},
 };
 use std::collections::HashMap;
-use test_log::test;
+use tracing_test::traced_test;
 
 #[test]
+#[traced_test]
 fn event_serialize() {
     let mut parameters = HashMap::new();
     parameters.insert("Id".to_string(), "WD01A8".to_string());

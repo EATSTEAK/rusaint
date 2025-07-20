@@ -10,7 +10,7 @@ use rusaint::{
         error::WebDynproError,
     },
 };
-use test_log::test;
+use tracing_test::traced_test;
 
 impl<'a> EventTestSuite {
     define_elements! {
@@ -42,7 +42,8 @@ impl<'a> EventTestSuite {
     }
 }
 
-#[test(tokio::test)]
+#[tokio::test]
+#[traced_test]
 async fn test_button_events() {
     let lock = get_event_test_suite().await.unwrap();
     let mut suite = lock.write().await;

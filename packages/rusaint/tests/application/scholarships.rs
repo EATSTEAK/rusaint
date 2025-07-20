@@ -1,9 +1,10 @@
 use crate::get_session;
 use rusaint::application::USaintClientBuilder;
 use rusaint::application::scholarships::ScholarshipsApplication;
-use test_log::test;
+use tracing_test::traced_test;
 
-#[test(tokio::test)]
+#[tokio::test]
+#[traced_test]
 async fn scholarships() {
     let session = get_session().await.unwrap().clone();
     let mut app = USaintClientBuilder::new()
@@ -12,5 +13,5 @@ async fn scholarships() {
         .await
         .unwrap();
     let info = app.scholarships().await.unwrap();
-    println!("{:?}", info);
+    tracing::info!("{:?}", info);
 }

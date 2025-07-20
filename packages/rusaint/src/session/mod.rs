@@ -88,7 +88,7 @@ impl USaintSession {
                 )
                 .unwrap();
         } else {
-            log::warn!("WAF cookie not found in portal response");
+            tracing::warn!("WAF cookie not found in portal response");
         }
         let token_cookie_str = format!("sToken={token}; domain=.ssu.ac.kr; path=/; secure");
         let req = client

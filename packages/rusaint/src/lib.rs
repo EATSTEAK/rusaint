@@ -113,10 +113,10 @@ pub mod global_test_utils {
         let session_file_path =
             std::env::var("SSO_SESSION_FILE").unwrap_or("session.json".to_string());
         let f = File::open(&session_file_path)
-            .map_err(|e| Error::msg(format!("Failed to open session file: {}", e)))?;
+            .map_err(|e| Error::msg(format!("Failed to open session file: {e}")))?;
         let reader = BufReader::new(f);
         let session: USaintSession = USaintSession::from_json(reader)
-            .map_err(|e| Error::msg(format!("Failed to parse session file: {}", e)))?;
+            .map_err(|e| Error::msg(format!("Failed to parse session file: {e}")))?;
         let session = Arc::new(session);
         Ok(session)
     }

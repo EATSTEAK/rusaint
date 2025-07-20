@@ -4,7 +4,7 @@ use lazy_static::lazy_static;
 use rusaint::USaintSession;
 use rusaint::model::SemesterType;
 use std::{fs::File, io::BufReader, sync::Arc};
-use test_log::test;
+use tracing_test::traced_test;
 
 lazy_static! {
     pub(crate) static ref TARGET_YEAR: u32 = {
@@ -27,16 +27,17 @@ lazy_static! {
 pub async fn get_session() -> Result<Arc<USaintSession>> {
     let session_file_path = std::env::var("SSO_SESSION_FILE").unwrap_or("session.json".to_string());
     let f = File::open(&session_file_path)
-        .map_err(|e| Error::msg(format!("Failed to open session file: {}", e)))?;
+        .map_err(|e| Error::msg(format!("Failed to open session file: {e}")))?;
     let reader = BufReader::new(f);
     let session: USaintSession = USaintSession::from_json(reader)
-        .map_err(|e| Error::msg(format!("Failed to parse session file: {}", e)))?;
+        .map_err(|e| Error::msg(format!("Failed to parse session file: {e}")))?;
     let session = Arc::new(session);
     Ok(session)
 }
 
 #[cfg(test)]
-#[test(tokio::test)]
+#[tokio::test]
+#[traced_test]
 async fn test_session() {
     let _ = get_session().await.unwrap();
 }
