@@ -58,11 +58,15 @@ impl ValueEnum for SemesterType {
 
     fn to_possible_value(&self) -> Option<clap::builder::PossibleValue> {
         match self.0 {
-            rusaint::model::SemesterType::One => Some(clap::builder::PossibleValue::new("one")),
+            rusaint::model::SemesterType::One => {
+                Some(clap::builder::PossibleValue::new("one").alias("1"))
+            }
             rusaint::model::SemesterType::Summer => {
                 Some(clap::builder::PossibleValue::new("summer"))
             }
-            rusaint::model::SemesterType::Two => Some(clap::builder::PossibleValue::new("two")),
+            rusaint::model::SemesterType::Two => {
+                Some(clap::builder::PossibleValue::new("two").alias("2"))
+            }
             rusaint::model::SemesterType::Winter => {
                 Some(clap::builder::PossibleValue::new("winter"))
             }
