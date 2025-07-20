@@ -4,7 +4,7 @@ use lazy_static::lazy_static;
 use rusaint::USaintSession;
 use rusaint::model::SemesterType;
 use std::{fs::File, io::BufReader, sync::Arc};
-use test_log::test;
+use tracing_test::traced_test;
 
 lazy_static! {
     pub(crate) static ref TARGET_YEAR: u32 = {
@@ -36,7 +36,8 @@ pub async fn get_session() -> Result<Arc<USaintSession>> {
 }
 
 #[cfg(test)]
-#[test(tokio::test)]
+#[tokio::test]
+#[traced_test]
 async fn test_session() {
     let _ = get_session().await.unwrap();
 }

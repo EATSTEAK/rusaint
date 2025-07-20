@@ -3,9 +3,10 @@ use rusaint::{
     application::{USaintClientBuilder, lecture_assessment::LectureAssessmentApplication},
     model::SemesterType,
 };
-use test_log::test;
+use tracing_test::traced_test;
 
-#[test(tokio::test)]
+#[tokio::test]
+#[traced_test]
 async fn lecture_assessment() {
     let session = get_session().await.unwrap().clone();
     let mut app = USaintClientBuilder::new()
@@ -18,5 +19,5 @@ async fn lecture_assessment() {
         .await
         .unwrap();
     assert_eq!(info.len(), 29);
-    println!("{} results: {:?}", info.len(), info);
+    tracing::info!("{} results: {:?}", info.len(), info);
 }

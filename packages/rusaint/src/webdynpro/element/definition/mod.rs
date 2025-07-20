@@ -45,7 +45,7 @@ pub trait ElementDefinition<'body>: Sized {
     fn selector(&self) -> Result<Selector, WebDynproError> {
         Ok(
             Selector::parse(format!(r#"[id="{}"]"#, self.id()).as_str()).map_err(|err| {
-                log::warn!(err:?; "failed to parse selector");
+                tracing::warn!(?err, "failed to parse selector");
                 BodyError::InvalidSelector
             })?,
         )

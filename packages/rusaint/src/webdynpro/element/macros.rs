@@ -109,10 +109,10 @@ macro_rules! define_element_base {
                 self.lsdata
                     .get_or_init(|| {
                         let lsdata_attr = self.element_ref.value().attr("lsdata").unwrap_or("");
-                        let Ok(lsdata_obj) = $crate::webdynpro::element::utils::parse_lsdata(lsdata_attr).or_else(|e| { log::warn!(e:?; "failed to parse lsdata"); Err(e) }) else {
+                        let Ok(lsdata_obj) = $crate::webdynpro::element::utils::parse_lsdata(lsdata_attr).or_else(|e| { tracing::warn!(?e, "failed to parse lsdata"); Err(e) }) else {
                             return $lsdata::default();
                         };
-                        serde_json::from_value::<Self::ElementLSData>(lsdata_obj).or_else(|e| { log::warn!(e:?; "failed to convert lsdata to struct"); Err(e) }).ok().unwrap_or($lsdata::default())
+                        serde_json::from_value::<Self::ElementLSData>(lsdata_obj).or_else(|e| { tracing::warn!(?e, "failed to convert lsdata to struct"); Err(e) }).ok().unwrap_or($lsdata::default())
                     })
             }
 
@@ -190,7 +190,7 @@ macro_rules! define_element_interactable {
                 self.lsevents
                     .get_or_init(|| {
                         let lsevents_attr = self.element_ref.value().attr("lsevents").unwrap_or("");
-                        $crate::webdynpro::element::utils::parse_lsevents(lsevents_attr).or_else(|e| { log::warn!(e:?; "failed to parse lsevents"); Err(e) }).ok()
+                        $crate::webdynpro::element::utils::parse_lsevents(lsevents_attr).or_else(|e| { tracing::warn!(?e, "failed to parse lsevents"); Err(e) }).ok()
                     })
                     .as_ref()
             }

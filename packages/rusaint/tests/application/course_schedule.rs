@@ -9,8 +9,8 @@ use rusaint::{
     model::SemesterType,
 };
 use std::sync::{Arc, OnceLock};
-use test_log::test;
 use tokio::sync::{Mutex, RwLock};
+use tracing_test::traced_test;
 
 lazy_static! {
     static ref APP: Mutex<OnceLock<Arc<RwLock<CourseScheduleApplication>>>> =
@@ -35,7 +35,8 @@ async fn get_app() -> Result<Arc<RwLock<CourseScheduleApplication>>, RusaintErro
     }
 }
 
-#[test(tokio::test)]
+#[tokio::test]
+#[traced_test]
 async fn find_major() {
     let lock = get_app().await.unwrap();
     let mut app = lock.write().await;
@@ -45,11 +46,12 @@ async fn find_major() {
         .await
         .unwrap();
     for lecture in lectures {
-        println!("{:?}", lecture);
+        tracing::info!("{:?}", lecture);
     }
 }
 
-#[test(tokio::test)]
+#[tokio::test]
+#[traced_test]
 async fn find_required_elective() {
     let session = get_session().await.unwrap().clone();
     let mut app = USaintClientBuilder::new()
@@ -63,11 +65,12 @@ async fn find_required_elective() {
         .await
         .unwrap();
     for lecture in lectures {
-        println!("{:?}", lecture);
+        tracing::info!("{:?}", lecture);
     }
 }
 
-#[test(tokio::test)]
+#[tokio::test]
+#[traced_test]
 async fn find_optional_elective() {
     let lock = get_app().await.unwrap();
     let mut app = lock.write().await;
@@ -77,11 +80,12 @@ async fn find_optional_elective() {
         .await
         .unwrap();
     for lecture in lectures {
-        println!("{:?}", lecture);
+        tracing::info!("{:?}", lecture);
     }
 }
 
-#[test(tokio::test)]
+#[tokio::test]
+#[traced_test]
 async fn find_chapel() {
     let session = get_session().await.unwrap().clone();
     let mut app = USaintClientBuilder::new()
@@ -95,11 +99,12 @@ async fn find_chapel() {
         .await
         .unwrap();
     for lecture in lectures {
-        println!("{:?}", lecture);
+        tracing::info!("{:?}", lecture);
     }
 }
 
-#[test(tokio::test)]
+#[tokio::test]
+#[traced_test]
 async fn find_education() {
     let lock = get_app().await.unwrap();
     let mut app = lock.write().await;
@@ -109,12 +114,12 @@ async fn find_education() {
         .await
         .unwrap();
     for lecture in lectures {
-        println!("{:?}", lecture);
+        tracing::info!("{:?}", lecture);
     }
 }
 
 #[tokio::test]
-#[ignore]
+#[traced_test]
 async fn find_graduated() {
     let lock = get_app().await.unwrap();
     let mut app = lock.write().await;
@@ -124,11 +129,12 @@ async fn find_graduated() {
         .await
         .unwrap();
     for lecture in lectures {
-        println!("{:?}", lecture);
+        tracing::info!("{:?}", lecture);
     }
 }
 
-#[test(tokio::test)]
+#[tokio::test]
+#[traced_test]
 async fn find_connected_major() {
     let lock = get_app().await.unwrap();
     let mut app = lock.write().await;
@@ -138,11 +144,12 @@ async fn find_connected_major() {
         .await
         .unwrap();
     for lecture in lectures {
-        println!("{:?}", lecture);
+        tracing::info!("{:?}", lecture);
     }
 }
 
-#[test(tokio::test)]
+#[tokio::test]
+#[traced_test]
 async fn find_united_major() {
     let lock = get_app().await.unwrap();
     let mut app = lock.write().await;
@@ -152,11 +159,12 @@ async fn find_united_major() {
         .await
         .unwrap();
     for lecture in lectures {
-        println!("{:?}", lecture);
+        tracing::info!("{:?}", lecture);
     }
 }
 
-#[test(tokio::test)]
+#[tokio::test]
+#[traced_test]
 async fn find_recognized_other_major() {
     let lock = get_app().await.unwrap();
     let mut app = lock.write().await;
@@ -166,11 +174,12 @@ async fn find_recognized_other_major() {
         .await
         .unwrap();
     for lecture in lectures {
-        println!("{:?}", lecture);
+        tracing::info!("{:?}", lecture);
     }
 }
 
-#[test(tokio::test)]
+#[tokio::test]
+#[traced_test]
 async fn find_cyber() {
     let lock = get_app().await.unwrap();
     let mut app = lock.write().await;
@@ -180,11 +189,12 @@ async fn find_cyber() {
         .await
         .unwrap();
     for lecture in lectures {
-        println!("{:?}", lecture);
+        tracing::info!("{:?}", lecture);
     }
 }
 
-#[test(tokio::test)]
+#[tokio::test]
+#[traced_test]
 async fn find_nothing() {
     let lock = get_app().await.unwrap();
     let mut app = lock.write().await;

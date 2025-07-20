@@ -8,8 +8,8 @@ use rusaint::{
     },
 };
 use std::sync::{Arc, OnceLock};
-use test_log::test;
 use tokio::sync::{Mutex, RwLock};
+use tracing_test::traced_test;
 
 lazy_static! {
     static ref APP: Mutex<OnceLock<Arc<RwLock<PersonalCourseScheduleApplication>>>> =
@@ -34,15 +34,17 @@ async fn get_app() -> Result<Arc<RwLock<PersonalCourseScheduleApplication>>, Rus
     }
 }
 
-#[test(tokio::test)]
+#[tokio::test]
+#[traced_test]
 async fn schedule() {
     let lock = get_app().await.unwrap();
     let mut app = lock.write().await;
     let info = app.schedule(*TARGET_YEAR, *TARGET_SEMESTER).await.unwrap();
-    println!("{:?}", info);
+    tracing::info!("{:?}", info);
 }
 
-#[test(tokio::test)]
+#[tokio::test]
+#[traced_test]
 async fn no_schedule() {
     let lock = get_app().await.unwrap();
     let mut app = lock.write().await;
@@ -51,5 +53,5 @@ async fn no_schedule() {
         info,
         RusaintError::ApplicationError(ApplicationError::NoScheduleInformation)
     ));
-    println!("{:?}", info);
+    tracing::info!("{:?}", info);
 }

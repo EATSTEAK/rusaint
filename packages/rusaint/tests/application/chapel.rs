@@ -6,8 +6,8 @@ use rusaint::{
     application::{USaintClientBuilder, chapel::ChapelApplication},
 };
 use std::sync::{Arc, OnceLock};
-use test_log::test;
 use tokio::sync::{Mutex, RwLock};
+use tracing_test::traced_test;
 
 lazy_static! {
     static ref APP: Mutex<OnceLock<Arc<RwLock<ChapelApplication>>>> = Mutex::new(OnceLock::new());
@@ -31,7 +31,8 @@ async fn get_app() -> Result<Arc<RwLock<ChapelApplication>>, RusaintError> {
     }
 }
 
-#[test(tokio::test)]
+#[tokio::test]
+#[traced_test]
 async fn chapel() {
     let lock = get_app().await.unwrap();
     let mut app = lock.write().await;
@@ -39,10 +40,11 @@ async fn chapel() {
         .information(*TARGET_YEAR, *TARGET_SEMESTER)
         .await
         .unwrap();
-    println!("{:?}", info);
+    tracing::info!("{:?}", info);
 }
 
-#[test(tokio::test)]
+#[tokio::test]
+#[traced_test]
 async fn no_chapel() {
     let lock = get_app().await.unwrap();
     let mut app = lock.write().await;
@@ -51,6 +53,6 @@ async fn no_chapel() {
         info,
         RusaintError::ApplicationError(ApplicationError::NoChapelInformation)
     ));
-    println!("{:?}", info);
-    println!("{:?}", info);
+    tracing::info!("{:?}", info);
+    tracing::info!("{:?}", info);
 }

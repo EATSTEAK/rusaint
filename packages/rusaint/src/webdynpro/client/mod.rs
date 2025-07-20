@@ -157,7 +157,7 @@ impl WebDynproClient {
             .send()
             .await?;
         if !res.status().is_success() {
-            log::warn!(res:?, serialized_events:%; "event request failed: {}", &serialized_events);
+            tracing::warn!(?res, %serialized_events, "event request failed: {}", &serialized_events);
             return Err(ClientError::InvalidResponse(res))?;
         }
         Ok(res.text().await?)
