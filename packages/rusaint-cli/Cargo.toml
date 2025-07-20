@@ -1,0 +1,18 @@
+[package]
+name = "rusaint-cli"
+version.workspace = true
+authors = ["JOONGGON LEE <2wndrhs@gmail.com>"]
+description = "CLI for fetching course schedules"
+repository = "https://github.com/2wndrhs/rusaint"
+readme = "README.md"
+license.workspace = true
+edition.workspace = true
+
+[dependencies]
+rusaint = { workspace = true }
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
+thiserror = { workspace = true }
+clap = { version = "4.5.27", features = ["derive"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+dotenv = "0.15.0"

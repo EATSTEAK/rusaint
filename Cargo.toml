@@ -1,6 +1,7 @@
 [workspace]
 members = [
   "packages/rusaint",
+  "packages/rusaint-cli",
   "packages/rusaint-ffi",
   "uniffi-bindgen",
   "session-helper",
