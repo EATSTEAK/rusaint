@@ -1,11 +1,17 @@
 use std::{borrow::Cow, cell::OnceCell};
 
-use crate::webdynpro::element::{macros::define_element_interactable, property::Visibility};
+use scraper::Node;
+
+use crate::webdynpro::element::{
+    Element as _, macros::define_element_interactable, property::Visibility,
+};
 
 // TODO: Implement additional events and data
 define_element_interactable! {
     #[doc = "버튼 등의 엘리먼트를 부연하는 라벨"]
-    Label<"L", "Label"> {},
+    Label<"L", "Label"> {
+        text: OnceCell<String>,
+    },
     #[doc = "[`Label`]의 정의"]
     LabelDef,
     #[doc = "[`Label`] 내부 데이터"]
@@ -44,6 +50,33 @@ impl<'a> Label<'a> {
             element_ref,
             lsdata: OnceCell::new(),
             lsevents: OnceCell::new(),
+            text: OnceCell::new(),
         }
+    }
+
+    /// 내부 텍스트를 반환합니다.
+    pub fn text(&self) -> &str {
+        self.text.get_or_init(|| {
+            self.element_ref()
+                .children()
+                .filter_map(|node| match node.value() {
+                    Node::Text(text) => Some(text.to_string()),
+                    Node::Element(elem) => {
+                        if elem.name() == "br" {
+                            Some("\n".to_string())
+                        } else {
+                            None
+                        }
+                    }
+                    _ => None,
+                })
+                .collect::<String>()
+        })
+    }
+}
+
+impl std::fmt::Display for Label<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.text())
     }
 }

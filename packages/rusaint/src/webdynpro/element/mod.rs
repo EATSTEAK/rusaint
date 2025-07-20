@@ -366,20 +366,39 @@ pub trait Interactable<'a>: Element<'a> {
 
 impl ElementWrapper<'_> {
     /// 주어진 엘리먼트를 텍스트 형태로 변환하려고 시도합니다.
+    #[deprecated(
+        since = "0.11.3",
+        note = "Use `TryInto<String>` trait implementation instead."
+    )]
     pub fn textise(&self) -> Result<String, WebDynproError> {
-        match self {
-            ElementWrapper::TextView(tv) => Ok(tv.text().to_string()),
-            ElementWrapper::Caption(cp) => Ok(cp.text().to_string()),
-            ElementWrapper::CheckBox(c) => Ok(format!("{}", c.checked())),
-            ElementWrapper::ComboBox(cb) => Ok(cb.value().unwrap_or_default().to_string()),
-            ElementWrapper::InputField(ifield) => {
-                Ok(ifield.value().unwrap_or_default().to_string())
-            }
+        self.try_into()
+    }
+}
+
+impl TryFrom<&ElementWrapper<'_>> for String {
+    type Error = WebDynproError;
+
+    fn try_from(value: &ElementWrapper<'_>) -> Result<Self, Self::Error> {
+        match value {
+            ElementWrapper::TextView(tv) => Ok(tv.to_string()),
+            ElementWrapper::Caption(cp) => Ok(cp.to_string()),
+            ElementWrapper::CheckBox(c) => Ok(c.to_string()),
+            ElementWrapper::ComboBox(cb) => Ok(cb.to_string()),
+            ElementWrapper::InputField(ifield) => Ok(ifield.to_string()),
+            ElementWrapper::Link(link) => Ok(link.to_string()),
             _ => Err(WebDynproError::Element(ElementError::InvalidContent {
-                element: self.id().to_string(),
+                element: value.id().to_string(),
                 content: "This element is cannot be textised.".to_string(),
             })),
         }
+    }
+}
+
+impl TryFrom<ElementWrapper<'_>> for String {
+    type Error = WebDynproError;
+
+    fn try_from(value: ElementWrapper<'_>) -> Result<Self, Self::Error> {
+        (&value).try_into()
     }
 }
 mod utils;

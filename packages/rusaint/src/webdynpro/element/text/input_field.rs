@@ -69,3 +69,9 @@ impl<'a> InputField<'a> {
         self.element_ref.attr("value")
     }
 }
+
+impl std::fmt::Display for InputField<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.value().unwrap_or_default())
+    }
+}
