@@ -72,3 +72,9 @@ impl<'a> CheckBox<'a> {
             .is_some_and(|str| str == "true")
     }
 }
+
+impl std::fmt::Display for CheckBox<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.checked())
+    }
+}

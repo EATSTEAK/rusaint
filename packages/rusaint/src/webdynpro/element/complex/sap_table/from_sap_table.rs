@@ -25,7 +25,9 @@ impl<'body> FromSapTable<'body> for Vec<Option<String>> {
         let vec = iter
             .map(|val| match val {
                 Ok(cell) => match cell.content() {
-                    Some(wrapper) => Ok(ElementWrapper::from_def(&wrapper, parser)?.textise().ok()),
+                    Some(wrapper) => {
+                        Ok(ElementWrapper::from_def(&wrapper, parser)?.try_into().ok())
+                    }
                     None => Ok(None),
                 },
                 Err(err) => Err(err),
@@ -44,7 +46,7 @@ impl<'body> FromSapTable<'body> for Vec<String> {
         let iter = row.iter_value(parser);
         iter.map(|val| match val {
             Ok(cell) => match cell.content() {
-                Some(wrapper) => Ok(ElementWrapper::from_def(&wrapper, parser)?.textise()?),
+                Some(wrapper) => Ok(ElementWrapper::from_def(&wrapper, parser)?.try_into()?),
                 None => Err(ElementError::NoSuchContent {
                     element: "Cell Content".to_string(),
                     content: "No content provided".to_string(),
@@ -66,7 +68,7 @@ impl<'body> FromSapTable<'body> for Vec<(String, Option<String>)> {
         let header_string = header_iter
             .map(|val| match val {
                 Ok(cell) => match cell.content() {
-                    Some(wrapper) => Ok(ElementWrapper::from_def(&wrapper, parser)?.textise()?),
+                    Some(wrapper) => Ok(ElementWrapper::from_def(&wrapper, parser)?.try_into()?),
                     None => Ok(cell.id().to_owned()),
                 },
                 Err(err) => Err(err),
@@ -76,7 +78,9 @@ impl<'body> FromSapTable<'body> for Vec<(String, Option<String>)> {
         let row_string = iter
             .map(|val| match val {
                 Ok(cell) => match cell.content() {
-                    Some(wrapper) => Ok(ElementWrapper::from_def(&wrapper, parser)?.textise().ok()),
+                    Some(wrapper) => {
+                        Ok(ElementWrapper::from_def(&wrapper, parser)?.try_into().ok())
+                    }
                     None => Ok(None),
                 },
                 Err(err) => Err(err),
@@ -100,7 +104,7 @@ impl<'body> FromSapTable<'body> for Vec<(String, String)> {
         let header_string = header_iter
             .map(|val| match val {
                 Ok(cell) => match cell.content() {
-                    Some(wrapper) => Ok(ElementWrapper::from_def(&wrapper, parser)?.textise()?),
+                    Some(wrapper) => Ok(ElementWrapper::from_def(&wrapper, parser)?.try_into()?),
                     None => Ok(cell.id().to_owned()),
                 },
                 Err(err) => Err(err),
@@ -111,7 +115,7 @@ impl<'body> FromSapTable<'body> for Vec<(String, String)> {
             .map(|val| match val {
                 Ok(cell) => match cell.content() {
                     Some(wrapper) => Ok(ElementWrapper::from_def(&wrapper, parser)?
-                        .textise()
+                        .try_into()
                         .unwrap_or(wrapper.id().to_string())),
                     None => Ok("".to_owned()),
                 },
