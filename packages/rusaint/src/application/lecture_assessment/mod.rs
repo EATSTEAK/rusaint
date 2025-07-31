@@ -3,32 +3,30 @@ use model::LectureAssessmentResult;
 use super::{USaintApplication, USaintClient};
 use crate::application::utils::sap_table::try_table_into_with_scroll;
 use crate::application::utils::semester::get_selected_semester;
-use crate::webdynpro::command::WebDynproCommandExecutor;
-use crate::webdynpro::element::parser::ElementParser;
-use crate::{
-    ApplicationError, RusaintError, define_elements,
-    model::SemesterType,
-    webdynpro::{
-        client::body::Body,
-        command::element::{
-            action::ButtonPressEventCommand,
-            complex::{SapTableBodyCommand, SapTableLSDataCommand},
-            selection::{
-                ComboBoxChangeEventCommand, ComboBoxLSDataCommand, ComboBoxSelectEventCommand,
-            },
+use crate::{ApplicationError, RusaintError, model::SemesterType};
+use wdpe::command::WebDynproCommandExecutor;
+use wdpe::element::parser::ElementParser;
+use wdpe::{
+    client::body::Body,
+    command::element::{
+        action::ButtonPressEventCommand,
+        complex::{SapTableBodyCommand, SapTableLSDataCommand},
+        selection::{
+            ComboBoxChangeEventCommand, ComboBoxLSDataCommand, ComboBoxSelectEventCommand,
         },
-        element::{
-            ElementDefWrapper,
-            action::Button,
-            complex::{
-                SapTable,
-                sap_table::cell::{SapTableCell, SapTableCellWrapper},
-            },
-            definition::ElementDefinition,
-            selection::ComboBox,
-        },
-        error::{ElementError, WebDynproError},
     },
+    define_elements,
+    element::{
+        ElementDefWrapper,
+        action::Button,
+        complex::{
+            SapTable,
+            sap_table::cell::{SapTableCell, SapTableCellWrapper},
+        },
+        definition::ElementDefinition,
+        selection::ComboBox,
+    },
+    error::{ElementError, WebDynproError},
 };
 
 /// [강의평가조회](https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/ZCMB2W1010)
@@ -159,7 +157,7 @@ impl<'a> LectureAssessmentApplication {
             .row_count()
             .map(|u| u.to_owned())
             .ok_or_else(|| {
-                WebDynproError::Element(ElementError::NoSuchData {
+                WebDynproError::from(ElementError::NoSuchData {
                     element: Self::TABLE.id().to_string(),
                     field: "row_count".to_string(),
                 })

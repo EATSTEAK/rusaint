@@ -6,20 +6,18 @@ use serde::{
 };
 
 use crate::application::utils::sap_table::try_table_into_with_scroll;
-use crate::webdynpro::command::WebDynproCommandExecutor;
-use crate::webdynpro::element::parser::ElementParser;
-use crate::{
-    application::{USaintClient, student_information::StudentInformationApplication},
+use crate::application::{USaintClient, student_information::StudentInformationApplication};
+use wdpe::command::WebDynproCommandExecutor;
+use wdpe::element::parser::ElementParser;
+use wdpe::{
+    command::element::layout::TabStripTabSelectEventCommand,
     define_elements,
-    webdynpro::{
-        command::element::layout::TabStripTabSelectEventCommand,
-        element::{
-            complex::{SapTable, sap_table::FromSapTable},
-            definition::ElementDefinition,
-            layout::tab_strip::item::TabStripItem,
-        },
-        error::{ElementError, WebDynproError},
+    element::{
+        complex::{SapTable, sap_table::FromSapTable},
+        definition::ElementDefinition,
+        layout::tab_strip::item::TabStripItem,
     },
+    error::{ElementError, WebDynproError},
 };
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -115,8 +113,8 @@ impl StudentTransferRecord {
 
 impl<'a> FromSapTable<'a> for StudentTransferRecord {
     fn from_table(
-        header: &'a crate::webdynpro::element::complex::sap_table::SapTableHeader,
-        row: &'a crate::webdynpro::element::complex::sap_table::SapTableRow,
+        header: &'a wdpe::element::complex::sap_table::SapTableHeader,
+        row: &'a wdpe::element::complex::sap_table::SapTableRow,
         parser: &'a ElementParser,
     ) -> Result<Self, WebDynproError> {
         let map_string = row.try_row_into::<HashMap<String, String>>(header, parser)?;

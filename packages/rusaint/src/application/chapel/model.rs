@@ -6,27 +6,24 @@ use serde::{
 };
 
 use crate::application::utils::de_with::{deserialize_semester_type, deserialize_u32_string};
-use crate::webdynpro::command::WebDynproCommandExecutor;
-use crate::webdynpro::element::parser::ElementParser;
-use crate::{
-    RusaintError, define_elements,
-    error::ApplicationError,
-    model::SemesterType,
-    webdynpro::{
-        command::element::complex::SapTableBodyCommand,
-        element::{
-            ElementDefWrapper,
-            complex::{
-                SapTable,
-                sap_table::{
-                    FromSapTable,
-                    cell::{SapTableCell, SapTableCellWrapper},
-                },
+use crate::{RusaintError, error::ApplicationError, model::SemesterType};
+use wdpe::command::WebDynproCommandExecutor;
+use wdpe::element::parser::ElementParser;
+use wdpe::{
+    command::element::complex::SapTableBodyCommand,
+    define_elements,
+    element::{
+        ElementDefWrapper,
+        complex::{
+            SapTable,
+            sap_table::{
+                FromSapTable,
+                cell::{SapTableCell, SapTableCellWrapper},
             },
-            definition::ElementDefinition,
         },
-        error::{ElementError, WebDynproError},
+        definition::ElementDefinition,
     },
+    error::{ElementError, WebDynproError},
 };
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -179,8 +176,8 @@ impl<'a> GeneralChapelInformation {
 
 impl<'body> FromSapTable<'body> for GeneralChapelInformation {
     fn from_table(
-        header: &'body crate::webdynpro::element::complex::sap_table::SapTableHeader,
-        row: &'body crate::webdynpro::element::complex::sap_table::SapTableRow,
+        header: &'body wdpe::element::complex::sap_table::SapTableHeader,
+        row: &'body wdpe::element::complex::sap_table::SapTableRow,
         parser: &'body ElementParser,
     ) -> Result<Self, WebDynproError> {
         let map_string = row.try_row_into::<HashMap<String, String>>(header, parser)?;
@@ -291,8 +288,8 @@ impl<'a> ChapelAttendance {
 
 impl<'body> FromSapTable<'body> for ChapelAttendance {
     fn from_table(
-        header: &'body crate::webdynpro::element::complex::sap_table::SapTableHeader,
-        row: &'body crate::webdynpro::element::complex::sap_table::SapTableRow,
+        header: &'body wdpe::element::complex::sap_table::SapTableHeader,
+        row: &'body wdpe::element::complex::sap_table::SapTableRow,
         parser: &'body ElementParser,
     ) -> Result<Self, WebDynproError> {
         let map_string = row.try_row_into::<HashMap<String, String>>(header, parser)?;
@@ -420,8 +417,8 @@ impl<'a> ChapelAbsenceRequest {
 
 impl<'body> FromSapTable<'body> for ChapelAbsenceRequest {
     fn from_table(
-        header: &'body crate::webdynpro::element::complex::sap_table::SapTableHeader,
-        row: &'body crate::webdynpro::element::complex::sap_table::SapTableRow,
+        header: &'body wdpe::element::complex::sap_table::SapTableHeader,
+        row: &'body wdpe::element::complex::sap_table::SapTableRow,
         parser: &'body ElementParser,
     ) -> Result<Self, WebDynproError> {
         let map_string = row.try_row_into::<HashMap<String, String>>(header, parser)?;

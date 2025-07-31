@@ -1,12 +1,10 @@
-use crate::{
-    define_elements,
-    webdynpro::{
-        command::element::text::InputFieldValueCommand,
-        element::{action::Button, graphic::Image, text::InputField},
-        error::WebDynproError,
-    },
-};
 use serde::{Deserialize, Serialize};
+use wdpe::{
+    command::element::text::InputFieldValueCommand,
+    define_elements,
+    element::{action::Button, graphic::Image, text::InputField},
+    error::WebDynproError,
+};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
@@ -317,8 +315,6 @@ mod research_bank_account;
 mod transfer;
 mod work;
 
-use crate::webdynpro::command::WebDynproCommandExecutor;
-use crate::webdynpro::element::parser::ElementParser;
 pub use academic_record::{StudentAcademicRecord, StudentAcademicRecords};
 pub use bank_account::StudentBankAccount;
 pub use family::{StudentFamily, StudentFamilyMember};
@@ -330,4 +326,8 @@ pub use qualification::{
 pub use religion::StudentReligion;
 pub use research_bank_account::StudentResearchBankAccount;
 pub use transfer::{StudentTransferRecord, StudentTransferRecords};
+use wdpe::command::WebDynproCommandExecutor;
+use wdpe::element::parser::ElementParser;
 pub use work::StudentWorkInformation;
+
+use crate::application::utils::input_field::InputFieldExt as _;

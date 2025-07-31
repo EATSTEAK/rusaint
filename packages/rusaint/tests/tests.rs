@@ -43,5 +43,3 @@ async fn test_session() {
 }
 
 mod application;
-#[cfg(test)]
-mod webdynpro;

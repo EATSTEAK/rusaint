@@ -1,33 +1,32 @@
 use self::model::{ClassGrade, CourseType, GradeSummary, SemesterGrade};
 use super::{USaintApplication, USaintClient};
+use crate::application::utils::input_field::InputFieldExt as _;
 use crate::application::utils::sap_table::try_table_into_with_scroll;
 use crate::application::utils::semester::get_selected_semester;
-use crate::webdynpro::client::body::Body;
-use crate::webdynpro::command::WebDynproCommandExecutor;
-use crate::webdynpro::element::complex::sap_table::cell::SapTableCellWrapper;
-use crate::webdynpro::element::parser::ElementParser;
-use crate::{
-    RusaintError, define_elements,
-    model::SemesterType,
-    webdynpro::{
-        command::element::{
-            complex::SapTableBodyCommand,
-            selection::{ComboBoxLSDataCommand, ComboBoxSelectEventCommand},
-        },
-        element::{
-            Element, ElementDefWrapper, ElementWrapper,
-            complex::sap_table::{SapTable, cell::SapTableCell},
-            definition::ElementDefinition,
-            layout::PopupWindow,
-            selection::ComboBox,
-            text::InputField,
-        },
-        error::{BodyError, ElementError, WebDynproError},
-        event::Event,
-    },
-};
+use crate::{RusaintError, model::SemesterType};
 use scraper::Selector;
 use std::collections::HashMap;
+use wdpe::client::body::Body;
+use wdpe::command::WebDynproCommandExecutor;
+use wdpe::element::complex::sap_table::cell::SapTableCellWrapper;
+use wdpe::element::parser::ElementParser;
+use wdpe::{
+    command::element::{
+        complex::SapTableBodyCommand,
+        selection::{ComboBoxLSDataCommand, ComboBoxSelectEventCommand},
+    },
+    define_elements,
+    element::{
+        Element, ElementDefWrapper, ElementWrapper,
+        complex::sap_table::{SapTable, cell::SapTableCell},
+        definition::ElementDefinition,
+        layout::PopupWindow,
+        selection::ComboBox,
+        text::InputField,
+    },
+    error::{BodyError, ElementError, WebDynproError},
+    event::Event,
+};
 
 /// [학생 성적 조회](https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/ZCMB3W0017)
 #[derive(Debug)]
@@ -550,12 +549,11 @@ pub mod model;
 
 #[cfg(test)]
 mod test {
-    use crate::webdynpro::element::parser::ElementParser;
     use crate::{
         application::{USaintClientBuilder, course_grades::CourseGradesApplication},
         global_test_utils::get_session,
-        webdynpro::element::{Element, layout::PopupWindow},
     };
+    use wdpe::element::{Element, layout::PopupWindow, parser::ElementParser};
 
     #[tokio::test]
     async fn close_popups() {

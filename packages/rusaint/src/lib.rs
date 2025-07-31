@@ -23,7 +23,7 @@
 //! ```no_run
 //! use rusaint::application::course_grades::{CourseGradesApplication, model::CourseType, model::SemesterGrade};
 //! use rusaint::application::USaintClientBuilder;
-//! use rusaint::webdynpro::element::Element;
+//! use wdpe::element::Element;
 //! use rusaint::RusaintError;
 //! use std::sync::Arc;
 //! use rusaint::USaintSession;
@@ -72,8 +72,6 @@ pub use session::USaintSession;
 pub mod model;
 
 pub(crate) mod utils;
-/// SAP WebDynpro 클라이언트를 파싱, 모방하는 클라이언트 엔진
-pub mod webdynpro;
 
 #[cfg(feature = "uniffi")]
 uniffi::setup_scaffolding!();

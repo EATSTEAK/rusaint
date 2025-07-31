@@ -4,18 +4,16 @@ use model::{CourseScheduleInformation, PersonalCourseSchedule, Weekday};
 
 use super::{USaintApplication, USaintClient};
 use crate::application::utils::semester::get_selected_semester;
-use crate::webdynpro::command::WebDynproCommandExecutor;
-use crate::webdynpro::element::parser::ElementParser;
-use crate::{
-    RusaintError, define_elements,
-    error::ApplicationError,
-    model::SemesterType,
-    webdynpro::{
-        client::body::Body,
-        command::element::selection::{ComboBoxLSDataCommand, ComboBoxSelectEventCommand},
-        element::{complex::SapTable, selection::ComboBox},
-        error::{ElementError, WebDynproError},
-    },
+use crate::{RusaintError, error::ApplicationError, model::SemesterType};
+
+use wdpe::command::WebDynproCommandExecutor;
+use wdpe::element::parser::ElementParser;
+use wdpe::{
+    client::body::Body,
+    command::element::selection::{ComboBoxLSDataCommand, ComboBoxSelectEventCommand},
+    define_elements,
+    element::{complex::SapTable, selection::ComboBox},
+    error::{ElementError, WebDynproError},
 };
 
 /// [개인수업시간표](https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/ZCMW2102)
@@ -178,9 +176,12 @@ impl<'a> PersonalCourseScheduleApplication {
                 Ok(PersonalCourseSchedule::new(schedule))
             }
             Err(err) => match err {
-                WebDynproError::Element(ElementError::InvalidId(_id)) => Err(
-                    RusaintError::ApplicationError(ApplicationError::NoScheduleInformation),
-                ),
+                WebDynproError::Element(ref el_err) => match el_err.as_ref() {
+                    ElementError::InvalidId(_) => Err(RusaintError::ApplicationError(
+                        ApplicationError::NoScheduleInformation,
+                    )),
+                    _ => Err(RusaintError::WebDynproError(err)),
+                },
                 err => Err(RusaintError::WebDynproError(err)),
             },
         }

@@ -1,19 +1,19 @@
-use crate::define_elements;
-use crate::webdynpro::client::{EventProcessResult, WebDynproClient};
-use crate::webdynpro::command::WebDynproCommandExecutor;
-use crate::webdynpro::command::element::action::ButtonPressEventCommand;
-use crate::webdynpro::command::element::layout::TabStripTabSelectEventCommand;
-use crate::webdynpro::command::element::selection::{
+use wdpe::client::{EventProcessResult, WebDynproClient};
+use wdpe::command::WebDynproCommandExecutor;
+use wdpe::command::element::action::ButtonPressEventCommand;
+use wdpe::command::element::layout::TabStripTabSelectEventCommand;
+use wdpe::command::element::selection::{
     ComboBoxChangeEventCommand, ComboBoxItemListBoxCommand, ComboBoxSelectByValue1EventCommand,
     ListBoxItemInfoCommand,
 };
-use crate::webdynpro::element::action::ButtonDef;
-use crate::webdynpro::element::layout::TabStrip;
-use crate::webdynpro::element::layout::tab_strip::item::TabStripItemDef;
-use crate::webdynpro::element::parser::ElementParser;
-use crate::webdynpro::element::selection::ComboBoxDef;
-use crate::webdynpro::element::selection::list_box::item::ListBoxItemInfo;
-use crate::webdynpro::error::WebDynproError;
+use wdpe::define_elements;
+use wdpe::element::action::ButtonDef;
+use wdpe::element::layout::TabStrip;
+use wdpe::element::layout::tab_strip::item::TabStripItemDef;
+use wdpe::element::parser::ElementParser;
+use wdpe::element::selection::ComboBoxDef;
+use wdpe::element::selection::list_box::item::ListBoxItemInfo;
+use wdpe::error::WebDynproError;
 
 define_elements! {
     TABSTRIP: TabStrip<'static> = "ZCMW2100.ID_0001:VIW_MAIN.MODULE_TABSTRIP";

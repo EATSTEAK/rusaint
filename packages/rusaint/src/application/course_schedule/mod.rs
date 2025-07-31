@@ -4,28 +4,28 @@ use crate::application::course_schedule::utils::{
 };
 use crate::application::utils::sap_table::try_table_into_with_scroll;
 use crate::application::utils::semester::get_selected_semester;
-use crate::webdynpro::command::WebDynproCommandExecutor;
-use crate::webdynpro::element::layout::tab_strip::item::TabStripItem;
-use crate::webdynpro::element::parser::ElementParser;
 use crate::{
     ApplicationError, RusaintError,
     application::course_schedule::model::{Lecture, LectureCategory},
-    define_elements,
     model::SemesterType,
-    webdynpro::{
-        client::body::Body,
-        command::element::{complex::SapTableBodyCommand, selection::ComboBoxSelectEventCommand},
-        element::{
-            ElementDefWrapper,
-            complex::{
-                SapTable,
-                sap_table::cell::{SapTableCell, SapTableCellWrapper},
-            },
-            layout::TabStrip,
-            selection::ComboBox,
+};
+use wdpe::command::WebDynproCommandExecutor;
+use wdpe::element::layout::tab_strip::item::TabStripItem;
+use wdpe::element::parser::ElementParser;
+use wdpe::{
+    client::body::Body,
+    command::element::{complex::SapTableBodyCommand, selection::ComboBoxSelectEventCommand},
+    define_elements,
+    element::{
+        ElementDefWrapper,
+        complex::{
+            SapTable,
+            sap_table::cell::{SapTableCell, SapTableCellWrapper},
         },
-        error::WebDynproError,
+        layout::TabStrip,
+        selection::ComboBox,
     },
+    error::WebDynproError,
 };
 
 /// [강의시간표](https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/ZCMW2100)

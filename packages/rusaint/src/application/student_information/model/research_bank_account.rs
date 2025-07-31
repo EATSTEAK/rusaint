@@ -1,21 +1,19 @@
-use crate::webdynpro::command::WebDynproCommandExecutor;
-use crate::webdynpro::element::parser::ElementParser;
-use crate::{
-    application::{USaintClient, student_information::StudentInformationApplication},
-    define_elements,
-    webdynpro::{
-        command::element::{
-            layout::TabStripTabSelectEventCommand, selection::ComboBoxValueCommand,
-            text::InputFieldValueCommand,
-        },
-        element::{
-            action::Button, layout::tab_strip::item::TabStripItem, selection::ComboBox,
-            text::InputField,
-        },
-        error::WebDynproError,
-    },
-};
+use crate::application::{USaintClient, student_information::StudentInformationApplication};
 use serde::{Deserialize, Serialize};
+use wdpe::command::WebDynproCommandExecutor;
+use wdpe::element::parser::ElementParser;
+use wdpe::{
+    command::element::{
+        layout::TabStripTabSelectEventCommand, selection::ComboBoxValueCommand,
+        text::InputFieldValueCommand,
+    },
+    define_elements,
+    element::{
+        action::Button, layout::tab_strip::item::TabStripItem, selection::ComboBox,
+        text::InputField,
+    },
+    error::WebDynproError,
+};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[cfg_attr(feature = "uniffi", derive(uniffi::Record))]

@@ -6,8 +6,8 @@ use serde::{
 };
 
 use crate::application::utils::de_with::deserialize_with_trim;
-use crate::webdynpro::element::parser::ElementParser;
-use crate::webdynpro::{
+use wdpe::element::parser::ElementParser;
+use wdpe::{
     element::{complex::sap_table::FromSapTable, definition::ElementDefinition},
     error::ElementError,
 };
@@ -274,10 +274,10 @@ fn deserialize_lectures<'de, D: Deserializer<'de>>(
 
 impl<'body> FromSapTable<'body> for GraduationRequirement {
     fn from_table(
-        header: &'body crate::webdynpro::element::complex::sap_table::SapTableHeader,
-        row: &'body crate::webdynpro::element::complex::sap_table::SapTableRow,
+        header: &'body wdpe::element::complex::sap_table::SapTableHeader,
+        row: &'body wdpe::element::complex::sap_table::SapTableRow,
         parser: &'body ElementParser,
-    ) -> Result<Self, crate::webdynpro::error::WebDynproError> {
+    ) -> Result<Self, wdpe::error::WebDynproError> {
         let map_string = row.try_row_into::<HashMap<String, String>>(header, parser)?;
         let map_de: MapDeserializer<_, serde::de::value::Error> = map_string.into_deserializer();
         Ok(GraduationRequirement::deserialize(map_de).map_err(|e| {
