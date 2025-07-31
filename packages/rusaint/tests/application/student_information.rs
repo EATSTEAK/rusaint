@@ -3,11 +3,11 @@ use lazy_static::lazy_static;
 use rusaint::{
     RusaintError,
     application::{USaintClientBuilder, student_information::StudentInformationApplication},
-    webdynpro::error::{ElementError, WebDynproError},
 };
 use std::sync::{Arc, OnceLock};
 use tokio::sync::{Mutex, RwLock};
 use tracing_test::traced_test;
+use wdpe::error::{ElementError, WebDynproError};
 
 lazy_static! {
     static ref APP: Mutex<OnceLock<Arc<RwLock<StudentInformationApplication>>>> =
@@ -48,12 +48,15 @@ async fn graduation() {
     let app = lock.read().await;
     let student_info = app.graduation();
     match student_info {
-        Err(RusaintError::WebDynproError(WebDynproError::Element(
-            ElementError::NoSuchContent {
-                element: _,
-                content: _,
-            },
-        ))) => (),
+        Err(RusaintError::WebDynproError(WebDynproError::Element(ref el_err))) => {
+            match el_err.as_ref() {
+                ElementError::NoSuchContent {
+                    element: _,
+                    content: _,
+                } => (),
+                _ => panic!("{el_err:?}"),
+            }
+        }
         Err(err) => {
             panic!("{err:?}");
         }

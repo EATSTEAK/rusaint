@@ -9,17 +9,15 @@ use crate::application::course_schedule::utils::{
     request, request_lv1, request_lv2, request_lv3, request_text,
 };
 use crate::application::utils::de_with::deserialize_optional_string;
-use crate::webdynpro::element::parser::ElementParser;
-use crate::{
+use wdpe::element::parser::ElementParser;
+use wdpe::{
+    client::WebDynproClient,
     define_elements,
-    webdynpro::{
-        client::WebDynproClient,
-        element::{
-            action::Button, complex::sap_table::FromSapTable, definition::ElementDefinition,
-            layout::tab_strip::item::TabStripItem, selection::ComboBox,
-        },
-        error::{ElementError, WebDynproError},
+    element::{
+        action::Button, complex::sap_table::FromSapTable, definition::ElementDefinition,
+        layout::tab_strip::item::TabStripItem, selection::ComboBox,
     },
+    error::{ElementError, WebDynproError},
 };
 
 /// 강의를 찾을 때 사용하는 강의 카테고리
@@ -479,8 +477,8 @@ pub struct Lecture {
 
 impl<'body> FromSapTable<'body> for Lecture {
     fn from_table(
-        header: &'body crate::webdynpro::element::complex::sap_table::SapTableHeader,
-        row: &'body crate::webdynpro::element::complex::sap_table::SapTableRow,
+        header: &'body wdpe::element::complex::sap_table::SapTableHeader,
+        row: &'body wdpe::element::complex::sap_table::SapTableRow,
         parser: &'body ElementParser,
     ) -> Result<Self, WebDynproError> {
         let map_string = row.try_row_into::<HashMap<String, String>>(header, parser)?;

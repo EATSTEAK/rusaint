@@ -1,11 +1,11 @@
 use crate::application::USaintClient;
 use crate::model::SemesterType;
-use crate::webdynpro::command::WebDynproCommandExecutor;
-use crate::webdynpro::command::element::selection::ComboBoxLSDataCommand;
-use crate::webdynpro::element::definition::ElementDefinition;
-use crate::webdynpro::element::parser::ElementParser;
-use crate::webdynpro::element::selection::ComboBoxDef;
-use crate::webdynpro::error::{ElementError, WebDynproError};
+use wdpe::command::WebDynproCommandExecutor;
+use wdpe::command::element::selection::ComboBoxLSDataCommand;
+use wdpe::element::definition::ElementDefinition;
+use wdpe::element::parser::ElementParser;
+use wdpe::element::selection::ComboBoxDef;
+use wdpe::error::{ElementError, WebDynproError};
 
 pub(crate) fn get_selected_semester(
     client: &USaintClient,
@@ -16,25 +16,21 @@ pub(crate) fn get_selected_semester(
     let year = parser
         .read(ComboBoxLSDataCommand::new(year_def.clone()))?
         .key()
-        .ok_or_else(|| {
-            WebDynproError::Element(ElementError::NoSuchContent {
-                element: year_def.id().to_string(),
-                content: "No data provided".to_string(),
-            })
+        .ok_or_else(|| ElementError::NoSuchContent {
+            element: year_def.id().to_string(),
+            content: "No data provided".to_string(),
         })?
         .parse::<u32>()
-        .or(Err(WebDynproError::Element(ElementError::InvalidContent {
+        .or(Err(ElementError::InvalidContent {
             element: year_def.id().to_string(),
             content: "Year cannot be parsed as u32".to_string(),
-        })))?;
+        }))?;
     let semester = match parser
         .read(ComboBoxLSDataCommand::new(semester_def.clone()))?
         .key()
-        .ok_or_else(|| {
-            WebDynproError::Element(ElementError::NoSuchContent {
-                element: semester_def.id().to_string(),
-                content: "No data provided".to_string(),
-            })
+        .ok_or_else(|| ElementError::NoSuchContent {
+            element: semester_def.id().to_string(),
+            content: "No data provided".to_string(),
         })?
         .as_str()
     {

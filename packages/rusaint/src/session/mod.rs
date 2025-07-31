@@ -12,11 +12,11 @@ use reqwest::{
 };
 use reqwest_cookie_store::CookieStoreRwLock;
 use url::Url;
+use wdpe::error::{ClientError, WebDynproError};
 
 use crate::{
     error::{RusaintError, SsuSsoError},
     utils::{DEFAULT_USER_AGENT, default_header},
-    webdynpro::error::{ClientError, WebDynproError},
 };
 
 const SSU_USAINT_PORTAL_URL: &str = "https://saint.ssu.ac.kr/irj/portal";

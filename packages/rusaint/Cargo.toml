@@ -44,6 +44,7 @@ serde_json = "1.0.140"
 reqwest_cookie_store = { version = "0.8.0", features = ["serde"] }
 cookie_store = "0.21.1"
 tracing = "0.1.41"
+wdpe = "0.1.1"
 
 [dev-dependencies]
 dotenv = "0.15.0"

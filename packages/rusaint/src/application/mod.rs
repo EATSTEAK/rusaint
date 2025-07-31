@@ -1,25 +1,21 @@
 use std::sync::Arc;
 use url::Url;
 
-use crate::webdynpro::command::WebDynproCommandExecutor;
-use crate::webdynpro::element::parser::ElementParser;
-use crate::{
-    RusaintError,
-    session::USaintSession,
-    utils::DEFAULT_USER_AGENT,
-    webdynpro::{
-        client::{EventProcessResult, WebDynproClient, WebDynproClientBuilder, body::Body},
-        command::element::system::{
-            ClientInspectorNotifyEventCommand, CustomClientInfoEventCommand,
-            LoadingPlaceholderLoadEventCommand,
-        },
-        element::{
-            define_elements,
-            system::{ClientInspector, Custom, CustomClientInfo, LoadingPlaceholder},
-        },
-        error::WebDynproError,
-        event::Event,
+use crate::{RusaintError, session::USaintSession, utils::DEFAULT_USER_AGENT};
+use wdpe::command::WebDynproCommandExecutor;
+use wdpe::element::parser::ElementParser;
+use wdpe::{
+    client::{EventProcessResult, WebDynproClient, WebDynproClientBuilder, body::Body},
+    command::element::system::{
+        ClientInspectorNotifyEventCommand, CustomClientInfoEventCommand,
+        LoadingPlaceholderLoadEventCommand,
     },
+    element::{
+        define_elements,
+        system::{ClientInspector, Custom, CustomClientInfo, LoadingPlaceholder},
+    },
+    error::WebDynproError,
+    event::Event,
 };
 
 const SSU_WEBDYNPRO_BASE_URL: &str = "https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/";

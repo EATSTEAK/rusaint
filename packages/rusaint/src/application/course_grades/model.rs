@@ -5,17 +5,17 @@ use serde::{
     de::{IntoDeserializer, value::MapDeserializer},
 };
 
-use crate::webdynpro::element::parser::ElementParser;
-use crate::webdynpro::{
-    element::{complex::sap_table::FromSapTable, definition::ElementDefinition},
-    error::{ElementError, WebDynproError},
-};
 use crate::{
     application::utils::de_with::{
         deserialize_empty, deserialize_f32_string, deserialize_semester_type,
         deserialize_u32_string,
     },
     model::SemesterType,
+};
+use wdpe::element::parser::ElementParser;
+use wdpe::{
+    element::{complex::sap_table::FromSapTable, definition::ElementDefinition},
+    error::{ElementError, WebDynproError},
 };
 
 /// 전체 성적(학적부, 증명)
@@ -253,8 +253,8 @@ impl SemesterGrade {
 
 impl<'body> FromSapTable<'body> for SemesterGrade {
     fn from_table(
-        header: &'body crate::webdynpro::element::complex::sap_table::SapTableHeader,
-        row: &'body crate::webdynpro::element::complex::sap_table::SapTableRow,
+        header: &'body wdpe::element::complex::sap_table::SapTableHeader,
+        row: &'body wdpe::element::complex::sap_table::SapTableRow,
         parser: &'body ElementParser,
     ) -> Result<Self, WebDynproError> {
         let map_string = row.try_row_into::<HashMap<String, String>>(header, parser)?;

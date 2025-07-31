@@ -2,20 +2,19 @@ use model::{ChapelAbsenceRequest, ChapelAttendance, ChapelInformation, GeneralCh
 
 use super::{USaintApplication, USaintClient};
 use crate::application::utils::semester::get_selected_semester;
-use crate::webdynpro::command::WebDynproCommandExecutor;
-use crate::webdynpro::element::parser::ElementParser;
-use crate::{
-    RusaintError, define_elements,
-    model::SemesterType,
-    webdynpro::{
-        client::body::Body,
-        command::element::{
-            action::ButtonPressEventCommand,
-            selection::{ComboBoxLSDataCommand, ComboBoxSelectEventCommand},
-        },
-        element::{action::Button, selection::ComboBox},
-        error::{ElementError, WebDynproError},
+use crate::{RusaintError, model::SemesterType};
+
+use wdpe::command::WebDynproCommandExecutor;
+use wdpe::element::parser::ElementParser;
+use wdpe::{
+    client::body::Body,
+    command::element::{
+        action::ButtonPressEventCommand,
+        selection::{ComboBoxLSDataCommand, ComboBoxSelectEventCommand},
     },
+    define_elements,
+    element::{action::Button, selection::ComboBox},
+    error::{ElementError, WebDynproError},
 };
 
 /// [채플정보조회](https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/ZCMW3681)

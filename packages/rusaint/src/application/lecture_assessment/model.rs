@@ -8,13 +8,11 @@ use serde::{
 use crate::application::utils::de_with::{
     deserialize_f32_string, deserialize_semester_type, deserialize_u32_string,
 };
-use crate::webdynpro::element::parser::ElementParser;
-use crate::{
-    model::SemesterType,
-    webdynpro::{
-        element::{complex::sap_table::FromSapTable, definition::ElementDefinition},
-        error::{ElementError, WebDynproError},
-    },
+use crate::model::SemesterType;
+use wdpe::element::parser::ElementParser;
+use wdpe::{
+    element::{complex::sap_table::FromSapTable, definition::ElementDefinition},
+    error::{ElementError, WebDynproError},
 };
 
 /// 강의평가 결과
@@ -109,8 +107,8 @@ impl LectureAssessmentResult {
 
 impl<'body> FromSapTable<'body> for LectureAssessmentResult {
     fn from_table(
-        header: &'body crate::webdynpro::element::complex::sap_table::SapTableHeader,
-        row: &'body crate::webdynpro::element::complex::sap_table::SapTableRow,
+        header: &'body wdpe::element::complex::sap_table::SapTableHeader,
+        row: &'body wdpe::element::complex::sap_table::SapTableRow,
         parser: &'body ElementParser,
     ) -> Result<Self, WebDynproError> {
         let map_string = row.try_row_into::<HashMap<String, String>>(header, parser)?;

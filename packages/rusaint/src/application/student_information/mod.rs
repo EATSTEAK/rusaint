@@ -5,11 +5,9 @@ use model::{
 };
 
 use super::{USaintApplication, USaintClient};
-use crate::webdynpro::element::parser::ElementParser;
-use crate::{
-    RusaintError, define_elements,
-    webdynpro::{client::body::Body, element::layout::TabStrip},
-};
+use crate::RusaintError;
+use wdpe::element::parser::ElementParser;
+use wdpe::{client::body::Body, define_elements, element::layout::TabStrip};
 
 /// [학생 정보 수정 및 조회](https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/ZCMW1001n)
 #[derive(Debug)]

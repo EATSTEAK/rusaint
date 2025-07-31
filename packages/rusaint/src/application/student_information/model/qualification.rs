@@ -1,13 +1,10 @@
-use crate::webdynpro::command::WebDynproCommandExecutor;
-use crate::webdynpro::element::parser::ElementParser;
-use crate::{
-    define_elements,
-    webdynpro::{
-        command::element::text::InputFieldValueCommand, element::text::InputField,
-        error::WebDynproError,
-    },
-};
 use serde::{Deserialize, Serialize};
+use wdpe::command::WebDynproCommandExecutor;
+use wdpe::element::parser::ElementParser;
+use wdpe::{
+    command::element::text::InputFieldValueCommand, define_elements, element::text::InputField,
+    error::WebDynproError,
+};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[cfg_attr(feature = "uniffi", derive(uniffi::Record))]

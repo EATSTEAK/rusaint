@@ -1,10 +1,21 @@
-use crate::webdynpro::{
+use wdpe::{
     element::{Element, text::InputField},
     error::{ElementError, WebDynproError},
 };
 
-impl InputField<'_> {
-    pub(crate) fn value_string(&self) -> Result<String, WebDynproError> {
+pub(crate) trait InputFieldExt {
+    /// Returns the value of the input field as a string.
+    fn value_string(&self) -> Result<String, WebDynproError>;
+
+    /// Converts the value of the input field to a u32.
+    fn value_into_u32(&self) -> Result<u32, WebDynproError>;
+
+    /// Converts the value of the input field to a f32.
+    fn value_into_f32(&self) -> Result<f32, WebDynproError>;
+}
+
+impl InputFieldExt for InputField<'_> {
+    fn value_string(&self) -> Result<String, WebDynproError> {
         Ok(self
             .value()
             .ok_or_else(|| ElementError::NoSuchContent {
@@ -14,7 +25,7 @@ impl InputField<'_> {
             .to_owned())
     }
 
-    pub(crate) fn value_into_u32(&self) -> Result<u32, WebDynproError> {
+    fn value_into_u32(&self) -> Result<u32, WebDynproError> {
         self.value_string()?.trim().parse::<u32>().map_err(|e| {
             tracing::error!(?e, "failed to convert string to u32");
             ElementError::InvalidContent {
@@ -25,7 +36,7 @@ impl InputField<'_> {
         })
     }
 
-    pub(crate) fn value_into_f32(&self) -> Result<f32, WebDynproError> {
+    fn value_into_f32(&self) -> Result<f32, WebDynproError> {
         self.value_string()?.trim().parse::<f32>().map_err(|_| {
             ElementError::InvalidContent {
                 element: self.id().to_owned(),

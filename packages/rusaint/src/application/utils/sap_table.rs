@@ -1,13 +1,13 @@
 use crate::application::USaintClient;
-use crate::webdynpro::command::WebDynproCommandExecutor;
-use crate::webdynpro::command::element::complex::{
+use wdpe::command::WebDynproCommandExecutor;
+use wdpe::command::element::complex::{
     SapTableBodyCommand, SapTableLSDataCommand, SapTableVerticalScrollEventCommand,
 };
-use crate::webdynpro::element::complex::SapTableDef;
-use crate::webdynpro::element::complex::sap_table::FromSapTable;
-use crate::webdynpro::element::definition::ElementDefinition;
-use crate::webdynpro::element::parser::ElementParser;
-use crate::webdynpro::error::{ElementError, WebDynproError};
+use wdpe::element::complex::SapTableDef;
+use wdpe::element::complex::sap_table::FromSapTable;
+use wdpe::element::definition::ElementDefinition;
+use wdpe::element::parser::ElementParser;
+use wdpe::error::{ElementError, WebDynproError};
 
 pub(crate) async fn try_table_into_with_scroll<T: for<'body> FromSapTable<'body>>(
     client: &mut USaintClient,
@@ -18,11 +18,9 @@ pub(crate) async fn try_table_into_with_scroll<T: for<'body> FromSapTable<'body>
         .read(SapTableLSDataCommand::new(table.clone()))?
         .row_count()
         .map(|u| u.to_owned())
-        .ok_or_else(|| {
-            WebDynproError::Element(ElementError::NoSuchData {
-                element: table.clone().id().to_string(),
-                field: "row_count".to_string(),
-            })
+        .ok_or_else(|| ElementError::NoSuchData {
+            element: table.clone().id().to_string(),
+            field: "row_count".to_string(),
         })?
         .try_into()
         .unwrap();

@@ -1,21 +1,20 @@
 use model::{GraduationRequirement, GraduationRequirements, GraduationStudent};
 
 use super::{USaintApplication, USaintClient};
-use crate::webdynpro::command::WebDynproCommandExecutor;
-use crate::webdynpro::element::parser::ElementParser;
-use crate::{
-    RusaintError, define_elements,
-    webdynpro::{
-        client::body::Body,
-        command::element::{
-            action::ButtonPressEventCommand, complex::SapTableBodyCommand,
-            text::InputFieldValueCommand,
-        },
-        element::{
-            action::Button,
-            complex::SapTable,
-            text::{InputField, InputFieldDef},
-        },
+use crate::RusaintError;
+use crate::application::utils::input_field::InputFieldExt as _;
+use wdpe::command::WebDynproCommandExecutor;
+use wdpe::element::parser::ElementParser;
+use wdpe::{
+    client::body::Body,
+    command::element::{
+        action::ButtonPressEventCommand, complex::SapTableBodyCommand, text::InputFieldValueCommand,
+    },
+    define_elements,
+    element::{
+        action::Button,
+        complex::SapTable,
+        text::{InputField, InputFieldDef},
     },
 };
 
@@ -168,15 +167,15 @@ pub mod model;
 
 #[cfg(test)]
 mod test {
-    use crate::webdynpro::command::WebDynproCommandExecutor;
-    use crate::webdynpro::element::parser::ElementParser;
     use crate::{
         application::{
             USaintClientBuilder, graduation_requirements::GraduationRequirementsApplication,
         },
         global_test_utils::get_session,
-        webdynpro::command::element::complex::SapTableBodyCommand,
     };
+    use wdpe::command::WebDynproCommandExecutor;
+    use wdpe::command::element::complex::SapTableBodyCommand;
+    use wdpe::element::parser::ElementParser;
 
     #[tokio::test]
     async fn read_table() {

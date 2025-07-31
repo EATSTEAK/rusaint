@@ -1,12 +1,12 @@
-use crate::webdynpro::element::parser::ElementParser;
-use crate::{
-    define_elements,
-    webdynpro::{
-        element::{definition::ElementDefinition, text::InputField},
-        error::{ElementError, WebDynproError},
-    },
-};
 use serde::{Deserialize, Serialize};
+use wdpe::element::parser::ElementParser;
+use wdpe::{
+    define_elements,
+    element::{definition::ElementDefinition, text::InputField},
+    error::{ElementError, WebDynproError},
+};
+
+use crate::application::utils::input_field::InputFieldExt as _;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
@@ -55,11 +55,12 @@ impl<'a> StudentGraduation {
             .element_from_def(&Self::GRDU_PERYR)?
             .value_into_u32()?;
         if graduation_year == 0 {
-            Err(WebDynproError::Element(ElementError::NoSuchContent {
+            Err(ElementError::NoSuchContent {
                 element: Self::GRDU_NO.id().to_string(),
                 content: "No graduation information provided. Is this student graduated?"
                     .to_string(),
-            }))
+            }
+            .into())
         } else {
             Ok(Self {
                 graduation_cardinal: parser.element_from_def(&Self::GRDU_NO)?.value_into_u32()?,

@@ -23,7 +23,7 @@
 //! ```no_run
 //! use rusaint::application::course_grades::{CourseGradesApplication, model::CourseType, model::SemesterGrade};
 //! use rusaint::application::USaintClientBuilder;
-//! use rusaint::webdynpro::element::Element;
+//! use wdpe::element::Element;
 //! use rusaint::RusaintError;
 //! use std::sync::Arc;
 //! use rusaint::USaintSession;

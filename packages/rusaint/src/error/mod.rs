@@ -1,6 +1,6 @@
 use thiserror::Error;
 
-use crate::webdynpro::error::WebDynproError;
+use wdpe::error::WebDynproError;
 
 /// Rusaint 애플리케이션에서 반환하는 오류
 #[derive(Error, Debug)]
