@@ -6,7 +6,7 @@ use crate::application::utils::input_field::InputFieldExt as _;
 use wdpe::command::WebDynproCommandExecutor;
 use wdpe::element::parser::ElementParser;
 use wdpe::{
-    client::body::Body,
+    body::Body,
     command::element::{
         action::ButtonPressEventCommand, complex::SapTableBodyCommand, text::InputFieldValueCommand,
     },

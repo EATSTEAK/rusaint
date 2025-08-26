@@ -1,4 +1,3 @@
-use wdpe::client::{EventProcessResult, WebDynproClient};
 use wdpe::command::WebDynproCommandExecutor;
 use wdpe::command::element::action::ButtonPressEventCommand;
 use wdpe::command::element::layout::TabStripTabSelectEventCommand;
@@ -14,6 +13,9 @@ use wdpe::element::parser::ElementParser;
 use wdpe::element::selection::ComboBoxDef;
 use wdpe::element::selection::list_box::item::ListBoxItemInfo;
 use wdpe::error::WebDynproError;
+use wdpe::state::EventProcessResult;
+
+use crate::application::USaintClient;
 
 define_elements! {
     TABSTRIP: TabStrip<'static> = "ZCMW2100.ID_0001:VIW_MAIN.MODULE_TABSTRIP";
@@ -21,7 +23,7 @@ define_elements! {
 
 #[allow(clippy::too_many_arguments)]
 pub(super) async fn request_lv3(
-    client: &mut WebDynproClient,
+    client: &mut USaintClient,
     tab_item: TabStripItemDef,
     tab_index: u32,
     lv1: ComboBoxDef,
@@ -53,7 +55,7 @@ pub(super) async fn request_lv3(
 
 #[allow(clippy::too_many_arguments)]
 pub(super) async fn request_lv2(
-    client: &mut WebDynproClient,
+    client: &mut USaintClient,
     tab_item: TabStripItemDef,
     tab_index: u32,
     lv1: ComboBoxDef,
@@ -78,7 +80,7 @@ pub(super) async fn request_lv2(
 }
 
 pub(super) async fn select_lv2(
-    client: &mut WebDynproClient,
+    client: &mut USaintClient,
     lv1: ComboBoxDef,
     lv2: ComboBoxDef,
     value_lv1: &str,
@@ -98,7 +100,7 @@ pub(super) async fn select_lv2(
 }
 
 pub(super) async fn request_lv1(
-    client: &mut WebDynproClient,
+    client: &mut USaintClient,
     tab_item: TabStripItemDef,
     tab_index: u32,
     lv1: ComboBoxDef,
@@ -117,7 +119,7 @@ pub(super) async fn request_lv1(
 }
 
 pub(super) async fn select_lv1(
-    client: &mut WebDynproClient,
+    client: &mut USaintClient,
     lv1: ComboBoxDef,
     value_lv1: &str,
 ) -> Result<(), WebDynproError> {
@@ -130,7 +132,7 @@ pub(super) async fn select_lv1(
 }
 
 pub(super) async fn request_text(
-    client: &mut WebDynproClient,
+    client: &mut USaintClient,
     tab_item: TabStripItemDef,
     tab_index: u32,
     text_combo: ComboBoxDef,
@@ -147,7 +149,7 @@ pub(super) async fn request_text(
 }
 
 pub(super) async fn request(
-    client: &mut WebDynproClient,
+    client: &mut USaintClient,
     tab_item: TabStripItemDef,
     tab_index: u32,
     search_btn: ButtonDef,
@@ -160,7 +162,7 @@ pub(super) async fn request(
 }
 
 pub(super) async fn select_tab(
-    client: &mut WebDynproClient,
+    client: &mut USaintClient,
     tab_item: TabStripItemDef,
     tab_index: u32,
 ) -> Result<EventProcessResult, WebDynproError> {
@@ -171,7 +173,7 @@ pub(super) async fn select_tab(
 }
 
 pub(super) fn combo_box_items(
-    client: &mut WebDynproClient,
+    client: &mut USaintClient,
     combo_box: ComboBoxDef,
 ) -> Result<Vec<String>, WebDynproError> {
     let parser = ElementParser::new(client.body());

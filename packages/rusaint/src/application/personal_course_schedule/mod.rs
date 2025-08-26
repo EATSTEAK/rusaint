@@ -9,7 +9,7 @@ use crate::{RusaintError, error::ApplicationError, model::SemesterType};
 use wdpe::command::WebDynproCommandExecutor;
 use wdpe::element::parser::ElementParser;
 use wdpe::{
-    client::body::Body,
+    body::Body,
     command::element::selection::{ComboBoxLSDataCommand, ComboBoxSelectEventCommand},
     define_elements,
     element::{complex::SapTable, selection::ComboBox},

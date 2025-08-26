@@ -1,7 +1,7 @@
 use super::{USaintApplication, USaintClient};
 use crate::RusaintError;
 use crate::application::scholarships::model::Scholarship;
-use wdpe::client::body::Body;
+use wdpe::body::Body;
 use wdpe::element::parser::ElementParser;
 
 /// [장학금수혜내역조회](https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/ZCMW7530n)
