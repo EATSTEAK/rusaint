@@ -6,7 +6,7 @@ use crate::application::utils::semester::get_selected_semester;
 use crate::{RusaintError, model::SemesterType};
 use scraper::Selector;
 use std::collections::HashMap;
-use wdpe::client::body::Body;
+use wdpe::body::Body;
 use wdpe::command::WebDynproCommandExecutor;
 use wdpe::element::complex::sap_table::cell::SapTableCellWrapper;
 use wdpe::element::parser::ElementParser;

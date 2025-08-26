@@ -58,7 +58,11 @@ impl USaintSession {
             .header(HOST, "saint.ssu.ac.kr".parse::<HeaderValue>().unwrap())
             .send()
             .await
-            .map_err(|e| WebDynproError::from(ClientError::from(e)))?;
+            .map_err(|e| {
+                WebDynproError::from(ClientError::FailedRequest(format!(
+                    "failed to send request: {e}"
+                )))
+            })?;
         let waf = portal.cookies().find(|cookie| cookie.name() == "WAF");
 
         session_store.set_cookies(
@@ -104,11 +108,16 @@ impl USaintSession {
             .header(COOKIE, token_cookie_str.parse::<HeaderValue>().unwrap())
             .header(HOST, "saint.ssu.ac.kr".parse::<HeaderValue>().unwrap())
             .build()
-            .map_err(|e| WebDynproError::from(ClientError::from(e)))?;
-        let res = client
-            .execute(req)
-            .await
-            .map_err(|e| WebDynproError::from(ClientError::from(e)))?;
+            .map_err(|e| {
+                WebDynproError::from(ClientError::FailedRequest(format!(
+                    "failed to build request: {e}"
+                )))
+            })?;
+        let res = client.execute(req).await.map_err(|e| {
+            WebDynproError::from(ClientError::FailedRequest(format!(
+                "failed to send request: {e}"
+            )))
+        })?;
         let mut new_cookies = res.headers().iter().filter_map(|header| {
             if header.0 == SET_COOKIE {
                 Some(header.1)

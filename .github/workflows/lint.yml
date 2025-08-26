@@ -16,6 +16,6 @@ jobs:
       - name: Retrieve cache
         uses: Leafwing-Studios/cargo-cache@v2
       - name: Check rustfmt
-        run: cargo fmt
+        run: cargo fmt --all --check
       - name: Check clippy
-        run: cargo clippy -- -D warnings
+        run: cargo clippy --all-targets --all-features -- -D warnings

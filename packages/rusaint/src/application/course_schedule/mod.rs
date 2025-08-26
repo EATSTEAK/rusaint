@@ -13,7 +13,7 @@ use wdpe::command::WebDynproCommandExecutor;
 use wdpe::element::layout::tab_strip::item::TabStripItem;
 use wdpe::element::parser::ElementParser;
 use wdpe::{
-    client::body::Body,
+    body::Body,
     command::element::{complex::SapTableBodyCommand, selection::ComboBoxSelectEventCommand},
     define_elements,
     element::{
@@ -136,8 +136,8 @@ impl<'app> CourseScheduleApplication {
             semester,
         )
         .await;
-        select_tab(&mut self.client.0, Self::TAB_OTHERS, 0).await?;
-        Ok(combo_box_items(&mut self.client.0, Self::OTHERS_DDK_LV3)?)
+        select_tab(&mut self.client, Self::TAB_OTHERS, 0).await?;
+        Ok(combo_box_items(&mut self.client, Self::OTHERS_DDK_LV3)?)
     }
 
     /// 선택한 학기 기준 주어진 단과대의 학과(부) 목록을 가져옵니다.
@@ -153,9 +153,9 @@ impl<'app> CourseScheduleApplication {
             semester,
         )
         .await;
-        select_tab(&mut self.client.0, Self::TAB_OTHERS, 0).await?;
-        select_lv1(&mut self.client.0, Self::OTHERS_DDK_LV3, collage).await?;
-        Ok(combo_box_items(&mut self.client.0, Self::OTHERS_DDK_LV4)?)
+        select_tab(&mut self.client, Self::TAB_OTHERS, 0).await?;
+        select_lv1(&mut self.client, Self::OTHERS_DDK_LV3, collage).await?;
+        Ok(combo_box_items(&mut self.client, Self::OTHERS_DDK_LV4)?)
     }
 
     /// 선택한 학과(부)의 전공 목록을 가져옵니다.
@@ -172,16 +172,16 @@ impl<'app> CourseScheduleApplication {
             semester,
         )
         .await;
-        select_tab(&mut self.client.0, Self::TAB_OTHERS, 0).await?;
+        select_tab(&mut self.client, Self::TAB_OTHERS, 0).await?;
         select_lv2(
-            &mut self.client.0,
+            &mut self.client,
             Self::OTHERS_DDK_LV3,
             Self::OTHERS_DDK_LV4,
             collage,
             department,
         )
         .await?;
-        Ok(combo_box_items(&mut self.client.0, Self::OTHERS_DDK_LV5)?)
+        Ok(combo_box_items(&mut self.client, Self::OTHERS_DDK_LV5)?)
     }
 
     /// 선택한 학기의 교양필수 과목명 목록을 가져옵니다.
@@ -200,8 +200,8 @@ impl<'app> CourseScheduleApplication {
             semester,
         )
         .await;
-        select_tab(&mut self.client.0, TAB_GENERAL_REQ, 1).await?;
-        Ok(combo_box_items(&mut self.client.0, GENERAL_REQ_TYPE)?)
+        select_tab(&mut self.client, TAB_GENERAL_REQ, 1).await?;
+        Ok(combo_box_items(&mut self.client, GENERAL_REQ_TYPE)?)
     }
 
     /// 선택한 학기의 교양선택 분야 목록을 가져옵니다.
@@ -220,11 +220,8 @@ impl<'app> CourseScheduleApplication {
             semester,
         )
         .await;
-        select_tab(&mut self.client.0, TAB_GENERAL_OPT, 2).await?;
-        Ok(combo_box_items(
-            &mut self.client.0,
-            GENERAL_OPT_DISCIPLINES,
-        )?)
+        select_tab(&mut self.client, TAB_GENERAL_OPT, 2).await?;
+        Ok(combo_box_items(&mut self.client, GENERAL_OPT_DISCIPLINES)?)
     }
 
     /// 선택한 학기의 채플 과목 분류 목록을 가져옵니다.
@@ -243,8 +240,8 @@ impl<'app> CourseScheduleApplication {
             semester,
         )
         .await;
-        select_tab(&mut self.client.0, TAB_CHAPEL, 3).await?;
-        Ok(combo_box_items(&mut self.client.0, CHAPEL_TYPE)?)
+        select_tab(&mut self.client, TAB_CHAPEL, 3).await?;
+        Ok(combo_box_items(&mut self.client, CHAPEL_TYPE)?)
     }
 
     define_elements! {
@@ -265,8 +262,8 @@ impl<'app> CourseScheduleApplication {
             semester,
         )
         .await;
-        select_tab(&mut self.client.0, Self::TAB_GRADUATE, 5).await?;
-        Ok(combo_box_items(&mut self.client.0, Self::GRADUATE_DDK_LV3)?)
+        select_tab(&mut self.client, Self::TAB_GRADUATE, 5).await?;
+        Ok(combo_box_items(&mut self.client, Self::GRADUATE_DDK_LV3)?)
     }
 
     /// 선택한 학기의 주어진 대학원 단과대의 학과 목록을 가져옵니다.
@@ -282,9 +279,9 @@ impl<'app> CourseScheduleApplication {
             semester,
         )
         .await;
-        select_tab(&mut self.client.0, Self::TAB_GRADUATE, 5).await?;
-        select_lv1(&mut self.client.0, Self::GRADUATE_DDK_LV3, collage).await?;
-        Ok(combo_box_items(&mut self.client.0, Self::GRADUATE_DDK_LV4)?)
+        select_tab(&mut self.client, Self::TAB_GRADUATE, 5).await?;
+        select_lv1(&mut self.client, Self::GRADUATE_DDK_LV3, collage).await?;
+        Ok(combo_box_items(&mut self.client, Self::GRADUATE_DDK_LV4)?)
     }
 
     /// 선택한 학기의 연계전공 목록을 가져옵니다.
@@ -303,8 +300,8 @@ impl<'app> CourseScheduleApplication {
             semester,
         )
         .await;
-        select_tab(&mut self.client.0, TAB_YOMA, 8).await?;
-        Ok(combo_box_items(&mut self.client.0, COMBO_YOMA)?)
+        select_tab(&mut self.client, TAB_YOMA, 8).await?;
+        Ok(combo_box_items(&mut self.client, COMBO_YOMA)?)
     }
 
     /// 선택한 학기의 융합전공 목록을 가져옵니다.
@@ -323,8 +320,8 @@ impl<'app> CourseScheduleApplication {
             semester,
         )
         .await;
-        select_tab(&mut self.client.0, TAB_UNMA, 9).await?;
-        Ok(combo_box_items(&mut self.client.0, COMBO_UNMA)?)
+        select_tab(&mut self.client, TAB_UNMA, 9).await?;
+        Ok(combo_box_items(&mut self.client, COMBO_UNMA)?)
     }
 
     /// 학기, 학년도, 강의 분류를 통해 강의를 찾습니다.
@@ -340,7 +337,7 @@ impl<'app> CourseScheduleApplication {
             self.select_rows(&parser, 500).await?;
             self.select_semester(&parser, &year_str, semester).await?;
         }
-        lecture_category.request_query(&mut self.client.0).await?;
+        lecture_category.request_query(&mut self.client).await?;
         let parser = ElementParser::new(self.body());
         let table = parser.read(SapTableBodyCommand::new(Self::MAIN_TABLE))?;
         let Some(first_row) = table.iter().next() else {

@@ -5,13 +5,13 @@ use serde::{
     de::{IntoDeserializer, value::MapDeserializer},
 };
 
-use crate::application::course_schedule::utils::{
-    request, request_lv1, request_lv2, request_lv3, request_text,
-};
 use crate::application::utils::de_with::deserialize_optional_string;
+use crate::application::{
+    USaintClient,
+    course_schedule::utils::{request, request_lv1, request_lv2, request_lv3, request_text},
+};
 use wdpe::element::parser::ElementParser;
 use wdpe::{
-    client::WebDynproClient,
     define_elements,
     element::{
         action::Button, complex::sap_table::FromSapTable, definition::ElementDefinition,
@@ -179,7 +179,7 @@ impl LectureCategory {
 
     pub(super) async fn request_query(
         &self,
-        client: &mut WebDynproClient,
+        client: &mut USaintClient,
     ) -> Result<(), WebDynproError> {
         match self {
             LectureCategory::Major {

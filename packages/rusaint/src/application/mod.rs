@@ -1,11 +1,14 @@
 use std::sync::Arc;
 use url::Url;
+use wdpe::body::Body;
+use wdpe::event::event_queue::EnqueueEventResult;
+use wdpe::requests::WebDynproRequests as _;
+use wdpe::state::{EventProcessResult, WebDynproState};
 
 use crate::{RusaintError, session::USaintSession, utils::DEFAULT_USER_AGENT};
 use wdpe::command::WebDynproCommandExecutor;
 use wdpe::element::parser::ElementParser;
 use wdpe::{
-    client::{EventProcessResult, WebDynproClient, WebDynproClientBuilder, body::Body},
     command::element::system::{
         ClientInspectorNotifyEventCommand, CustomClientInfoEventCommand,
         LoadingPlaceholderLoadEventCommand,
@@ -23,7 +26,10 @@ const INITIAL_CLIENT_DATA_WD01: &str = "ClientWidth:1920px;ClientHeight:1000px;S
 const INITIAL_CLIENT_DATA_WD02: &str = "ThemedTableRowHeight:25px";
 /// u-saint에 접속하기 위한 기본 클라이언트
 #[derive(Debug)]
-pub struct USaintClient(WebDynproClient);
+pub struct USaintClient {
+    state: WebDynproState,
+    client: reqwest::Client,
+}
 
 impl<'a> USaintClient {
     define_elements! {
@@ -34,30 +40,33 @@ impl<'a> USaintClient {
 
     const CUSTOM: Custom = Custom::new(std::borrow::Cow::Borrowed("WD01"));
 
-    async fn new(client: WebDynproClient) -> Result<USaintClient, WebDynproError> {
-        let mut client = USaintClient(client);
+    async fn new(
+        state: WebDynproState,
+        client: reqwest::Client,
+    ) -> Result<USaintClient, WebDynproError> {
+        let mut client = USaintClient { state, client };
         client.load_placeholder().await?;
         Ok(client)
     }
 
     /// WebDynpro 애플리케이션의 이름을 반환합니다.
     pub fn name(&self) -> &str {
-        self.0.name()
+        self.state.name()
     }
 
     /// WebDynpro 애플리케이션의 기본 URL을 반환합니다.
     pub fn base_url(&self) -> &Url {
-        self.0.base_url()
+        self.state.base_url()
     }
 
     /// WebDynpro 애플리케이션의 페이지 문서를 반환합니다.
     pub fn body(&self) -> &Body {
-        self.0.body()
+        self.state.body()
     }
 
     /// 실제로 요청하는 애플리케이션의 URL을 반환합니다.
     pub fn client_url(&self) -> String {
-        self.0.client_url()
+        self.state.client_url()
     }
 
     /// 이벤트를 처리합니다. [`process_event()`](WebDynproClient::process_event)를 참조하세요.
@@ -66,7 +75,24 @@ impl<'a> USaintClient {
         force_send: bool,
         event: Event,
     ) -> Result<EventProcessResult, WebDynproError> {
-        self.0.process_event(force_send, event).await
+        let enqueue_result = self.state.add_event(event).await;
+
+        if (matches!(enqueue_result, EnqueueEventResult::ShouldProcess)) || force_send {
+            let serialized_events = self.state.serialize_and_clear_with_form_event().await?;
+            let update = {
+                self.client
+                    .send_events(
+                        self.state.base_url(),
+                        self.state.body().ssr_client(),
+                        &serialized_events,
+                    )
+                    .await?
+            };
+            self.state.mutate_body(update)?;
+            Ok(EventProcessResult::Sent)
+        } else {
+            Ok(EventProcessResult::Enqueued)
+        }
     }
 
     async fn load_placeholder(&mut self) -> Result<(), WebDynproError> {
@@ -126,17 +152,22 @@ impl USaintClientBuilder {
 
     /// 애플리케이션 이름과 함께 [`USaintClient`]을 생성합니다.
     pub async fn build(self, name: &str) -> Result<USaintClient, WebDynproError> {
-        let mut builder = WebDynproClientBuilder::new(SSU_WEBDYNPRO_BASE_URL, name);
-        if let Some(session) = self.session {
-            let client = reqwest::Client::builder()
+        let base_url = Url::parse(SSU_WEBDYNPRO_BASE_URL).unwrap();
+        let client = if let Some(session) = self.session {
+            reqwest::Client::builder()
                 .cookie_provider(session)
                 .user_agent(DEFAULT_USER_AGENT)
                 .build()
-                .unwrap();
-            builder = builder.client(client);
-        }
-        let base_app = builder.build().await?;
-        USaintClient::new(base_app).await
+                .unwrap()
+        } else {
+            reqwest::Client::builder()
+                .user_agent(DEFAULT_USER_AGENT)
+                .build()
+                .unwrap()
+        };
+        let body = client.navigate(&base_url, name).await?;
+        let state = WebDynproState::new(base_url, name.to_string(), body);
+        USaintClient::new(state, client).await
     }
 
     /// 특정 [`USaintApplication`]을 만듭니다.

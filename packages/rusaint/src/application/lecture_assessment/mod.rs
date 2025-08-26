@@ -7,7 +7,7 @@ use crate::{ApplicationError, RusaintError, model::SemesterType};
 use wdpe::command::WebDynproCommandExecutor;
 use wdpe::element::parser::ElementParser;
 use wdpe::{
-    client::body::Body,
+    body::Body,
     command::element::{
         action::ButtonPressEventCommand,
         complex::{SapTableBodyCommand, SapTableLSDataCommand},
