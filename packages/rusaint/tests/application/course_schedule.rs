@@ -2,10 +2,8 @@ use crate::get_session;
 use lazy_static::lazy_static;
 use rusaint::{
     ApplicationError, RusaintError,
-    application::{
-        USaintClientBuilder,
-        course_schedule::{CourseScheduleApplication, model::LectureCategory},
-    },
+    application::course_schedule::{CourseScheduleApplication, model::LectureCategory},
+    client::USaintClientBuilder,
     model::SemesterType,
 };
 use std::sync::{Arc, OnceLock};

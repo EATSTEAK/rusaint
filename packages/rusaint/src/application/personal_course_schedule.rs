@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use model::{CourseScheduleInformation, PersonalCourseSchedule, Weekday};
 
-use super::{USaintApplication, USaintClient};
+use crate::client::{USaintApplication, USaintClient};
 use crate::application::utils::semester::get_selected_semester;
 use crate::{RusaintError, error::ApplicationError, model::SemesterType};
 

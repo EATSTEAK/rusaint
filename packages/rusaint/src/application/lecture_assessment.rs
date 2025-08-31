@@ -1,8 +1,8 @@
 use model::LectureAssessmentResult;
 
-use super::{USaintApplication, USaintClient};
 use crate::application::utils::sap_table::try_table_into_with_scroll;
 use crate::application::utils::semester::get_selected_semester;
+use crate::client::{USaintApplication, USaintClient};
 use crate::{ApplicationError, RusaintError, model::SemesterType};
 use wdpe::command::WebDynproCommandExecutor;
 use wdpe::element::parser::ElementParser;

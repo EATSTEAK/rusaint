@@ -1,10 +1,8 @@
 use crate::{TARGET_SEMESTER, TARGET_YEAR, get_session};
 use lazy_static::lazy_static;
 use rusaint::RusaintError;
-use rusaint::application::{
-    USaintClientBuilder,
-    course_grades::{CourseGradesApplication, model::CourseType},
-};
+use rusaint::application::course_grades::{CourseGradesApplication, model::CourseType};
+use rusaint::client::USaintClientBuilder;
 use std::sync::{Arc, OnceLock};
 use tokio::sync::{Mutex, RwLock};
 use tracing_test::traced_test;

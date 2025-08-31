@@ -1,6 +1,6 @@
 use crate::get_session;
 use rusaint::{
-    application::{USaintClientBuilder, lecture_assessment::LectureAssessmentApplication},
+    application::lecture_assessment::LectureAssessmentApplication, client::USaintClientBuilder,
     model::SemesterType,
 };
 use tracing_test::traced_test;

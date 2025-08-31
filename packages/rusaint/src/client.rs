@@ -1,25 +1,27 @@
 use std::sync::Arc;
-use url::Url;
-use wdpe::body::Body;
-use wdpe::event::event_queue::EnqueueEventResult;
-use wdpe::requests::WebDynproRequests as _;
-use wdpe::state::{EventProcessResult, WebDynproState};
 
-use crate::{RusaintError, session::USaintSession, utils::DEFAULT_USER_AGENT};
-use wdpe::command::WebDynproCommandExecutor;
-use wdpe::element::parser::ElementParser;
+use url::Url;
 use wdpe::{
-    command::element::system::{
-        ClientInspectorNotifyEventCommand, CustomClientInfoEventCommand,
-        LoadingPlaceholderLoadEventCommand,
+    body::Body,
+    command::{
+        WebDynproCommandExecutor as _,
+        element::system::{
+            ClientInspectorNotifyEventCommand, CustomClientInfoEventCommand,
+            LoadingPlaceholderLoadEventCommand,
+        },
     },
+    define_elements,
     element::{
-        define_elements,
+        parser::ElementParser,
         system::{ClientInspector, Custom, CustomClientInfo, LoadingPlaceholder},
     },
     error::WebDynproError,
-    event::Event,
+    event::{Event, event_queue::EnqueueEventResult},
+    requests::WebDynproRequests as _,
+    state::{EventProcessResult, WebDynproState},
 };
+
+use crate::{RusaintError, USaintSession, utils::DEFAULT_USER_AGENT};
 
 const SSU_WEBDYNPRO_BASE_URL: &str = "https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/";
 const INITIAL_CLIENT_DATA_WD01: &str = "ClientWidth:1920px;ClientHeight:1000px;ScreenWidth:1920px;ScreenHeight:1080px;ScreenOrientation:landscape;ThemedTableRowHeight:33px;ThemedFormLayoutRowHeight:32px;ThemedSvgLibUrls:{\"SAPGUI-icons\":\"https://ecc.ssu.ac.kr:8443/sap/public/bc/ur/nw5/themes/~cache-20210223121230/Base/baseLib/sap_fiori_3/svg/libs/SAPGUI-icons.svg\",\"SAPWeb-icons\":\"https://ecc.ssu.ac.kr:8443/sap/public/bc/ur/nw5/themes/~cache-20210223121230/Base/baseLib/sap_fiori_3/svg/libs/SAPWeb-icons.svg\"};ThemeTags:Fiori_3,Touch;ThemeID:sap_fiori_3;SapThemeID:sap_fiori_3;DeviceType:DESKTOP";
@@ -183,27 +185,3 @@ impl Default for USaintClientBuilder {
         Self::new()
     }
 }
-/// 학생 성적 조회: [`CourseGradesApplication`](course_grades::CourseGradesApplication)
-pub mod course_grades;
-
-/// 강의시간표: [`CourseScheduleApplication`](course_schedule::CourseScheduleApplication)
-pub mod course_schedule;
-
-/// 졸업사정표: [`GraduationRequirementsApplication`](graduation_requirements::GraduationRequirementsApplication)
-pub mod graduation_requirements;
-
-/// 학생 정보 조회: [`StudentInformationApplication`](student_information::StudentInformationApplication)
-pub mod student_information;
-
-/// 채플 정보 조회: [`ChapelApplication`](chapel::ChapelApplication)
-pub mod chapel;
-
-/// 개인 수업 시간표 조회: [`PersonalCourseScheduleApplication`](personal_course_schedule::PersonalCourseScheduleApplication)
-pub mod personal_course_schedule;
-
-/// 강의평가 조회: [`LectureAssessmentApplication`](lecture_assessment::LectureAssessmentApplication)
-pub mod lecture_assessment;
-
-/// 장학금 수혜내역 조회: [`ScholarshipsApplication`](scholarships::ScholarshipsApplication)
-pub mod scholarships;
-pub(crate) mod utils;

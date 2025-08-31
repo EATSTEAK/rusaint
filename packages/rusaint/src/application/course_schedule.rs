@@ -1,9 +1,9 @@
-use super::{USaintApplication, USaintClient};
 use crate::application::course_schedule::utils::{
     combo_box_items, select_lv1, select_lv2, select_tab,
 };
 use crate::application::utils::sap_table::try_table_into_with_scroll;
 use crate::application::utils::semester::get_selected_semester;
+use crate::client::{USaintApplication, USaintClient};
 use crate::{
     ApplicationError, RusaintError,
     application::course_schedule::model::{Lecture, LectureCategory},

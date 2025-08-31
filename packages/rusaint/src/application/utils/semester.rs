@@ -1,11 +1,10 @@
-use crate::application::USaintClient;
+use crate::client::USaintClient;
 use crate::model::SemesterType;
-use wdpe::command::WebDynproCommandExecutor;
-use wdpe::command::element::selection::ComboBoxLSDataCommand;
-use wdpe::element::definition::ElementDefinition;
-use wdpe::element::parser::ElementParser;
-use wdpe::element::selection::ComboBoxDef;
-use wdpe::error::{ElementError, WebDynproError};
+use wdpe::{
+    command::{WebDynproCommandExecutor, element::selection::ComboBoxLSDataCommand},
+    element::{definition::ElementDefinition, parser::ElementParser, selection::ComboBoxDef},
+    error::{ElementError, WebDynproError},
+};
 
 pub(crate) fn get_selected_semester(
     client: &USaintClient,

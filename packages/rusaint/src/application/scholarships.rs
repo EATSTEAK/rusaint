@@ -1,6 +1,6 @@
-use super::{USaintApplication, USaintClient};
 use crate::RusaintError;
 use crate::application::scholarships::model::Scholarship;
+use crate::client::{USaintApplication, USaintClient};
 use wdpe::body::Body;
 use wdpe::element::parser::ElementParser;
 

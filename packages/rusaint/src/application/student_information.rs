@@ -4,8 +4,8 @@ use model::{
     StudentTransferRecords, StudentWorkInformation,
 };
 
-use super::{USaintApplication, USaintClient};
 use crate::RusaintError;
+use crate::client::{USaintApplication, USaintClient};
 use wdpe::element::parser::ElementParser;
 use wdpe::{body::Body, define_elements, element::layout::TabStrip};
 

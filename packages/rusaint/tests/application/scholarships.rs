@@ -1,6 +1,5 @@
 use crate::get_session;
-use rusaint::application::USaintClientBuilder;
-use rusaint::application::scholarships::ScholarshipsApplication;
+use rusaint::{application::scholarships::ScholarshipsApplication, client::USaintClientBuilder};
 use tracing_test::traced_test;
 
 #[tokio::test]

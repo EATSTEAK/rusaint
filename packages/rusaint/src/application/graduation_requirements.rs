@@ -1,8 +1,8 @@
 use model::{GraduationRequirement, GraduationRequirements, GraduationStudent};
 
-use super::{USaintApplication, USaintClient};
 use crate::RusaintError;
 use crate::application::utils::input_field::InputFieldExt as _;
+use crate::client::{USaintApplication, USaintClient};
 use wdpe::command::WebDynproCommandExecutor;
 use wdpe::element::parser::ElementParser;
 use wdpe::{
@@ -167,10 +167,9 @@ pub mod model;
 
 #[cfg(test)]
 mod test {
+    use crate::client::USaintClientBuilder;
     use crate::{
-        application::{
-            USaintClientBuilder, graduation_requirements::GraduationRequirementsApplication,
-        },
+        application::graduation_requirements::GraduationRequirementsApplication,
         global_test_utils::get_session,
     };
     use wdpe::command::WebDynproCommandExecutor;
