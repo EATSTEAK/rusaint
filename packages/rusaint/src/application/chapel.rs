@@ -1,7 +1,7 @@
 use model::{ChapelAbsenceRequest, ChapelAttendance, ChapelInformation, GeneralChapelInformation};
 
-use crate::client::{USaintApplication, USaintClient};
 use crate::application::utils::semester::get_selected_semester;
+use crate::client::{USaintApplication, USaintClient};
 use crate::{RusaintError, model::SemesterType};
 
 use wdpe::command::WebDynproCommandExecutor;
