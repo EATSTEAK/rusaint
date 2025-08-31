@@ -1,9 +1,7 @@
 use crate::get_session;
 use lazy_static::lazy_static;
-use rusaint::RusaintError;
-use rusaint::application::{
-    USaintClientBuilder, graduation_requirements::GraduationRequirementsApplication,
-};
+use rusaint::application::graduation_requirements::GraduationRequirementsApplication;
+use rusaint::{RusaintError, client::USaintClientBuilder};
 use std::sync::{Arc, OnceLock};
 use tokio::sync::{Mutex, RwLock};
 use tracing_test::traced_test;

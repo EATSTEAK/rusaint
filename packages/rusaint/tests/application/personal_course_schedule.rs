@@ -1,11 +1,10 @@
 use crate::{TARGET_SEMESTER, TARGET_YEAR, get_session};
 use lazy_static::lazy_static;
+use rusaint::client::USaintClientBuilder;
 use rusaint::model::SemesterType;
 use rusaint::{
     ApplicationError, RusaintError,
-    application::{
-        USaintClientBuilder, personal_course_schedule::PersonalCourseScheduleApplication,
-    },
+    application::personal_course_schedule::PersonalCourseScheduleApplication,
 };
 use std::sync::{Arc, OnceLock};
 use tokio::sync::{Mutex, RwLock};

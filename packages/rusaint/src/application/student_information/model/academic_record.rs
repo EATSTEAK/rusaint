@@ -6,7 +6,9 @@ use serde::{
 };
 
 use crate::application::utils::sap_table::try_table_into_with_scroll;
-use crate::application::{USaintClient, student_information::StudentInformationApplication};
+use crate::{
+    application::student_information::StudentInformationApplication, client::USaintClient,
+};
 use wdpe::command::WebDynproCommandExecutor;
 use wdpe::element::parser::ElementParser;
 use wdpe::{

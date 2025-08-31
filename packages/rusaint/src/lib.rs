@@ -22,7 +22,7 @@
 //!
 //! ```no_run
 //! use rusaint::application::course_grades::{CourseGradesApplication, model::CourseType, model::SemesterGrade};
-//! use rusaint::application::USaintClientBuilder;
+//! use rusaint::client::USaintClientBuilder;
 //! use wdpe::element::Element;
 //! use rusaint::RusaintError;
 //! use std::sync::Arc;
@@ -50,6 +50,10 @@
 #[cfg(feature = "application")]
 /// rusaint에서 제공하는 기본 u-saint 애플리케이션
 pub mod application;
+
+#[cfg(feature = "application")]
+/// u-saint 접속을 위한 기본 클라이언트
+pub mod client;
 #[cfg(feature = "application")]
 mod error;
 #[cfg(feature = "application")]

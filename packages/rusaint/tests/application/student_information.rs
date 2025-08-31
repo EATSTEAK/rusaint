@@ -1,8 +1,8 @@
 use crate::get_session;
 use lazy_static::lazy_static;
 use rusaint::{
-    RusaintError,
-    application::{USaintClientBuilder, student_information::StudentInformationApplication},
+    RusaintError, application::student_information::StudentInformationApplication,
+    client::USaintClientBuilder,
 };
 use std::sync::{Arc, OnceLock};
 use tokio::sync::{Mutex, RwLock};

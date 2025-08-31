@@ -1,8 +1,8 @@
 use self::model::{ClassGrade, CourseType, GradeSummary, SemesterGrade};
-use super::{USaintApplication, USaintClient};
 use crate::application::utils::input_field::InputFieldExt as _;
 use crate::application::utils::sap_table::try_table_into_with_scroll;
 use crate::application::utils::semester::get_selected_semester;
+use crate::client::{USaintApplication, USaintClient};
 use crate::{RusaintError, model::SemesterType};
 use scraper::Selector;
 use std::collections::HashMap;
@@ -193,7 +193,7 @@ impl<'a> CourseGradesApplication {
     /// # use std::sync::Arc;
     /// # use rusaint::USaintSession;
     /// # use rusaint::application::course_grades::{ model::CourseType, CourseGradesApplication };
-    /// # use rusaint::application::USaintClientBuilder;
+    /// # use rusaint::client::USaintClientBuilder;
     /// # let session = Arc::new(USaintSession::with_password("20212345", "password").await.unwrap());
     /// let mut app = USaintClientBuilder::new().session(session).build_into::<CourseGradesApplication>().await.unwrap();
     /// let summary = app.recorded_summary(CourseType::Bachelor).await.unwrap();
@@ -241,7 +241,7 @@ impl<'a> CourseGradesApplication {
     /// # tokio_test::block_on(async {
     /// # use std::sync::Arc;
     /// # use rusaint::USaintSession;
-    /// # use rusaint::application::USaintClientBuilder;
+    /// # use rusaint::client::USaintClientBuilder;
     /// # use rusaint::application::course_grades::{ model::CourseType, CourseGradesApplication };
     /// # let session = Arc::new(USaintSession::with_password("20212345", "password").await.unwrap());
     /// let mut app = USaintClientBuilder::new().session(session).build_into::<CourseGradesApplication>().await.unwrap();
@@ -291,7 +291,7 @@ impl<'a> CourseGradesApplication {
     /// # use std::sync::Arc;
     /// # use rusaint::USaintSession;
     /// # use rusaint::application::course_grades::{ model::CourseType, CourseGradesApplication };
-    /// # use rusaint::application::USaintClientBuilder;
+    /// # use rusaint::client::USaintClientBuilder;
     /// # let session = Arc::new(USaintSession::with_password("20212345", "password").await.unwrap());
     /// let mut app = USaintClientBuilder::new().session(session).build_into::<CourseGradesApplication>().await.unwrap();
     /// let semesters = app.semesters(CourseType::Bachelor).await.unwrap();
@@ -374,7 +374,7 @@ impl<'a> CourseGradesApplication {
     /// # use std::sync::Arc;
     /// # use rusaint::USaintSession;
     /// # use rusaint::application::course_grades::{ model::CourseType, CourseGradesApplication };
-    /// # use rusaint::application::USaintClientBuilder;
+    /// # use rusaint::client::USaintClientBuilder;
     /// # use rusaint::model::SemesterType;
     /// # let session = Arc::new(USaintSession::with_password("20212345", "password").await.unwrap());
     /// let mut app = USaintClientBuilder::new().session(session).build_into::<CourseGradesApplication>().await.unwrap();
@@ -390,7 +390,7 @@ impl<'a> CourseGradesApplication {
     /// # use rusaint::USaintSession;
     /// # use rusaint::application::course_grades::{ model::CourseType, CourseGradesApplication };
     /// # use rusaint::model::SemesterType;
-    /// # use rusaint::application::USaintClientBuilder;
+    /// # use rusaint::client::USaintClientBuilder;
     /// # let session = Arc::new(USaintSession::with_password("20212345", "password").await.unwrap());
     /// let mut app = USaintClientBuilder::new().session(session).build_into::<CourseGradesApplication>().await.unwrap();
     /// let classes = app.classes(CourseType::Bachelor, 2022, SemesterType::Two, true).await.unwrap();
@@ -475,7 +475,7 @@ impl<'a> CourseGradesApplication {
     /// # use rusaint::USaintSession;
     /// # use rusaint::model::SemesterType;
     /// # use rusaint::application::course_grades::{ model::CourseType, CourseGradesApplication };
-    /// # use rusaint::application::USaintClientBuilder;
+    /// # use rusaint::client::USaintClientBuilder;
     /// # let session = Arc::new(USaintSession::with_password("20212345", "password").await.unwrap());
     /// let mut app = USaintClientBuilder::new().session(session).build_into::<CourseGradesApplication>().await.unwrap();
     /// let classes = app.classes(CourseType::Bachelor, 2022, SemesterType::Two, false).await.unwrap();
@@ -550,7 +550,7 @@ pub mod model;
 #[cfg(test)]
 mod test {
     use crate::{
-        application::{USaintClientBuilder, course_grades::CourseGradesApplication},
+        application::course_grades::CourseGradesApplication, client::USaintClientBuilder,
         global_test_utils::get_session,
     };
     use wdpe::element::{Element, layout::PopupWindow, parser::ElementParser};

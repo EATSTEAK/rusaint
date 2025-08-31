@@ -15,7 +15,7 @@ use wdpe::element::selection::list_box::item::ListBoxItemInfo;
 use wdpe::error::WebDynproError;
 use wdpe::state::EventProcessResult;
 
-use crate::application::USaintClient;
+use crate::client::USaintClient;
 
 define_elements! {
     TABSTRIP: TabStrip<'static> = "ZCMW2100.ID_0001:VIW_MAIN.MODULE_TABSTRIP";

@@ -1,4 +1,5 @@
-use crate::application::{USaintClient, student_information::StudentInformationApplication};
+use crate::application::student_information::StudentInformationApplication;
+use crate::client::USaintClient;
 use serde::{Deserialize, Serialize};
 use wdpe::command::WebDynproCommandExecutor;
 use wdpe::element::parser::ElementParser;

@@ -193,7 +193,7 @@ impl CourseScheduleApplicationBuilder {
         session: Arc<USaintSession>,
     ) -> Result<CourseScheduleApplication, RusaintError> {
         let original_builder =
-            rusaint::application::USaintClientBuilder::new().session(session.original());
+            rusaint::client::USaintClientBuilder::new().session(session.original());
         let original_app = original_builder
             .build_into::<rusaint::application::course_schedule::CourseScheduleApplication>()
             .await?;

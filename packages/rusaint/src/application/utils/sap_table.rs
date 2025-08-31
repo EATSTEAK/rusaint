@@ -1,4 +1,3 @@
-use crate::application::USaintClient;
 use wdpe::command::WebDynproCommandExecutor;
 use wdpe::command::element::complex::{
     SapTableBodyCommand, SapTableLSDataCommand, SapTableVerticalScrollEventCommand,
@@ -8,6 +7,8 @@ use wdpe::element::complex::sap_table::FromSapTable;
 use wdpe::element::definition::ElementDefinition;
 use wdpe::element::parser::ElementParser;
 use wdpe::error::{ElementError, WebDynproError};
+
+use crate::client::USaintClient;
 
 pub(crate) async fn try_table_into_with_scroll<T: for<'body> FromSapTable<'body>>(
     client: &mut USaintClient,

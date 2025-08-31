@@ -2,8 +2,8 @@ use std::collections::HashMap;
 
 use model::{CourseScheduleInformation, PersonalCourseSchedule, Weekday};
 
-use super::{USaintApplication, USaintClient};
 use crate::application::utils::semester::get_selected_semester;
+use crate::client::{USaintApplication, USaintClient};
 use crate::{RusaintError, error::ApplicationError, model::SemesterType};
 
 use wdpe::command::WebDynproCommandExecutor;

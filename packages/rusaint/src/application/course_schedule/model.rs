@@ -6,9 +6,11 @@ use serde::{
 };
 
 use crate::application::utils::de_with::deserialize_optional_string;
-use crate::application::{
-    USaintClient,
-    course_schedule::utils::{request, request_lv1, request_lv2, request_lv3, request_text},
+use crate::{
+    application::course_schedule::utils::{
+        request, request_lv1, request_lv2, request_lv3, request_text,
+    },
+    client::USaintClient,
 };
 use wdpe::element::parser::ElementParser;
 use wdpe::{

@@ -5,13 +5,11 @@ use std::{fs::File, io::Write, sync::Arc};
 use clap::{Parser, Subcommand};
 use rusaint::{
     RusaintError, USaintSession,
-    application::{
-        USaintClientBuilder,
-        course_schedule::{
-            CourseScheduleApplication,
-            model::{Lecture, LectureCategory},
-        },
+    application::course_schedule::{
+        CourseScheduleApplication,
+        model::{Lecture, LectureCategory},
     },
+    client::USaintClientBuilder,
 };
 
 use dotenv::dotenv;
