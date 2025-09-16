@@ -33,13 +33,16 @@ cargo add rusaint
 ## 예시
 
 ```rust
-use rusaint::application::course_grades::{CourseGrades, model::SemesterSummary};
-use rusaint::session::USaintSession;
-use futures::executor::block_on;
+use rusaint::application::course_grades::{CourseGradesApplication, model::{CourseType}};
+use rusaint::client::USaintClientBuilder;
+use rusaint::USaintSession;
+use rusaint::RusaintError;
+use std::sync::Arc;
 
 // 성적 정보를 출력하는 애플리케이션
-fn main() {
-    block_on(print_grades());
+#[tokio::main]
+async fn main() -> Result<(), RusaintError> {
+    print_grades().await
     /* SemesterSummary { year: 2022, semester: "2 학기", attempted_credits: 17.5, earned_credits: 17.5, pf_earned_credits: 0.5, grade_points_average: 4.5, grade_points_sum: 100.0, arithmetic_mean: 100.0, semester_rank: (1, 99), general_rank: (1, 99), academic_probation: false, consult: false, flunked: false }
      * ...
      */
@@ -47,8 +50,8 @@ fn main() {
 
 async fn print_grades() -> Result<(), RusaintError> {
     // USaintSession::from_token(id: &str, token: &str) 을 이용하여 비밀번호 없이 SSO 토큰으로 로그인 할 수 있음
-    let session = USaintSession::from_password("20211561", "password").await?;
-    let mut app = USaintClientBuilder::new().session(session).build_into::<CourseGrades>().await?;
+    let session = Arc::new(USaintSession::with_password("20211561", "password").await?);
+    let mut app = USaintClientBuilder::new().session(session).build_into::<CourseGradesApplication>().await?;
     let grades: Vec<SemesterGrade> = app.semesters(CourseType::Bachelor).await?;
     for grade in grades {
         println!("{:?}", grade);
