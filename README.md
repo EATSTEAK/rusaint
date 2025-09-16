@@ -34,7 +34,7 @@ cargo add rusaint
 
 ```rust
 use rusaint::application::course_grades::{CourseGrades, model::SemesterSummary};
-use rusaint::session::USaintSession;
+use rusaint::USaintSession;
 use futures::executor::block_on;
 
 // 성적 정보를 출력하는 애플리케이션
@@ -97,7 +97,7 @@ repositories {
 
 ```kotlin
 dependencies {
-  implementation("dev.eatsteak:rusaint:0.10.0")
+  implementation("dev.eatsteak:rusaint:0.12.0")
 }
 ```
 
