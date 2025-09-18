@@ -151,7 +151,7 @@ async fn find_connected_major() {
 async fn find_united_major() {
     let lock = get_app().await.unwrap();
     let mut app = lock.write().await;
-    let category = LectureCategory::united_major("빅데이터융합");
+    let category = LectureCategory::united_major("빅데이터");
     let lectures = app
         .find_lectures(2025, SemesterType::One, &category)
         .await
