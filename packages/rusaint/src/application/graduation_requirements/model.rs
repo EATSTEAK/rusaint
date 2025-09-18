@@ -172,7 +172,7 @@ pub struct GraduationRequirement {
         rename(deserialize = "계산값"),
         deserialize_with = "deserialize_option_f32_string"
     )]
-    calcuation: Option<f32>,
+    calculation: Option<f32>,
     #[serde(
         rename(deserialize = "계산값 - 기준값"),
         deserialize_with = "deserialize_option_f32_string"
@@ -204,8 +204,8 @@ impl GraduationRequirement {
     }
 
     /// 계산값
-    pub fn calcuation(&self) -> Option<f32> {
-        self.calcuation
+    pub fn calculation(&self) -> Option<f32> {
+        self.calculation
     }
 
     /// 계산값 - 기준값
