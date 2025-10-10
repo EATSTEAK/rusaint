@@ -39,11 +39,10 @@
     "!**/.*"
   ],
   "scripts": {
-    "ubrn:ios": "ubrn build ios     --config ubrn.config.yaml --and-generate && (cd example/ios && pod install)",
+    "ubrn:ios": "ubrn build ios --config ubrn.config.yaml --and-generate && (cd example/ios && pod install)",
     "ubrn:android": "ubrn build android --config ubrn.config.yaml --and-generate",
-    "ubrn:checkout": "ubrn checkout      --config ubrn.config.yaml",
     "ubrn:release-build": "ubrn build ios --config ubrn.config.yaml --and-generate --release && ubrn build android --config ubrn.config.yaml --and-generate --release",
-    "ubrn:clean": "rm -Rf cpp/ android/src/main/java ios/ src/Native* src/generated/ src/index.ts*",
+    "ubrn:clean": "rm -rfv cpp/ android/CMakeLists.txt android/src/main/java android/*.cpp ios/ src/Native* src/index.*ts* src/generated/",
     "example": "yarn workspace @rusaint/react-native-example",
     "test": "jest",
     "typecheck": "tsc",

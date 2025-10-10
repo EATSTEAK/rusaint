@@ -91,3 +91,4 @@ cpp/generated
 
 rust_modules/
 *.a
+*.so
