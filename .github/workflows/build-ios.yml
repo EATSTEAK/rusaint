@@ -1,0 +1,92 @@
+name: Build (iOS)
+
+on:
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+
+jobs:
+  build-ios:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v4
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: "aarch64-apple-ios, x86_64-apple-ios, aarch64-apple-ios-sim"
+      - name: Retrieve cache
+        uses: Leafwing-Studios/cargo-cache@v2
+      - name: Install the Apple certificate
+        env:
+          BUILD_CERTIFICATE_BASE64: ${{ secrets.IOS_BUILD_CERTIFICATE_BASE64 }}
+          P12_PASSWORD: ${{ secrets.IOS_P12_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.IOS_KEYCHAIN_PASSWORD }}
+        run: |
+          # create variables
+          CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+          KEYCHAIN_PATH=$RUNNER_TEMP/signing.keychain-db
+
+          # import certificate from secrets
+          echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
+
+          # create temporary keychain
+          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+
+          # import certificate to keychain
+          security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security list-keychain -d user -s $KEYCHAIN_PATH
+      - name: Build native library
+        env:
+          IPHONEOS_DEPLOYMENT_TARGET: ${{ vars.IOS_DEPLOYMENT_TARGET || '14.0' }}
+          RUSTFLAGS: "-C link-arg=-Wl,-application_extension"
+        run: |
+          mkdir $RUNNER_TEMP/target
+          export CARGO_TARGET_DIR=$RUNNER_TEMP/target
+          cargo build --package rusaint-ffi --target aarch64-apple-ios-sim --release
+          cargo build --package rusaint-ffi --target aarch64-apple-ios --release
+          cargo build --package rusaint-ffi --target x86_64-apple-ios --release
+      - name: List directory contents
+        run: |
+          ls -alhR $RUNNER_TEMP/target
+      - name: Create universal libraries for simulator
+        run: |
+          mkdir -p $RUNNER_TEMP/target/universal-ios-sim/release
+          lipo -create \
+            $RUNNER_TEMP/target/aarch64-apple-ios-sim/release/librusaint_ffi.a \
+            $RUNNER_TEMP/target/x86_64-apple-ios/release/librusaint_ffi.a \
+            -output $RUNNER_TEMP/target/universal-ios-sim/release/librusaint_ffi.a
+      - name: Generate swift bindings
+        run: |
+          cargo run -p uniffi-bindgen generate \
+            $RUNNER_TEMP/target/aarch64-apple-ios/release/librusaint_ffi.dylib \
+            --library \
+            --language swift \
+            --no-format \
+            --out-dir $RUNNER_TEMP/bindings
+      - name: Compress generated swift bindings
+        run: |
+          tar -czvf $RUNNER_TEMP/bindings.tar.gz $RUNNER_TEMP/bindings/*.swift
+      - name: Massage the generated files to fit xcframework
+        run: |
+          mkdir $RUNNER_TEMP/Headers
+          mv $RUNNER_TEMP/bindings/*.h $RUNNER_TEMP/Headers/
+          cat $RUNNER_TEMP/bindings/*.modulemap > $RUNNER_TEMP/Headers/module.modulemap
+      - name: Create xcframework
+        run: |
+          rm -rf $RUNNER_TEMP/RusaintFFI.xcframework
+          xcodebuild -create-xcframework \
+              -library $RUNNER_TEMP/target/aarch64-apple-ios/release/librusaint_ffi.a \
+              -headers $RUNNER_TEMP/Headers \
+              -library $RUNNER_TEMP/target/universal-ios-sim/release/librusaint_ffi.a \
+              -headers $RUNNER_TEMP/Headers \
+              -output $RUNNER_TEMP/RusaintFFI.xcframework
+      - name: Sign xcframework
+        env:
+          KEYCHAIN_PASSWORD: ${{ secrets.IOS_KEYCHAIN_PASSWORD }}
+        run: |
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $RUNNER_TEMP/signing.keychain-db
+          codesign --timestamp -s "Apple Development" $RUNNER_TEMP/RusaintFFI.xcframework
