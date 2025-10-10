@@ -34,7 +34,7 @@ thiserror = { workspace = true }
 tokio = { workspace = true, features = ["sync"] }
 html-escape = "0.2.13"
 url = "2.5.4"
-roxmltree = "0.20.0"
+roxmltree = "0.21.0"
 lol_html = "2.3.0"
 scraper = { version = "0.24", features = ["atomic"], optional = true }
 serde = { version = "1", features = ["derive"] }
@@ -47,7 +47,6 @@ tracing = "0.1.41"
 wdpe = { version = "0.2.1", features = ["reqwest"] }
 
 [dev-dependencies]
-dotenv = "0.15.0"
 anyhow = "1"
 dotenvy = "0.15.7"
 futures = "0.3.31"
