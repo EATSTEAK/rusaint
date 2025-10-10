@@ -20,3 +20,5 @@ turboModule:
   cpp: cpp
 noOverwrite:
   - '*.podspec'
+  - 'android/build.gradle'
+  - 'android/cpp-adapter.cpp' # temporary disable since ubrn not supports rn 0.80+ yet
