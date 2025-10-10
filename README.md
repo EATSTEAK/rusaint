@@ -135,23 +135,7 @@ pnpm add @rusaint/react-native # or yarn, npm
 
 ##### Expo에서 사용하기
 
-현재 `@rusaint/react-native`는 Expo Module을 지원하지 않습니다. 따라서 Expo 프로젝트에서 사용하기 위해서는 `@react-native-community/cli`의 autolink 기능을 활성화하여 Turbo Module을 autolink 해야 합니다.
-
-```bash
-pnpm add @react-native-community/cli -D # or use yarn, npm
-```
-
-으로 `@react-native-community/cli`를 설치합니다.
-
-```properties
-# .env
-EXPO_USE_COMMUNITY_AUTOLINKING=1 # Enable autolinking by @react-native-community/cli
-```
-
-`EXPO_USE_COMMUNITY_AUTOLINKING` 환경변수를 `expo prebuild` 과정에 제공하여 모듈의 autolink를 활성화합니다.
-
-> [!WARNING]
-> Community autolinking을 활성화 하면 Expo Go를 사용할 수 없습니다.
+`@rusaint/react-native` 는 네이티브 바이너리를 사용합니다. React Native Community Autolink 및 Expo Autolink를 사용한 자동 링킹을 지원하므로 별개의 설정은 필요하지 않으나, Expo Go를 사용할 수 없음에 주의하시길 바랍니다.
 
 #### 소스 코드에서 빌드
 
