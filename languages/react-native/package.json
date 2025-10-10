@@ -1,6 +1,6 @@
 {
   "name": "@rusaint/react-native",
-  "version": "0.13.1",
+  "version": "0.13.2",
   "description": "React native implementation of the rusaint, scraper library for SSU u-saint",
   "source": "./src/index.tsx",
   "main": "./lib/commonjs/index.js",
