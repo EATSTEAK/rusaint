@@ -22,7 +22,7 @@ readme = "README.md"
 [workspace.dependencies]
 thiserror = "2"
 tokio = "1.47.1"
-uniffi = "0.30.0"
+uniffi = "0.29.4"
 rusaint = { version = "0.13.0", path = "packages/rusaint" }
 
 [workspace.lints.clippy]
