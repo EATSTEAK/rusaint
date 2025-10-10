@@ -12,7 +12,7 @@ use rusaint::{
     client::USaintClientBuilder,
 };
 
-use dotenv::dotenv;
+use dotenvy::dotenv;
 use semester_type::SemesterType;
 use serde_json::to_string_pretty;
 
