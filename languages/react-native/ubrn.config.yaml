@@ -2,5 +2,21 @@ name: rusaint-react-native
 rust:
   directory: ../../
   manifestPath: packages/rusaint-ffi/Cargo.toml
+android:
+  directory: android
+  targets:
+    - arm64-v8a
+    - armeabi-v7a
+  apiLevel: 21
+  jniLibs: src/main/jniLibs
+  useSharedLibrary: true
 ios:
+  directory: ios
+  targets:
+    - aarch64-apple-ios
+    - aarch64-apple-ios-sim
   frameworkName: build/RusaintReactNative
+turboModule:
+  cpp: cpp
+noOverwrite:
+  - '*.podspec'

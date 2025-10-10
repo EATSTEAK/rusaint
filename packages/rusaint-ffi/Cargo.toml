@@ -24,3 +24,6 @@ uniffi = { workspace = true, features = ["build"] }
 
 [lints]
 workspace = true
+
+[profile.release]
+strip = "none"
