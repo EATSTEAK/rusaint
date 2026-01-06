@@ -98,7 +98,7 @@ jobs:
         if: steps.check_version.outputs.should_release == 'true'
         uses: nttld/setup-ndk@v1
         with:
-          ndk-version: r27c
+          ndk-version: r29
           link-to-sdk: true
       - name: Setup Gradle
         if: steps.check_version.outputs.should_release == 'true'
