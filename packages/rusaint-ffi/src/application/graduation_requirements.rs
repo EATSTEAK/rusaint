@@ -23,6 +23,11 @@ impl GraduationRequirementsApplication {
     pub async fn requirements(&self) -> Result<GraduationRequirements, RusaintError> {
         Ok(self.0.write().await.requirements().await?)
     }
+
+    /// 페이지를 새로고침합니다.
+    pub async fn reload(&self) -> Result<(), RusaintError> {
+        Ok(self.0.write().await.reload().await?)
+    }
 }
 
 /// [`GraduationRequirementsApplication`] 생성을 위한 빌더

@@ -173,6 +173,11 @@ impl CourseScheduleApplication {
     ) -> Result<Vec<String>, RusaintError> {
         Ok(self.0.write().await.united_majors(year, semester).await?)
     }
+
+    /// 페이지를 새로고침합니다.
+    pub async fn reload(&self) -> Result<(), RusaintError> {
+        Ok(self.0.write().await.reload().await?)
+    }
 }
 
 /// [`CourseScheduleApplication`] 생성을 위한 빌더

@@ -81,6 +81,16 @@ impl CourseGradesApplication {
             .await?)
     }
 
+    /// 최신 정보를 조회합니다. 새로고침 시 유용합니다.
+    pub async fn lookup(&self) -> Result<(), RusaintError> {
+        Ok(self.0.write().await.lookup().await?)
+    }
+
+    /// 페이지를 새로고침합니다.
+    pub async fn reload(&self) -> Result<(), RusaintError> {
+        Ok(self.0.write().await.reload().await?)
+    }
+
     /// 현재 페이지에 선택된 년도와 학기를 가져옵니다. 최초 로드 시 현재 학기를 가져올 가능성이 있습니다.
     /// 하지만 이 애플리케이션의 다른 함수를 호출하여 한번 정보를 가져왔다면 마지막으로 가져온 정보의 학기가 반환되므로 주의하여야 하며, 신뢰할 수 있는 현재 학기의 원천으로 사용되어서는 안됩니다.
     pub async fn get_selected_semester(&self) -> Result<YearSemester, RusaintError> {
