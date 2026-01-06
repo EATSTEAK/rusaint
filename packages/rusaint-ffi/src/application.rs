@@ -1,6 +1,9 @@
 /// 학생 성적 조회: [`CourseGradesApplication`](course_grades::CourseGradesApplication)
 pub mod course_grades;
 
+/// 수강신청 내역 조회: [`CourseRegistrationStatusApplication`](course_registration_status::CourseRegistrationStatusApplication)
+pub mod course_registration_status;
+
 /// 강의시간표: [`CourseScheduleApplication`](course_schedule::CourseScheduleApplication)
 pub mod course_schedule;
 
