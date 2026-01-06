@@ -1,15 +1,17 @@
-name: Release (Android)
+name: Android Release
 
 on:
-  workflow_run:
-    workflows: ["Release"]
-    types: [completed]
-    branches:
-      - main
+  workflow_call:
+    inputs:
+      version:
+        description: "Version to release"
+        required: true
+        type: string
   workflow_dispatch:
 
 env:
   CARGO_TERM_COLOR: always
+
 jobs:
   release-android:
     runs-on: ubuntu-latest
@@ -33,50 +35,59 @@ jobs:
             https://central.sonatype.com/api/v1/publisher/published?namespace=dev.eatsteak&name=rusaint&version=${{ steps.current_version.outputs.result }} \
             | jq '.published | "result=" + .' \
             | tr -d '"' >> $GITHUB_OUTPUT
-      - name: Cancel workflow if version is already released
+      - name: Skip if version is already released
         if: steps.is_published.outputs.result == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh run cancel ${{ github.run_id }}
-          gh run watch ${{ github.run_id }}
+          echo "Version ${{ steps.current_version.outputs.result }} is already published to Maven Central. Skipping."
+          exit 0
       - name: Clear directory
+        if: steps.is_published.outputs.result != 'true'
         run: |
           rm -rf ./*
           rm -rf ./.git
       - name: Checkout
+        if: steps.is_published.outputs.result != 'true'
         uses: actions/checkout@v4
       - name: Setup Rust
+        if: steps.is_published.outputs.result != 'true'
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: "armv7-linux-androideabi, i686-linux-android, aarch64-linux-android, x86_64-linux-android"
       - name: Retrieve cache
+        if: steps.is_published.outputs.result != 'true'
         uses: Leafwing-Studios/cargo-cache@v2
       - name: Setup Java
+        if: steps.is_published.outputs.result != 'true'
         uses: actions/setup-java@v4
         with:
           java-version: 23
           distribution: temurin
           cache: gradle
       - name: Setup Android SDK
+        if: steps.is_published.outputs.result != 'true'
         uses: android-actions/setup-android@v3
       - name: Setup Android NDK
+        if: steps.is_published.outputs.result != 'true'
         uses: nttld/setup-ndk@v1
         with:
           ndk-version: r27c
           link-to-sdk: true
       - name: Setup Gradle
+        if: steps.is_published.outputs.result != 'true'
         uses: gradle/actions/setup-gradle@v4
       - name: Build with Gradle
+        if: steps.is_published.outputs.result != 'true'
         run: |
           cd ./languages/kotlin
           chmod +x ./gradlew
           ./gradlew build
       - name: Publish to local Maven repository
+        if: steps.is_published.outputs.result != 'true'
         run: |
           cd ./languages/kotlin
           ./gradlew publish
       - name: Publish with JReleaser
+        if: steps.is_published.outputs.result != 'true'
         env:
           JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           JRELEASER_MAVENCENTRAL_USERNAME: ${{ secrets.MAVENCENTRAL_USERNAME }}

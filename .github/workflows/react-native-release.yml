@@ -1,20 +1,19 @@
-name: Release (React Native)
+name: React Native Release
 
 on:
-  workflow_run:
-    workflows: ["Release"]
-    types: [completed]
-    branches:
-      - main
+  workflow_call:
   workflow_dispatch:
+
 permissions:
   actions: write
   id-token: write
+
 jobs:
   build-rn:
     runs-on: macos-latest
     outputs:
       current_version: ${{ steps.current_version.outputs.result }}
+      should_release: ${{ steps.check_version.outputs.should_release }}
     steps:
       - name: Checkout Cargo.toml to check version
         uses: actions/checkout@v4
@@ -24,7 +23,7 @@ jobs:
           sparse-checkout-cone-mode: false
       - name: Get rusaint version
         id: current_version
-        run: yq '.workspace.package.version | "result=v" + .' Cargo.toml >> $GITHUB_OUTPUT
+        run: yq '.workspace.package.version | "result=" + .' Cargo.toml >> $GITHUB_OUTPUT
       - name: Fetch latest npm release
         id: latest_release
         run: |
@@ -33,28 +32,35 @@ jobs:
             https://registry.npmjs.org/@rusaint%2freact-native \
             | jq '."dist-tags"."latest" | "result=" + .' \
             | tr -d '"' >> $GITHUB_OUTPUT
-      - name: Cancel workflow if version is not updated
-        if: steps.current_version.outputs.result == steps.latest_release.outputs.result
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Check if version needs release
+        id: check_version
         run: |
-          gh run cancel ${{ github.run_id }}
-          gh run watch ${{ github.run_id }}
+          if [ "${{ steps.current_version.outputs.result }}" = "${{ steps.latest_release.outputs.result }}" ]; then
+            echo "should_release=false" >> $GITHUB_OUTPUT
+            echo "Version ${{ steps.current_version.outputs.result }} is already released to npm. Skipping."
+          else
+            echo "should_release=true" >> $GITHUB_OUTPUT
+          fi
       - name: Clear directory
+        if: steps.check_version.outputs.should_release == 'true'
         run: |
           rm -rf ./*
           rm -rf ./.git
       - name: Checkout the repository
+        if: steps.check_version.outputs.should_release == 'true'
         uses: actions/checkout@v4
       - name: Setup Rust
+        if: steps.check_version.outputs.should_release == 'true'
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: "aarch64-apple-ios, x86_64-apple-ios, aarch64-apple-ios-sim, armv7-linux-androideabi, i686-linux-android, aarch64-linux-android, x86_64-linux-android"
       - name: Retrieve cache
+        if: steps.check_version.outputs.should_release == 'true'
         uses: Leafwing-Studios/cargo-cache@v2
 
       ## iOS Setup
       - name: Install the Apple certificate
+        if: steps.check_version.outputs.should_release == 'true'
         env:
           BUILD_CERTIFICATE_BASE64: ${{ secrets.IOS_BUILD_CERTIFICATE_BASE64 }}
           P12_PASSWORD: ${{ secrets.IOS_P12_PASSWORD }}
@@ -76,28 +82,37 @@ jobs:
           security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
           security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
           security list-keychain -d user -s $KEYCHAIN_PATH
+
       ## Android Setup
       - name: Setup Java
+        if: steps.check_version.outputs.should_release == 'true'
         uses: actions/setup-java@v4
         with:
           java-version: 17
           distribution: temurin
           cache: gradle
       - name: Setup Android SDK
+        if: steps.check_version.outputs.should_release == 'true'
         uses: android-actions/setup-android@v3
       - name: Setup Android NDK
+        if: steps.check_version.outputs.should_release == 'true'
         uses: nttld/setup-ndk@v1
         with:
           ndk-version: r27c
           link-to-sdk: true
       - name: Setup Gradle
+        if: steps.check_version.outputs.should_release == 'true'
         uses: gradle/actions/setup-gradle@v4
       - name: Install cargo-ndk
+        if: steps.check_version.outputs.should_release == 'true'
         run: cargo install cargo-ndk
+
       ## Node.js Setup
       - name: Enable Corepack
+        if: steps.check_version.outputs.should_release == 'true'
         run: corepack enable
       - name: Setup Node.js
+        if: steps.check_version.outputs.should_release == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -105,12 +120,15 @@ jobs:
           scope: "@rusaint"
           registry-url: https://registry.npmjs.org
       - name: Install dependencies
+        if: steps.check_version.outputs.should_release == 'true'
         working-directory: languages/react-native
         run: yarn install --immutable
       - name: Build the library
+        if: steps.check_version.outputs.should_release == 'true'
         working-directory: languages/react-native
         run: "yarn ubrn:release-build"
       - name: Sign xcframework
+        if: steps.check_version.outputs.should_release == 'true'
         env:
           KEYCHAIN_PASSWORD: ${{ secrets.IOS_KEYCHAIN_PASSWORD }}
         working-directory: languages/react-native
@@ -118,6 +136,7 @@ jobs:
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" $RUNNER_TEMP/signing.keychain-db
           codesign --timestamp -s "Apple Development" ./build/RusaintReactNative.xcframework
       - name: Publish to npm
+        if: steps.check_version.outputs.should_release == 'true'
         working-directory: languages/react-native
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

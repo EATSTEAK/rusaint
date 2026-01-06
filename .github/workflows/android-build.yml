@@ -1,12 +1,12 @@
-name: Build (Android)
+name: Android Build
 
 on:
-  pull_request:
-    branches: ["main"]
+  workflow_call:
   workflow_dispatch:
 
 env:
   CARGO_TERM_COLOR: always
+
 jobs:
   build-android:
     runs-on: ubuntu-latest

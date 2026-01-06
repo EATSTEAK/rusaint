@@ -2,21 +2,27 @@ name: Release
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
-      - 'Cargo.toml'
+      - "Cargo.toml"
   workflow_dispatch:
 
 permissions:
   id-token: write
   contents: write
+  actions: write
+  attestations: write
 
 env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  release:
+  release-crate:
+    name: Crate (crates.io)
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.current_version.outputs.result }}
+      should_release: ${{ steps.check_version.outputs.should_release }}
     steps:
       - name: Checkout Cargo.toml to check version
         uses: actions/checkout@v4
@@ -37,41 +43,51 @@ jobs:
             https://api.github.com/repos/EATSTEAK/rusaint/releases \
             | jq '.[0].tag_name | "result=" + .' \
             | tr -d '"' >> $GITHUB_OUTPUT
-      - name: Cancel workflow if version is not updated
-        if: steps.current_version.outputs.result == steps.latest_release.outputs.result
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Check if version needs release
+        id: check_version
         run: |
-          gh run cancel ${{ github.run_id }}
-          gh run watch ${{ github.run_id }}
+          if [ "${{ steps.current_version.outputs.result }}" = "${{ steps.latest_release.outputs.result }}" ]; then
+            echo "should_release=false" >> $GITHUB_OUTPUT
+            echo "Version ${{ steps.current_version.outputs.result }} is already released. Skipping."
+          else
+            echo "should_release=true" >> $GITHUB_OUTPUT
+          fi
       - name: Clear directory
+        if: steps.check_version.outputs.should_release == 'true'
         run: |
           rm -rf ./*
           rm -rf ./.git
       - name: Checkout
+        if: steps.check_version.outputs.should_release == 'true'
         uses: actions/checkout@v4
       - uses: rust-lang/crates-io-auth-action@v1
+        if: steps.check_version.outputs.should_release == 'true'
         id: auth
       - name: Setup Rust
+        if: steps.check_version.outputs.should_release == 'true'
         uses: dtolnay/rust-toolchain@stable
         with:
-          targets: 'armv7-linux-androideabi, i686-linux-android, aarch64-linux-android, x86_64-linux-android'
+          targets: "armv7-linux-androideabi, i686-linux-android, aarch64-linux-android, x86_64-linux-android"
       - name: Retrieve cache
+        if: steps.check_version.outputs.should_release == 'true'
         uses: Leafwing-Studios/cargo-cache@v2
-      
+
       # Publish rusaint
       - name: Publish rusaint
+        if: steps.check_version.outputs.should_release == 'true'
         run: cargo publish --package rusaint --verbose
         env:
           CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
-      
+
       # Publish rusaint-cli
       - name: Publish rusaint-cli
+        if: steps.check_version.outputs.should_release == 'true'
         run: cargo publish --package rusaint-cli --verbose
         env:
           CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
-      
+
       - name: Create an GitHub Release
+        if: steps.check_version.outputs.should_release == 'true'
         run: |
           curl -L \
             -X POST \
@@ -80,3 +96,35 @@ jobs:
             -H "X-GitHub-Api-Version: 2022-11-28" \
             https://api.github.com/repos/EATSTEAK/rusaint/releases \
             -d '{"tag_name":"${{ steps.current_version.outputs.result }}","name":"${{ steps.current_version.outputs.result }}","generate_release_notes":true}'
+
+  release-android:
+    name: Android (Maven Central)
+    needs: [release-crate]
+    if: needs.release-crate.outputs.should_release == 'true'
+    uses: ./.github/workflows/android-release.yml
+    secrets: inherit
+    with:
+      version: ${{ needs.release-crate.outputs.version }}
+
+  release-ios:
+    name: iOS (rusaint-ios)
+    needs: [release-crate]
+    if: needs.release-crate.outputs.should_release == 'true'
+    uses: ./.github/workflows/ios-release.yml
+    secrets: inherit
+    with:
+      version: ${{ needs.release-crate.outputs.version }}
+
+  release-python:
+    name: Python (PyPI)
+    needs: [release-crate]
+    if: needs.release-crate.outputs.should_release == 'true'
+    uses: ./.github/workflows/python-release.yml
+    secrets: inherit
+
+  release-react-native:
+    name: React Native (npm)
+    needs: [release-crate]
+    if: needs.release-crate.outputs.should_release == 'true'
+    uses: ./.github/workflows/react-native-release.yml
+    secrets: inherit
