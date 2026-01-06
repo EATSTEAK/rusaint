@@ -71,6 +71,11 @@ async fn print_grades() -> Result<(), RusaintError> {
 - `rusaint`는 빠른 테스트 실행을 위해 `cargo-nextest`를 사용합니다. (`cargo install cargo-nextest`를 통해 설치할 수 있습니다)
 - `cargo nextest run` 을 실행하여 테스트를 실행합니다.
 
+자세한 정보는 아래 문서를 참고하세요.
+
+- [Application 작성](/docs/APPLICATION-IMPLS.md)
+- [배포 환경 설정](/docs/DEPLOYMENT.md)
+
 ## 멀티 플랫폼
 
 rusaint는 [uniffi](https://github.com/mozilla/uniffi-rs)를 이용한 FFI 멀티플랫폼을 지원합니다. 현재 지원하는 플랫폼은 다음과 같습니다.
@@ -100,7 +105,7 @@ repositories {
 
 ```kotlin
 dependencies {
-  implementation("dev.eatsteak:rusaint:0.13.6")
+  implementation("dev.eatsteak:rusaint:0.14.0")
 }
 ```
 
