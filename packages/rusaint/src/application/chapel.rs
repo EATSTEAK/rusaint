@@ -87,6 +87,20 @@ impl<'a> ChapelApplication {
         Ok(())
     }
 
+    /// 최신 정보를 조회합니다. 새로고침 시 유용합니다.
+    pub async fn lookup(&mut self) -> Result<(), RusaintError> {
+        let parser = ElementParser::new(self.body());
+        let button_press_event = parser.read(ButtonPressEventCommand::new(Self::BTN_SEL))?;
+        self.client.process_event(false, button_press_event).await?;
+        Ok(())
+    }
+
+    /// 페이지를 새로고침합니다.
+    pub async fn reload(&mut self) -> Result<(), RusaintError> {
+        self.client.reload().await?;
+        Ok(())
+    }
+
     /// 해당 학기의 채플 정보를 가져옵니다.
     pub async fn information(
         &mut self,
