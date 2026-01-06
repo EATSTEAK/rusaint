@@ -16,6 +16,11 @@ impl ScholarshipsApplication {
     pub async fn scholarships(&self) -> Result<Vec<Scholarship>, RusaintError> {
         Ok(self.0.write().await.scholarships().await?)
     }
+
+    /// 페이지를 새로고침합니다.
+    pub async fn reload(&self) -> Result<(), RusaintError> {
+        Ok(self.0.write().await.reload().await?)
+    }
 }
 
 /// [`ScholarshipsApplication`] 생성을 위한 빌더
