@@ -9,7 +9,7 @@ members = [
 resolver = "3"
 
 [workspace.package]
-version = "0.13.6"
+version = "0.14.0"
 
 keywords = ["ssu", "u-saint", "scraping", "parser"]
 authors = ["Hyomin Koo <me@eatsteak.dev>"]
@@ -23,7 +23,7 @@ readme = "README.md"
 thiserror = "2"
 tokio = "1.47.1"
 uniffi = "0.29.4"
-rusaint = { version = "0.13.6", path = "packages/rusaint" }
+rusaint = { version = "0.14.0", path = "packages/rusaint" }
 
 [workspace.lints.clippy]
 collapsible_if = "allow"
