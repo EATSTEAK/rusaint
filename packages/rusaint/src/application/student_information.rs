@@ -91,6 +91,12 @@ impl<'a> StudentInformationApplication {
         Ok(StudentResearchBankAccount::with_client(&mut self.client).await?)
     }
 
+    /// 페이지를 새로고침합니다.
+    pub async fn reload(&mut self) -> Result<(), RusaintError> {
+        self.client.reload().await?;
+        Ok(())
+    }
+
     fn body(&self) -> &Body {
         self.client.body()
     }

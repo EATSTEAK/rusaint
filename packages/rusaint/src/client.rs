@@ -71,6 +71,21 @@ impl<'a> USaintClient {
         self.state.client_url()
     }
 
+    /// 페이지를 새로고침합니다.
+    pub async fn reload(&mut self) -> Result<(), WebDynproError> {
+        let body = self
+            .client
+            .navigate(self.state.base_url(), self.state.name())
+            .await?;
+        self.state = WebDynproState::new(
+            self.state.base_url().clone(),
+            self.state.name().to_string(),
+            body,
+        );
+        self.load_placeholder().await?;
+        Ok(())
+    }
+
     /// 이벤트를 처리합니다. [`process_event()`](WebDynproClient::process_event)를 참조하세요.
     pub async fn process_event(
         &mut self,

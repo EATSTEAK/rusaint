@@ -40,6 +40,11 @@ impl LectureAssessmentApplication {
         let (year, semester) = self.0.read().await.get_selected_semester()?;
         Ok(YearSemester::new(year, semester))
     }
+
+    /// 페이지를 새로고침합니다.
+    pub async fn reload(&self) -> Result<(), RusaintError> {
+        Ok(self.0.write().await.reload().await?)
+    }
 }
 
 /// [`LectureAssessmentApplication`] 생성을 위한 빌더

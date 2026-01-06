@@ -8,6 +8,8 @@ use scraper::Selector;
 use std::collections::HashMap;
 use wdpe::body::Body;
 use wdpe::command::WebDynproCommandExecutor;
+use wdpe::command::element::action::ButtonPressEventCommand;
+use wdpe::element::action::Button;
 use wdpe::element::complex::sap_table::cell::SapTableCellWrapper;
 use wdpe::element::parser::ElementParser;
 use wdpe::{
@@ -48,6 +50,10 @@ impl USaintApplication for CourseGradesApplication {
 
 #[allow(unused)]
 impl<'a> CourseGradesApplication {
+    define_elements! {
+        BTN_SEARCH: Button<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.BTN_SEARCH";
+    }
+
     // Elements for Grade Summaries
     define_elements!(
         // Grade summaries by semester
@@ -184,6 +190,20 @@ impl<'a> CourseGradesApplication {
             &Self::PERIOD_YEAR,
             &Self::PERIOD_SEMESTER,
         )?)
+    }
+
+    /// 최신 정보를 조회합니다. 새로고침 시 유용합니다.
+    pub async fn lookup(&mut self) -> Result<(), RusaintError> {
+        let parser = ElementParser::new(self.client.body());
+        let button_press_event = parser.read(ButtonPressEventCommand::new(Self::BTN_SEARCH))?;
+        self.client.process_event(false, button_press_event).await?;
+        Ok(())
+    }
+
+    /// 페이지를 새로고침합니다.
+    pub async fn reload(&mut self) -> Result<(), RusaintError> {
+        self.client.reload().await?;
+        Ok(())
     }
 
     /// 전체 학기의 학적부 평점 정보를 가져옵니다.

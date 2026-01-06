@@ -186,6 +186,12 @@ impl<'a> PersonalCourseScheduleApplication {
             },
         }
     }
+
+    /// 페이지를 새로고침합니다.
+    pub async fn reload(&mut self) -> Result<(), RusaintError> {
+        self.client.reload().await?;
+        Ok(())
+    }
 }
 
 /// [`PersonalCourseSchedule`] 애플리케이션에 사용되는 데이터
