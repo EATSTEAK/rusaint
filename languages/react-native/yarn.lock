@@ -4306,7 +4306,7 @@ __metadata:
     uniffi-bindgen-react-native: ^0.29.3-1
   peerDependencies:
     react: "*"
-    react-native: ^0.79.3
+    react-native: "*"
   languageName: unknown
   linkType: soft
 
