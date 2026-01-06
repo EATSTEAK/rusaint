@@ -359,7 +359,11 @@ impl<'app> CourseScheduleApplication {
         Ok(lectures.into_iter())
     }
 
-    // TO-DO: 카테고리 별 선택지 가져오기 기능
+    /// 페이지를 새로고침합니다.
+    pub async fn reload(&mut self) -> Result<(), RusaintError> {
+        self.client.reload().await?;
+        Ok(())
+    }
 }
 
 #[cfg(test)]
