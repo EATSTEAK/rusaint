@@ -15,6 +15,9 @@ pub mod course_grades;
 /// 강의시간표: [`CourseScheduleApplication`](course_schedule::CourseScheduleApplication)
 pub mod course_schedule;
 
+/// 수강신청조회 [`CourseRegistrationStatusApplication`](course_registration_status::CourseRegistrationStatusApplication)
+pub mod course_registration_status;
+
 /// 졸업사정표: [`GraduationRequirementsApplication`](graduation_requirements::GraduationRequirementsApplication)
 pub mod graduation_requirements;
 
