@@ -1,0 +1,27 @@
+name: Build
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-android:
+    name: Android
+    uses: ./.github/workflows/android-build.yml
+    secrets: inherit
+
+  build-ios:
+    name: iOS
+    uses: ./.github/workflows/ios-build.yml
+    secrets: inherit
+
+  build-python:
+    name: Python
+    uses: ./.github/workflows/python-build.yml
+    secrets: inherit
+
+  build-react-native:
+    name: React Native
+    uses: ./.github/workflows/react-native-build.yml
+    secrets: inherit
