@@ -65,6 +65,11 @@ impl StudentInformationApplication {
     pub async fn research_bank_account(&self) -> Result<StudentResearchBankAccount, RusaintError> {
         Ok(self.0.write().await.research_bank_account().await?)
     }
+
+    /// 페이지를 새로고침합니다.
+    pub async fn reload(&self) -> Result<(), RusaintError> {
+        Ok(self.0.write().await.reload().await?)
+    }
 }
 
 /// [`StudentInformationApplication`] 생성을 위한 빌더
