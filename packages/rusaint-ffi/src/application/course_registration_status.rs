@@ -1,8 +1,7 @@
 use std::sync::Arc;
 
 use rusaint::{
-    application::course_registration_status::model::RegisteredLecture,
-    model::SemesterType,
+    application::course_registration_status::model::RegisteredLecture, model::SemesterType,
 };
 use tokio::sync::RwLock;
 
@@ -67,7 +66,9 @@ impl CourseRegistrationStatusApplicationBuilder {
         let original_app = original_builder
             .build_into::<rusaint::application::course_registration_status::CourseRegistrationStatusApplication>()
             .await?;
-        Ok(CourseRegistrationStatusApplication(RwLock::new(original_app)))
+        Ok(CourseRegistrationStatusApplication(RwLock::new(
+            original_app,
+        )))
     }
 }
 
