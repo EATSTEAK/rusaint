@@ -20,6 +20,7 @@ jobs:
   release-crate:
     name: Crate (crates.io)
     runs-on: ubuntu-latest
+    environment: release
     outputs:
       version: ${{ steps.current_version.outputs.result }}
       should_release: ${{ steps.check_version.outputs.should_release }}

@@ -15,6 +15,7 @@ env:
 jobs:
   release-android:
     runs-on: ubuntu-latest
+    environment: release
     steps:
       - name: Checkout Cargo.toml to check version
         uses: actions/checkout@v4

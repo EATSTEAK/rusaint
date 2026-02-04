@@ -11,6 +11,7 @@ permissions:
 jobs:
   build-rn:
     runs-on: macos-latest
+    environment: release
     outputs:
       current_version: ${{ steps.current_version.outputs.result }}
       should_release: ${{ steps.check_version.outputs.should_release }}
@@ -138,6 +139,4 @@ jobs:
       - name: Publish to npm
         if: steps.check_version.outputs.should_release == 'true'
         working-directory: languages/react-native
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --access public --scope @rusaint --provenance
+        run: npm publish --access public --provenance
