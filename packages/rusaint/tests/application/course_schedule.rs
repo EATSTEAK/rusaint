@@ -212,6 +212,30 @@ async fn find_nothing() {
 
 #[tokio::test]
 #[traced_test]
+async fn loaded_lectures() {
+    let session = get_session().await.unwrap().clone();
+    let mut app = USaintClientBuilder::new()
+        .session(session)
+        .build_into::<CourseScheduleApplication>()
+        .await
+        .unwrap();
+    let category = LectureCategory::major("IT대학", "글로벌미디어학부", None);
+    let find_result: Vec<_> = app
+        .find_lectures(2025, SemesterType::One, &category)
+        .await
+        .unwrap()
+        .collect();
+    assert!(!find_result.is_empty(), "Should have at least one lecture");
+    let loaded_result: Vec<_> = app.loaded_lectures().unwrap().collect();
+    assert!(
+        !loaded_result.is_empty(),
+        "loaded_lectures should return results after find_lectures"
+    );
+    tracing::info!("loaded_lectures returned {} lectures", loaded_result.len());
+}
+
+#[tokio::test]
+#[traced_test]
 async fn lecture_detail() {
     let session = get_session().await.unwrap().clone();
     let mut app = USaintClientBuilder::new()

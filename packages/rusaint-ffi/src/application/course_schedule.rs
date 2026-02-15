@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use rusaint::{
-    application::course_schedule::model::{Lecture, LectureCategory},
+    application::course_schedule::model::{Lecture, LectureCategory, LectureDetail},
     model::SemesterType,
 };
 use tokio::sync::RwLock;
@@ -172,6 +172,18 @@ impl CourseScheduleApplication {
         semester: SemesterType,
     ) -> Result<Vec<String>, RusaintError> {
         Ok(self.0.write().await.united_majors(year, semester).await?)
+    }
+
+    /// 현재 페이지에 로드된 강의들을 가져옵니다. `find_lectures` 함수를 호출하여 강의를 검색한 이후에 사용되어야 하며, 검색한 강의들에 대한 추가 정보를 가져오고자 할 때 사용할 수 있습니다.
+    /// NOTE: 이 함수는 스크롤을 수행하지 않으므로, find_lectures 함수가 너무 많은 강의(500줄 초과)를 반환한 경우, 예상대로 동작하지 않을 수 있습니다.
+    pub async fn loaded_lectures(&self) -> Result<Vec<Lecture>, RusaintError> {
+        Ok(self.0.read().await.loaded_lectures()?.collect())
+    }
+
+    /// 주어진 과목번호에 해당하는 강의의 상세 정보를 가져옵니다.
+    /// `find_lectures` 함수를 먼저 호출하여 강의를 검색한 이후에 사용되어야 합니다.
+    pub async fn lecture_detail(&self, code: &str) -> Result<LectureDetail, RusaintError> {
+        Ok(self.0.write().await.lecture_detail(code).await?)
     }
 
     /// 페이지를 새로고침합니다.

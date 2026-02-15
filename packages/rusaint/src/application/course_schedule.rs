@@ -2,7 +2,8 @@ use crate::application::course_schedule::model::LectureDetail;
 use crate::application::course_schedule::utils::{
     combo_box_items, select_lv1, select_lv2, select_tab,
 };
-use crate::application::utils::sap_table::try_table_into_with_scroll;
+use crate::application::utils::popup::close_popups;
+use crate::application::utils::sap_table::{is_sap_table_empty, try_table_into_with_scroll};
 use crate::application::utils::semester::get_selected_semester;
 use crate::client::{USaintApplication, USaintClient};
 use crate::{
@@ -10,7 +11,6 @@ use crate::{
     application::course_schedule::model::{Lecture, LectureCategory},
     model::SemesterType,
 };
-use scraper::Selector;
 use wdpe::command::WebDynproCommandExecutor;
 use wdpe::element::definition::ElementDefinition as _;
 use wdpe::element::layout::tab_strip::item::TabStripItem;
@@ -20,16 +20,15 @@ use wdpe::{
     command::element::{complex::SapTableBodyCommand, selection::ComboBoxSelectEventCommand},
     define_elements,
     element::{
-        Element, ElementDefWrapper, ElementWrapper,
+        ElementDefWrapper,
         complex::{
             SapTable,
             sap_table::cell::{SapTableCell, SapTableCellWrapper},
         },
-        layout::{PopupWindow, TabStrip},
+        layout::TabStrip,
         selection::ComboBox,
     },
     error::{ElementError, WebDynproError},
-    event::Event,
 };
 
 /// [강의시간표](https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/ZCMW2100)
@@ -344,14 +343,7 @@ impl<'app> CourseScheduleApplication {
         lecture_category.request_query(&mut self.client).await?;
         let parser = ElementParser::new(self.body());
         let table = parser.read(SapTableBodyCommand::new(Self::MAIN_TABLE))?;
-        let Some(first_row) = table.iter().next() else {
-            return Err(ApplicationError::NoLectureResult.into());
-        };
-        if let Some(Ok(SapTableCellWrapper::Normal(cell))) = first_row.iter_value(&parser).next()
-            && let Some(ElementDefWrapper::TextView(tv_def)) = cell.content()
-            && let Ok(tv) = parser.element_from_def(&tv_def)
-            && tv.text().contains("없습니다.")
-        {
+        if is_sap_table_empty(&table, &parser) {
             return Err(ApplicationError::NoLectureResult.into());
         }
         let lectures =
@@ -423,30 +415,9 @@ impl<'app> CourseScheduleApplication {
         let detail = LectureDetail::with_parser(&parser)?;
 
         // Close the popup
-        self.close_popups().await?;
+        close_popups(&mut self.client).await?;
 
         Ok(detail)
-    }
-
-    async fn close_popups(&mut self) -> Result<(), WebDynproError> {
-        let popup_selector =
-            Selector::parse(format!(r#"[ct="{}"]"#, PopupWindow::CONTROL_ID).as_str()).unwrap();
-        fn make_close_event(body: &Body, selector: &Selector) -> Option<Event> {
-            let parser = ElementParser::new(body);
-            let mut popup_iter = parser.document().select(selector);
-            popup_iter.next().and_then(|elem| {
-                let elem_wrapped = ElementWrapper::from_ref(elem).ok()?;
-                if let ElementWrapper::PopupWindow(popup) = elem_wrapped {
-                    popup.close().ok()
-                } else {
-                    None
-                }
-            })
-        }
-        while let Some(event) = make_close_event(self.body(), &popup_selector) {
-            self.client.process_event(false, event).await?;
-        }
-        Ok(())
     }
 
     /// 페이지를 새로고침합니다.
