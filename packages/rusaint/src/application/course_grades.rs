@@ -1,5 +1,6 @@
 use self::model::{ClassGrade, CourseType, GradeSummary, SemesterGrade};
 use crate::application::utils::input_field::InputFieldExt as _;
+use crate::application::utils::popup::close_popups;
 use crate::application::utils::sap_table::try_table_into_with_scroll;
 use crate::application::utils::semester::get_selected_semester;
 use crate::client::{USaintApplication, USaintClient};
@@ -22,7 +23,6 @@ use wdpe::{
         Element, ElementDefWrapper, ElementWrapper,
         complex::sap_table::{SapTable, cell::SapTableCell},
         definition::ElementDefinition,
-        layout::PopupWindow,
         selection::ComboBox,
         text::InputField,
     },
@@ -94,24 +94,7 @@ impl<'a> CourseGradesApplication {
     );
 
     async fn close_popups(&mut self) -> Result<(), WebDynproError> {
-        let popup_selector =
-            Selector::parse(format!(r#"[ct="{}"]"#, PopupWindow::CONTROL_ID).as_str()).unwrap();
-        fn make_close_event(body: &Body, selector: &Selector) -> Option<Event> {
-            let parser = ElementParser::new(body);
-            let mut popup_iter = parser.document().select(selector);
-            popup_iter.next().and_then(|elem| {
-                let elem_wrapped = ElementWrapper::from_ref(elem).ok()?;
-                if let ElementWrapper::PopupWindow(popup) = elem_wrapped {
-                    popup.close().ok()
-                } else {
-                    None
-                }
-            })
-        }
-        while let Some(event) = make_close_event(self.body(), &popup_selector) {
-            self.client.process_event(false, event).await?;
-        }
-        Ok(())
+        close_popups(&mut self.client).await
     }
 
     fn semester_to_key(semester: SemesterType) -> &'static str {

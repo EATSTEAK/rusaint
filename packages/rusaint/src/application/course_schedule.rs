@@ -1,7 +1,9 @@
+use crate::application::course_schedule::model::LectureDetail;
 use crate::application::course_schedule::utils::{
     combo_box_items, select_lv1, select_lv2, select_tab,
 };
-use crate::application::utils::sap_table::try_table_into_with_scroll;
+use crate::application::utils::popup::close_popups;
+use crate::application::utils::sap_table::{is_sap_table_empty, try_table_into_with_scroll};
 use crate::application::utils::semester::get_selected_semester;
 use crate::client::{USaintApplication, USaintClient};
 use crate::{
@@ -10,6 +12,7 @@ use crate::{
     model::SemesterType,
 };
 use wdpe::command::WebDynproCommandExecutor;
+use wdpe::element::definition::ElementDefinition as _;
 use wdpe::element::layout::tab_strip::item::TabStripItem;
 use wdpe::element::parser::ElementParser;
 use wdpe::{
@@ -25,7 +28,7 @@ use wdpe::{
         layout::TabStrip,
         selection::ComboBox,
     },
-    error::WebDynproError,
+    error::{ElementError, WebDynproError},
 };
 
 /// [강의시간표](https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/ZCMW2100)
@@ -340,23 +343,81 @@ impl<'app> CourseScheduleApplication {
         lecture_category.request_query(&mut self.client).await?;
         let parser = ElementParser::new(self.body());
         let table = parser.read(SapTableBodyCommand::new(Self::MAIN_TABLE))?;
-        let Some(first_row) = table.iter().next() else {
+        if is_sap_table_empty(&table, &parser) {
             return Err(ApplicationError::NoLectureResult.into());
-        };
-        if let Some(Ok(SapTableCellWrapper::Normal(cell))) = first_row.iter_value(&parser).next() {
-            if let Some(ElementDefWrapper::TextView(tv_def)) = cell.content() {
-                if let Ok(tv) = parser.element_from_def(&tv_def) {
-                    if tv.text().contains("없습니다.") {
-                        return Err(ApplicationError::NoLectureResult.into());
-                    }
-                }
-            }
         }
         let lectures =
             try_table_into_with_scroll::<Lecture>(&mut self.client, parser, Self::MAIN_TABLE)
                 .await?;
 
         Ok(lectures.into_iter())
+    }
+
+    /// 현재 페이지에 로드된 강의들을 가져옵니다. `find_lectures` 함수를 호출하여 강의를 검색한 이후에 사용되어야 하며, 검색한 강의들에 대한 추가 정보를 가져오고자 할 때 사용할 수 있습니다.
+    /// NOTE: 이 함수는 스크롤을 수행하지 않으므로, find_lectures 함수가 너무 많은 강의(500줄 초과)를 반환한 경우, 예상대로 동작하지 않을 수 있습니다.
+    pub fn loaded_lectures(&self) -> Result<impl Iterator<Item = Lecture>, RusaintError> {
+        let parser = ElementParser::new(self.body());
+        let table = parser.read(SapTableBodyCommand::new(Self::MAIN_TABLE))?;
+        let lectures = table.try_table_into::<Lecture>(&parser)?;
+        Ok(lectures.into_iter())
+    }
+
+    /// 주어진 과목번호에 해당하는 강의의 상세 정보를 가져옵니다.
+    /// `find_lectures` 함수를 먼저 호출하여 강의를 검색한 이후에 사용되어야 합니다.
+    pub async fn lecture_detail(&mut self, code: &str) -> Result<LectureDetail, RusaintError> {
+        let parser = ElementParser::new(self.body());
+        let table = parser.read(SapTableBodyCommand::new(Self::MAIN_TABLE))?;
+
+        // Find the column index for "과목번호" from header
+        let header = table
+            .header()
+            .ok_or(WebDynproError::from(ElementError::NoSuchContent {
+                element: Self::MAIN_TABLE.id().to_string(),
+                content: "Header of table".to_string(),
+            }))?;
+        let titles = header.titles(&parser)?;
+        let code_col_idx =
+            titles
+                .iter()
+                .position(|t| t == "과목번호")
+                .ok_or(WebDynproError::from(ElementError::NoSuchContent {
+                    element: Self::MAIN_TABLE.id().to_string(),
+                    content: "과목번호 column".to_string(),
+                }))?;
+
+        // Find the row with matching code and get the Link's activate event
+        let activate_event = table
+            .iter()
+            .find_map(|row| {
+                let cell_wrapper =
+                    SapTableCellWrapper::from_def(&row[code_col_idx], &parser).ok()?;
+                if let Some(ElementDefWrapper::Link(link_def)) = cell_wrapper.content() {
+                    let link = parser.element_from_def(&link_def).ok()?;
+                    if link.text() == code {
+                        link.activate(false, false).ok()
+                    } else {
+                        None
+                    }
+                } else {
+                    None
+                }
+            })
+            .ok_or(WebDynproError::from(ElementError::NoSuchData {
+                element: Self::MAIN_TABLE.id().to_string(),
+                field: format!("lecture with code {code}"),
+            }))?;
+
+        // Send the activate event to open the detail popup
+        self.client.process_event(false, activate_event).await?;
+
+        // Parse the detail from the popup
+        let parser = ElementParser::new(self.body());
+        let detail = LectureDetail::with_parser(&parser)?;
+
+        // Close the popup
+        close_popups(&mut self.client).await?;
+
+        Ok(detail)
     }
 
     /// 페이지를 새로고침합니다.
