@@ -176,7 +176,7 @@ impl<'a> GeneralChapelInformation {
 
 impl<'body> FromSapTable<'body> for GeneralChapelInformation {
     fn from_table(
-        header: &'body wdpe::element::complex::sap_table::SapTableHeader,
+        header: Option<&'body wdpe::element::complex::sap_table::SapTableHeader>,
         row: &'body wdpe::element::complex::sap_table::SapTableRow,
         parser: &'body ElementParser,
     ) -> Result<Self, WebDynproError> {
@@ -288,7 +288,7 @@ impl<'a> ChapelAttendance {
 
 impl<'body> FromSapTable<'body> for ChapelAttendance {
     fn from_table(
-        header: &'body wdpe::element::complex::sap_table::SapTableHeader,
+        header: Option<&'body wdpe::element::complex::sap_table::SapTableHeader>,
         row: &'body wdpe::element::complex::sap_table::SapTableRow,
         parser: &'body ElementParser,
     ) -> Result<Self, WebDynproError> {
@@ -417,7 +417,7 @@ impl<'a> ChapelAbsenceRequest {
 
 impl<'body> FromSapTable<'body> for ChapelAbsenceRequest {
     fn from_table(
-        header: &'body wdpe::element::complex::sap_table::SapTableHeader,
+        header: Option<&'body wdpe::element::complex::sap_table::SapTableHeader>,
         row: &'body wdpe::element::complex::sap_table::SapTableRow,
         parser: &'body ElementParser,
     ) -> Result<Self, WebDynproError> {
