@@ -115,7 +115,7 @@ impl StudentTransferRecord {
 
 impl<'a> FromSapTable<'a> for StudentTransferRecord {
     fn from_table(
-        header: &'a wdpe::element::complex::sap_table::SapTableHeader,
+        header: Option<&'a wdpe::element::complex::sap_table::SapTableHeader>,
         row: &'a wdpe::element::complex::sap_table::SapTableRow,
         parser: &'a ElementParser,
     ) -> Result<Self, WebDynproError> {

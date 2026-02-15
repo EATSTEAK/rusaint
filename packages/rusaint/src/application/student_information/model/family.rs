@@ -160,7 +160,7 @@ impl StudentFamilyMember {
 
 impl<'a> FromSapTable<'a> for StudentFamilyMember {
     fn from_table(
-        header: &'a wdpe::element::complex::sap_table::SapTableHeader,
+        header: Option<&'a wdpe::element::complex::sap_table::SapTableHeader>,
         row: &'a wdpe::element::complex::sap_table::SapTableRow,
         parser: &'a ElementParser,
     ) -> Result<Self, WebDynproError> {

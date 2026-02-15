@@ -107,7 +107,7 @@ impl LectureAssessmentResult {
 
 impl<'body> FromSapTable<'body> for LectureAssessmentResult {
     fn from_table(
-        header: &'body wdpe::element::complex::sap_table::SapTableHeader,
+        header: Option<&'body wdpe::element::complex::sap_table::SapTableHeader>,
         row: &'body wdpe::element::complex::sap_table::SapTableRow,
         parser: &'body ElementParser,
     ) -> Result<Self, WebDynproError> {

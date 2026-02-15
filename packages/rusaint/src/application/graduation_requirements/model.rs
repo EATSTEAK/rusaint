@@ -274,7 +274,7 @@ fn deserialize_lectures<'de, D: Deserializer<'de>>(
 
 impl<'body> FromSapTable<'body> for GraduationRequirement {
     fn from_table(
-        header: &'body wdpe::element::complex::sap_table::SapTableHeader,
+        header: Option<&'body wdpe::element::complex::sap_table::SapTableHeader>,
         row: &'body wdpe::element::complex::sap_table::SapTableRow,
         parser: &'body ElementParser,
     ) -> Result<Self, wdpe::error::WebDynproError> {

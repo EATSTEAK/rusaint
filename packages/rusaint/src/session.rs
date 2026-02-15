@@ -97,7 +97,6 @@ impl USaintSession {
         let token_cookie_str = format!("sToken={token}; domain=.ssu.ac.kr; path=/; secure");
         let req = client
             .get(format!("{SSU_USAINT_SSO_URL}?sToken={token}&sIdno={id}"))
-            .query(&[("sToken", token), ("sIdno", id)])
             .headers(default_header())
             .header(
                 COOKIE,
