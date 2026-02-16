@@ -105,8 +105,8 @@ impl<'a> USaintClient {
                     )
                     .await?
             };
-            self.state.mutate_body(update)?;
-            Ok(EventProcessResult::Sent)
+            let result = self.state.mutate_body(update)?;
+            Ok(EventProcessResult::Sent(result))
         } else {
             Ok(EventProcessResult::Enqueued)
         }
