@@ -90,7 +90,7 @@ jobs:
       - name: Build native library
         if: steps.check_version.outputs.should_release == 'true'
         env:
-          IPHONEOS_DEPLOYMENT_TARGET: ${{ vars.IOS_DEPLOYMENT_TARGET || '14.0' }}
+          IPHONEOS_DEPLOYMENT_TARGET: ${{ vars.IOS_DEPLOYMENT_TARGET || '15.1' }}
           RUSTFLAGS: "-C link-arg=-Wl,-application_extension"
         run: |
           mkdir $RUNNER_TEMP/target

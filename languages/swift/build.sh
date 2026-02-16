@@ -8,7 +8,7 @@ mkdir tmp
 mkdir -p tmp/target/universal-ios-sim/release
 
 # Build native library
-export IPHONEOS_DEPLOYMENT_TARGET="16.0"
+export IPHONEOS_DEPLOYMENT_TARGET="15.1"
 export RUSTFLAGS="-C link-arg=-Wl,-application_extension"
 cargo build --package rusaint-ffi --target aarch64-apple-ios-sim --release
 cargo build --package rusaint-ffi --target aarch64-apple-ios --release
