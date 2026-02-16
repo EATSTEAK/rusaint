@@ -44,6 +44,7 @@ reqwest_cookie_store = { version = "0.10.0", features = ["serde"] }
 cookie_store = "0.22"
 tracing = "0.1.41"
 wdpe = { version = "0.4.0", features = ["reqwest"] }
+ozra = { version = "0.0.1" }
 
 [dev-dependencies]
 anyhow = "1"

@@ -591,5 +591,7 @@ impl Default for LectureCategoryBuilder {
 }
 
 mod detail;
+mod syllabus;
 
 pub use detail::{AlternativeLecture, LectureChangeHistory, LectureDetail, PrerequisiteLecture};
+pub use syllabus::{LectureSyllabus, SyllabusCompetency, SyllabusGradingItem, SyllabusWeeklyPlan};

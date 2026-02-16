@@ -48,4 +48,7 @@ pub enum ApplicationError {
     /// 조건에 맞는 강의를 찾을 수 없음
     #[error("No lecture found")]
     NoLectureResult,
+    /// 강의계획서 데이터 가져오기 실패
+    #[error("Failed to fetch syllabus data: {0}")]
+    SyllabusFetchError(String),
 }
