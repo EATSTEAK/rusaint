@@ -1,7 +1,8 @@
-use crate::application::course_schedule::model::LectureDetail;
+use crate::application::course_schedule::model::{LectureDetail, LectureSyllabus};
 use crate::application::course_schedule::utils::{
     combo_box_items, select_lv1, select_lv2, select_tab,
 };
+use crate::application::utils::oz::fetch_data_module_from_script_calls;
 use crate::application::utils::popup::close_popups;
 use crate::application::utils::sap_table::{is_sap_table_empty, try_table_into_with_scroll};
 use crate::application::utils::semester::get_selected_semester;
@@ -15,6 +16,7 @@ use wdpe::command::WebDynproCommandExecutor;
 use wdpe::element::definition::ElementDefinition as _;
 use wdpe::element::layout::tab_strip::item::TabStripItem;
 use wdpe::element::parser::ElementParser;
+use wdpe::state::EventProcessResult;
 use wdpe::{
     body::Body,
     command::element::{complex::SapTableBodyCommand, selection::ComboBoxSelectEventCommand},
@@ -23,12 +25,16 @@ use wdpe::{
         ElementDefWrapper,
         complex::{
             SapTable,
-            sap_table::cell::{SapTableCell, SapTableCellWrapper},
+            sap_table::{
+                SapTableRow,
+                cell::{SapTableCell, SapTableCellWrapper},
+            },
         },
         layout::TabStrip,
         selection::ComboBox,
     },
     error::{ElementError, WebDynproError},
+    event::Event,
 };
 
 /// [강의시간표](https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/ZCMW2100)
@@ -108,6 +114,38 @@ impl<'app> CourseScheduleApplication {
 
     fn body(&self) -> &Body {
         self.client.body()
+    }
+
+    fn find_column_index(titles: &[String], column_name: &str) -> Result<usize, WebDynproError> {
+        titles
+            .iter()
+            .position(|t| t == column_name)
+            .ok_or(WebDynproError::from(ElementError::NoSuchContent {
+                element: Self::MAIN_TABLE.id().to_string(),
+                content: format!("{} column", column_name),
+            }))
+    }
+
+    fn match_row_code(
+        row: &SapTableRow,
+        code_col_idx: usize,
+        parser: &ElementParser,
+        code: &str,
+    ) -> bool {
+        let Ok(code_cell) = SapTableCellWrapper::from_def(&row[code_col_idx], parser) else {
+            return false;
+        };
+        match code_cell.content() {
+            Some(ElementDefWrapper::Link(link_def)) => parser
+                .element_from_def(&link_def)
+                .map(|link| link.text() == code)
+                .unwrap_or(false),
+            Some(ElementDefWrapper::TextView(tv_def)) => parser
+                .element_from_def(&tv_def)
+                .map(|tv| tv.text() == code)
+                .unwrap_or(false),
+            _ => false,
+        }
     }
 
     /// 현재 페이지에 선택된 년도와 학기를 가져옵니다. 최초 로드 시 현재 학기를 가져올 가능성이 있습니다.
@@ -368,7 +406,6 @@ impl<'app> CourseScheduleApplication {
         let parser = ElementParser::new(self.body());
         let table = parser.read(SapTableBodyCommand::new(Self::MAIN_TABLE))?;
 
-        // Find the column index for "과목번호" from header
         let header = table
             .header()
             .ok_or(WebDynproError::from(ElementError::NoSuchContent {
@@ -376,28 +413,19 @@ impl<'app> CourseScheduleApplication {
                 content: "Header of table".to_string(),
             }))?;
         let titles = header.titles(&parser)?;
-        let code_col_idx =
-            titles
-                .iter()
-                .position(|t| t == "과목번호")
-                .ok_or(WebDynproError::from(ElementError::NoSuchContent {
-                    element: Self::MAIN_TABLE.id().to_string(),
-                    content: "과목번호 column".to_string(),
-                }))?;
+        let code_col_idx = Self::find_column_index(&titles, "과목번호")?;
 
-        // Find the row with matching code and get the Link's activate event
         let activate_event = table
             .iter()
             .find_map(|row| {
+                if !Self::match_row_code(row, code_col_idx, &parser, code) {
+                    return None;
+                }
                 let cell_wrapper =
                     SapTableCellWrapper::from_def(&row[code_col_idx], &parser).ok()?;
                 if let Some(ElementDefWrapper::Link(link_def)) = cell_wrapper.content() {
                     let link = parser.element_from_def(&link_def).ok()?;
-                    if link.text() == code {
-                        link.activate(false, false).ok()
-                    } else {
-                        None
-                    }
+                    link.activate(false, false).ok()
                 } else {
                     None
                 }
@@ -407,17 +435,108 @@ impl<'app> CourseScheduleApplication {
                 field: format!("lecture with code {code}"),
             }))?;
 
-        // Send the activate event to open the detail popup
         self.client.process_event(false, activate_event).await?;
 
-        // Parse the detail from the popup
         let parser = ElementParser::new(self.body());
         let detail = LectureDetail::with_parser(&parser)?;
 
-        // Close the popup
         close_popups(&mut self.client).await?;
 
         Ok(detail)
+    }
+
+    /// 주어진 과목번호에 해당하는 강의의 강의계획서(syllabus) 데이터를 OZ 서버에서 가져옵니다.
+    /// `find_lectures` 함수를 먼저 호출하여 강의를 검색한 이후에 사용되어야 합니다.
+    /// 강의계획서가 없는 강의의 경우 에러를 반환합니다.
+    pub async fn lecture_syllabus(&mut self, code: &str) -> Result<LectureSyllabus, RusaintError> {
+        let activate_event = self.find_syllabus_activate_event(code)?;
+        let script_calls = self.send_syllabus_event(activate_event).await?;
+
+        close_popups(&mut self.client).await?;
+
+        let response = fetch_data_module_from_script_calls(&script_calls).await?;
+
+        let syllabus = LectureSyllabus::from_datasets(&response.datasets)?;
+        Ok(syllabus)
+    }
+
+    fn find_syllabus_activate_event(&self, code: &str) -> Result<Event, RusaintError> {
+        let parser = ElementParser::new(self.body());
+        let table = parser.read(SapTableBodyCommand::new(Self::MAIN_TABLE))?;
+
+        let header = table
+            .header()
+            .ok_or(WebDynproError::from(ElementError::NoSuchContent {
+                element: Self::MAIN_TABLE.id().to_string(),
+                content: "Header of table".to_string(),
+            }))?;
+        let titles = header.titles(&parser)?;
+        let code_col_idx = Self::find_column_index(&titles, "과목번호")?;
+        // 강의계획서 컬럼을 동적으로 찾음 (일반적으로 "강의계획서" 헤더를 가진 첫 번째 컬럼)
+        let syllabus_col_idx = Self::find_column_index(&titles, "강의계획서").unwrap_or(0);
+
+        table
+            .iter()
+            .find_map(|row| {
+                if !Self::match_row_code(row, code_col_idx, &parser, code) {
+                    return None;
+                }
+
+                let syllabus_cell =
+                    SapTableCellWrapper::from_def(&row[syllabus_col_idx], &parser).ok()?;
+                match syllabus_cell.content() {
+                    Some(ElementDefWrapper::Link(link_def)) => {
+                        let link = parser.element_from_def(&link_def).ok()?;
+                        link.activate(false, false).ok()
+                    }
+                    Some(ElementDefWrapper::Button(btn_def)) => {
+                        let btn = parser.element_from_def(&btn_def).ok()?;
+                        btn.press().ok()
+                    }
+                    Some(ElementDefWrapper::Image(img_def)) => {
+                        tracing::debug!("Syllabus cell contains an Image element: {:?}", img_def);
+                        None
+                    }
+                    other => {
+                        tracing::debug!(
+                            "Syllabus cell content for code {}: {:?}",
+                            code,
+                            other.as_ref().map(|e| format!("{:?}", e))
+                        );
+                        None
+                    }
+                }
+            })
+            .ok_or_else(|| {
+                WebDynproError::from(ElementError::NoSuchData {
+                    element: Self::MAIN_TABLE.id().to_string(),
+                    field: format!("syllabus button for lecture with code {code}"),
+                })
+                .into()
+            })
+    }
+
+    async fn send_syllabus_event(
+        &mut self,
+        activate_event: Event,
+    ) -> Result<Vec<String>, RusaintError> {
+        let result = self.client.process_event(false, activate_event).await?;
+
+        match result {
+            EventProcessResult::Sent(body_update_result) => {
+                let calls = body_update_result.script_calls.unwrap_or_default();
+                tracing::debug!(
+                    "lecture_syllabus script_calls ({} items): {:?}",
+                    calls.len(),
+                    calls
+                );
+                Ok(calls)
+            }
+            EventProcessResult::Enqueued => Err(ApplicationError::SyllabusFetchError(
+                "Syllabus button click event was enqueued but not sent to server".to_string(),
+            )
+            .into()),
+        }
     }
 
     /// 페이지를 새로고침합니다.

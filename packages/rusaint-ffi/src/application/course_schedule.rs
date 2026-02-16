@@ -1,7 +1,9 @@
 use std::sync::Arc;
 
 use rusaint::{
-    application::course_schedule::model::{Lecture, LectureCategory, LectureDetail},
+    application::course_schedule::model::{
+        Lecture, LectureCategory, LectureDetail, LectureSyllabus,
+    },
     model::SemesterType,
 };
 use tokio::sync::RwLock;
@@ -184,6 +186,13 @@ impl CourseScheduleApplication {
     /// `find_lectures` 함수를 먼저 호출하여 강의를 검색한 이후에 사용되어야 합니다.
     pub async fn lecture_detail(&self, code: &str) -> Result<LectureDetail, RusaintError> {
         Ok(self.0.write().await.lecture_detail(code).await?)
+    }
+
+    /// 주어진 과목번호에 해당하는 강의의 강의계획서(syllabus) 데이터를 OZ 서버에서 가져옵니다.
+    /// `find_lectures` 함수를 먼저 호출하여 강의를 검색한 이후에 사용되어야 합니다.
+    /// 강의계획서가 없는 강의의 경우 에러를 반환합니다.
+    pub async fn lecture_syllabus(&self, code: &str) -> Result<LectureSyllabus, RusaintError> {
+        Ok(self.0.write().await.lecture_syllabus(code).await?)
     }
 
     /// 페이지를 새로고침합니다.
