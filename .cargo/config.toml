@@ -1,0 +1,6 @@
+[env]
+# React Native 0.79.2 requires iOS 15.1+.
+# Without this, Rust's aarch64-apple-ios target defaults to iOS 10.0,
+# causing aws-lc-sys to emit ___chkstk_darwin calls (macOS-only stack probe)
+# that don't exist in the iOS SDK.
+IPHONEOS_DEPLOYMENT_TARGET = "15.1"

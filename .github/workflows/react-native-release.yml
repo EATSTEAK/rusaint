@@ -54,7 +54,7 @@ jobs:
         if: steps.check_version.outputs.should_release == 'true'
         uses: dtolnay/rust-toolchain@stable
         with:
-          targets: "aarch64-apple-ios, x86_64-apple-ios, aarch64-apple-ios-sim, armv7-linux-androideabi, i686-linux-android, aarch64-linux-android, x86_64-linux-android"
+          targets: "aarch64-apple-ios, aarch64-apple-ios-sim, armv7-linux-androideabi, i686-linux-android, aarch64-linux-android, x86_64-linux-android"
       - name: Retrieve cache
         if: steps.check_version.outputs.should_release == 'true'
         uses: Leafwing-Studios/cargo-cache@v2
