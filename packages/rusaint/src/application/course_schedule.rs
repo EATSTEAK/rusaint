@@ -532,7 +532,7 @@ impl<'app> CourseScheduleApplication {
                 );
                 Ok(calls)
             }
-            EventProcessResult::Enqueued => Err(ApplicationError::SyllabusFetchError(
+            EventProcessResult::Enqueued => Err(ApplicationError::OzDataFetchError(
                 "Syllabus button click event was enqueued but not sent to server".to_string(),
             )
             .into()),
