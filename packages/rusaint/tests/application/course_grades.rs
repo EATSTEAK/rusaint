@@ -96,3 +96,16 @@ async fn classes_with_detail() {
     tracing::info!("{:?}", detail);
     assert!(!detail.is_empty());
 }
+
+#[tokio::test]
+#[traced_test]
+async fn grades_by_classification() {
+    let lock = get_app().await.unwrap();
+    let mut app = lock.write().await;
+    let result = app
+        .grades_by_classification(CourseType::Bachelor)
+        .await
+        .unwrap();
+    tracing::info!("{:?}", result);
+    assert!(!result.grades().is_empty());
+}

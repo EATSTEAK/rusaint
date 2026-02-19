@@ -1,10 +1,13 @@
-use self::model::{ClassGrade, CourseType, GradeSummary, SemesterGrade};
+use self::model::{ClassGrade, CourseType, GradeSummary, GradesByClassification, SemesterGrade};
 use crate::application::utils::input_field::InputFieldExt as _;
+use crate::application::utils::oz::{
+    extract_oz_url_from_script_calls, fetch_data_module, parse_oz_url_params,
+};
 use crate::application::utils::popup::close_popups;
 use crate::application::utils::sap_table::try_table_into_with_scroll;
 use crate::application::utils::semester::get_selected_semester;
 use crate::client::{USaintApplication, USaintClient};
-use crate::{RusaintError, model::SemesterType};
+use crate::{ApplicationError, RusaintError, model::SemesterType};
 use scraper::Selector;
 use std::collections::HashMap;
 use wdpe::body::Body;
@@ -13,6 +16,7 @@ use wdpe::command::element::action::ButtonPressEventCommand;
 use wdpe::element::action::Button;
 use wdpe::element::complex::sap_table::cell::SapTableCellWrapper;
 use wdpe::element::parser::ElementParser;
+use wdpe::state::EventProcessResult;
 use wdpe::{
     command::element::{
         complex::SapTableBodyCommand,
@@ -52,6 +56,8 @@ impl USaintApplication for CourseGradesApplication {
 impl<'a> CourseGradesApplication {
     define_elements! {
         BTN_SEARCH: Button<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.BTN_SEARCH";
+        // Button to see grades by course classification
+        BTN_PRINT_CP: Button<'a> = "ZCMB3W0017.ID_0001:VIW_MAIN.BTN_PRINT_CP";
     }
 
     // Elements for Grade Summaries
@@ -285,6 +291,51 @@ impl<'a> CourseGradesApplication {
             avg,
             pf_earned_credits,
         ))
+    }
+
+    /// 이수구분별 성적 데이터를 OZ 서버에서 가져옵니다.
+    pub async fn grades_by_classification(
+        &mut self,
+        course_type: CourseType,
+    ) -> Result<GradesByClassification, RusaintError> {
+        self.close_popups().await?;
+
+        let parser = ElementParser::new(self.client.body());
+        let button_press_event = parser.read(ButtonPressEventCommand::new(Self::BTN_PRINT_CP))?;
+        let result = self.client.process_event(true, button_press_event).await?;
+
+        let script_calls = match result {
+            EventProcessResult::Sent(body_update_result) => {
+                body_update_result.script_calls.unwrap_or_default()
+            }
+            EventProcessResult::Enqueued => {
+                return Err(ApplicationError::OzDataFetchError(
+                    "BTN_PRINT_CP event was enqueued but not sent".to_string(),
+                )
+                .into());
+            }
+        };
+
+        let oz_url = extract_oz_url_from_script_calls(&script_calls)?;
+        let mut oz_params = parse_oz_url_params(&oz_url)?;
+
+        if let Some(uname) = oz_params
+            .params
+            .iter()
+            .find(|(k, _)| k == "UNAME")
+            .map(|(_, v)| v.clone())
+        {
+            if !oz_params.params.iter().any(|(k, _)| k == "arg4") {
+                oz_params.params.push(("arg4".to_string(), uname.clone()));
+            }
+            if !oz_params.params.iter().any(|(k, _)| k == "ADMIN") {
+                oz_params.params.push(("ADMIN".to_string(), uname));
+            }
+        }
+
+        let response = fetch_data_module(&oz_params).await?;
+        let result = GradesByClassification::from_datasets(&response.datasets)?;
+        Ok(result)
     }
 
     /// 학기별 평점 정보를 가져옵니다.
