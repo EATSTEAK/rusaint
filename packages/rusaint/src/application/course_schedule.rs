@@ -2,7 +2,9 @@ use crate::application::course_schedule::model::{LectureDetail, LectureSyllabus}
 use crate::application::course_schedule::utils::{
     combo_box_items, select_lv1, select_lv2, select_tab,
 };
-use crate::application::utils::oz::fetch_data_module_from_script_calls;
+use crate::application::utils::oz::{
+    extract_oz_url_from_script_calls, fetch_data_module, parse_oz_url_params,
+};
 use crate::application::utils::popup::close_popups;
 use crate::application::utils::sap_table::{is_sap_table_empty, try_table_into_with_scroll};
 use crate::application::utils::semester::get_selected_semester;
@@ -454,8 +456,21 @@ impl<'app> CourseScheduleApplication {
 
         close_popups(&mut self.client).await?;
 
-        let response = fetch_data_module_from_script_calls(&script_calls).await?;
+        let oz_url = extract_oz_url_from_script_calls(&script_calls)?;
+        let mut oz_params = parse_oz_url_params(&oz_url)?;
 
+        if let Some(uname) = oz_params
+            .params
+            .iter()
+            .find(|(k, _)| k == "UNAME")
+            .map(|(_, v)| v.clone())
+        {
+            if !oz_params.params.iter().any(|(k, _)| k == "arg4") {
+                oz_params.params.push(("arg4".to_string(), uname));
+            }
+        }
+
+        let response = fetch_data_module(&oz_params).await?;
         let syllabus = LectureSyllabus::from_datasets(&response.datasets)?;
         Ok(syllabus)
     }

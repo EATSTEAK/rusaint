@@ -163,23 +163,11 @@ pub(crate) fn parse_oz_url_params(oz_url: &str) -> Result<OzUrlParams, RusaintEr
         .into());
     }
 
-    let mut params: Vec<(String, String)> = p_names
+    let params: Vec<(String, String)> = p_names
         .iter()
         .zip(p_values.iter())
-        .filter(|(name, _)| **name != "P_RANDOM")
         .map(|(name, value)| (name.to_string(), value.to_string()))
         .collect();
-
-    let has_arg4 = params.iter().any(|(name, _)| name == "arg4");
-    if !has_arg4 {
-        if let Some(uname_value) = params
-            .iter()
-            .find(|(name, _)| name == "UNAME")
-            .map(|(_, v)| v.clone())
-        {
-            params.push(("arg4".to_string(), uname_value));
-        }
-    }
 
     let odi_name = format!("{}.odi", ozrname);
 
@@ -192,18 +180,10 @@ pub(crate) fn parse_oz_url_params(oz_url: &str) -> Result<OzUrlParams, RusaintEr
     })
 }
 
-/// OZ URL로부터 OzClient를 생성, 세션 초기화, 로그인, DataModule 데이터를 가져옵니다.
-///
-/// `script_calls`에서 OZ URL을 추출하고, URL 파라미터를 파싱한 뒤,
-/// OzClient를 사용하여 DataModule 응답(`DataModuleResponse`)을 반환합니다.
-pub(crate) async fn fetch_data_module_from_script_calls(
-    script_calls: &[String],
+/// [`OzUrlParams`]를 사용하여 OzClient를 생성, 세션 초기화, 로그인, DataModule 데이터를 가져옵니다.
+pub(crate) async fn fetch_data_module(
+    oz_params: &OzUrlParams,
 ) -> Result<ozra::types::DataModuleResponse, RusaintError> {
-    let oz_url = extract_oz_url_from_script_calls(script_calls)?;
-    tracing::debug!("Full OZ URL: {}", oz_url);
-
-    let oz_params = parse_oz_url_params(&oz_url)?;
-
     tracing::debug!(
         "OZ params: base_url={}, ozrname={}, category={}, odi={}, params={:?}",
         oz_params.base_url,
@@ -238,9 +218,7 @@ pub(crate) async fn fetch_data_module_from_script_calls(
             &oz_params.params,
         )
         .await
-        .map_err(|e| {
-            ApplicationError::OzDataFetchError(format!("OZ data fetch failed: {}", e))
-        })?;
+        .map_err(|e| ApplicationError::OzDataFetchError(format!("OZ data fetch failed: {}", e)))?;
 
     Ok(response)
 }
@@ -398,33 +376,16 @@ mod tests {
     }
 
     #[test]
-    fn parse_params_filters_p_random() {
-        let url = "https://office.ssu.ac.kr/oz70/viewer?ozrname=r&category=c&pName=P_RANDOM,KEY&pValue=12345,val";
+    fn parse_params_preserves_all_params() {
+        let url = "https://office.ssu.ac.kr/oz70/viewer?ozrname=r&category=c&pName=P_RANDOM,KEY,UNAME&pValue=12345,val,user123";
         let params = parse_oz_url_params(url).unwrap();
-        assert_eq!(params.params, vec![("KEY".to_string(), "val".to_string())]);
-    }
-
-    #[test]
-    fn parse_params_adds_arg4_from_uname() {
-        let url = "https://office.ssu.ac.kr/oz70/viewer?ozrname=r&category=c&pName=UNAME,OTHER&pValue=user123,foo";
-        let params = parse_oz_url_params(url).unwrap();
-        assert!(
-            params
-                .params
-                .iter()
-                .any(|(k, v)| k == "arg4" && v == "user123")
-        );
-    }
-
-    #[test]
-    fn parse_params_no_duplicate_arg4() {
-        let url = "https://office.ssu.ac.kr/oz70/viewer?ozrname=r&category=c&pName=arg4,UNAME&pValue=existing,user123";
-        let params = parse_oz_url_params(url).unwrap();
-        let arg4_count = params.params.iter().filter(|(k, _)| k == "arg4").count();
-        assert_eq!(arg4_count, 1);
         assert_eq!(
-            params.params.iter().find(|(k, _)| k == "arg4").unwrap().1,
-            "existing"
+            params.params,
+            vec![
+                ("P_RANDOM".to_string(), "12345".to_string()),
+                ("KEY".to_string(), "val".to_string()),
+                ("UNAME".to_string(), "user123".to_string()),
+            ]
         );
     }
 
