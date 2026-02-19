@@ -409,3 +409,207 @@ impl FromStr for ClassScore {
         })
     }
 }
+
+/// 이수구분별 성적 조회 결과
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
+pub struct GradesByClassification {
+    /// 학번
+    student_number: String,
+    /// 이름
+    student_name: String,
+    /// 학년
+    year_level: String,
+    /// 대학
+    college: String,
+    /// 학부(과)
+    department: String,
+    /// 전공
+    major: String,
+    /// 조회일
+    audit_date: String,
+    /// 이수구분별 과목 성적 목록
+    grades: Vec<ClassGradeItem>,
+}
+
+impl GradesByClassification {
+    /// 학번
+    pub fn student_number(&self) -> &str {
+        &self.student_number
+    }
+
+    /// 이름
+    pub fn student_name(&self) -> &str {
+        &self.student_name
+    }
+
+    /// 학년
+    pub fn year_level(&self) -> &str {
+        &self.year_level
+    }
+
+    /// 대학
+    pub fn college(&self) -> &str {
+        &self.college
+    }
+
+    /// 학부(과)
+    pub fn department(&self) -> &str {
+        &self.department
+    }
+
+    /// 전공
+    pub fn major(&self) -> &str {
+        &self.major
+    }
+
+    /// 조회일
+    pub fn audit_date(&self) -> &str {
+        &self.audit_date
+    }
+
+    /// 이수구분별 과목 성적 목록
+    pub fn grades(&self) -> &[ClassGradeItem] {
+        &self.grades
+    }
+}
+
+/// 이수구분별 개별 과목 성적
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
+pub struct ClassGradeItem {
+    /// 이수구분 (e.g., "교양필수", "전공선택")
+    classification: String,
+    /// 학년도
+    year: String,
+    /// 학기
+    semester: String,
+    /// 과목코드
+    course_code: String,
+    /// 과목명
+    course_name: String,
+    /// 학점
+    credits: String,
+    /// 성적 점수 (e.g., "100")
+    score: String,
+    /// 성적 등급 (e.g., "A+")
+    grade: String,
+    /// 비고
+    note: String,
+}
+
+impl ClassGradeItem {
+    /// 이수구분
+    pub fn classification(&self) -> &str {
+        &self.classification
+    }
+
+    /// 학년도
+    pub fn year(&self) -> &str {
+        &self.year
+    }
+
+    /// 학기
+    pub fn semester(&self) -> &str {
+        &self.semester
+    }
+
+    /// 과목코드
+    pub fn course_code(&self) -> &str {
+        &self.course_code
+    }
+
+    /// 과목명
+    pub fn course_name(&self) -> &str {
+        &self.course_name
+    }
+
+    /// 학점
+    pub fn credits(&self) -> &str {
+        &self.credits
+    }
+
+    /// 성적 점수
+    pub fn score(&self) -> &str {
+        &self.score
+    }
+
+    /// 성적 등급
+    pub fn grade(&self) -> &str {
+        &self.grade
+    }
+
+    /// 비고
+    pub fn note(&self) -> &str {
+        &self.note
+    }
+}
+
+use ozra::types::{DataSet, FieldValue};
+
+use crate::{ApplicationError, RusaintError};
+
+/// OZ DataModule row에서 주어진 필드명에 해당하는 값을 문자열로 추출합니다.
+fn get_string_field(row: &[(String, FieldValue)], field_name: &str) -> String {
+    row.iter()
+        .find(|(name, _)| name == field_name)
+        .map(|(_, val)| val.to_string_repr())
+        .unwrap_or_default()
+}
+
+/// OZ DataModule 응답에서 주어진 이름의 데이터셋 행들을 찾아 반환합니다.
+fn find_dataset<'a>(datasets: &'a [DataSet], name: &str) -> &'a [Vec<(String, FieldValue)>] {
+    datasets
+        .iter()
+        .find(|(n, _)| n == name)
+        .map(|(_, rows)| rows.as_slice())
+        .unwrap_or(&[])
+}
+
+impl GradesByClassification {
+    /// OZ DataModule의 데이터셋으로부터 [`GradesByClassification`]를 생성합니다.
+    pub fn from_datasets(datasets: &[DataSet]) -> Result<Self, RusaintError> {
+        // Shadow_master — 학생 정보 (1 row)
+        let master_rows = find_dataset(datasets, "Shadow_master");
+        let master = master_rows.first().ok_or_else(|| {
+            ApplicationError::OzDataFetchError(
+                "Shadow_master dataset is empty or missing in OZ response".to_string(),
+            )
+        })?;
+
+        let student_number = get_string_field(master, "ST_NO");
+        let student_name = get_string_field(master, "ST_NAME");
+        let year_level = get_string_field(master, "HUKNYUN").trim().to_string();
+        let college = get_string_field(master, "CLEG_O_STEXT");
+        let department = get_string_field(master, "SC_DEPT_STEXT");
+        let major = get_string_field(master, "SC_MAJO_STEXT");
+        let audit_date = get_string_field(master, "AUD_DATE");
+
+        // ITAB — 이수구분별 과목 성적
+        let grades: Vec<ClassGradeItem> = find_dataset(datasets, "ITAB")
+            .iter()
+            .map(|row| ClassGradeItem {
+                classification: get_string_field(row, "COMPL_TEXT"),
+                year: get_string_field(row, "PERYR"),
+                semester: get_string_field(row, "HUKGI"),
+                course_code: get_string_field(row, "SM_ID"),
+                course_name: get_string_field(row, "SM_TEXT"),
+                credits: get_string_field(row, "CPATTEMP"),
+                score: get_string_field(row, "GRADESYMBOL"),
+                grade: get_string_field(row, "GRADE"),
+                note: get_string_field(row, "BIGO"),
+            })
+            .collect();
+
+        Ok(Self {
+            student_number,
+            student_name,
+            year_level,
+            college,
+            department,
+            major,
+            audit_date,
+            grades,
+        })
+    }
+}

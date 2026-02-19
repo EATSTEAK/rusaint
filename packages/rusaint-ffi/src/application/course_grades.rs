@@ -1,7 +1,9 @@
 use std::{collections::HashMap, sync::Arc};
 
 use rusaint::{
-    application::course_grades::model::{ClassGrade, CourseType, GradeSummary, SemesterGrade},
+    application::course_grades::model::{
+        ClassGrade, CourseType, GradeSummary, GradesByClassification, SemesterGrade,
+    },
     model::SemesterType,
 };
 use tokio::sync::RwLock;
@@ -78,6 +80,19 @@ impl CourseGradesApplication {
             .write()
             .await
             .class_detail(course_type, year, semester, code)
+            .await?)
+    }
+
+    /// 이수구분별 성적 데이터를 OZ 서버에서 가져옵니다.
+    pub async fn grades_by_classification(
+        &self,
+        course_type: CourseType,
+    ) -> Result<GradesByClassification, RusaintError> {
+        Ok(self
+            .0
+            .write()
+            .await
+            .grades_by_classification(course_type)
             .await?)
     }
 

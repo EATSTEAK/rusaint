@@ -113,7 +113,7 @@ impl LectureSyllabus {
         // ET_PLAN — main syllabus info (1 row expected)
         let plan_rows = find_dataset(datasets, "ET_PLAN");
         let plan = plan_rows.first().ok_or_else(|| {
-            ApplicationError::SyllabusFetchError(
+            ApplicationError::OzDataFetchError(
                 "ET_PLAN dataset is empty or missing in OZ response".to_string(),
             )
         })?;
