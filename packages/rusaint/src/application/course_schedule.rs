@@ -552,14 +552,7 @@ impl<'app> CourseScheduleApplication {
                 field: format!("lecture with code {code}"),
             }))?;
 
-        self.client.process_event(false, activate_event).await?;
-
-        let parser = ElementParser::new(self.body());
-        let detail = LectureDetail::with_parser(&parser)?;
-
-        close_popups(&mut self.client).await?;
-
-        Ok(detail)
+        self.process_detail_event(activate_event).await
     }
 
     /// 주어진 과목번호에 해당하는 강의의 강의계획서(syllabus) 데이터를 OZ 서버에서 가져옵니다.
@@ -567,27 +560,7 @@ impl<'app> CourseScheduleApplication {
     /// 강의계획서가 없는 강의의 경우 에러를 반환합니다.
     pub async fn lecture_syllabus(&mut self, code: &str) -> Result<LectureSyllabus, RusaintError> {
         let activate_event = self.find_syllabus_activate_event(code)?;
-        let script_calls = self.send_syllabus_event(activate_event).await?;
-
-        close_popups(&mut self.client).await?;
-
-        let oz_url = extract_oz_url_from_script_calls(&script_calls)?;
-        let mut oz_params = parse_oz_url_params(&oz_url)?;
-
-        if let Some(uname) = oz_params
-            .params
-            .iter()
-            .find(|(k, _)| k == "UNAME")
-            .map(|(_, v)| v.clone())
-        {
-            if !oz_params.params.iter().any(|(k, _)| k == "arg4") {
-                oz_params.params.push(("arg4".to_string(), uname));
-            }
-        }
-
-        let response = fetch_data_module(&oz_params).await?;
-        let syllabus = LectureSyllabus::from_datasets(&response.datasets)?;
-        Ok(syllabus)
+        self.process_syllabus_event(activate_event).await
     }
 
     fn find_syllabus_activate_event(&self, code: &str) -> Result<Event, RusaintError> {
@@ -684,7 +657,7 @@ impl<'app> CourseScheduleApplication {
             .await?;
         let row_count = self.get_table_row_count()?;
         let mut processed_count: usize = 0;
-        let mut results: Vec<DetailedLecture> = Vec::new();
+        let mut results: Vec<DetailedLecture> = Vec::with_capacity(row_count);
 
         while processed_count < row_count {
             let lectures_with_events = {
@@ -699,7 +672,7 @@ impl<'app> CourseScheduleApplication {
                     .titles(&parser)?;
                 let code_col_idx = Self::find_column_index(&titles, "과목번호")?;
                 let syllabus_col_idx = if fetch_syllabus {
-                    Some(Self::find_column_index(&titles, "강의계획서").unwrap_or(0))
+                    Some(Self::find_column_index(&titles, "강의계획서")?)
                 } else {
                     None
                 };
@@ -788,7 +761,7 @@ impl<'app> CourseScheduleApplication {
                         .titles(&parser)?;
                     let code_col_idx = Self::find_column_index(&titles, "과목번호")?;
                     let syllabus_col_idx = if fetch_syllabus {
-                        Some(Self::find_column_index(&titles, "강의계획서").unwrap_or(0))
+                        Some(Self::find_column_index(&titles, "강의계획서")?)
                     } else {
                         None
                     };
