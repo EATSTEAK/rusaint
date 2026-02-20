@@ -1,4 +1,4 @@
-use crate::application::course_schedule::model::{LectureDetail, LectureSyllabus};
+use crate::application::course_schedule::model::{DetailedLecture, LectureDetail, LectureSyllabus};
 use crate::application::course_schedule::utils::{
     combo_box_items, select_lv1, select_lv2, select_tab,
 };
@@ -21,14 +21,17 @@ use wdpe::element::parser::ElementParser;
 use wdpe::state::EventProcessResult;
 use wdpe::{
     body::Body,
-    command::element::{complex::SapTableBodyCommand, selection::ComboBoxSelectEventCommand},
+    command::element::{
+        complex::{SapTableBodyCommand, SapTableLSDataCommand, SapTableVerticalScrollEventCommand},
+        selection::ComboBoxSelectEventCommand,
+    },
     define_elements,
     element::{
         ElementDefWrapper,
         complex::{
             SapTable,
             sap_table::{
-                SapTableRow,
+                FromSapTable, SapTableRow,
                 cell::{SapTableCell, SapTableCellWrapper},
             },
         },
@@ -367,13 +370,12 @@ impl<'app> CourseScheduleApplication {
         Ok(combo_box_items(&mut self.client, COMBO_UNMA)?)
     }
 
-    /// 학기, 학년도, 강의 분류를 통해 강의를 찾습니다.
-    pub async fn find_lectures(
+    async fn setup_lecture_search(
         &mut self,
         year: u32,
         semester: SemesterType,
         lecture_category: &LectureCategory,
-    ) -> Result<impl Iterator<Item = Lecture>, RusaintError> {
+    ) -> Result<(), RusaintError> {
         {
             let parser = ElementParser::new(self.body());
             let year_str = format!("{year}");
@@ -386,10 +388,123 @@ impl<'app> CourseScheduleApplication {
         if is_sap_table_empty(&table, &parser) {
             return Err(ApplicationError::NoLectureResult.into());
         }
+        Ok(())
+    }
+
+    fn get_table_row_count(&self) -> Result<usize, WebDynproError> {
+        let parser = ElementParser::new(self.body());
+        let row_count: usize = parser
+            .read(SapTableLSDataCommand::new(Self::MAIN_TABLE))?
+            .row_count()
+            .map(|u| u.to_owned())
+            .ok_or_else(|| ElementError::NoSuchData {
+                element: Self::MAIN_TABLE.id().to_string(),
+                field: "row_count".to_string(),
+            })?
+            .try_into()
+            .unwrap();
+        Ok(row_count)
+    }
+
+    fn extract_detail_event_from_row(
+        row: &SapTableRow,
+        code_col_idx: usize,
+        parser: &ElementParser,
+    ) -> Option<Event> {
+        let cell = SapTableCellWrapper::from_def(&row[code_col_idx], parser).ok()?;
+        if let Some(ElementDefWrapper::Link(link_def)) = cell.content() {
+            let link = parser.element_from_def(&link_def).ok()?;
+            link.activate(false, false).ok()
+        } else {
+            None
+        }
+    }
+
+    fn extract_syllabus_event_from_row(
+        row: &SapTableRow,
+        syllabus_col_idx: usize,
+        parser: &ElementParser,
+    ) -> Option<Event> {
+        let cell = SapTableCellWrapper::from_def(&row[syllabus_col_idx], parser).ok()?;
+        match cell.content() {
+            Some(ElementDefWrapper::Link(link_def)) => parser
+                .element_from_def(&link_def)
+                .ok()?
+                .activate(false, false)
+                .ok(),
+            Some(ElementDefWrapper::Button(btn_def)) => {
+                parser.element_from_def(&btn_def).ok()?.press().ok()
+            }
+            _ => None,
+        }
+    }
+
+    async fn process_detail_event(
+        &mut self,
+        activate_event: Event,
+    ) -> Result<LectureDetail, RusaintError> {
+        self.client.process_event(false, activate_event).await?;
+        let parser = ElementParser::new(self.body());
+        let detail = LectureDetail::with_parser(&parser)?;
+        close_popups(&mut self.client).await?;
+        Ok(detail)
+    }
+
+    async fn process_syllabus_event(
+        &mut self,
+        activate_event: Event,
+    ) -> Result<LectureSyllabus, RusaintError> {
+        let script_calls = self.send_syllabus_event(activate_event).await?;
+        close_popups(&mut self.client).await?;
+
+        let oz_url = extract_oz_url_from_script_calls(&script_calls)?;
+        let mut oz_params = parse_oz_url_params(&oz_url)?;
+
+        if let Some(uname) = oz_params
+            .params
+            .iter()
+            .find(|(k, _)| k == "UNAME")
+            .map(|(_, v)| v.clone())
+        {
+            if !oz_params.params.iter().any(|(k, _)| k == "arg4") {
+                oz_params.params.push(("arg4".to_string(), uname));
+            }
+        }
+
+        let response = fetch_data_module(&oz_params).await?;
+        let syllabus = LectureSyllabus::from_datasets(&response.datasets)?;
+        Ok(syllabus)
+    }
+
+    async fn scroll_table_to(&mut self, position: usize) -> Result<(), WebDynproError> {
+        let parser = ElementParser::new(self.body());
+        let event = parser.read(SapTableVerticalScrollEventCommand::new(
+            Self::MAIN_TABLE,
+            position.try_into().unwrap(),
+            "",
+            "SCROLLBAR",
+            false,
+            false,
+            false,
+            false,
+        ))?;
+        self.client.process_event(false, event).await?;
+        Ok(())
+    }
+
+    /// 학기, 학년도, 강의 분류를 통해 강의를 찾습니다.
+    pub async fn find_lectures(
+        &mut self,
+        year: u32,
+        semester: SemesterType,
+        lecture_category: &LectureCategory,
+    ) -> Result<impl Iterator<Item = Lecture>, RusaintError> {
+        self.setup_lecture_search(year, semester, lecture_category)
+            .await?;
+        let parser = ElementParser::new(self.body());
         let lectures =
             try_table_into_with_scroll::<Lecture>(&mut self.client, parser, Self::MAIN_TABLE)
                 .await?;
-
         Ok(lectures.into_iter())
     }
 
@@ -437,14 +552,7 @@ impl<'app> CourseScheduleApplication {
                 field: format!("lecture with code {code}"),
             }))?;
 
-        self.client.process_event(false, activate_event).await?;
-
-        let parser = ElementParser::new(self.body());
-        let detail = LectureDetail::with_parser(&parser)?;
-
-        close_popups(&mut self.client).await?;
-
-        Ok(detail)
+        self.process_detail_event(activate_event).await
     }
 
     /// 주어진 과목번호에 해당하는 강의의 강의계획서(syllabus) 데이터를 OZ 서버에서 가져옵니다.
@@ -452,27 +560,7 @@ impl<'app> CourseScheduleApplication {
     /// 강의계획서가 없는 강의의 경우 에러를 반환합니다.
     pub async fn lecture_syllabus(&mut self, code: &str) -> Result<LectureSyllabus, RusaintError> {
         let activate_event = self.find_syllabus_activate_event(code)?;
-        let script_calls = self.send_syllabus_event(activate_event).await?;
-
-        close_popups(&mut self.client).await?;
-
-        let oz_url = extract_oz_url_from_script_calls(&script_calls)?;
-        let mut oz_params = parse_oz_url_params(&oz_url)?;
-
-        if let Some(uname) = oz_params
-            .params
-            .iter()
-            .find(|(k, _)| k == "UNAME")
-            .map(|(_, v)| v.clone())
-        {
-            if !oz_params.params.iter().any(|(k, _)| k == "arg4") {
-                oz_params.params.push(("arg4".to_string(), uname));
-            }
-        }
-
-        let response = fetch_data_module(&oz_params).await?;
-        let syllabus = LectureSyllabus::from_datasets(&response.datasets)?;
-        Ok(syllabus)
+        self.process_syllabus_event(activate_event).await
     }
 
     fn find_syllabus_activate_event(&self, code: &str) -> Result<Event, RusaintError> {
@@ -551,6 +639,183 @@ impl<'app> CourseScheduleApplication {
                 "Syllabus button click event was enqueued but not sent to server".to_string(),
             )
             .into()),
+        }
+    }
+
+    /// 검색된 모든 강의의 상세 정보와 강의계획서를 함께 조회합니다.
+    /// 테이블 스크롤을 자동으로 수행합니다.
+    /// `fetch_syllabus`가 `true`이면 강의계획서도 함께 조회합니다.
+    /// 강의계획서가 없는 강의의 경우 `syllabus` 필드가 `None`이 되며, 그 외 조회 오류는 에러로 전파됩니다.
+    pub async fn find_detailed_lectures(
+        &mut self,
+        year: u32,
+        semester: SemesterType,
+        lecture_category: &LectureCategory,
+        fetch_syllabus: bool,
+    ) -> Result<Vec<DetailedLecture>, RusaintError> {
+        self.setup_lecture_search(year, semester, lecture_category)
+            .await?;
+        let row_count = self.get_table_row_count()?;
+        let mut processed_count: usize = 0;
+        let mut results: Vec<DetailedLecture> = Vec::with_capacity(row_count);
+
+        while processed_count < row_count {
+            let lectures_with_events = {
+                let parser = ElementParser::new(self.body());
+                let table_body = parser.read(SapTableBodyCommand::new(Self::MAIN_TABLE))?;
+                let header = table_body.header();
+                let titles = header
+                    .ok_or(WebDynproError::from(ElementError::NoSuchContent {
+                        element: Self::MAIN_TABLE.id().to_string(),
+                        content: "Header of table".to_string(),
+                    }))?
+                    .titles(&parser)?;
+                let code_col_idx = Self::find_column_index(&titles, "과목번호")?;
+                let syllabus_col_idx = if fetch_syllabus {
+                    Some(Self::find_column_index(&titles, "강의계획서")?)
+                } else {
+                    None
+                };
+
+                let visible: Vec<_> = table_body
+                    .iter()
+                    .filter_map(|row| {
+                        let lecture =
+                            Lecture::from_table(table_body.header(), row, &parser).ok()?;
+                        let detail_event =
+                            Self::extract_detail_event_from_row(row, code_col_idx, &parser);
+                        let syllabus_event = syllabus_col_idx.and_then(|idx| {
+                            Self::extract_syllabus_event_from_row(row, idx, &parser)
+                        });
+                        Some((lecture, detail_event, syllabus_event))
+                    })
+                    .collect();
+                visible
+            };
+
+            let remaining = row_count - processed_count;
+            let skip_count = if lectures_with_events.len() > remaining {
+                lectures_with_events.len() - remaining
+            } else {
+                0
+            };
+
+            for (lecture, detail_event, syllabus_event) in
+                lectures_with_events.into_iter().skip(skip_count)
+            {
+                let detail = if let Some(event) = detail_event {
+                    Some(self.process_detail_event(event).await?)
+                } else {
+                    None
+                };
+
+                let syllabus = if let Some(event) = syllabus_event {
+                    Some(self.process_syllabus_event(event).await?)
+                } else {
+                    None
+                };
+
+                results.push(DetailedLecture {
+                    lecture,
+                    detail,
+                    syllabus,
+                });
+                processed_count += 1;
+            }
+
+            if processed_count < row_count {
+                self.scroll_table_to(processed_count).await?;
+            }
+        }
+
+        Ok(results)
+    }
+
+    /// 검색된 모든 강의의 상세 정보와 강의계획서를 async stream으로 조회합니다.
+    /// 테이블 스크롤을 자동으로 수행합니다.
+    /// `fetch_syllabus`가 `true`이면 강의계획서도 함께 조회합니다.
+    /// 강의계획서가 없는 강의의 경우 `syllabus` 필드가 `None`이 되며, 그 외 조회 오류는 `Err`를 yield하고 stream이 종료됩니다.
+    #[cfg(feature = "stream")]
+    pub fn find_detailed_lectures_stream<'a>(
+        &'a mut self,
+        year: u32,
+        semester: SemesterType,
+        lecture_category: &'a LectureCategory,
+        fetch_syllabus: bool,
+    ) -> impl futures_core::Stream<Item = Result<DetailedLecture, RusaintError>> + 'a {
+        async_stream::try_stream! {
+            self.setup_lecture_search(year, semester, lecture_category).await?;
+            let row_count = self.get_table_row_count()?;
+            let mut processed_count: usize = 0;
+
+            while processed_count < row_count {
+                let lectures_with_events = {
+                    let parser = ElementParser::new(self.body());
+                    let table_body = parser.read(SapTableBodyCommand::new(Self::MAIN_TABLE))?;
+                    let header = table_body.header();
+                    let titles = header
+                        .ok_or(WebDynproError::from(ElementError::NoSuchContent {
+                            element: Self::MAIN_TABLE.id().to_string(),
+                            content: "Header of table".to_string(),
+                        }))?
+                        .titles(&parser)?;
+                    let code_col_idx = Self::find_column_index(&titles, "과목번호")?;
+                    let syllabus_col_idx = if fetch_syllabus {
+                        Some(Self::find_column_index(&titles, "강의계획서")?)
+                    } else {
+                        None
+                    };
+
+                    let visible: Vec<_> = table_body
+                        .iter()
+                        .filter_map(|row| {
+                            let lecture =
+                                Lecture::from_table(table_body.header(), row, &parser).ok()?;
+                            let detail_event =
+                                Self::extract_detail_event_from_row(row, code_col_idx, &parser);
+                            let syllabus_event = syllabus_col_idx.and_then(|idx| {
+                                Self::extract_syllabus_event_from_row(row, idx, &parser)
+                            });
+                            Some((lecture, detail_event, syllabus_event))
+                        })
+                        .collect();
+                    visible
+                };
+
+                let remaining = row_count - processed_count;
+                let skip_count = if lectures_with_events.len() > remaining {
+                    lectures_with_events.len() - remaining
+                } else {
+                    0
+                };
+
+                for (lecture, detail_event, syllabus_event) in
+                    lectures_with_events.into_iter().skip(skip_count)
+                {
+                    let detail = if let Some(event) = detail_event {
+                        Some(self.process_detail_event(event).await?)
+                    } else {
+                        None
+                    };
+
+                    let syllabus = if let Some(event) = syllabus_event {
+                        Some(self.process_syllabus_event(event).await?)
+                    } else {
+                        None
+                    };
+
+                    yield DetailedLecture {
+                        lecture,
+                        detail,
+                        syllabus,
+                    };
+                    processed_count += 1;
+                }
+
+                if processed_count < row_count {
+                    self.scroll_table_to(processed_count).await?;
+                }
+            }
         }
     }
 
