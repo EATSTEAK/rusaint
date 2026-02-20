@@ -16,6 +16,7 @@ readme.workspace = true
 default = ["application", "element"]
 element = ["dep:scraper"]
 application = ["element"]
+stream = ["dep:async-stream", "dep:futures-core"]
 uniffi = ["dep:uniffi", "application"]
 
 [dependencies]
@@ -45,6 +46,8 @@ cookie_store = "0.22"
 tracing = "0.1.41"
 wdpe = { version = "0.4.1", features = ["reqwest"] }
 ozra = { version = "0.0.1" }
+async-stream = { version = "0.3", optional = true }
+futures-core = { version = "0.3", optional = true }
 
 [dev-dependencies]
 anyhow = "1"
