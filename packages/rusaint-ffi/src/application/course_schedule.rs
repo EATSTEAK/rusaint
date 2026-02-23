@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use rusaint::{
     application::course_schedule::model::{
-        Lecture, LectureCategory, LectureDetail, LectureSyllabus,
+        DetailedLecture, Lecture, LectureCategory, LectureDetail, LectureSyllabus,
     },
     model::SemesterType,
 };
@@ -193,6 +193,25 @@ impl CourseScheduleApplication {
     /// 강의계획서가 없는 강의의 경우 에러를 반환합니다.
     pub async fn lecture_syllabus(&self, code: &str) -> Result<LectureSyllabus, RusaintError> {
         Ok(self.0.write().await.lecture_syllabus(code).await?)
+    }
+
+    /// 검색된 모든 강의의 상세 정보와 강의계획서를 함께 조회합니다.
+    /// 테이블 스크롤을 자동으로 수행합니다.
+    /// `fetch_syllabus`가 `true`이면 강의계획서도 함께 조회합니다.
+    /// 강의계획서가 없는 강의의 경우 `syllabus` 필드가 `None`이 되며, 그 외 조회 오류는 에러로 전파됩니다.
+    pub async fn find_detailed_lectures(
+        &self,
+        year: u32,
+        semester: SemesterType,
+        lecture_category: &LectureCategory,
+        fetch_syllabus: bool,
+    ) -> Result<Vec<DetailedLecture>, RusaintError> {
+        Ok(self
+            .0
+            .write()
+            .await
+            .find_detailed_lectures(year, semester, lecture_category, fetch_syllabus)
+            .await?)
     }
 
     /// 페이지를 새로고침합니다.

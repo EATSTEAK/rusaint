@@ -590,6 +590,18 @@ impl Default for LectureCategoryBuilder {
     }
 }
 
+/// 강의 검색 결과와 상세 정보, 강의계획서를 함께 담는 구조체
+#[derive(Debug, Serialize, Deserialize)]
+#[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
+pub struct DetailedLecture {
+    /// 강의 기본 정보
+    pub lecture: Lecture,
+    /// 강의 상세 정보 (상세 정보 링크가 없는 경우 `None`)
+    pub detail: Option<LectureDetail>,
+    /// 강의계획서 (조회하지 않았거나 강의계획서가 없는 강의의 경우 `None`)
+    pub syllabus: Option<LectureSyllabus>,
+}
+
 mod detail;
 mod syllabus;
 
