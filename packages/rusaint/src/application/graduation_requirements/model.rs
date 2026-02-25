@@ -126,6 +126,7 @@ impl GraduationStudent {
 
 #[derive(Debug)]
 #[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
+#[derive(Serialize, Deserialize)]
 /// 전체 졸업 요건 정보
 pub struct GraduationRequirements {
     is_graduatable: bool,

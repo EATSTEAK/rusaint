@@ -39,7 +39,7 @@ jobs:
         if: steps.changes.outputs.version == 'true'
         run: cargo publish -p rusaint --dry-run --verbose
       - name: Generate session
-        run: cargo run -p rusaint-session-helper >> ./packages/rusaint/session.json
+        run: cargo run -p rusaint-cli -- create-session -o ./packages/rusaint/session.json
       - name: Generate code coverage
         env:
           RUST_LOG: info

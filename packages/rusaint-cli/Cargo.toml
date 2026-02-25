@@ -2,7 +2,7 @@
 name = "rusaint-cli"
 version.workspace = true
 authors = ["JOONGGON LEE <2wndrhs@gmail.com>", "Hyomin Koo <me@eatsteak.dev>"]
-description = "CLI for fetching course schedules"
+description = "CLI for rusaint"
 repository = "https://github.com/eatsteak/rusaint"
 readme = "README.md"
 license.workspace = true
