@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{path::Path, sync::Arc};
 
 use clap::Subcommand;
 use rusaint::{
@@ -6,7 +6,7 @@ use rusaint::{
 };
 
 use crate::{
-    output::write_json,
+    output::{OutputFormat, write_output},
     types::{CourseType, SemesterType},
 };
 
@@ -62,6 +62,8 @@ pub enum GradesCommands {
 pub async fn execute(
     session: Arc<USaintSession>,
     command: GradesCommands,
+    format: &OutputFormat,
+    output: Option<&Path>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let mut app = USaintClientBuilder::new()
         .session(session)
@@ -71,19 +73,19 @@ pub async fn execute(
     match command {
         GradesCommands::RecordedSummary { course_type } => {
             let result = app.recorded_summary(*course_type).await?;
-            write_json("grades_recorded_summary", &result)?;
+            write_output(format, output, &result)?;
         }
         GradesCommands::CertificatedSummary { course_type } => {
             let result = app.certificated_summary(*course_type).await?;
-            write_json("grades_certificated_summary", &result)?;
+            write_output(format, output, &result)?;
         }
         GradesCommands::ByClassification { course_type } => {
             let result = app.grades_by_classification(*course_type).await?;
-            write_json("grades_by_classification", &result)?;
+            write_output(format, output, &result)?;
         }
         GradesCommands::Semesters { course_type } => {
             let result = app.semesters(*course_type).await?;
-            write_json("grades_semesters", &result)?;
+            write_output(format, output, &result)?;
         }
         GradesCommands::Classes {
             course_type,
@@ -94,7 +96,7 @@ pub async fn execute(
             let result = app
                 .classes(*course_type, year, *semester, include_details)
                 .await?;
-            write_json(&format!("grades_classes_{year}_{semester}"), &result)?;
+            write_output(format, output, &result)?;
         }
         GradesCommands::ClassDetail {
             course_type,
@@ -105,10 +107,7 @@ pub async fn execute(
             let result = app
                 .class_detail(*course_type, year, *semester, &code)
                 .await?;
-            write_json(
-                &format!("grades_class_detail_{year}_{semester}_{code}"),
-                &result,
-            )?;
+            write_output(format, output, &result)?;
         }
     }
 

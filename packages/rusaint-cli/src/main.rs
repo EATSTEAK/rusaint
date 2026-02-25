@@ -7,6 +7,7 @@ use std::path::PathBuf;
 
 use clap::Parser;
 use commands::Commands;
+use output::OutputFormat;
 
 #[derive(Parser)]
 #[command(name = "rusaint-cli")]
@@ -19,6 +20,14 @@ struct Cli {
     /// .env 파일 경로. 지정 시 해당 파일에서 환경변수를 로드
     #[arg(long, global = true)]
     env_file: Option<PathBuf>,
+
+    /// 출력 포맷 (human 또는 json)
+    #[arg(long, global = true, default_value = "human")]
+    format: OutputFormat,
+
+    /// 결과 출력 파일 경로. 미지정 시 stdout 출력
+    #[arg(short, long, global = true)]
+    output: Option<PathBuf>,
 
     #[command(subcommand)]
     command: Commands,
@@ -39,45 +48,48 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         dotenvy::dotenv().ok();
     }
 
+    let format = &cli.format;
+    let output = cli.output.as_deref();
+
     match cli.command {
         Commands::CreateSession(args) => {
             commands::create_session::execute(args).await?;
         }
         Commands::CourseSchedule { command } => {
             let session = session::get_session(cli.session_file.as_deref()).await?;
-            commands::course_schedule::execute(session, command).await?;
+            commands::course_schedule::execute(session, command, format, output).await?;
         }
         Commands::StudentInfo { command } => {
             let session = session::get_session(cli.session_file.as_deref()).await?;
-            commands::student_info::execute(session, command).await?;
+            commands::student_info::execute(session, command, format, output).await?;
         }
         Commands::Grades { command } => {
             let session = session::get_session(cli.session_file.as_deref()).await?;
-            commands::grades::execute(session, command).await?;
+            commands::grades::execute(session, command, format, output).await?;
         }
         Commands::ChapelInfo { command } => {
             let session = session::get_session(cli.session_file.as_deref()).await?;
-            commands::chapel::execute(session, command).await?;
+            commands::chapel::execute(session, command, format, output).await?;
         }
         Commands::Registration { command } => {
             let session = session::get_session(cli.session_file.as_deref()).await?;
-            commands::registration::execute(session, command).await?;
+            commands::registration::execute(session, command, format, output).await?;
         }
         Commands::Graduation { command } => {
             let session = session::get_session(cli.session_file.as_deref()).await?;
-            commands::graduation::execute(session, command).await?;
+            commands::graduation::execute(session, command, format, output).await?;
         }
         Commands::Assessment { command } => {
             let session = session::get_session(cli.session_file.as_deref()).await?;
-            commands::assessment::execute(session, command).await?;
+            commands::assessment::execute(session, command, format, output).await?;
         }
         Commands::PersonalSchedule { command } => {
             let session = session::get_session(cli.session_file.as_deref()).await?;
-            commands::personal_schedule::execute(session, command).await?;
+            commands::personal_schedule::execute(session, command, format, output).await?;
         }
         Commands::Scholarships { command } => {
             let session = session::get_session(cli.session_file.as_deref()).await?;
-            commands::scholarships::execute(session, command).await?;
+            commands::scholarships::execute(session, command, format, output).await?;
         }
     }
 

@@ -1,9 +1,12 @@
-use std::sync::Arc;
+use std::{path::Path, sync::Arc};
 
 use clap::Subcommand;
 use rusaint::{USaintSession, application::chapel::ChapelApplication, client::USaintClientBuilder};
 
-use crate::{output::write_json, types::SemesterType};
+use crate::{
+    output::{OutputFormat, write_output},
+    types::SemesterType,
+};
 
 #[derive(Subcommand)]
 pub enum ChapelCommands {
@@ -19,6 +22,8 @@ pub enum ChapelCommands {
 pub async fn execute(
     session: Arc<USaintSession>,
     command: ChapelCommands,
+    format: &OutputFormat,
+    output: Option<&Path>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let mut app = USaintClientBuilder::new()
         .session(session)
@@ -28,7 +33,7 @@ pub async fn execute(
     match command {
         ChapelCommands::Information { year, semester } => {
             let result = app.information(year, *semester).await?;
-            write_json(&format!("chapel_{year}_{semester}"), &result)?;
+            write_output(format, output, &result)?;
         }
     }
 

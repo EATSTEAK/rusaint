@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{path::Path, sync::Arc};
 
 use clap::Subcommand;
 use rusaint::{
@@ -6,7 +6,10 @@ use rusaint::{
     client::USaintClientBuilder,
 };
 
-use crate::{output::write_json, types::SemesterType};
+use crate::{
+    output::{OutputFormat, write_output},
+    types::SemesterType,
+};
 
 #[derive(Subcommand)]
 pub enum AssessmentCommands {
@@ -31,6 +34,8 @@ pub enum AssessmentCommands {
 pub async fn execute(
     session: Arc<USaintSession>,
     command: AssessmentCommands,
+    format: &OutputFormat,
+    output: Option<&Path>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let mut app = USaintClientBuilder::new()
         .session(session)
@@ -54,7 +59,7 @@ pub async fn execute(
                     professor_name.as_deref(),
                 )
                 .await?;
-            write_json(&format!("assessment_{year}_{semester}"), &result)?;
+            write_output(format, output, &result)?;
         }
     }
 

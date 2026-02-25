@@ -1,11 +1,11 @@
-use std::sync::Arc;
+use std::{path::Path, sync::Arc};
 
 use clap::Subcommand;
 use rusaint::{
     USaintSession, application::scholarships::ScholarshipsApplication, client::USaintClientBuilder,
 };
 
-use crate::output::write_json;
+use crate::output::{OutputFormat, write_output};
 
 #[derive(Subcommand)]
 pub enum ScholarshipsCommands {
@@ -16,6 +16,8 @@ pub enum ScholarshipsCommands {
 pub async fn execute(
     session: Arc<USaintSession>,
     command: ScholarshipsCommands,
+    format: &OutputFormat,
+    output: Option<&Path>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let mut app = USaintClientBuilder::new()
         .session(session)
@@ -25,7 +27,7 @@ pub async fn execute(
     match command {
         ScholarshipsCommands::List => {
             let result = app.scholarships().await?;
-            write_json("scholarships", &result)?;
+            write_output(format, output, &result)?;
         }
     }
 

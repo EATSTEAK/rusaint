@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{path::Path, sync::Arc};
 
 use clap::Subcommand;
 use rusaint::{
@@ -6,7 +6,7 @@ use rusaint::{
     client::USaintClientBuilder,
 };
 
-use crate::output::write_json;
+use crate::output::{OutputFormat, write_output};
 
 #[derive(Subcommand)]
 pub enum StudentInfoCommands {
@@ -35,6 +35,8 @@ pub enum StudentInfoCommands {
 pub async fn execute(
     session: Arc<USaintSession>,
     command: StudentInfoCommands,
+    format: &OutputFormat,
+    output: Option<&Path>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let mut app = USaintClientBuilder::new()
         .session(session)
@@ -44,43 +46,43 @@ pub async fn execute(
     match command {
         StudentInfoCommands::General => {
             let result = app.general()?;
-            write_json("student_general", &result)?;
+            write_output(format, output, &result)?;
         }
         StudentInfoCommands::Graduation => {
             let result = app.graduation()?;
-            write_json("student_graduation", &result)?;
+            write_output(format, output, &result)?;
         }
         StudentInfoCommands::Qualifications => {
             let result = app.qualifications()?;
-            write_json("student_qualifications", &result)?;
+            write_output(format, output, &result)?;
         }
         StudentInfoCommands::Work => {
             let result = app.work().await?;
-            write_json("student_work", &result)?;
+            write_output(format, output, &result)?;
         }
         StudentInfoCommands::Family => {
             let result = app.family().await?;
-            write_json("student_family", &result)?;
+            write_output(format, output, &result)?;
         }
         StudentInfoCommands::Religion => {
             let result = app.religion().await?;
-            write_json("student_religion", &result)?;
+            write_output(format, output, &result)?;
         }
         StudentInfoCommands::Transfer => {
             let result = app.transfer().await?;
-            write_json("student_transfer", &result)?;
+            write_output(format, output, &result)?;
         }
         StudentInfoCommands::BankAccount => {
             let result = app.bank_account().await?;
-            write_json("student_bank_account", &result)?;
+            write_output(format, output, &result)?;
         }
         StudentInfoCommands::AcademicRecord => {
             let result = app.academic_record().await?;
-            write_json("student_academic_record", &result)?;
+            write_output(format, output, &result)?;
         }
         StudentInfoCommands::ResearchBankAccount => {
             let result = app.research_bank_account().await?;
-            write_json("student_research_bank_account", &result)?;
+            write_output(format, output, &result)?;
         }
     }
 

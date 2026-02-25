@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{path::Path, sync::Arc};
 
 use clap::Subcommand;
 use rusaint::{
@@ -7,7 +7,10 @@ use rusaint::{
     client::USaintClientBuilder,
 };
 
-use crate::{output::write_json, types::SemesterType};
+use crate::{
+    output::{OutputFormat, write_output},
+    types::SemesterType,
+};
 
 #[derive(Subcommand)]
 pub enum CourseScheduleCommands {
@@ -180,13 +183,15 @@ pub enum CourseScheduleCommands {
 pub async fn execute(
     session: Arc<USaintSession>,
     command: CourseScheduleCommands,
+    format: &OutputFormat,
+    output: Option<&Path>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let mut app = USaintClientBuilder::new()
         .session(session)
         .build_into::<CourseScheduleApplication>()
         .await?;
 
-    let (year, semester, category, file_name, detailed, fetch_syllabus) = match &command {
+    let (year, semester, category, detailed, fetch_syllabus) = match &command {
         CourseScheduleCommands::ByLecture {
             year,
             semester,
@@ -197,7 +202,6 @@ pub async fn execute(
             *year,
             *semester,
             LectureCategory::find_by_lecture(keyword),
-            format!("{year}_{semester}_{keyword}"),
             *detailed,
             *fetch_syllabus,
         ),
@@ -209,21 +213,13 @@ pub async fn execute(
             major,
             detailed,
             fetch_syllabus,
-        } => {
-            let name = if let Some(m) = major {
-                format!("{year}_{semester}_{college}_{department}_{m}_전공")
-            } else {
-                format!("{year}_{semester}_{college}_{department}_전공")
-            };
-            (
-                *year,
-                *semester,
-                LectureCategory::major(college, department, major.as_deref()),
-                name,
-                *detailed,
-                *fetch_syllabus,
-            )
-        }
+        } => (
+            *year,
+            *semester,
+            LectureCategory::major(college, department, major.as_deref()),
+            *detailed,
+            *fetch_syllabus,
+        ),
         CourseScheduleCommands::RequiredElective {
             year,
             semester,
@@ -234,7 +230,6 @@ pub async fn execute(
             *year,
             *semester,
             LectureCategory::required_elective(course_name),
-            format!("{year}_{semester}_{course_name}_교양필수"),
             *detailed,
             *fetch_syllabus,
         ),
@@ -248,7 +243,6 @@ pub async fn execute(
             *year,
             *semester,
             LectureCategory::optional_elective(course_name),
-            format!("{year}_{semester}_{course_name}_교양선택"),
             *detailed,
             *fetch_syllabus,
         ),
@@ -262,7 +256,6 @@ pub async fn execute(
             *year,
             *semester,
             LectureCategory::chapel(chapel_name),
-            format!("{year}_{semester}_{chapel_name}_채플"),
             *detailed,
             *fetch_syllabus,
         ),
@@ -275,7 +268,6 @@ pub async fn execute(
             *year,
             *semester,
             LectureCategory::education(),
-            format!("{year}_{semester}_교직"),
             *detailed,
             *fetch_syllabus,
         ),
@@ -289,7 +281,6 @@ pub async fn execute(
             *year,
             *semester,
             LectureCategory::connected_major(major_name),
-            format!("{year}_{semester}_{major_name}_연계전공"),
             *detailed,
             *fetch_syllabus,
         ),
@@ -303,7 +294,6 @@ pub async fn execute(
             *year,
             *semester,
             LectureCategory::united_major(major_name),
-            format!("{year}_{semester}_{major_name}_융합전공"),
             *detailed,
             *fetch_syllabus,
         ),
@@ -315,21 +305,13 @@ pub async fn execute(
             major,
             detailed,
             fetch_syllabus,
-        } => {
-            let name = if let Some(m) = major {
-                format!("{year}_{semester}_{college}_{department}_{m}_타전공인정")
-            } else {
-                format!("{year}_{semester}_{college}_{department}_타전공인정")
-            };
-            (
-                *year,
-                *semester,
-                LectureCategory::recognized_other_major(college, department, major.as_deref()),
-                name,
-                *detailed,
-                *fetch_syllabus,
-            )
-        }
+        } => (
+            *year,
+            *semester,
+            LectureCategory::recognized_other_major(college, department, major.as_deref()),
+            *detailed,
+            *fetch_syllabus,
+        ),
         CourseScheduleCommands::Cyber {
             year,
             semester,
@@ -339,7 +321,6 @@ pub async fn execute(
             *year,
             *semester,
             LectureCategory::cyber(),
-            format!("{year}_{semester}_숭사대"),
             *detailed,
             *fetch_syllabus,
         ),
@@ -354,7 +335,6 @@ pub async fn execute(
             *year,
             *semester,
             LectureCategory::graduated(college, department),
-            format!("{year}_{semester}_{college}_{department}_대학원"),
             *detailed,
             *fetch_syllabus,
         ),
@@ -368,7 +348,6 @@ pub async fn execute(
             *year,
             *semester,
             LectureCategory::find_by_professor(keyword),
-            format!("{year}_{semester}_{keyword}_교수"),
             *detailed,
             *fetch_syllabus,
         ),
@@ -378,13 +357,13 @@ pub async fn execute(
         let lectures = app
             .find_detailed_lectures(year, *semester, &category, fetch_syllabus)
             .await?;
-        write_json(&file_name, &lectures)?;
+        write_output(format, output, &lectures)?;
     } else {
         let lectures: Vec<_> = app
             .find_lectures(year, *semester, &category)
             .await?
             .collect();
-        write_json(&file_name, &lectures)?;
+        write_output(format, output, &lectures)?;
     }
 
     Ok(())

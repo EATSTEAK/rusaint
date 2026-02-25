@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{path::Path, sync::Arc};
 
 use clap::Subcommand;
 use rusaint::{
@@ -6,7 +6,10 @@ use rusaint::{
     client::USaintClientBuilder,
 };
 
-use crate::{output::write_json, types::SemesterType};
+use crate::{
+    output::{OutputFormat, write_output},
+    types::SemesterType,
+};
 
 #[derive(Subcommand)]
 pub enum RegistrationCommands {
@@ -22,6 +25,8 @@ pub enum RegistrationCommands {
 pub async fn execute(
     session: Arc<USaintSession>,
     command: RegistrationCommands,
+    format: &OutputFormat,
+    output: Option<&Path>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let mut app = USaintClientBuilder::new()
         .session(session)
@@ -31,7 +36,7 @@ pub async fn execute(
     match command {
         RegistrationCommands::Lectures { year, semester } => {
             let lectures: Vec<_> = app.lectures(year, *semester).await?.collect();
-            write_json(&format!("registration_{year}_{semester}"), &lectures)?;
+            write_output(format, output, &lectures)?;
         }
     }
 

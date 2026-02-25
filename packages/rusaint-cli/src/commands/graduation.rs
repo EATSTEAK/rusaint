@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{path::Path, sync::Arc};
 
 use clap::Subcommand;
 use rusaint::{
@@ -6,7 +6,7 @@ use rusaint::{
     client::USaintClientBuilder,
 };
 
-use crate::output::write_json;
+use crate::output::{OutputFormat, write_output};
 
 #[derive(Subcommand)]
 pub enum GraduationCommands {
@@ -19,6 +19,8 @@ pub enum GraduationCommands {
 pub async fn execute(
     session: Arc<USaintSession>,
     command: GraduationCommands,
+    format: &OutputFormat,
+    output: Option<&Path>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let mut app = USaintClientBuilder::new()
         .session(session)
@@ -28,11 +30,11 @@ pub async fn execute(
     match command {
         GraduationCommands::StudentInfo => {
             let result = app.student_info().await?;
-            write_json("graduation_student_info", &result)?;
+            write_output(format, output, &result)?;
         }
         GraduationCommands::Requirements => {
             let result = app.requirements().await?;
-            write_json("graduation_requirements", &result)?;
+            write_output(format, output, &result)?;
         }
     }
 

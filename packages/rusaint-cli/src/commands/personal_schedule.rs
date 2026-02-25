@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{path::Path, sync::Arc};
 
 use clap::Subcommand;
 use rusaint::{
@@ -6,7 +6,10 @@ use rusaint::{
     client::USaintClientBuilder,
 };
 
-use crate::{output::write_json, types::SemesterType};
+use crate::{
+    output::{OutputFormat, write_output},
+    types::SemesterType,
+};
 
 #[derive(Subcommand)]
 pub enum PersonalScheduleCommands {
@@ -22,6 +25,8 @@ pub enum PersonalScheduleCommands {
 pub async fn execute(
     session: Arc<USaintSession>,
     command: PersonalScheduleCommands,
+    format: &OutputFormat,
+    output: Option<&Path>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let mut app = USaintClientBuilder::new()
         .session(session)
@@ -31,7 +36,7 @@ pub async fn execute(
     match command {
         PersonalScheduleCommands::Schedule { year, semester } => {
             let result = app.schedule(year, *semester).await?;
-            write_json(&format!("personal_schedule_{year}_{semester}"), &result)?;
+            write_output(format, output, &result)?;
         }
     }
 
