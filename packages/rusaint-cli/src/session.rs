@@ -1,9 +1,4 @@
-use std::{
-    fs::File,
-    io::BufReader,
-    path::Path,
-    sync::Arc,
-};
+use std::{fs::File, io::BufReader, path::Path, sync::Arc};
 
 use rusaint::USaintSession;
 
@@ -15,11 +10,11 @@ pub async fn get_session(
         let reader = BufReader::new(f);
         Ok(Arc::new(USaintSession::from_json(reader)?))
     } else {
-        dotenvy::dotenv().ok();
-        let id = std::env::var("SSO_ID")
-            .map_err(|_| "SSO_ID 환경변수가 설정되지 않았습니다.")?;
+        let id = std::env::var("SSO_ID").map_err(|_| "SSO_ID 환경변수가 설정되지 않았습니다.")?;
         let password = std::env::var("SSO_PASSWORD")
             .map_err(|_| "SSO_PASSWORD 환경변수가 설정되지 않았습니다.")?;
-        Ok(Arc::new(USaintSession::with_password(&id, &password).await?))
+        Ok(Arc::new(
+            USaintSession::with_password(&id, &password).await?,
+        ))
     }
 }

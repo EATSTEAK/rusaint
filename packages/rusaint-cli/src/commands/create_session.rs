@@ -11,11 +11,9 @@ pub struct CreateSessionArgs {
 }
 
 pub async fn execute(args: CreateSessionArgs) -> Result<(), Box<dyn std::error::Error>> {
-    dotenvy::dotenv().ok();
-    let id =
-        std::env::var("SSO_ID").map_err(|_| "SSO_ID 환경변수가 설정되지 않았습니다.")?;
-    let password =
-        std::env::var("SSO_PASSWORD").map_err(|_| "SSO_PASSWORD 환경변수가 설정되지 않았습니다.")?;
+    let id = std::env::var("SSO_ID").map_err(|_| "SSO_ID 환경변수가 설정되지 않았습니다.")?;
+    let password = std::env::var("SSO_PASSWORD")
+        .map_err(|_| "SSO_PASSWORD 환경변수가 설정되지 않았습니다.")?;
 
     let session = USaintSession::with_password(&id, &password).await?;
     let file = File::create(&args.output)?;
