@@ -123,6 +123,31 @@ jobs:
     uses: ./.github/workflows/python-release.yml
     secrets: inherit
 
+  release-python-publish:
+    name: Python Publish (PyPI)
+    runs-on: ubuntu-latest
+    needs: [release-crate, release-python]
+    if: needs.release-crate.outputs.should_release == 'true'
+    environment: release
+    permissions:
+      id-token: write
+      contents: write
+      attestations: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: wheels-*
+          merge-multiple: true
+          path: dist
+      - name: Generate artifact attestation
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: "dist/*"
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          skip-existing: true
+
   release-react-native:
     name: React Native (npm)
     needs: [release-crate]
