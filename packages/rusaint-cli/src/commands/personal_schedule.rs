@@ -2,8 +2,7 @@ use std::sync::Arc;
 
 use clap::Subcommand;
 use rusaint::{
-    USaintSession,
-    application::personal_course_schedule::PersonalCourseScheduleApplication,
+    USaintSession, application::personal_course_schedule::PersonalCourseScheduleApplication,
     client::USaintClientBuilder,
 };
 
@@ -32,10 +31,7 @@ pub async fn execute(
     match command {
         PersonalScheduleCommands::Schedule { year, semester } => {
             let result = app.schedule(year, *semester).await?;
-            write_json(
-                &format!("personal_schedule_{year}_{semester}"),
-                &result,
-            )?;
+            write_json(&format!("personal_schedule_{year}_{semester}"), &result)?;
         }
     }
 

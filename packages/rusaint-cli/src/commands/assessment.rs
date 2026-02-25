@@ -2,8 +2,7 @@ use std::sync::Arc;
 
 use clap::Subcommand;
 use rusaint::{
-    USaintSession,
-    application::lecture_assessment::LectureAssessmentApplication,
+    USaintSession, application::lecture_assessment::LectureAssessmentApplication,
     client::USaintClientBuilder,
 };
 
@@ -55,10 +54,7 @@ pub async fn execute(
                     professor_name.as_deref(),
                 )
                 .await?;
-            write_json(
-                &format!("assessment_{year}_{semester}"),
-                &result,
-            )?;
+            write_json(&format!("assessment_{year}_{semester}"), &result)?;
         }
     }
 

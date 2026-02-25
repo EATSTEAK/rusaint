@@ -2,12 +2,13 @@ use std::sync::Arc;
 
 use clap::Subcommand;
 use rusaint::{
-    USaintSession,
-    application::course_grades::CourseGradesApplication,
-    client::USaintClientBuilder,
+    USaintSession, application::course_grades::CourseGradesApplication, client::USaintClientBuilder,
 };
 
-use crate::{output::write_json, types::{CourseType, SemesterType}};
+use crate::{
+    output::write_json,
+    types::{CourseType, SemesterType},
+};
 
 #[derive(Subcommand)]
 pub enum GradesCommands {
@@ -93,10 +94,7 @@ pub async fn execute(
             let result = app
                 .classes(*course_type, year, *semester, include_details)
                 .await?;
-            write_json(
-                &format!("grades_classes_{year}_{semester}"),
-                &result,
-            )?;
+            write_json(&format!("grades_classes_{year}_{semester}"), &result)?;
         }
         GradesCommands::ClassDetail {
             course_type,
@@ -104,7 +102,9 @@ pub async fn execute(
             semester,
             code,
         } => {
-            let result = app.class_detail(*course_type, year, *semester, &code).await?;
+            let result = app
+                .class_detail(*course_type, year, *semester, &code)
+                .await?;
             write_json(
                 &format!("grades_class_detail_{year}_{semester}_{code}"),
                 &result,

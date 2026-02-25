@@ -1,11 +1,7 @@
 use std::sync::Arc;
 
 use clap::Subcommand;
-use rusaint::{
-    USaintSession,
-    application::chapel::ChapelApplication,
-    client::USaintClientBuilder,
-};
+use rusaint::{USaintSession, application::chapel::ChapelApplication, client::USaintClientBuilder};
 
 use crate::{output::write_json, types::SemesterType};
 

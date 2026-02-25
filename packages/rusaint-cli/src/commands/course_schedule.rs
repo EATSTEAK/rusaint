@@ -380,7 +380,10 @@ pub async fn execute(
             .await?;
         write_json(&file_name, &lectures)?;
     } else {
-        let lectures: Vec<_> = app.find_lectures(year, *semester, &category).await?.collect();
+        let lectures: Vec<_> = app
+            .find_lectures(year, *semester, &category)
+            .await?
+            .collect();
         write_json(&file_name, &lectures)?;
     }
 

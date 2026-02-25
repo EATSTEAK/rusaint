@@ -2,9 +2,7 @@ use std::sync::Arc;
 
 use clap::Subcommand;
 use rusaint::{
-    USaintSession,
-    application::scholarships::ScholarshipsApplication,
-    client::USaintClientBuilder,
+    USaintSession, application::scholarships::ScholarshipsApplication, client::USaintClientBuilder,
 };
 
 use crate::output::write_json;

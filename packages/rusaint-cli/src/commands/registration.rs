@@ -2,8 +2,7 @@ use std::sync::Arc;
 
 use clap::Subcommand;
 use rusaint::{
-    USaintSession,
-    application::course_registration_status::CourseRegistrationStatusApplication,
+    USaintSession, application::course_registration_status::CourseRegistrationStatusApplication,
     client::USaintClientBuilder,
 };
 
@@ -32,10 +31,7 @@ pub async fn execute(
     match command {
         RegistrationCommands::Lectures { year, semester } => {
             let lectures: Vec<_> = app.lectures(year, *semester).await?.collect();
-            write_json(
-                &format!("registration_{year}_{semester}"),
-                &lectures,
-            )?;
+            write_json(&format!("registration_{year}_{semester}"), &lectures)?;
         }
     }
 

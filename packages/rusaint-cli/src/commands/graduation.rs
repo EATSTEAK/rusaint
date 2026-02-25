@@ -2,8 +2,7 @@ use std::sync::Arc;
 
 use clap::Subcommand;
 use rusaint::{
-    USaintSession,
-    application::graduation_requirements::GraduationRequirementsApplication,
+    USaintSession, application::graduation_requirements::GraduationRequirementsApplication,
     client::USaintClientBuilder,
 };
 
