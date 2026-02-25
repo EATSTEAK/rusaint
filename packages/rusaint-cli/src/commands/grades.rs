@@ -15,27 +15,27 @@ pub enum GradesCommands {
     /// 전체 학기 성적 요약 (기록부 기준)
     RecordedSummary {
         /// 과정 구분
-        #[arg(short = 't', long)]
+        #[arg(short = 't', long, default_value = "bachelor")]
         course_type: CourseType,
     },
     /// 전체 학기 성적 요약 (증명서 기준)
     CertificatedSummary {
-        #[arg(short = 't', long)]
+        #[arg(short = 't', long, default_value = "bachelor")]
         course_type: CourseType,
     },
     /// 이수구분별 성적 조회
     ByClassification {
-        #[arg(short = 't', long)]
+        #[arg(short = 't', long, default_value = "bachelor")]
         course_type: CourseType,
     },
     /// 학기별 성적 목록
     Semesters {
-        #[arg(short = 't', long)]
+        #[arg(short = 't', long, default_value = "bachelor")]
         course_type: CourseType,
     },
     /// 과목별 성적 목록
     Classes {
-        #[arg(short = 't', long)]
+        #[arg(short = 't', long, default_value = "bachelor")]
         course_type: CourseType,
         #[arg(short = 'y', long)]
         year: u32,
@@ -47,7 +47,7 @@ pub enum GradesCommands {
     },
     /// 개별 과목 성적 상세
     ClassDetail {
-        #[arg(short = 't', long)]
+        #[arg(short = 't', long, default_value = "bachelor")]
         course_type: CourseType,
         #[arg(short = 'y', long)]
         year: u32,
