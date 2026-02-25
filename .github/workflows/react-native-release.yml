@@ -139,4 +139,4 @@ jobs:
       - name: Publish to npm
         if: steps.check_version.outputs.should_release == 'true'
         working-directory: languages/react-native
-        run: npm publish --access public --provenance
+        run: npm publish --access public --scope @rusaint --provenance
