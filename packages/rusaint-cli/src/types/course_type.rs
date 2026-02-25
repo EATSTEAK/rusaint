@@ -1,13 +1,14 @@
 use std::{fmt::Display, ops::Deref, str::FromStr};
 
 use clap::ValueEnum;
+use rusaint::application::course_grades::model::CourseType as RusaintCourseType;
 use thiserror::Error;
 
 #[derive(Debug, Clone, Copy)]
-pub struct CourseType(rusaint::application::course_grades::model::CourseType);
+pub struct CourseType(RusaintCourseType);
 
 impl Deref for CourseType {
-    type Target = rusaint::application::course_grades::model::CourseType;
+    type Target = RusaintCourseType;
 
     fn deref(&self) -> &Self::Target {
         &self.0
@@ -17,11 +18,11 @@ impl Deref for CourseType {
 impl Display for CourseType {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         let name = match self.0 {
-            rusaint::application::course_grades::model::CourseType::Bachelor => "학사",
-            rusaint::application::course_grades::model::CourseType::Master => "석사",
-            rusaint::application::course_grades::model::CourseType::Phd => "박사",
-            rusaint::application::course_grades::model::CourseType::PhdIntergrated => "석박사통합",
-            rusaint::application::course_grades::model::CourseType::Research => "연구",
+            RusaintCourseType::Bachelor => "학사",
+            RusaintCourseType::Master => "석사",
+            RusaintCourseType::Phd => "박사",
+            RusaintCourseType::PhdIntergrated => "석박사통합",
+            RusaintCourseType::Research => "연구",
         };
         write!(f, "{name}")
     }
@@ -38,21 +39,11 @@ impl FromStr for CourseType {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s.to_lowercase().as_str() {
-            "bachelor" => Ok(CourseType(
-                rusaint::application::course_grades::model::CourseType::Bachelor,
-            )),
-            "master" => Ok(CourseType(
-                rusaint::application::course_grades::model::CourseType::Master,
-            )),
-            "phd" => Ok(CourseType(
-                rusaint::application::course_grades::model::CourseType::Phd,
-            )),
-            "phd-integrated" => Ok(CourseType(
-                rusaint::application::course_grades::model::CourseType::PhdIntergrated,
-            )),
-            "research" => Ok(CourseType(
-                rusaint::application::course_grades::model::CourseType::Research,
-            )),
+            "bachelor" => Ok(CourseType(RusaintCourseType::Bachelor)),
+            "master" => Ok(CourseType(RusaintCourseType::Master)),
+            "phd" => Ok(CourseType(RusaintCourseType::Phd)),
+            "phd-integrated" => Ok(CourseType(RusaintCourseType::PhdIntergrated)),
+            "research" => Ok(CourseType(RusaintCourseType::Research)),
             _ => Err(ParseCourseTypeError::InvalidCourseType),
         }
     }
@@ -61,31 +52,23 @@ impl FromStr for CourseType {
 impl ValueEnum for CourseType {
     fn value_variants<'a>() -> &'a [Self] {
         &[
-            CourseType(rusaint::application::course_grades::model::CourseType::Bachelor),
-            CourseType(rusaint::application::course_grades::model::CourseType::Master),
-            CourseType(rusaint::application::course_grades::model::CourseType::Phd),
-            CourseType(rusaint::application::course_grades::model::CourseType::PhdIntergrated),
-            CourseType(rusaint::application::course_grades::model::CourseType::Research),
+            CourseType(RusaintCourseType::Bachelor),
+            CourseType(RusaintCourseType::Master),
+            CourseType(RusaintCourseType::Phd),
+            CourseType(RusaintCourseType::PhdIntergrated),
+            CourseType(RusaintCourseType::Research),
         ]
     }
 
     fn to_possible_value(&self) -> Option<clap::builder::PossibleValue> {
         match self.0 {
-            rusaint::application::course_grades::model::CourseType::Bachelor => {
-                Some(clap::builder::PossibleValue::new("bachelor"))
-            }
-            rusaint::application::course_grades::model::CourseType::Master => {
-                Some(clap::builder::PossibleValue::new("master"))
-            }
-            rusaint::application::course_grades::model::CourseType::Phd => {
-                Some(clap::builder::PossibleValue::new("phd"))
-            }
-            rusaint::application::course_grades::model::CourseType::PhdIntergrated => {
+            RusaintCourseType::Bachelor => Some(clap::builder::PossibleValue::new("bachelor")),
+            RusaintCourseType::Master => Some(clap::builder::PossibleValue::new("master")),
+            RusaintCourseType::Phd => Some(clap::builder::PossibleValue::new("phd")),
+            RusaintCourseType::PhdIntergrated => {
                 Some(clap::builder::PossibleValue::new("phd-integrated"))
             }
-            rusaint::application::course_grades::model::CourseType::Research => {
-                Some(clap::builder::PossibleValue::new("research"))
-            }
+            RusaintCourseType::Research => Some(clap::builder::PossibleValue::new("research")),
         }
     }
 }
