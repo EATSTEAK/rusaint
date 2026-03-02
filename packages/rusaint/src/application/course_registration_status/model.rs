@@ -25,12 +25,12 @@ pub struct RegisteredLecture {
         deserialize_with = "deserialize_optional_string"
     )]
     syllabus: Option<String>,
-    /// 이수구분(주전공)
-    #[serde(rename(deserialize = "이수구분(주전공)"))]
+    /// 이수구분
+    #[serde(rename(deserialize = "이수구분"))]
     category: String,
-    /// 이수구분(다전공)
+    /// 다전공구분
     #[serde(
-        rename(deserialize = "이수구분(다전공)"),
+        rename(deserialize = "다전공구분"),
         default,
         deserialize_with = "deserialize_optional_string"
     )]
@@ -65,24 +65,18 @@ pub struct RegisteredLecture {
     /// 교수명
     #[serde(rename(deserialize = "교수명"))]
     professor: String,
-    /// 개설학과
-    #[serde(rename(deserialize = "개설학과"))]
-    department: String,
     /// 시간/학점(설계)
     #[serde(rename(deserialize = "시간/학점(설계)"))]
     time_points: String,
-    /// 수강인원
-    #[serde(rename(deserialize = "수강인원"))]
-    personeel: String,
-    /// 여석
-    #[serde(rename(deserialize = "여석"))]
-    remaining_seats: String,
-    /// 강의시간(강의실)
-    #[serde(rename(deserialize = "강의시간(강의실)"))]
+    /// 요일/시간(강의실)
+    #[serde(rename(deserialize = "요일/시간(강의실)"))]
     schedule_room: String,
-    /// 수강대상
-    #[serde(rename(deserialize = "수강대상"))]
+    /// 과정
+    #[serde(rename(deserialize = "과정"))]
     target: String,
+    /// 수강 신청일
+    #[serde(rename(deserialize = "수강 신청일"))]
+    register_date: String,
     /// 비고
     #[serde(rename(deserialize = "비고"))]
     remarks: String,
