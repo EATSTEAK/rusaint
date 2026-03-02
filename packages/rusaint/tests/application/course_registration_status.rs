@@ -44,15 +44,10 @@ async fn get_selected_semester() {
 async fn lectures() {
     let lock = get_app().await.unwrap();
     let mut app = lock.write().await;
-    let result = app.lectures(*TARGET_YEAR, *TARGET_SEMESTER).await;
-    match result {
-        Ok(lectures) => {
-            let lectures: Vec<_> = lectures.collect();
-            tracing::info!("Lectures: {:?}", lectures);
-        }
-        Err(e) => {
-            // NoLectureResult is acceptable
-            tracing::info!("Error (may be expected): {:?}", e);
-        }
-    }
+    let lectures: Vec<_> = app
+        .lectures(*TARGET_YEAR, *TARGET_SEMESTER)
+        .await
+        .unwrap()
+        .collect();
+    tracing::info!("Lectures: {:?}", lectures);
 }
