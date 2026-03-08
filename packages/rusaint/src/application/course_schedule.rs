@@ -575,8 +575,7 @@ impl<'app> CourseScheduleApplication {
             }))?;
         let titles = header.titles(&parser)?;
         let code_col_idx = Self::find_column_index(&titles, "과목번호")?;
-        // 강의계획서 컬럼을 동적으로 찾음 (일반적으로 "강의계획서" 헤더를 가진 첫 번째 컬럼)
-        let syllabus_col_idx = Self::find_column_index(&titles, "강의계획서").unwrap_or(0);
+        let syllabus_col_idx = Self::find_column_index(&titles, "계획").unwrap_or(0);
 
         table
             .iter()
@@ -672,7 +671,7 @@ impl<'app> CourseScheduleApplication {
                     .titles(&parser)?;
                 let code_col_idx = Self::find_column_index(&titles, "과목번호")?;
                 let syllabus_col_idx = if fetch_syllabus {
-                    Some(Self::find_column_index(&titles, "강의계획서")?)
+                    Some(Self::find_column_index(&titles, "계획")?)
                 } else {
                     None
                 };
@@ -761,7 +760,7 @@ impl<'app> CourseScheduleApplication {
                         .titles(&parser)?;
                     let code_col_idx = Self::find_column_index(&titles, "과목번호")?;
                     let syllabus_col_idx = if fetch_syllabus {
-                        Some(Self::find_column_index(&titles, "강의계획서")?)
+                        Some(Self::find_column_index(&titles, "계획")?)
                     } else {
                         None
                     };
