@@ -105,7 +105,7 @@ repositories {
 
 ```kotlin
 dependencies {
-  implementation("dev.eatsteak:rusaint:0.14.2")
+  implementation("dev.eatsteak:rusaint:0.15.0")
 }
 ```
 
