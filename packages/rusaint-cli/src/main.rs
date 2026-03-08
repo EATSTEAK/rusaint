@@ -10,7 +10,7 @@ use commands::Commands;
 use output::OutputFormat;
 
 #[derive(Parser)]
-#[command(name = "rusaint-cli")]
+#[command(name = "rusaint")]
 #[command(about = "CLI for rusaint - 숭실대학교 u-Saint 학사 정보 조회")]
 struct Cli {
     /// 세션 JSON 파일 경로. 지정 시 SSO_ID/SSO_PASSWORD 대신 사용
