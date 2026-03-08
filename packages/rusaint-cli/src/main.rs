@@ -56,39 +56,39 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             commands::create_session::execute(args).await?;
         }
         Commands::CourseSchedule { command } => {
-            let session = session::get_session(cli.session_file.as_deref()).await?;
+            let session = session::get_session(cli.session_file.as_deref(), true).await?;
             commands::course_schedule::execute(session, command, format, output).await?;
         }
         Commands::StudentInfo { command } => {
-            let session = session::get_session(cli.session_file.as_deref()).await?;
+            let session = session::get_session(cli.session_file.as_deref(), false).await?;
             commands::student_info::execute(session, command, format, output).await?;
         }
         Commands::Grades { command } => {
-            let session = session::get_session(cli.session_file.as_deref()).await?;
+            let session = session::get_session(cli.session_file.as_deref(), false).await?;
             commands::grades::execute(session, command, format, output).await?;
         }
         Commands::ChapelInfo { command } => {
-            let session = session::get_session(cli.session_file.as_deref()).await?;
+            let session = session::get_session(cli.session_file.as_deref(), false).await?;
             commands::chapel::execute(session, command, format, output).await?;
         }
         Commands::Registration { command } => {
-            let session = session::get_session(cli.session_file.as_deref()).await?;
+            let session = session::get_session(cli.session_file.as_deref(), false).await?;
             commands::registration::execute(session, command, format, output).await?;
         }
         Commands::Graduation { command } => {
-            let session = session::get_session(cli.session_file.as_deref()).await?;
+            let session = session::get_session(cli.session_file.as_deref(), false).await?;
             commands::graduation::execute(session, command, format, output).await?;
         }
         Commands::Assessment { command } => {
-            let session = session::get_session(cli.session_file.as_deref()).await?;
+            let session = session::get_session(cli.session_file.as_deref(), false).await?;
             commands::assessment::execute(session, command, format, output).await?;
         }
         Commands::PersonalSchedule { command } => {
-            let session = session::get_session(cli.session_file.as_deref()).await?;
+            let session = session::get_session(cli.session_file.as_deref(), false).await?;
             commands::personal_schedule::execute(session, command, format, output).await?;
         }
         Commands::Scholarships { command } => {
-            let session = session::get_session(cli.session_file.as_deref()).await?;
+            let session = session::get_session(cli.session_file.as_deref(), false).await?;
             commands::scholarships::execute(session, command, format, output).await?;
         }
     }
