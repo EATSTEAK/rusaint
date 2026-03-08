@@ -41,6 +41,7 @@ async fn get_selected_semester() {
 
 #[tokio::test]
 #[traced_test]
+#[ignore = "this application only supports recent 1 year"]
 async fn lectures() {
     let lock = get_app().await.unwrap();
     let mut app = lock.write().await;
