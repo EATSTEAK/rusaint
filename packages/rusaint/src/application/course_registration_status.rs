@@ -12,11 +12,8 @@ use wdpe::element::action::Button;
 use wdpe::element::parser::ElementParser;
 use wdpe::state::EventProcessResult;
 use wdpe::{
-    body::Body,
-    command::element::selection::ComboBoxSelectEventCommand,
-    define_elements,
-    element::selection::ComboBox,
-    error::WebDynproError,
+    body::Body, command::element::selection::ComboBoxSelectEventCommand, define_elements,
+    element::selection::ComboBox, error::WebDynproError,
 };
 
 /// [수강신청조회(학생용)](https://ecc.ssu.ac.kr/sap/bc/webdynpro/SAP/ZCMW2110)
@@ -138,7 +135,6 @@ impl<'app> CourseRegistrationStatusApplication {
         Ok(())
     }
 }
-
 
 /// [`CourseRegistrationStatusApplication`](CourseRegistrationStatusApplication) 에서 사용하는 데이터
 pub mod model;
