@@ -1,19 +1,21 @@
 use crate::ApplicationError;
 use crate::application::course_registration_status::model::RegisteredLecture;
-use crate::application::utils::sap_table::try_table_into_with_scroll;
+use crate::application::utils::oz::{
+    extract_oz_url_from_script_calls, fetch_data_module, parse_oz_url_params,
+};
 use crate::application::utils::semester::get_selected_semester;
 use crate::client::{USaintApplication, USaintClient};
 use crate::{RusaintError, model::SemesterType};
 use wdpe::command::WebDynproCommandExecutor;
-use wdpe::command::element::complex::SapTableBodyCommand;
-use wdpe::element::ElementDefWrapper;
-use wdpe::element::complex::sap_table::cell::{SapTableCell as _, SapTableCellWrapper};
+use wdpe::command::element::action::ButtonPressEventCommand;
+use wdpe::element::action::Button;
 use wdpe::element::parser::ElementParser;
+use wdpe::state::EventProcessResult;
 use wdpe::{
     body::Body,
     command::element::selection::ComboBoxSelectEventCommand,
     define_elements,
-    element::{complex::SapTable, selection::ComboBox},
+    element::selection::ComboBox,
     error::WebDynproError,
 };
 
@@ -87,7 +89,7 @@ impl<'app> CourseRegistrationStatusApplication {
     define_elements! {
         PERIOD_YEAR: ComboBox<'app> = "ZCMW_PERIOD_RE.ID_57CC7986881470383154D0F1FF86642A:VIW_MAIN.PERYR";
         PERIOD_ID: ComboBox<'app> = "ZCMW_PERIOD_RE.ID_57CC7986881470383154D0F1FF86642A:VIW_MAIN.PERID";
-        MAIN_TABLE: SapTable<'app> = "ZCMW2110.ID_0001:VIW_BOOKED.TABLE";
+        BUTTON_PRINT: Button<'app> = "ZCMW2110.ID_0001:VIW_MAIN.BUTTON_PRINT";
     }
 
     /// 개인이 수강신청한 내역을 학기별로 찾습니다.
@@ -96,32 +98,37 @@ impl<'app> CourseRegistrationStatusApplication {
         year: u32,
         semester: SemesterType,
     ) -> Result<impl Iterator<Item = RegisteredLecture>, RusaintError> {
-        {
-            let parser = ElementParser::new(self.body());
-            let year_str = format!("{year}");
-            self.select_semester(&parser, &year_str, semester).await?;
-        }
-        let parser = ElementParser::new(self.body());
-        let table = parser.read(SapTableBodyCommand::new(Self::MAIN_TABLE))?;
-        let Some(first_row) = table.iter().next() else {
-            return Err(ApplicationError::NoLectureResult.into());
+        let parser = ElementParser::new(self.client.body());
+        let button_press_event = parser.read(ButtonPressEventCommand::new(Self::BUTTON_PRINT))?;
+        let result = self.client.process_event(true, button_press_event).await?;
+
+        let script_calls = match result {
+            EventProcessResult::Sent(body_update_result) => {
+                body_update_result.script_calls.unwrap_or_default()
+            }
+            EventProcessResult::Enqueued => {
+                return Err(ApplicationError::OzDataFetchError(
+                    "BUTTON_PRINT event was enqueued but not sent".to_string(),
+                )
+                .into());
+            }
         };
-        if let Some(Ok(SapTableCellWrapper::Normal(cell))) = first_row.iter_value(&parser).next() {
-            if let Some(ElementDefWrapper::TextView(tv_def)) = cell.content() {
-                if let Ok(tv) = parser.element_from_def(&tv_def) {
-                    if tv.text().contains("없습니다.") {
-                        return Err(ApplicationError::NoLectureResult.into());
-                    }
-                }
+
+        let oz_url = extract_oz_url_from_script_calls(&script_calls)?;
+        let mut oz_params = parse_oz_url_params(&oz_url)?;
+        let semester_key = Self::semester_to_key(semester).to_string();
+        let year_value = year.to_string();
+
+        for (key, value) in &mut oz_params.params {
+            if key == "arg1" {
+                *value = year_value.clone();
+            } else if key == "arg2" {
+                *value = semester_key.clone();
             }
         }
-        let lectures = try_table_into_with_scroll::<RegisteredLecture>(
-            &mut self.client,
-            parser,
-            Self::MAIN_TABLE,
-        )
-        .await?;
 
+        let response = fetch_data_module(&oz_params).await?;
+        let lectures = RegisteredLecture::from_datasets(&response.datasets)?;
         Ok(lectures.into_iter())
     }
 
@@ -132,8 +139,6 @@ impl<'app> CourseRegistrationStatusApplication {
     }
 }
 
-#[cfg(test)]
-mod test {}
 
 /// [`CourseRegistrationStatusApplication`](CourseRegistrationStatusApplication) 에서 사용하는 데이터
 pub mod model;

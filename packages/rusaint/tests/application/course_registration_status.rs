@@ -1,4 +1,4 @@
-use crate::{TARGET_SEMESTER, TARGET_YEAR, get_session};
+use crate::get_session;
 use lazy_static::lazy_static;
 use rusaint::RusaintError;
 use rusaint::application::course_registration_status::CourseRegistrationStatusApplication;
@@ -41,14 +41,16 @@ async fn get_selected_semester() {
 
 #[tokio::test]
 #[traced_test]
-#[ignore = "this application only supports recent 1 year"]
 async fn lectures() {
     let lock = get_app().await.unwrap();
     let mut app = lock.write().await;
-    let lectures: Vec<_> = app
-        .lectures(*TARGET_YEAR, *TARGET_SEMESTER)
-        .await
-        .unwrap()
-        .collect();
+    let (year, semester) = app.get_selected_semester().unwrap();
+    let lectures: Vec<_> = app.lectures(year, semester).await.unwrap().collect();
     tracing::info!("Lectures: {:?}", lectures);
+
+    assert!(!lectures.is_empty());
+    assert!(lectures.iter().all(|lecture| !lecture.code.is_empty()));
+    assert!(lectures.iter().all(|lecture| !lecture.name.is_empty()));
+    assert!(lectures.iter().all(|lecture| !lecture.sm_objid.is_empty()));
+    assert!(lectures.iter().all(|lecture| !lecture.se_objid.is_empty()));
 }
