@@ -1,100 +1,103 @@
-use std::collections::HashMap;
+use ozra::types::{DataSet, FieldValue};
+use serde::{Deserialize, Serialize};
 
-use serde::{
-    Deserialize, Serialize,
-    de::{IntoDeserializer, value::MapDeserializer},
-};
+use crate::{ApplicationError, RusaintError};
 
-use crate::application::utils::de_with::deserialize_optional_string;
-use wdpe::{
-    element::{
-        complex::sap_table::FromSapTable, definition::ElementDefinition as _, parser::ElementParser,
-    },
-    error::{ElementError, WebDynproError},
-};
-
-/// 수강신청한 과목 정보
+/// OZ `ET_BOOKED` 데이터셋 기준 수강신청 과목 정보
 #[allow(unused)]
 #[derive(Debug, Serialize, Deserialize)]
 #[cfg_attr(feature = "uniffi", derive(uniffi::Record))]
 pub struct RegisteredLecture {
     /// 계획
-    #[serde(
-        rename(deserialize = "계획"),
-        default,
-        deserialize_with = "deserialize_optional_string"
-    )]
-    syllabus: Option<String>,
+    pub syllabus: Option<String>,
     /// 이수구분
-    #[serde(rename(deserialize = "이수구분"))]
-    category: String,
+    pub category: String,
     /// 다전공구분
-    #[serde(
-        rename(deserialize = "다전공구분"),
-        default,
-        deserialize_with = "deserialize_optional_string"
-    )]
-    sub_category: Option<String>,
+    pub sub_category: Option<String>,
     /// 공학인증
-    #[serde(
-        rename(deserialize = "공학인증"),
-        default,
-        deserialize_with = "deserialize_optional_string"
-    )]
-    abeek_info: Option<String>,
+    pub abeek_info: Option<String>,
     /// 교과영역
-    #[serde(
-        rename(deserialize = "교과영역"),
-        default,
-        deserialize_with = "deserialize_optional_string"
-    )]
-    field: Option<String>,
-    /// 과목번호
-    #[serde(rename(deserialize = "과목번호"))]
-    code: String,
+    pub field: Option<String>,
+    /// 과목번호 (`SE_SHORT`)
+    pub code: String,
     /// 과목명
-    #[serde(rename(deserialize = "과목명"))]
-    name: String,
+    pub name: String,
     /// 분반
-    #[serde(
-        rename(deserialize = "분반"),
-        default,
-        deserialize_with = "deserialize_optional_string"
-    )]
-    division: Option<String>,
+    pub division: Option<String>,
     /// 교수명
-    #[serde(rename(deserialize = "교수명"))]
-    professor: String,
+    pub professor: String,
     /// 시간/학점(설계)
-    #[serde(rename(deserialize = "시간/학점(설계)"))]
-    time_points: String,
-    /// 요일/시간(강의실)
-    #[serde(rename(deserialize = "요일/시간(강의실)"))]
-    schedule_room: String,
-    /// 과정
-    #[serde(rename(deserialize = "과정"))]
-    target: String,
-    /// 수강 신청일
-    #[serde(rename(deserialize = "수강 신청일"))]
-    register_date: String,
-    /// 비고
-    #[serde(rename(deserialize = "비고"))]
-    remarks: String,
+    pub time_points: String,
+    /// 강의시간(강의실)
+    pub schedule_room: String,
+    /// 원본 과목 ID (`SM_OBJID`)
+    pub sm_objid: String,
+    /// 원본 분반 ID (`SE_OBJID`)
+    pub se_objid: String,
+    /// 전체 과목명
+    pub full_name: String,
+    /// 다전공 정보
+    pub multi_major_info: String,
+    /// 과정 코드 (`PROGC_VAR`)
+    pub program_code: String,
+    /// 과정명 (`PROGC_VART`)
+    pub program_title: String,
+    /// 수강신청일
+    pub registration_date: String,
+    /// 수강신청시각
+    pub registration_time: String,
+    /// 비고 (`REMARK`)
+    pub remark: String,
 }
 
-impl<'body> FromSapTable<'body> for RegisteredLecture {
-    fn from_table(
-        header: Option<&'body wdpe::element::complex::sap_table::SapTableHeader>,
-        row: &'body wdpe::element::complex::sap_table::SapTableRow,
-        parser: &'body ElementParser,
-    ) -> Result<Self, WebDynproError> {
-        let map_string = row.try_row_into::<HashMap<String, String>>(header, parser)?;
-        let map_de: MapDeserializer<_, serde::de::value::Error> = map_string.into_deserializer();
-        Ok(
-            RegisteredLecture::deserialize(map_de).map_err(|e| ElementError::InvalidContent {
-                element: row.table_def().id().to_string(),
-                content: e.to_string(),
-            })?,
-        )
+fn get_string_field(row: &[(String, FieldValue)], field_name: &str) -> String {
+    row.iter()
+        .find(|(name, _)| name == field_name)
+        .map(|(_, val)| val.to_string_repr())
+        .unwrap_or_default()
+}
+
+fn find_dataset<'a>(datasets: &'a [DataSet], name: &str) -> &'a [Vec<(String, FieldValue)>] {
+    datasets
+        .iter()
+        .find(|(n, _)| n == name)
+        .map(|(_, rows)| rows.as_slice())
+        .unwrap_or(&[])
+}
+
+impl RegisteredLecture {
+    /// OZ DataModule의 데이터셋으로부터 [`RegisteredLecture`] 목록을 생성합니다.
+    pub fn from_datasets(datasets: &[DataSet]) -> Result<Vec<Self>, RusaintError> {
+        let lectures: Vec<Self> = find_dataset(datasets, "ET_BOOKED")
+            .iter()
+            .map(|row| Self {
+                syllabus: None,
+                category: get_string_field(row, "CATEGORY"),
+                sub_category: None,
+                abeek_info: Some(get_string_field(row, "ABEEK_INFO")).filter(|s| !s.is_empty()),
+                field: None,
+                code: get_string_field(row, "SE_SHORT"),
+                name: get_string_field(row, "SE_STEXT"),
+                division: Some(get_string_field(row, "BUNBAN")).filter(|s| !s.is_empty()),
+                professor: get_string_field(row, "PROF_NM"),
+                time_points: get_string_field(row, "TIME_CREDIT"),
+                schedule_room: get_string_field(row, "LEC_TIME_ROOM"),
+                sm_objid: get_string_field(row, "SM_OBJID"),
+                se_objid: get_string_field(row, "SE_OBJID"),
+                full_name: get_string_field(row, "LONG_NAME"),
+                multi_major_info: get_string_field(row, "MULTI"),
+                program_code: get_string_field(row, "PROGC_VAR"),
+                program_title: get_string_field(row, "PROGC_VART"),
+                registration_date: get_string_field(row, "BOOKDATE"),
+                registration_time: get_string_field(row, "BOOKTIME"),
+                remark: get_string_field(row, "REMARK"),
+            })
+            .collect();
+
+        if lectures.is_empty() {
+            return Err(ApplicationError::NoLectureResult.into());
+        }
+
+        Ok(lectures)
     }
 }
