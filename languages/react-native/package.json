@@ -105,8 +105,8 @@
     "@types/react": "^19.0.0"
   },
   "peerDependencies": {
-    "react": "19.0.0 || 19.2.3",
-    "react-native": "^0.79.0 || ^0.84.0"
+    "react": "^19.0.0",
+    "react-native": ">=0.79.0 <1.0.0"
   },
   "workspaces": [
     "example"
@@ -198,7 +198,7 @@
           "react-native@0.84"
         ],
         "production": [
-          "react-native@0.79 || 0.84"
+          "react-native@>=0.79 <1.0"
         ]
       },
       "capabilities": [
