@@ -169,14 +169,11 @@ impl<'a> LectureAssessmentApplication {
             };
             if let Some(Ok(SapTableCellWrapper::Normal(cell))) =
                 first_row.iter_value(&parser).next()
+                && let Some(ElementDefWrapper::TextView(tv_def)) = cell.content()
+                && let Ok(tv) = parser.element_from_def(&tv_def)
+                && tv.text().contains("없습니다.")
             {
-                if let Some(ElementDefWrapper::TextView(tv_def)) = cell.content() {
-                    if let Ok(tv) = parser.element_from_def(&tv_def) {
-                        if tv.text().contains("없습니다.") {
-                            return Err(ApplicationError::NoLectureAssessments.into());
-                        }
-                    }
-                }
+                return Err(ApplicationError::NoLectureAssessments.into());
             }
         }
         Ok(try_table_into_with_scroll(&mut self.client, parser, Self::TABLE).await?)

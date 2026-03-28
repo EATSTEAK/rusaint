@@ -22,8 +22,5 @@ tokio = { workspace = true, features = ["sync"] }
 [build-dependencies]
 uniffi = { workspace = true, features = ["build"] }
 
-[lints]
-workspace = true
-
 [profile.release]
 strip = "none"

@@ -465,10 +465,9 @@ impl<'app> CourseScheduleApplication {
             .iter()
             .find(|(k, _)| k == "UNAME")
             .map(|(_, v)| v.clone())
+            && !oz_params.params.iter().any(|(k, _)| k == "arg4")
         {
-            if !oz_params.params.iter().any(|(k, _)| k == "arg4") {
-                oz_params.params.push(("arg4".to_string(), uname));
-            }
+            oz_params.params.push(("arg4".to_string(), uname));
         }
 
         let response = fetch_data_module(&oz_params).await?;

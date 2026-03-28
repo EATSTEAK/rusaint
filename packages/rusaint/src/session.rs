@@ -219,9 +219,10 @@ pub async fn obtain_ssu_sso_token(id: &str, password: &str) -> Result<String, Ss
 }
 
 fn parse_login_form(body: &str) -> Result<(String, String), SsuSsoError> {
-    let document = scraper::Html::parse_document(body);
-    let in_tp_bit_selector = scraper::Selector::parse(r#"input[name="in_tp_bit"]"#).unwrap();
-    let rqst_caus_cd_selector = scraper::Selector::parse(r#"input[name="rqst_caus_cd"]"#).unwrap();
+    let document = wdpe::scraper::Html::parse_document(body);
+    let in_tp_bit_selector = wdpe::scraper::Selector::parse(r#"input[name="in_tp_bit"]"#).unwrap();
+    let rqst_caus_cd_selector =
+        wdpe::scraper::Selector::parse(r#"input[name="rqst_caus_cd"]"#).unwrap();
     let in_tp_bit = document
         .select(&in_tp_bit_selector)
         .next()

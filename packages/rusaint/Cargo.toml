@@ -14,7 +14,7 @@ readme.workspace = true
 
 [features]
 default = ["application", "element"]
-element = ["dep:scraper"]
+element = []
 application = ["element"]
 stream = ["dep:async-stream", "dep:futures-core"]
 uniffi = ["dep:uniffi", "application"]
@@ -36,7 +36,6 @@ html-escape = "0.2.13"
 url = "2.5.4"
 roxmltree = "0.21.0"
 lol_html = "2.3.0"
-scraper = { version = "0.25", features = ["atomic"], optional = true }
 serde = { version = "1", features = ["derive"] }
 custom_debug_derive = "0.6.2"
 regex-lite = "0.1.6"
@@ -44,7 +43,7 @@ serde_json = "1.0.140"
 reqwest_cookie_store = { version = "0.10.0", features = ["serde"] }
 cookie_store = "0.22"
 tracing = "0.1.41"
-wdpe = { version = "0.4.1", features = ["reqwest"] }
+wdpe = { version = "0.4.2", features = ["reqwest"] }
 ozra = { version = "0.0.2" }
 async-stream = { version = "0.3", optional = true }
 futures-core = { version = "0.3", optional = true }
@@ -60,6 +59,3 @@ tracing-test = "0.2.5"
 
 [build-dependencies]
 uniffi = { workspace = true, features = ["build"] }
-
-[lints]
-workspace = true

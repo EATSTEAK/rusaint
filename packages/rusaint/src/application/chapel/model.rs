@@ -121,14 +121,12 @@ impl<'a> GeneralChapelInformation {
         let Some(first_row) = table.iter().next() else {
             return Err(ApplicationError::NoChapelInformation.into());
         };
-        if let Some(Ok(SapTableCellWrapper::Normal(cell))) = first_row.iter_value(parser).next() {
-            if let Some(ElementDefWrapper::TextView(tv_def)) = cell.content() {
-                if let Ok(tv) = parser.element_from_def(&tv_def) {
-                    if tv.text().contains("없습니다.") {
-                        return Err(ApplicationError::NoChapelInformation.into());
-                    }
-                }
-            }
+        if let Some(Ok(SapTableCellWrapper::Normal(cell))) = first_row.iter_value(parser).next()
+            && let Some(ElementDefWrapper::TextView(tv_def)) = cell.content()
+            && let Ok(tv) = parser.element_from_def(&tv_def)
+            && tv.text().contains("없습니다.")
+        {
+            return Err(ApplicationError::NoChapelInformation.into());
         }
         Ok(table.try_table_into::<Self>(parser)?)
     }
@@ -228,14 +226,12 @@ impl<'a> ChapelAttendance {
         let Some(first_row) = table.iter().next() else {
             return Ok(Vec::with_capacity(0));
         };
-        if let Some(Ok(SapTableCellWrapper::Normal(cell))) = first_row.iter_value(parser).next() {
-            if let Some(ElementDefWrapper::TextView(tv_def)) = cell.content() {
-                if let Ok(tv) = parser.element_from_def(&tv_def) {
-                    if tv.text().contains("채플 출결 상세내용") {
-                        return Ok(Vec::with_capacity(0));
-                    }
-                }
-            }
+        if let Some(Ok(SapTableCellWrapper::Normal(cell))) = first_row.iter_value(parser).next()
+            && let Some(ElementDefWrapper::TextView(tv_def)) = cell.content()
+            && let Ok(tv) = parser.element_from_def(&tv_def)
+            && tv.text().contains("채플 출결 상세내용")
+        {
+            return Ok(Vec::with_capacity(0));
         }
         table.try_table_into::<Self>(parser)
     }
@@ -346,14 +342,12 @@ impl<'a> ChapelAbsenceRequest {
         let Some(first_row) = table.iter().next() else {
             return Ok(Vec::with_capacity(0));
         };
-        if let Some(Ok(SapTableCellWrapper::Normal(cell))) = first_row.iter_value(parser).next() {
-            if let Some(ElementDefWrapper::TextView(tv_def)) = cell.content() {
-                if let Ok(tv) = parser.element_from_def(&tv_def) {
-                    if tv.text().contains("없습니다.") {
-                        return Ok(Vec::with_capacity(0));
-                    }
-                }
-            }
+        if let Some(Ok(SapTableCellWrapper::Normal(cell))) = first_row.iter_value(parser).next()
+            && let Some(ElementDefWrapper::TextView(tv_def)) = cell.content()
+            && let Ok(tv) = parser.element_from_def(&tv_def)
+            && tv.text().contains("없습니다.")
+        {
+            return Ok(Vec::with_capacity(0));
         }
 
         Ok(table.try_table_into::<Self>(parser)?)
