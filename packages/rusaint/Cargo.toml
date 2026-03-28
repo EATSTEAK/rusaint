@@ -36,7 +36,7 @@ html-escape = "0.2.13"
 url = "2.5.4"
 roxmltree = "0.21.0"
 lol_html = "2.3.0"
-scraper = { version = "0.25", features = ["atomic"], optional = true }
+scraper = { version = "0.26", features = ["atomic"], optional = true }
 serde = { version = "1", features = ["derive"] }
 custom_debug_derive = "0.6.2"
 regex-lite = "0.1.6"
