@@ -8,7 +8,6 @@ use crate::application::utils::sap_table::try_table_into_with_scroll;
 use crate::application::utils::semester::get_selected_semester;
 use crate::client::{USaintApplication, USaintClient};
 use crate::{ApplicationError, RusaintError, model::SemesterType};
-use scraper::Selector;
 use std::collections::HashMap;
 use wdpe::body::Body;
 use wdpe::command::WebDynproCommandExecutor;
@@ -16,6 +15,7 @@ use wdpe::command::element::action::ButtonPressEventCommand;
 use wdpe::element::action::Button;
 use wdpe::element::complex::sap_table::cell::SapTableCellWrapper;
 use wdpe::element::parser::ElementParser;
+use wdpe::scraper::Selector;
 use wdpe::state::EventProcessResult;
 use wdpe::{
     command::element::{
@@ -618,9 +618,10 @@ mod test {
             .await
             .unwrap();
         app.close_popups().await.unwrap();
-        let popup_selector =
-            scraper::Selector::parse(format!(r#"[ct="{}"]"#, PopupWindow::CONTROL_ID).as_str())
-                .unwrap();
+        let popup_selector = wdpe::scraper::Selector::parse(
+            format!(r#"[ct="{}"]"#, PopupWindow::CONTROL_ID).as_str(),
+        )
+        .unwrap();
         let parser = ElementParser::new(app.client.body());
         let result = parser.document().select(&popup_selector).next().is_none();
         assert!(result);

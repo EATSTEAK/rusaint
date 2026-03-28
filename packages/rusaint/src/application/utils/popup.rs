@@ -1,10 +1,10 @@
-use scraper::Selector;
 use wdpe::body::Body;
 use wdpe::element::layout::PopupWindow;
 use wdpe::element::parser::ElementParser;
 use wdpe::element::{Element, ElementWrapper};
 use wdpe::error::WebDynproError;
 use wdpe::event::Event;
+use wdpe::scraper::Selector;
 
 use crate::client::USaintClient;
 
