@@ -60,6 +60,3 @@ tracing-test = "0.2.5"
 
 [build-dependencies]
 uniffi = { workspace = true, features = ["build"] }
-
-[lints]
-workspace = true

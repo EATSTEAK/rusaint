@@ -23,6 +23,3 @@ thiserror = "2"
 tokio = "1.47.1"
 uniffi = "0.29.4"
 rusaint = { version = "0.15.0", path = "packages/rusaint" }
-
-[workspace.lints.clippy]
-collapsible_if = "allow"
