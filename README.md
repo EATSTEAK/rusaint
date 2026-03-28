@@ -26,6 +26,35 @@ u-saint 내부 요소들을 조작하고 파싱할 수 있습니다.
 cargo add rusaint
 ```
 
+## CLI
+
+<a href="https://crates.io/crates/rusaint-cli"><img alt="crates.io" src="https://img.shields.io/crates/v/rusaint-cli.svg?style=for-the-badge&color=fc8d62&logo=rust&label=rusaint-cli"></a>
+
+터미널에서 바로 u-saint 학사 정보를 조회할 수 있는 CLI 도구를 제공합니다.
+
+```bash
+cargo install rusaint-cli
+```
+
+```bash
+# 강의 검색
+rusaint course-schedule by-lecture -y 2025 -s 1 -k "대학글쓰기"
+
+# 성적 조회
+rusaint grades recorded-summary
+
+# 수강신청 내역
+rusaint registration lectures -y 2025 -s 1
+
+# 장학금 조회
+rusaint scholarships list
+
+# JSON 출력
+rusaint --format json student-info general
+```
+
+> 자세한 사용법은 [packages/rusaint-cli/README.md](/packages/rusaint-cli/README.md)를 참고하세요.
+
 ## 문서
 
 [docs.rs](https://docs.rs/rusaint)
