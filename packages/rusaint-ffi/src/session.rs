@@ -2,6 +2,17 @@ use std::sync::Arc;
 
 use crate::error::RusaintError;
 
+/// 플랫폼에 맞는 TLS 설정이 적용된 reqwest Client를 생성합니다.
+fn create_http_client() -> reqwest::Client {
+    #[allow(unused_mut)]
+    let mut builder = reqwest::Client::builder();
+    #[cfg(target_os = "android")]
+    {
+        builder = builder.use_preconfigured_tls(crate::android_tls_config().as_ref().clone());
+    }
+    builder.build().unwrap()
+}
+
 /// u-saint에서 사용할 세션
 /// [`USaintSessionBuilder`]를 이용해 생성합니다.
 #[derive(Debug, uniffi::Object)]
@@ -67,7 +78,9 @@ impl USaintSessionBuilder {
         id: &str,
         password: &str,
     ) -> Result<USaintSession, RusaintError> {
-        let original = rusaint::USaintSession::with_password(id, password).await?;
+        let client = create_http_client();
+        let original =
+            rusaint::USaintSession::with_password_using_client(id, password, client).await?;
         Ok(USaintSession(Arc::new(original)))
     }
 
@@ -78,7 +91,8 @@ impl USaintSessionBuilder {
     ///     val withToken = USaintSessionBuilder().withToken("<example sso token>") // suspend
     /// }
     pub async fn with_token(&self, id: &str, token: &str) -> Result<USaintSession, RusaintError> {
-        let original = rusaint::USaintSession::with_token(id, token).await?;
+        let client = create_http_client();
+        let original = rusaint::USaintSession::with_token_using_client(id, token, client).await?;
         Ok(USaintSession(Arc::new(original)))
     }
 

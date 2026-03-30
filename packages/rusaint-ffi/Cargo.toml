@@ -16,6 +16,7 @@ name = "rusaint_ffi"
 [dependencies]
 uniffi = { workspace = true, features = ["tokio"] }
 rusaint = { path = "../rusaint", default-features = false, features = ["uniffi"] }
+reqwest = { version = "0.13.2", default-features = false }
 thiserror = { workspace = true }
 tokio = { workspace = true, features = ["sync"] }
 
