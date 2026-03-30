@@ -154,7 +154,7 @@ pub trait USaintApplication: Sized {
 pub struct USaintClientBuilder {
     session: Option<Arc<USaintSession>>,
     #[cfg(feature = "rustls-no-provider")]
-    tls_client_config: Option<rustls::ClientConfig>,
+    tls_client_config: Option<Arc<rustls::ClientConfig>>,
 }
 
 impl USaintClientBuilder {
@@ -175,7 +175,7 @@ impl USaintClientBuilder {
 
     /// 커스텀 TLS 설정을 추가합니다. (`rustls-no-provider` feature 필요)
     #[cfg(feature = "rustls-no-provider")]
-    pub fn tls_client_config(mut self, config: rustls::ClientConfig) -> USaintClientBuilder {
+    pub fn tls_client_config(mut self, config: Arc<rustls::ClientConfig>) -> USaintClientBuilder {
         self.tls_client_config = Some(config);
         self
     }
@@ -197,7 +197,7 @@ impl USaintClientBuilder {
 
         #[cfg(feature = "rustls-no-provider")]
         if let Some(tls_config) = self.tls_client_config {
-            builder = builder.use_preconfigured_tls(tls_config);
+            builder = builder.use_preconfigured_tls(tls_config.as_ref().clone());
         }
 
         let client = builder.user_agent(DEFAULT_USER_AGENT).build().unwrap();

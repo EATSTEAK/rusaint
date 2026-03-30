@@ -46,8 +46,7 @@ pub fn client_builder() -> rusaint::client::USaintClientBuilder {
     let mut builder = rusaint::client::USaintClientBuilder::new();
     #[cfg(target_os = "android")]
     {
-        let config = android_tls_config();
-        builder = builder.tls_client_config((*config).clone());
+        builder = builder.tls_client_config(android_tls_config());
     }
     builder
 }

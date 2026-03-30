@@ -13,11 +13,12 @@ keywords.workspace = true
 readme.workspace = true
 
 [features]
-default = ["application", "element"]
+default = ["application", "element", "rustls"]
 element = []
 application = ["element"]
 stream = ["dep:async-stream", "dep:futures-core"]
 uniffi = ["dep:uniffi", "application"]
+rustls = ["reqwest/rustls"]
 rustls-no-provider = [
     "dep:ring",
     "dep:rustls",

@@ -15,12 +15,15 @@ name = "rusaint_ffi"
 
 [dependencies]
 uniffi = { workspace = true, features = ["tokio"] }
-rusaint = { path = "../rusaint", features = ["uniffi"] }
+rusaint = { path = "../rusaint", default-features = false, features = ["uniffi"] }
 thiserror = { workspace = true }
 tokio = { workspace = true, features = ["sync"] }
 
+[target.'cfg(not(target_os = "android"))'.dependencies]
+rusaint = { path = "../rusaint", features = ["rustls"] }
+
 [target.'cfg(target_os = "android")'.dependencies]
-rusaint = { path = "../rusaint", features = ["uniffi", "rustls-no-provider"] }
+rusaint = { path = "../rusaint", default-features = false, features = ["rustls-no-provider"] }
 rustls = { version = "0.23", default-features = false, features = [
   "ring",
   "logging",
