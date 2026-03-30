@@ -1785,7 +1785,7 @@ PODS:
     - React-utils (= 0.84.1)
     - ReactNativeDependencies
   - ReactNativeDependencies (0.84.1)
-  - rusaint-react-native (0.16.1):
+  - rusaint-react-native (0.16.2):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety

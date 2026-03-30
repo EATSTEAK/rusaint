@@ -8,7 +8,7 @@ members = [
 resolver = "3"
 
 [workspace.package]
-version = "0.16.1"
+version = "0.16.2"
 
 keywords = ["ssu", "u-saint", "scraping", "parser"]
 authors = ["Hyomin Koo <me@eatsteak.dev>"]
@@ -22,4 +22,4 @@ readme = "README.md"
 thiserror = "2"
 tokio = "1"
 uniffi = "0.31.0"
-rusaint = { version = "0.16.1", path = "packages/rusaint" }
+rusaint = { version = "0.16.2", path = "packages/rusaint" }
