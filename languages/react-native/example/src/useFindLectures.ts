@@ -5,7 +5,7 @@ import {
   LectureCategoryBuilder,
   SemesterType,
   USaintSessionBuilder,
-  type CourseScheduleApplicationInterface,
+  type CourseScheduleApplicationLike,
 } from '@rusaint/react-native';
 import { useRef, useState, useEffect } from 'react';
 
@@ -16,7 +16,7 @@ export const useFindLectures = (
   semester: SemesterType,
   category: LectureCategory
 ) => {
-  const clientRef = useRef<CourseScheduleApplicationInterface | null>(null);
+  const clientRef = useRef<CourseScheduleApplicationLike | null>(null);
   const [result, setResult] = useState<Lecture[]>([]);
   useEffect(() => {
     (async () => {
