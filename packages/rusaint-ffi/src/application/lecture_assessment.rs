@@ -64,8 +64,7 @@ impl LectureAssessmentApplicationBuilder {
         &self,
         session: Arc<USaintSession>,
     ) -> Result<LectureAssessmentApplication, RusaintError> {
-        let original_builder =
-            rusaint::client::USaintClientBuilder::new().session(session.original());
+        let original_builder = crate::client_builder().session(session.original());
         let original_app = original_builder
             .build_into::<rusaint::application::lecture_assessment::LectureAssessmentApplication>()
             .await?;
