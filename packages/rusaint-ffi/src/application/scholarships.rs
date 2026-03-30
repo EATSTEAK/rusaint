@@ -40,8 +40,7 @@ impl ScholarshipsApplicationBuilder {
         &self,
         session: Arc<USaintSession>,
     ) -> Result<ScholarshipsApplication, RusaintError> {
-        let original_builder =
-            rusaint::client::USaintClientBuilder::new().session(session.original());
+        let original_builder = crate::client_builder().session(session.original());
         let original_app = original_builder
             .build_into::<rusaint::application::scholarships::ScholarshipsApplication>()
             .await?;

@@ -4537,8 +4537,8 @@ __metadata:
     typescript-eslint: "npm:^8.46.0"
     uniffi-bindgen-react-native: "npm:^0.31.0-2"
   peerDependencies:
-    react: 19.0.0 || 19.2.3
-    react-native: ^0.79.0 || ^0.84.0
+    react: ^19.0.0
+    react-native: ">=0.79.0 <1.0.0"
   languageName: unknown
   linkType: soft
 
