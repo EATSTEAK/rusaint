@@ -61,6 +61,11 @@ impl<'a> USaintClient {
         self.state.base_url()
     }
 
+    /// 내부 reqwest 클라이언트의 참조를 반환합니다.
+    pub fn http_client(&self) -> &reqwest::Client {
+        &self.client
+    }
+
     /// WebDynpro 애플리케이션의 페이지 문서를 반환합니다.
     pub fn body(&self) -> &Body {
         self.state.body()

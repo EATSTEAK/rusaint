@@ -14,6 +14,8 @@ mod android_tls {
 
     /// webpki-roots 기반 ClientConfig를 생성합니다.
     fn create_tls_config() -> ClientConfig {
+        let _ = rustls::crypto::ring::default_provider().install_default();
+
         let mut root_store = rustls::RootCertStore::empty();
         root_store.extend(webpki_roots::TLS_SERVER_ROOTS.iter().cloned());
 
