@@ -37,7 +37,12 @@ reqwest = { version = "0.13.2", default-features = false, features = [
     "brotli",
 ] }
 ring = { version = "0.17", optional = true }
-rustls = { version = "0.23", default-features = false, optional = true, features = ["ring", "logging", "std", "tls12"] }
+rustls = { version = "0.23", default-features = false, optional = true, features = [
+    "ring",
+    "logging",
+    "std",
+    "tls12",
+] }
 thiserror = { workspace = true }
 tokio = { workspace = true, features = ["sync"] }
 html-escape = "0.2.13"
@@ -52,7 +57,7 @@ reqwest_cookie_store = { version = "0.10.0", features = ["serde"] }
 cookie_store = "0.22"
 tracing = "0.1.41"
 wdpe = { version = "0.4.3", features = ["reqwest"] }
-ozra = { version = "0.0.3" }
+ozra = { version = "0.0.4" }
 async-stream = { version = "0.3", optional = true }
 futures-core = { version = "0.3", optional = true }
 

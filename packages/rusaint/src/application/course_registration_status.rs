@@ -124,7 +124,7 @@ impl<'app> CourseRegistrationStatusApplication {
             }
         }
 
-        let response = fetch_data_module(&oz_params).await?;
+        let response = fetch_data_module(&oz_params, Some(self.client.http_client())).await?;
         let lectures = RegisteredLecture::from_datasets(&response.datasets)?;
         Ok(lectures.into_iter())
     }

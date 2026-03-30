@@ -470,7 +470,7 @@ impl<'app> CourseScheduleApplication {
             oz_params.params.push(("arg4".to_string(), uname));
         }
 
-        let response = fetch_data_module(&oz_params).await?;
+        let response = fetch_data_module(&oz_params, Some(self.client.http_client())).await?;
         let syllabus = LectureSyllabus::from_datasets(&response.datasets)?;
         Ok(syllabus)
     }

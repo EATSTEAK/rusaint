@@ -181,8 +181,10 @@ pub(crate) fn parse_oz_url_params(oz_url: &str) -> Result<OzUrlParams, RusaintEr
 }
 
 /// [`OzUrlParams`]를 사용하여 OzClient를 생성, 세션 초기화, 로그인, DataModule 데이터를 가져옵니다.
+/// `http_client`를 전달하면 해당 클라이언트를 재사용합니다.
 pub(crate) async fn fetch_data_module(
     oz_params: &OzUrlParams,
+    http_client: Option<&reqwest::Client>,
 ) -> Result<ozra::types::DataModuleResponse, RusaintError> {
     tracing::debug!(
         "OZ params: base_url={}, ozrname={}, category={}, odi={}, params={:?}",
@@ -193,11 +195,19 @@ pub(crate) async fn fetch_data_module(
         oz_params.params
     );
 
-    let oz_client =
-        ozra::client::OzClient::new(&oz_params.base_url, OZ_DEFAULT_USER, OZ_DEFAULT_PASSWORD)
-            .map_err(|e| {
-                ApplicationError::OzDataFetchError(format!("OzClient creation failed: {}", e))
-            })?;
+    let mut oz_builder = ozra::client::OzClientBuilder::new(
+        &oz_params.base_url,
+        OZ_DEFAULT_USER,
+        OZ_DEFAULT_PASSWORD,
+    );
+
+    if let Some(client) = http_client {
+        oz_builder = oz_builder.http_client(client.clone());
+    }
+
+    let oz_client = oz_builder.build().map_err(|e| {
+        ApplicationError::OzDataFetchError(format!("OzClient creation failed: {}", e))
+    })?;
 
     oz_client
         .init_session_with_params(&oz_params.ozrname, &oz_params.category, &oz_params.params)

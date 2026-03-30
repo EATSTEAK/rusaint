@@ -333,7 +333,7 @@ impl<'a> CourseGradesApplication {
             }
         }
 
-        let response = fetch_data_module(&oz_params).await?;
+        let response = fetch_data_module(&oz_params, Some(self.client.http_client())).await?;
         let result = GradesByClassification::from_datasets(&response.datasets)?;
         Ok(result)
     }
