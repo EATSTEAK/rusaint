@@ -46,11 +46,20 @@ impl USaintSession {
 
     /// SSO 로그인 토큰과 학번으로 인증된 세션을 반환합니다.
     pub async fn with_token(id: &str, token: &str) -> Result<USaintSession, RusaintError> {
-        let session_store = Self::anonymous();
         let client = Client::builder()
             .user_agent(DEFAULT_USER_AGENT)
             .build()
             .unwrap();
+        Self::with_token_using_client(id, token, client).await
+    }
+
+    /// SSO 로그인 토큰과 학번으로 인증된 세션을 반환합니다. 지정한 reqwest Client를 사용합니다.
+    pub async fn with_token_using_client(
+        id: &str,
+        token: &str,
+        client: Client,
+    ) -> Result<USaintSession, RusaintError> {
+        let session_store = Self::anonymous();
         // Manually include WAF cookies because of bug in reqwest::cookie::Jar
         let portal = client
             .get(SSU_USAINT_PORTAL_URL)
@@ -146,8 +155,21 @@ impl USaintSession {
 
     /// 학번과 비밀번호로 인증된 세션을 반환합니다.
     pub async fn with_password(id: &str, password: &str) -> Result<USaintSession, RusaintError> {
+        let client = Client::builder()
+            .user_agent(DEFAULT_USER_AGENT)
+            .build()
+            .unwrap();
+        Self::with_password_using_client(id, password, client).await
+    }
+
+    /// 학번과 비밀번호로 인증된 세션을 반환합니다. 지정한 reqwest Client를 사용합니다.
+    pub async fn with_password_using_client(
+        id: &str,
+        password: &str,
+        client: Client,
+    ) -> Result<USaintSession, RusaintError> {
         let token = obtain_ssu_sso_token(id, password).await?;
-        Self::with_token(id, &token).await
+        Self::with_token_using_client(id, &token, client).await
     }
 
     /// 현재 세션의 쿠키를 json 형식으로 저장합니다.
