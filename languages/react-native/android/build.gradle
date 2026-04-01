@@ -2,7 +2,7 @@
 
 buildscript {
   // Buildscript is evaluated before everything else so we can't use getExtOrDefault
-  def kotlin_version = rootProject.ext.has("kotlinVersion") ? rootProject.ext.get("kotlinVersion") : project.properties["DummyLibForAndroid_kotlinVersion"]
+  def kotlin_version = rootProject.ext.has("kotlinVersion") ? rootProject.ext.get("kotlinVersion") : project.properties["RusaintReactNative_kotlinVersion"]
 
   repositories {
     google()
@@ -121,33 +121,17 @@ android {
   }
 }
 
-def findRustlsPlatformVerifierMavenDir() {
-  def output = new ByteArrayOutputStream()
-  exec {
-    commandLine "cargo", "metadata",
-      "--format-version", "1",
-      "--manifest-path", "../../../packages/rusaint-ffi/Cargo.toml",
-      "--filter-platform", "aarch64-linux-android"
-    standardOutput = output
-  }
-
-  def metadata = new groovy.json.JsonSlurper().parseText(output.toString())
-  def pkg = metadata.packages.find { it.name == "rustls-platform-verifier-android" }
-  return new File(pkg.manifest_path).parentFile.toPath().resolve("maven").toFile()
-}
+def kotlin_version = getExtOrDefault("kotlinVersion")
+def rustlsPlatformVerifierJarFile = new File(
+  projectDir,
+  "libs/rustls-platform-verifier-vendored.jar"
+)
+def rustlsPlatformVerifierJar = files(rustlsPlatformVerifierJarFile)
 
 repositories {
   mavenCentral()
   google()
-  maven {
-    url = uri(findRustlsPlatformVerifierMavenDir())
-    metadataSources {
-      artifact()
-    }
-  }
 }
-
-def kotlin_version = getExtOrDefault("kotlinVersion")
 
 dependencies {
   // For < 0.71, this will be from the local maven repo
@@ -156,7 +140,7 @@ dependencies {
   implementation "com.facebook.react:react-native:+"
   implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
   implementation "net.java.dev.jna:jna:5.17.0@aar"
-  implementation "rustls:rustls-platform-verifier:latest.release"
+  implementation rustlsPlatformVerifierJar
 }
 
 if (isNewArchitectureEnabled()) {

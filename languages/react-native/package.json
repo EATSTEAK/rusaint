@@ -48,7 +48,8 @@
     "typecheck": "tsc",
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
     "clean": "del-cli android/build example/android/build example/android/app/build example/ios/build lib",
-    "prepare": "bob build",
+    "prepare:rustls-platform-verifier": "node ./scripts/prepare-rustls-platform-verifier-jar.mjs",
+    "prepare": "pnpm run prepare:rustls-platform-verifier && bob build",
     "release": "release-it"
   },
   "keywords": [
@@ -84,6 +85,7 @@
     "@types/jest": "^29.5.14",
     "@types/node": "^22.18.8",
     "@types/react": "^19.2.0",
+    "adm-zip": "^0.5.16",
     "commitlint": "^19.8.1",
     "del-cli": "^7.0.0",
     "eslint": "^9.37.0",
