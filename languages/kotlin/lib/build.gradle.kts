@@ -137,15 +137,13 @@ val prepareRustlsPlatformVerifierJar = tasks.register("prepareRustlsPlatformVeri
     }
 }
 
-tasks.named("preBuild") {
-    dependsOn(prepareRustlsPlatformVerifierJar)
-}
+val rustlsPlatformVerifierJarFiles = files(prepareRustlsPlatformVerifierJar)
 
 dependencies {
     //noinspection UseTomlInstead
     // See: https://github.com/gradle/gradle/issues/21267
     implementation("net.java.dev.jna:jna:5.14.0@aar")
-    implementation(files(rustlsPlatformVerifierJar))
+    implementation(rustlsPlatformVerifierJarFiles)
     implementation("androidx.startup:startup-runtime:1.2.0")
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.core.ktx)
