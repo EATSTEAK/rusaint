@@ -15,7 +15,9 @@ name = "rusaint_ffi"
 
 [dependencies]
 uniffi = { workspace = true, features = ["tokio"] }
-rusaint = { path = "../rusaint", default-features = false, features = ["uniffi"] }
+rusaint = { path = "../rusaint", default-features = false, features = [
+  "uniffi",
+] }
 thiserror = { workspace = true }
 tokio = { workspace = true, features = ["sync"] }
 
@@ -23,7 +25,9 @@ tokio = { workspace = true, features = ["sync"] }
 rusaint = { path = "../rusaint", features = ["rustls"] }
 
 [target.'cfg(target_os = "android")'.dependencies]
-rusaint = { path = "../rusaint", default-features = false, features = ["rustls-no-provider"] }
+rusaint = { path = "../rusaint", default-features = false, features = [
+  "rustls-no-provider",
+] }
 rustls = { version = "0.23", default-features = false, features = [
   "ring",
   "logging",
@@ -32,6 +36,8 @@ rustls = { version = "0.23", default-features = false, features = [
 ] }
 webpki-roots = "1.0.6"
 once_cell = "1"
+jni = "0.22.4"
+rustls-platform-verifier = "0.6.2"
 
 [build-dependencies]
 uniffi = { workspace = true, features = ["build"] }
