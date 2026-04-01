@@ -121,9 +121,30 @@ android {
   }
 }
 
+def findRustlsPlatformVerifierMavenDir() {
+  def output = new ByteArrayOutputStream()
+  exec {
+    commandLine "cargo", "metadata",
+      "--format-version", "1",
+      "--manifest-path", "../../../packages/rusaint-ffi/Cargo.toml",
+      "--filter-platform", "aarch64-linux-android"
+    standardOutput = output
+  }
+
+  def metadata = new groovy.json.JsonSlurper().parseText(output.toString())
+  def pkg = metadata.packages.find { it.name == "rustls-platform-verifier-android" }
+  return new File(pkg.manifest_path).parentFile.toPath().resolve("maven").toFile()
+}
+
 repositories {
   mavenCentral()
   google()
+  maven {
+    url = uri(findRustlsPlatformVerifierMavenDir())
+    metadataSources {
+      artifact()
+    }
+  }
 }
 
 def kotlin_version = getExtOrDefault("kotlinVersion")
@@ -135,6 +156,7 @@ dependencies {
   implementation "com.facebook.react:react-native:+"
   implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
   implementation "net.java.dev.jna:jna:5.17.0@aar"
+  implementation "rustls:rustls-platform-verifier:latest.release"
 }
 
 if (isNewArchitectureEnabled()) {
