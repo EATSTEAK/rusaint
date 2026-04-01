@@ -5,17 +5,29 @@ pub mod application;
 
 #[cfg(target_os = "android")]
 mod android {
+    use std::sync::Once;
+
     use jni::{
         JNIEnv,
         objects::{JClass, JObject},
         sys::jboolean,
     };
 
+    static INSTALL_RING_PROVIDER: Once = Once::new();
+
     fn throw_runtime_exception(env: &mut JNIEnv, message: impl AsRef<str>) {
         let _ = env.throw_new("java/lang/RuntimeException", message.as_ref());
     }
 
+    fn install_ring_provider() {
+        INSTALL_RING_PROVIDER.call_once(|| {
+            let _ = rustls::crypto::ring::default_provider().install_default();
+        });
+    }
+
     fn init_platform_verifier(env: &mut JNIEnv, context: JObject, caller: &str) -> jboolean {
+        install_ring_provider();
+
         match rustls_platform_verifier::android::init_with_env(env, context) {
             Ok(()) => 1,
             Err(error) => {
