@@ -49,7 +49,8 @@
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
     "clean": "del-cli android/build example/android/build example/android/app/build example/ios/build lib",
     "prepare:rustls-platform-verifier": "node ./scripts/prepare-rustls-platform-verifier-jar.mjs",
-    "prepare": "pnpm run prepare:rustls-platform-verifier && bob build",
+    "prepare": "bob build",
+    "prepack": "yarn run prepare:rustls-platform-verifier",
     "release": "release-it"
   },
   "keywords": [

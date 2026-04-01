@@ -53,7 +53,11 @@ if (!existsSync(sourceAar)) {
 
 mkdirSync(targetDir, { recursive: true })
 for (const entry of readdirSync(targetDir)) {
-  if (/^rustls-platform-verifier-.*\.jar$/.test(entry) && entry !== path.basename(targetJar)) {
+  if (
+    (entry === 'rustls-platform-verifier-vendored.jar' ||
+      /^rustls-platform-verifier-.*\.jar$/.test(entry)) &&
+    entry !== path.basename(targetJar)
+  ) {
     rmSync(path.join(targetDir, entry), { force: true })
   }
 }

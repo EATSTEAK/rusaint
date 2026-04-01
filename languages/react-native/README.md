@@ -26,7 +26,7 @@ u-saint 내부 요소들을 조작하고 파싱할 수 있습니다.
 pnpm add @rusaint/react-native # or yarn, npm
 ```
 
-Android에서 추가 local Maven 설정은 필요하지 않습니다. verifier 관련 JVM artifact는 패키지 내부에 포함되며, `prepare` 단계에서 Cargo metadata를 통해 Rust 의존성과 같은 upstream Android support artifact를 `android/libs/rustls-platform-verifier-vendored.jar`로 준비합니다.
+Android에서 추가 local Maven 설정은 필요하지 않습니다. verifier 관련 JVM artifact는 패키지 내부에 포함되며, 패키징 직전(`prepack`)에 Cargo metadata를 통해 Rust 의존성과 같은 upstream Android support artifact를 `android/libs/rustls-platform-verifier-vendored.jar`로 준비합니다.
 
 ## 문서
 
