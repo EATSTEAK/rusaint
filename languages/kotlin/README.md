@@ -22,3 +22,5 @@ rustup target add x86_64-linux-android      # for x86_64
 # Make sure rust toolchain and android targets are installed
 ./gradlew build
 ```
+
+배포 산출물에는 verifier 관련 Android JVM artifact가 함께 포함되므로, 소비자 프로젝트에서 별도 local Maven 설정은 필요하지 않습니다.

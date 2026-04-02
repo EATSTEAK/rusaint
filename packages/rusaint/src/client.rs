@@ -158,30 +158,17 @@ pub trait USaintApplication: Sized {
 /// 새로운 [`USaintClient`]를 생성하는 빌더
 pub struct USaintClientBuilder {
     session: Option<Arc<USaintSession>>,
-    #[cfg(feature = "rustls-no-provider")]
-    tls_client_config: Option<Arc<rustls::ClientConfig>>,
 }
 
 impl USaintClientBuilder {
     /// 새로운 빌더를 만듭니다.
     pub fn new() -> USaintClientBuilder {
-        USaintClientBuilder {
-            session: None,
-            #[cfg(feature = "rustls-no-provider")]
-            tls_client_config: None,
-        }
+        USaintClientBuilder { session: None }
     }
 
     /// 빌더에 [`USaintSession`]을 추가합니다.
     pub fn session(mut self, session: Arc<USaintSession>) -> USaintClientBuilder {
         self.session = Some(session);
-        self
-    }
-
-    /// 커스텀 TLS 설정을 추가합니다. (`rustls-no-provider` feature 필요)
-    #[cfg(feature = "rustls-no-provider")]
-    pub fn tls_client_config(mut self, config: Arc<rustls::ClientConfig>) -> USaintClientBuilder {
-        self.tls_client_config = Some(config);
         self
     }
 
@@ -193,17 +180,11 @@ impl USaintClientBuilder {
         }
         let base_url = Url::parse(SSU_WEBDYNPRO_BASE_URL).unwrap();
 
-        #[allow(unused_mut)]
-        let mut builder = if let Some(session) = self.session {
+        let builder = if let Some(session) = self.session {
             reqwest::Client::builder().cookie_provider(session)
         } else {
             reqwest::Client::builder()
         };
-
-        #[cfg(feature = "rustls-no-provider")]
-        if let Some(tls_config) = self.tls_client_config {
-            builder = builder.use_preconfigured_tls(tls_config.as_ref().clone());
-        }
 
         let client = builder.user_agent(DEFAULT_USER_AGENT).build().unwrap();
 

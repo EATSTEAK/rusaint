@@ -2,7 +2,7 @@
 
 buildscript {
   // Buildscript is evaluated before everything else so we can't use getExtOrDefault
-  def kotlin_version = rootProject.ext.has("kotlinVersion") ? rootProject.ext.get("kotlinVersion") : project.properties["DummyLibForAndroid_kotlinVersion"]
+  def kotlin_version = rootProject.ext.has("kotlinVersion") ? rootProject.ext.get("kotlinVersion") : project.properties["RusaintReactNative_kotlinVersion"]
 
   repositories {
     google()
@@ -121,12 +121,17 @@ android {
   }
 }
 
+def kotlin_version = getExtOrDefault("kotlinVersion")
+def rustlsPlatformVerifierJarFile = new File(
+  projectDir,
+  "libs/rustls-platform-verifier-vendored.jar"
+)
+def rustlsPlatformVerifierJar = files(rustlsPlatformVerifierJarFile)
+
 repositories {
   mavenCentral()
   google()
 }
-
-def kotlin_version = getExtOrDefault("kotlinVersion")
 
 dependencies {
   // For < 0.71, this will be from the local maven repo
@@ -135,6 +140,7 @@ dependencies {
   implementation "com.facebook.react:react-native:+"
   implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
   implementation "net.java.dev.jna:jna:5.17.0@aar"
+  implementation rustlsPlatformVerifierJar
 }
 
 if (isNewArchitectureEnabled()) {

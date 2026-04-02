@@ -1,2 +1,4 @@
 /build
-/src/main/kotlin
+# Generated UniFFI Kotlin bindings
+/src/main/kotlin/dev/eatsteak/rusaint/core/rusaint.kt
+/src/main/kotlin/dev/eatsteak/rusaint/ffi/rusaint_ffi.kt

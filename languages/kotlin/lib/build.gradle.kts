@@ -1,6 +1,8 @@
+import groovy.json.JsonSlurper
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.jreleaser.model.Active
 import java.io.ByteArrayOutputStream
+import java.io.File
 
 plugins {
     alias(libs.plugins.jreleaser)
@@ -86,10 +88,63 @@ tasks.register<Exec>("generateBindings") {
     }
 }
 
+fun findRustlsPlatformVerifierAndroidPackage(): Map<*, *> {
+    val output = ByteArrayOutputStream()
+    exec {
+        commandLine(
+            "cargo", "metadata",
+            "--format-version", "1",
+            "--manifest-path", "../../../packages/rusaint-ffi/Cargo.toml",
+            "--filter-platform", "aarch64-linux-android"
+        )
+        standardOutput = output
+    }
+
+    val metadata = JsonSlurper().parseText(output.toString()) as Map<*, *>
+    val packages = metadata["packages"] as List<Map<*, *>>
+    return packages.first { pkg ->
+        pkg["name"] == "rustls-platform-verifier-android"
+    }
+}
+
+val rustlsPlatformVerifierAndroidPackage = findRustlsPlatformVerifierAndroidPackage()
+val rustlsPlatformVerifierVersion = rustlsPlatformVerifierAndroidPackage["version"] as String
+val rustlsPlatformVerifierSourceAar = File(
+    File(rustlsPlatformVerifierAndroidPackage["manifest_path"] as String).parentFile,
+    "maven/rustls/rustls-platform-verifier/$rustlsPlatformVerifierVersion/rustls-platform-verifier-$rustlsPlatformVerifierVersion.aar"
+)
+val rustlsPlatformVerifierJar = File(
+    projectDir,
+    "libs/rustls-platform-verifier-$rustlsPlatformVerifierVersion.jar"
+)
+
+val prepareRustlsPlatformVerifierJar = tasks.register("prepareRustlsPlatformVerifierJar") {
+    inputs.file(rustlsPlatformVerifierSourceAar)
+    outputs.file(rustlsPlatformVerifierJar)
+
+    doLast {
+        if (!rustlsPlatformVerifierSourceAar.exists()) {
+            throw GradleException(
+                "rustls-platform-verifier aar not found at ${rustlsPlatformVerifierSourceAar.absolutePath}"
+            )
+        }
+
+        rustlsPlatformVerifierJar.parentFile.mkdirs()
+        zipTree(rustlsPlatformVerifierSourceAar)
+            .matching { include("classes.jar") }
+            .singleFile
+            .copyTo(rustlsPlatformVerifierJar, overwrite = true)
+    }
+}
+
+val rustlsPlatformVerifierJarFiles = files(prepareRustlsPlatformVerifierJar)
+
 dependencies {
     //noinspection UseTomlInstead
     // See: https://github.com/gradle/gradle/issues/21267
     implementation("net.java.dev.jna:jna:5.14.0@aar")
+    implementation(rustlsPlatformVerifierJarFiles)
+    implementation("androidx.startup:startup-runtime:1.2.0")
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.core.ktx)
     testImplementation(libs.junit)

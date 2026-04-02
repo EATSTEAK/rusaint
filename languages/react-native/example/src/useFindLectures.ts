@@ -7,7 +7,7 @@ import {
   USaintSessionBuilder,
   type CourseScheduleApplicationLike,
 } from '@rusaint/react-native';
-import { useRef, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
 const session = new USaintSessionBuilder().anonymous();
 
@@ -16,27 +16,29 @@ export const useFindLectures = (
   semester: SemesterType,
   category: LectureCategory
 ) => {
-  const clientRef = useRef<CourseScheduleApplicationLike | null>(null);
   const [result, setResult] = useState<Lecture[]>([]);
+
   useEffect(() => {
+    let cancelled = false;
+
     (async () => {
       const client = await new CourseScheduleApplicationBuilder().build(
         session
       );
-      clientRef.current = client;
-    })();
-  }, []);
+      const result = await client.findLectures(year, semester, category);
 
-  useEffect(() => {
-    (async () => {
-      let result = await clientRef.current?.findLectures(
-        year,
-        semester,
-        category
-      );
-      setResult(result || []);
+      if (cancelled) {
+        return;
+      }
+
+      setResult(result);
       console.log('Lectures fetched:', result);
     })();
+
+    return () => {
+      cancelled = true;
+    };
   }, [year, semester, category]);
+
   return result;
 };

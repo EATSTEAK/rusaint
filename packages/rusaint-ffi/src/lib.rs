@@ -3,38 +3,61 @@ uniffi::setup_scaffolding!();
 /// rusaint에서 제공하는 기본 u-saint 애플리케이션
 pub mod application;
 
-/// Android에서 webpki-roots 기반 TLS 설정
 #[cfg(target_os = "android")]
-mod android_tls {
-    use once_cell::sync::OnceCell;
-    use rustls::ClientConfig;
-    use std::sync::Arc;
+mod android {
+    use std::sync::Once;
 
-    static TLS_CONFIG: OnceCell<Arc<ClientConfig>> = OnceCell::new();
+    use jni::{
+        JNIEnv,
+        objects::{JClass, JObject},
+        sys::jboolean,
+    };
 
-    /// webpki-roots 기반 ClientConfig를 생성합니다.
-    fn create_tls_config() -> ClientConfig {
-        let _ = rustls::crypto::ring::default_provider().install_default();
+    static INSTALL_RING_PROVIDER: Once = Once::new();
 
-        let mut root_store = rustls::RootCertStore::empty();
-        root_store.extend(webpki_roots::TLS_SERVER_ROOTS.iter().cloned());
-
-        ClientConfig::builder()
-            .with_root_certificates(root_store)
-            .with_no_client_auth()
+    fn throw_runtime_exception(env: &mut JNIEnv, message: impl AsRef<str>) {
+        let _ = env.throw_new("java/lang/RuntimeException", message.as_ref());
     }
 
-    /// webpki-roots 기반 TLS ClientConfig를 반환합니다.
-    pub fn tls_config() -> Arc<ClientConfig> {
-        TLS_CONFIG
-            .get_or_init(|| Arc::new(create_tls_config()))
-            .clone()
+    fn install_ring_provider() {
+        INSTALL_RING_PROVIDER.call_once(|| {
+            let _ = rustls::crypto::ring::default_provider().install_default();
+        });
+    }
+
+    fn init_platform_verifier(env: &mut JNIEnv, context: JObject, caller: &str) -> jboolean {
+        install_ring_provider();
+
+        match rustls_platform_verifier::android::init_with_env(env, context) {
+            Ok(()) => 1,
+            Err(error) => {
+                throw_runtime_exception(
+                    env,
+                    format!("{caller} failed to initialize rustls platform verifier: {error}"),
+                );
+                0
+            }
+        }
+    }
+
+    #[unsafe(no_mangle)]
+    pub extern "system" fn Java_dev_eatsteak_rusaint_core_RusaintAndroid_nativeInitPlatformVerifier(
+        mut env: JNIEnv,
+        _class: JClass,
+        context: JObject,
+    ) -> jboolean {
+        init_platform_verifier(&mut env, context, "RusaintAndroid")
+    }
+
+    #[unsafe(no_mangle)]
+    pub extern "system" fn Java_dev_eatsteak_rusaint_reactnative_RusaintReactNativeModule_nativeInitPlatformVerifier(
+        mut env: JNIEnv,
+        _this: JObject,
+        context: JObject,
+    ) -> jboolean {
+        init_platform_verifier(&mut env, context, "RusaintReactNativeModule")
     }
 }
-
-/// Android TLS 설정을 노출
-#[cfg(target_os = "android")]
-pub use android_tls::tls_config as android_tls_config;
 
 /// rusaint의 오류 처리 모듈
 pub mod error;
@@ -42,13 +65,7 @@ pub mod error;
 /// u-saint 세션을 제공
 pub mod session;
 
-/// 플랫폼에 맞는 TLS 설정이 적용된 USaintClientBuilder를 생성합니다.
+/// 공통 USaintClientBuilder를 생성합니다.
 pub fn client_builder() -> rusaint::client::USaintClientBuilder {
-    #[allow(unused_mut)]
-    let mut builder = rusaint::client::USaintClientBuilder::new();
-    #[cfg(target_os = "android")]
-    {
-        builder = builder.tls_client_config(android_tls_config());
-    }
-    builder
+    rusaint::client::USaintClientBuilder::new()
 }

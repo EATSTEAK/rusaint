@@ -2,3 +2,4 @@
 -dontwarn java.awt.*
 -keep class com.sun.jna.* { *; }
 -keepclassmembers class * extends com.sun.jna.* { public *; }
+-keep,includedescriptorclasses class org.rustls.platformverifier.** { *; }
