@@ -3,5 +3,6 @@
 
 # Ignore Gradle build output directory
 build
+lib/libs/
 .idea
 local.properties

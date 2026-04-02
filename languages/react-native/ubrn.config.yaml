@@ -22,3 +22,4 @@ noOverwrite:
   - '*.podspec'
   - 'android/build.gradle'
   - 'android/cpp-adapter.cpp' # temporary disable since ubrn not supports rn 0.80+ yet
+  - 'android/src/main/java/dev/eatsteak/rusaint/reactnative/RusaintReactNativeModule.kt'
