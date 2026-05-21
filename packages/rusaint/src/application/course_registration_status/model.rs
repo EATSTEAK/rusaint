@@ -3,6 +3,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::{ApplicationError, RusaintError};
 
+const REQUIRED_LECTURE_FIELDS: [&str; 4] = ["SE_SHORT", "SE_STEXT", "SM_OBJID", "SE_OBJID"];
+
 /// OZ `ET_BOOKED` 데이터셋 기준 수강신청 과목 정보
 #[allow(unused)]
 #[derive(Debug, Serialize, Deserialize)]
@@ -65,6 +67,7 @@ fn find_dataset<'a>(datasets: &'a [DataSet], name: &str) -> &'a [Vec<(String, Fi
         .unwrap_or(&[])
 }
 
+/// Returns true when the first row contains all required field names (case-insensitive).
 fn dataset_has_fields(rows: &[Vec<(String, FieldValue)>], field_names: &[&str]) -> bool {
     let Some(row) = rows.first() else {
         return false;
@@ -83,11 +86,11 @@ impl RegisteredLecture {
             if !booked_rows.is_empty() {
                 booked_rows
             } else {
-                let required_fields = ["SE_SHORT", "SE_STEXT", "SM_OBJID", "SE_OBJID"];
                 datasets
                     .iter()
                     .find_map(|(_, rows)| {
-                        dataset_has_fields(rows, &required_fields).then_some(rows.as_slice())
+                        dataset_has_fields(rows, &REQUIRED_LECTURE_FIELDS)
+                            .then_some(rows.as_slice())
                     })
                     .unwrap_or(&[])
             }
