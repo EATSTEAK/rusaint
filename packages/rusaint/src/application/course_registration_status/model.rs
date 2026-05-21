@@ -65,10 +65,39 @@ fn find_dataset<'a>(datasets: &'a [DataSet], name: &str) -> &'a [Vec<(String, Fi
         .unwrap_or(&[])
 }
 
+fn dataset_has_fields(rows: &[Vec<(String, FieldValue)>], field_names: &[&str]) -> bool {
+    let Some(row) = rows.first() else {
+        return false;
+    };
+    field_names.iter().all(|field_name| {
+        row.iter()
+            .any(|(name, _)| name.eq_ignore_ascii_case(field_name))
+    })
+}
+
 impl RegisteredLecture {
     /// OZ DataModule의 데이터셋으로부터 [`RegisteredLecture`] 목록을 생성합니다.
     pub fn from_datasets(datasets: &[DataSet]) -> Result<Vec<Self>, RusaintError> {
-        let lectures: Vec<Self> = find_dataset(datasets, "ET_BOOKED")
+        let lecture_rows = {
+            let booked_rows = find_dataset(datasets, "ET_BOOKED");
+            if !booked_rows.is_empty() {
+                booked_rows
+            } else {
+                let required_fields = ["SE_SHORT", "SE_STEXT", "SM_OBJID", "SE_OBJID"];
+                datasets
+                    .iter()
+                    .find_map(|(_, rows)| {
+                        if dataset_has_fields(rows, &required_fields) {
+                            Some(rows.as_slice())
+                        } else {
+                            None
+                        }
+                    })
+                    .unwrap_or(&[])
+            }
+        };
+
+        let lectures: Vec<Self> = lecture_rows
             .iter()
             .map(|row| Self {
                 syllabus: None,
