@@ -87,11 +87,7 @@ impl RegisteredLecture {
                 datasets
                     .iter()
                     .find_map(|(_, rows)| {
-                        if dataset_has_fields(rows, &required_fields) {
-                            Some(rows.as_slice())
-                        } else {
-                            None
-                        }
+                        dataset_has_fields(rows, &required_fields).then_some(rows.as_slice())
                     })
                     .unwrap_or(&[])
             }
